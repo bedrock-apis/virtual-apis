@@ -14,12 +14,15 @@
 		"semi": false,
 		"singleQuote": true
 	},
+	"dependencies": {
+		"acorn": "^8.14.0",
+		"astring": "^1.9.0"
+	},
 	"devDependencies": {
 		"eslint": "^9.16.0",
-		"node-fetch": "^3.3.2",
 		"prettier": "^3.4.2",
 		"rolldown": "^0.15.0",
-		"typescript": "^5.7.2",
+		"typescript": "5.8.0-dev.20241205",
 		"typescript-eslint": "^8.17.0"
 	},
 	"packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab",
