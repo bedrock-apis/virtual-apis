@@ -98,4 +98,4 @@ $native_functions.add(
     )
     return string + ''
   }),
-)
+);
