@@ -6,4 +6,9 @@ export default [
   { files: ['src/**/*.{js,mjs,cjs,ts}'] },
   jseslint.configs.recommended,
   ...tseslint.configs.strict,
+  {
+    rules: {
+      '@typescript-eslint/no-extraneous-class': 'off',
+    },
+  },
 ]
