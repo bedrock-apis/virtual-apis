@@ -1,4 +1,4 @@
-export {FunctionType} from "./function-type";
+export { FunctionType } from './function-type';
 /*
 export class FunctionValidator{
     get min(){return this.metadata.min;}

@@ -1,1 +1,1 @@
-import "./codegen";
+import './codegen';

@@ -1,3 +1,1 @@
-export class FunctionType{
-    
-}
+export class FunctionType {}

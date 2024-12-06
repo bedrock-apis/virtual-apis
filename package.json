@@ -1,38 +1,39 @@
 {
-	"name": "fake-api",
-	"version": "1.0.0",
-	"license": "Apache-2.0",
-	"author": "bedrock-apis",
-	"main": "dist/index.js",
-	"type": "module",
-	"scripts": {
-		"build": "rolldown -c",
-		"codegen": "node ./dist/codegen.js",
-		"test-js": "node tests-js/index.js"
-	},
-	"prettier": {
-		"arrowParens": "avoid",
-		"endOfLine": "crlf",
-		"quoteProps": "consistent",
-		"semi": false,
-		"singleQuote": true
-	},
-	"dependencies": {
-		"@types/node": "^22.10.1",
-		"acorn": "^8.14.0",
-		"astring": "^1.9.0",
-		"get-tsconfig": "^4.8.1",
-		"tsx": "^4.19.2"
-	},
-	"devDependencies": {
-		"eslint": "^9.16.0",
-		"prettier": "^3.4.2",
-		"rolldown": "0.15.0-snapshot-22747a3-20241206003640",
-		"typescript": "5.8.0-dev.20241205",
-		"typescript-eslint": "^8.17.0"
-	},
-	"packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab",
-	"engines": {
-		"node": ">=20.x.x"
-	}
+  "name": "fake-api",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "bedrock-apis",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "rolldown -c",
+    "codegen": "node ./dist/codegen.js",
+    "test-js": "node tests-js/index.js"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "endOfLine": "crlf",
+    "quoteProps": "consistent",
+    "singleQuote": true,
+    "printWidth": 120
+  },
+  "dependencies": {
+    "@types/node": "^22.10.1",
+    "acorn": "^8.14.0",
+    "astring": "^1.9.0",
+    "get-tsconfig": "^4.8.1",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  },
+  "devDependencies": {
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "rolldown": "0.15.0-snapshot-22747a3-20241206003640",
+    "typescript": "5.8.0-dev.20241205",
+    "typescript-eslint": "^8.17.0"
+  },
+  "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab",
+  "engines": {
+    "node": ">=20.x.x"
+  }
 }

@@ -1,3 +1,3 @@
-import { Kernel } from "./kernel";
+import { Kernel } from './kernel';
 
-export const NATIVE_OBJECTS = Kernel.Construct("WeakSet");
+export const NATIVE_OBJECTS = Kernel.Construct('WeakSet');

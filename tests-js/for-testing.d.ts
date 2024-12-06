@@ -1,10 +1,10 @@
 export class Entity {
-  readonly id: string
+  public readonly id: string;
 
   /**
    * Jsdocs for test
    */
-  teleport(): void
+  public teleport(): void;
 }
 
 export class Player extends Entity {}

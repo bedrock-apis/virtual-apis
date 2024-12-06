@@ -1,8 +1,6 @@
 type PartialParts<B, ThisArg = B> = {
-  [P in keyof B]?: B[P] extends (...param: infer param) => infer ret
-    ? (this: ThisArg, ...param: param) => ret
-    : B[P]
-}
+  [P in keyof B]?: B[P] extends (...param: infer param) => infer ret ? (this: ThisArg, ...param: param) => ret : B[P];
+};
 
 /**
  * Adds properties to the provided object prototype
@@ -15,14 +13,14 @@ export function OverTakes<B>(prototype: B, object: PartialParts<B>): B {
   const prototypeOrigin = Object.setPrototypeOf(
     Object.defineProperties({}, Object.getOwnPropertyDescriptors(prototype)),
     Object.getPrototypeOf(prototype),
-  )
-  Object.setPrototypeOf(object, prototypeOrigin)
-  Object.defineProperties(prototype, Object.getOwnPropertyDescriptors(object))
-  return prototypeOrigin
+  );
+  Object.setPrototypeOf(object, prototypeOrigin);
+  Object.defineProperties(prototype, Object.getOwnPropertyDescriptors(object));
+  return prototypeOrigin;
 }
 
-import { Player } from '../src/codegen/for-testing.js'
+import { Player } from './for-testing.js';
 
 OverTakes(Player.prototype, {
   teleport() {},
-})
+});

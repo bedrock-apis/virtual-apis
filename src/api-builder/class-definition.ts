@@ -1,77 +1,65 @@
-import { Kernel } from "./kernel";
-import { APIBuilder } from "./api-builder";
+import { APIBuilder } from './api-builder';
+import { Kernel } from './kernel';
 
 // Class for single fake api definition
 
-export class ClassDefinition<T extends ClassDefinition<any, any> | null, P = {}> {
-    /**
-     * Fake API Class Name
-     */
-    public readonly classId: string;
+export class ClassDefinition<T extends ClassDefinition | null = null, P = object> {
+  /**
+   * Fake API Class Name
+   */
+  public readonly classId: string;
 
-    public readonly nativeCache = Kernel.constructor("WeakMap");
+  public readonly nativeCache = Kernel.constructor('WeakMap');
 
-    public readonly cache = Kernel.Construct("WeakMap");
+  public readonly cache = Kernel.Construct('WeakMap');
 
-    public readonly parent: T;
+  public readonly parent: T;
 
-    // HARDCODED VALUES FOR NOW
-    public readonly hasConstructor: boolean = false;
-    public readonly newExpected: boolean = true;
-    
-    /**
-     * TODO: Improve the types tho
-     */
-    public readonly apiClass: {
-        new(...any: any[]):  P & (T extends ClassDefinition<any, any>?T["apiClass"]["prototype"]:{}),
-        readonly name: string,
-        readonly prototype: P & (T extends ClassDefinition<any, any>?T["apiClass"]["prototype"]:{})
-    };
+  // HARDCODED VALUES FOR NOW
+  public readonly hasConstructor: boolean = false;
+  public readonly newExpected: boolean = true;
 
-    /**
-     * 
-     * @param classId Fake API Class Name
-     * @param parent Inject inheritance
-     * 
-     * TODO: Add option to set constructor api validation
-     */
-    public constructor(classId: string, parent: T){
-        this.classId = classId;
-        this.parent = parent;
-        this.apiClass = APIBuilder.CreateConstructor(this);
-    }
-    public addMethod<S extends string>(name: S): ClassDefinition<T, P & { [N in S]: Function }>{
-        this.apiClass.prototype;
-        this.apiClass.prototype[name] = APIBuilder.CreateMethod(this, name);
-        return this as any;
-    }
-    
-    public __newAPIInstance(params: IArguments){
-        console.log("New instance creation");
-        return Kernel.__create(null);
-    }
-    public __APICall(that: any, id: string, params: any[]){
-        console.log("call: " + id);
-    }
+  /**
+   * TODO: Improve the types tho
+   */
+  public readonly apiClass: {
+    new (...any: unknown[]): P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
+    readonly name: string;
+    readonly prototype: P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
+  };
 
+  /**
+   *
+   * @param classId Fake API Class Name
+   * @param parent Inject inheritance
+   *
+   * TODO: Add option to set constructor api validation
+   */
+  public constructor(classId: string, parent: T) {
+    this.classId = classId;
+    this.parent = parent;
+    this.apiClass = APIBuilder.CreateConstructor(this);
+  }
 
+  public addMethod<S extends string>(name: S): ClassDefinition<T, P & { [N in S]: Function }> {
+    this.apiClass.prototype[name] = APIBuilder.CreateMethod(this, name);
+    return this as any;
+  }
 
+  public __newAPIInstance(params: IArguments) {
+    console.log('New instance creation');
+    return Kernel.__create(null);
+  }
+  public __APICall(that: any, id: string, params: any[]) {
+    console.log('call: ' + id);
+  }
 
-
-
-
-
-
-
-
-
-
-/**
- * TRASH HERE
- * @param factory 
- * @returns 
- */
-/*
+  /**
+   * TRASH HERE
+   * @param factory
+   * @returns
+   */
+  /*
     setConstructFunction(factory: (cache: any, definition: this, handle: object, data: any) => object){
         this.factory = factory;
         return this;
