@@ -1,5 +1,5 @@
-import { Kernel } from "../kernel.js";
-import { APIBuilder } from "./api-builder.js";
+import { Kernel } from "./kernel";
+import { APIBuilder } from "./api-builder";
 
 // Class for single fake api definition
 

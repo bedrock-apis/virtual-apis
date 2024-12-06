@@ -1,4 +1,4 @@
-import { Kernel } from "../kernel.js"
+import { Kernel } from "./kernel"
 
 export type Range = {min: number, max: number};
 export type NativeKind = "function" | "getter" | "setter" | "constructor";

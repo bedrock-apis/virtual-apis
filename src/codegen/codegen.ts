@@ -1,6 +1,6 @@
 // import * as ACORN from 'acorn'
 import ts, { factory } from 'typescript';
-import fs from 'fs';
+import fs from 'node:fs';
 
 // TODO Maybe migrate to acorn if suitable
 console.log('abc')
@@ -94,7 +94,7 @@ export const CodeBuilder = {
   }
 }
 
-const data: typeof import("./server_1.15.0-beta.json") = JSON.parse(fs.readFileSync("./src/codegen/server_1.15.0-beta.json").toString());
+const data: typeof import("../../data/server_1.15.0-beta.json") = JSON.parse(fs.readFileSync("./data/server_1.15.0-beta.json").toString());
 const OVERTAKES_NAME = "OVERTAKES";
 const OVERTAKES_SRC = `
 export function ${OVERTAKES_NAME}(prototype, src) {
@@ -207,10 +207,10 @@ console.log("Success");
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
 
 // Emit the JavaScript code
-const jsCode = printer.printList(ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine, body as unknown as ts.NodeArray<ts.Node>, undefined);
+const jsCode = printer.printList(ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine, body as unknown as ts.NodeArray<ts.Node>, null as any);
 
 // Write the JavaScript code to a file
-fs.writeFileSync('./src/codegen/generatedCode.js', jsCode);
+fs.writeFileSync('./dist/generatedCode.js', jsCode);
 
 function i(data: TemplateStringsArray, ...params: unknown[]) { return factory.createIdentifier(data.map((e, i) => e + (params[i] ?? "")).join("")); }
 function o() { return factory.createObjectLiteralExpression([], false) }

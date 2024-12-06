@@ -21,7 +21,7 @@ export function OverTakes<B>(prototype: B, object: PartialParts<B>): B {
   return prototypeOrigin
 }
 
-import { Player } from './for-testing.js'
+import { Player } from '../src/codegen/for-testing.js'
 
 OverTakes(Player.prototype, {
   teleport() {},

@@ -1,7 +1,7 @@
-import { Kernel } from "../kernel.js";
-import { ErrorConstructors, ErrorMessages } from "./errors.js";
-import { ClassDefinition } from "./class-definition.js";
-import { NATIVE_OBJECTS } from "./index.js";
+import { Kernel } from "./kernel";
+import { ErrorConstructors, ErrorMessages } from "./errors";
+import { ClassDefinition } from "./class-definition";
+import { NATIVE_OBJECTS } from "./index";
 
 export class APIBuilder{
     /**

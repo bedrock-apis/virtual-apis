@@ -6,6 +6,7 @@
 	"main": "dist/index.js",
 	"type": "module",
 	"scripts": {
+		"build": "npx rolldown -c",
 		"test-js": "node tests-js/index.js",
 		"codegen": "tsx src/codegen/codegen.ts"
 	},
@@ -26,7 +27,7 @@
 	"devDependencies": {
 		"eslint": "^9.16.0",
 		"prettier": "^3.4.2",
-		"rolldown": "^0.15.0",
+		"rolldown": "0.15.0-snapshot-22747a3-20241206003640",
 		"typescript": "5.8.0-dev.20241205",
 		"typescript-eslint": "^8.17.0"
 	},
