@@ -1,112 +1,68 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import ts, { factory } from 'typescript';
+import { ClassDefinition } from '../api-builder';
+import { TypeScriptAstHelper as t } from './ts-ast-helper';
 
-export const CodeBuilder = {
-  call(identity: ts.Expression, ...params: ts.Expression[]) {
-    return factory.createCallExpression(identity, undefined, params);
-  },
-  assign(l: ts.Expression, r: ts.Expression) {
-    return factory.createBinaryExpression(l, factory.createToken(ts.SyntaxKind.EqualsToken), r);
-  },
-  accessWith(origin: ts.Expression, p: string) {
-    return factory.createElementAccessExpression(origin, factory.createStringLiteral(p));
-  },
-  accessBy(origin: ts.Expression, by: string | ts.Identifier) {
-    return factory.createPropertyAccessExpression(origin, by);
-  },
-  createIdentifier(v: string) {
-    return factory.createIdentifier(v);
-  },
-  createModuleConstant(identity: string | ts.BindingName, value: ts.Expression) {
-    return factory.createVariableStatement(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList(
-        [factory.createVariableDeclaration(identity, undefined, undefined, value)],
-        ts.NodeFlags.Const,
-      ),
-    );
-  },
-  createEmptyObject() {
-    return factory.createObjectLiteralExpression([], false);
-  },
-  importAsFrom(identity: ts.Identifier, src: string) {
-    return factory.createImportDeclaration(
-      undefined,
-      factory.createImportClause(false, undefined, factory.createNamespaceImport(identity)),
-      factory.createStringLiteral(src),
-      undefined,
-    );
-  },
-  createExportConst(identifierName: string, value: ts.Expression) {
-    return factory.createVariableStatement(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList(
-        [factory.createVariableDeclaration(factory.createIdentifier(identifierName), undefined, undefined, value)],
-        ts.NodeFlags.Const,
-      ),
-    );
-  },
-  createNewCall(identifierName: string, params: ts.Expression[]) {
-    return factory.createNewExpression(factory.createIdentifier(identifierName), undefined, params);
-  },
-  builderCall(nodeToBeCalled: ts.Expression, methodName: string, params: ts.Expression[]) {
-    return factory.createCallExpression(
-      factory.createPropertyAccessExpression(nodeToBeCalled, factory.createIdentifier(methodName)),
-      undefined,
-      params,
-    );
-  },
-  string(string: string) {
-    return factory.createStringLiteral(string);
-  },
-};
+const CLASS_DEFINITION_NAME = t.i`${ClassDefinition.name}`;
+const DEFINTION_FILE_NAME = 'definition.js';
+const EXPORTS_FILE_NAME = 'exports.js';
+const DEFINTIONS_IDENTITY = t.i`DEFINITIONS`;
+const DEFINTIONS_CLASS_ACCESS_IDENTITY = t.i`apiClass`;
+const ADD_METHOD_NAME = 'addMethod';
+const ADD_PROPERTY_NAME = 'addProperty';
+const ADD_STATIC_PROPERTY_NAME = 'addStaticProperty';
 
-const data: typeof import('../../data/server_1.15.0-beta.json') = JSON.parse(
+const source: typeof import('../../data/server_1.15.0-beta.json') = JSON.parse(
   fs.readFileSync('./data/server_1.15.0-beta.json').toString(),
 );
 
-const MODULE_NAME_IDENTITY = i`MC`;
+const definitions: ts.Node[] = [];
+const exportDeclarations: ts.Node[] = [t.importAsFrom(DEFINTIONS_IDENTITY, path.join('./', DEFINTION_FILE_NAME))];
 
-const definitions = data.classes.map(data => {
-  const name = data.name;
-  const nameString = CodeBuilder.string(name);
-  const nameDefinition = `${name}Definition`;
-  const baseClass = data.base_types[0]?.name ? i`${data.base_types[0].name}` : factory.createNull();
+for (const classMeta of source.classes) {
+  const name = classMeta.name;
+  const nameString = t.v(name);
+  const baseClass = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : factory.createNull();
 
-  let node: ts.Expression = CodeBuilder.createNewCall('ClassDefintion', [nameString, baseClass]);
+  let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_NAME, undefined, [nameString, baseClass]);
 
-  for (const method of data.functions) {
+  for (const method of classMeta.functions) {
     if (method.is_constructor) continue;
 
-    node = CodeBuilder.builderCall(node, 'addMethod', [CodeBuilder.string(method.name)]);
+    node = t.mehodCall(node, ADD_METHOD_NAME, [t.v(method.name)]);
   }
 
-  return [
-    CodeBuilder.createExportConst(nameDefinition, node),
+  for (const property of classMeta.properties) {
+    node = t.mehodCall(node, ADD_PROPERTY_NAME, [t.v(property.name)]);
+  }
 
-    CodeBuilder.createExportConst(name, factory.createPropertyAccessExpression(i`${nameDefinition}`, i`apiClass`)),
-  ];
-});
+  for (const property of classMeta.constants) {
+    node = t.mehodCall(node, ADD_STATIC_PROPERTY_NAME, [t.v(property.name)]);
+  }
 
-const body: ts.Node[] = [CodeBuilder.importAsFrom(MODULE_NAME_IDENTITY, '@minecraft/server'), ...definitions.flat()];
+  definitions.push(t.exportConst(name, node));
+  exportDeclarations.push(
+    t.exportConst(name, t.accessBy(t.accessBy(DEFINTIONS_IDENTITY, name), DEFINTIONS_CLASS_ACCESS_IDENTITY)),
+  );
+}
 
 // Create a printer to print the AST back to a string
-const printer = ts.createPrinter({
-  newLine: ts.NewLineKind.CarriageReturnLineFeed,
-});
+const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
 
-// Emit the JavaScript code
-const resultCode = printer.printList(
-  ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine | ts.ListFormat.MultiLineBlockStatements,
-  body as unknown as ts.NodeArray<ts.Node>,
-  ts.createSourceFile('', '', ts.ScriptTarget.Latest),
-);
+writeCode(DEFINTION_FILE_NAME, definitions);
+writeCode(EXPORTS_FILE_NAME, exportDeclarations);
 
-// Write the JavaScript code to a file
-fs.writeFileSync('./dist/generatedCode.js', resultCode);
+function writeCode(file: string, body: ts.Node[]) {
+  // Emit the JavaScript code
+  const resultCode = printer.printList(
+    ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine | ts.ListFormat.MultiLineBlockStatements,
+    body as unknown as ts.NodeArray<ts.Node>,
+    ts.createSourceFile('', '', ts.ScriptTarget.Latest),
+  );
 
-function i(data: TemplateStringsArray, ...params: unknown[]) {
-  return factory.createIdentifier(data.map((e, i) => e + (params[i] ?? '')).join(''));
+  // Write the JavaScript code to a file
+  fs.writeFileSync(path.join('dist', file), resultCode);
 }
 
 console.log('Success');

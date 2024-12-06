@@ -10,6 +10,7 @@ export default [
   {
     rules: {
       '@typescript-eslint/no-extraneous-class': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
     },
   },
