@@ -3,9 +3,7 @@ import { ClassDefinition } from './class-definition';
 
 describe('tes', () => {
   it('should construct everything', () => {
-    const EntityDefinition = new ClassDefinition('Entity', null).addMethod<(param: string) => number, 'methodA'>(
-      'methodA',
-    );
+    const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA');
     const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod('methodB');
 
     const Player = PlayerDefinition.apiClass;

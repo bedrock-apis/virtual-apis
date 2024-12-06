@@ -1,5 +1,7 @@
+import { MetadataFunctionArgumentDefinition } from '../codegen/ScriptModule';
 import { APIBuilder } from './api-builder';
 import { Kernel } from './kernel';
+import { DefaultMetadataType } from './type-validators/default-types';
 
 // Class for single fake api definition
 
@@ -21,8 +23,6 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
    *
    * @param classId Fake API Class Name
    * @param parent Inject inheritance
-   *
-   * TODO: Add option to set constructor api validation
    */
   public constructor(
     /**
@@ -36,10 +36,14 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     this.apiClass = APIBuilder.CreateConstructor(this);
   }
 
-  public addMethod<MethodType extends CallableFunction, Name extends string>(name: Name) {
+  public addMethod<Name extends string>(
+    name: Name,
+    params?: MetadataFunctionArgumentDefinition,
+    returnType?: DefaultMetadataType,
+  ) {
     (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name);
 
-    return this as ClassDefinition<T, P & Record<Name, MethodType>>;
+    return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }
 
   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
@@ -55,8 +59,15 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     defaultValue: unknown,
   ) {
     // TODO
+    (this.apiClass as Record<Name, unknown>)[name] = defaultValue;
 
     return this as ClassDefinition<T, P, Static & Record<Name, PropertyType>>;
+  }
+
+  public addConstructor(params: MetadataFunctionArgumentDefinition) {
+    // TODO
+
+    return this;
   }
 
   public __newAPIInstance(params: IArguments) {

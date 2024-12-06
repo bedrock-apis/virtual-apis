@@ -35,11 +35,17 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
     ]);
 
     for (const method of classMeta.functions) {
-      node = t.methodCall(node, method.is_constructor ? ADD_CONSTRUCTOR_NAME : ADD_METHOD_NAME, [
-        t.v(method.name),
-        t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) }))),
-        t.v(toDefaultType(method.return_type)),
-      ]);
+      const paramTypes = t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) })));
+
+      if (method.is_constructor) {
+        node = t.methodCall(node, ADD_CONSTRUCTOR_NAME, [paramTypes]);
+      } else {
+        node = t.methodCall(node, ADD_CONSTRUCTOR_NAME, [
+          t.v(method.name),
+          paramTypes,
+          t.v(toDefaultType(method.return_type)),
+        ]);
+      }
     }
 
     node = addProperties(node, ADD_PROPERTY_NAME, classMeta.properties);
