@@ -3,7 +3,7 @@ import { APIBuilder } from "./api-builder.js";
 
 // Class for single fake api definition
 
-export class ClassDefinition {
+export class ClassDefinition<T extends ClassDefinition<any, any> | null, P = {}> {
     /**
      * Fake API Class Name
      */
@@ -13,7 +13,7 @@ export class ClassDefinition {
 
     public readonly cache = Kernel.Construct("WeakMap");
 
-    public readonly parent: ClassDefinition | null;
+    public readonly parent: T;
 
     // HARDCODED VALUES FOR NOW
     public readonly hasConstructor: boolean = false;
@@ -22,7 +22,11 @@ export class ClassDefinition {
     /**
      * TODO: Improve the types tho
      */
-    public readonly apiClass: {new(...any: any[]): any};
+    public readonly apiClass: {
+        new(...any: any[]):  P & (T extends ClassDefinition<any, any>?T["apiClass"]["prototype"]:{}),
+        readonly name: string,
+        readonly prototype: P & (T extends ClassDefinition<any, any>?T["apiClass"]["prototype"]:{})
+    };
 
     /**
      * 
@@ -31,12 +35,24 @@ export class ClassDefinition {
      * 
      * TODO: Add option to set constructor api validation
      */
-    public constructor(classId: string, parent: ClassDefinition | null = null){
+    public constructor(classId: string, parent: T){
         this.classId = classId;
         this.parent = parent;
         this.apiClass = APIBuilder.CreateConstructor(this);
     }
-
+    public addMethod<S extends string>(name: S): ClassDefinition<T, P & { [N in S]: Function }>{
+        this.apiClass.prototype;
+        this.apiClass.prototype[name] = APIBuilder.CreateMethod(this, name);
+        return this as any;
+    }
+    
+    public __newAPIInstance(params: IArguments){
+        console.log("New instance creation");
+        return Kernel.__create(null);
+    }
+    public __APICall(that: any, id: string, params: any[]){
+        console.log("call: " + id);
+    }
 
 
 
@@ -55,6 +71,7 @@ export class ClassDefinition {
  * @param factory 
  * @returns 
  */
+/*
     setConstructFunction(factory: (cache: any, definition: this, handle: object, data: any) => object){
         this.factory = factory;
         return this;
@@ -104,5 +121,5 @@ export class ClassDefinition {
     }
     __methodCall(cache, handle, id, ...params){
         return 5;
-    }
+    }*/
 }

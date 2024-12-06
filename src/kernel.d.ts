@@ -39,12 +39,12 @@ export class Kernel {
     ? { [key in keyof (typeof globalThis)[T]]: (typeof globalThis)[T][key] }
     : never
 
-  static SetName<T extends () => void>(func: T, name: string): T
-  static SetLength<T extends () => void>(func: T, length: number): T
-  static SetClass<T extends () => unknown>(func: T, name: string): T
-  static LockPrototype<T extends () => unknown>(func: T): T
-  static SetFakeNative<T extends () => unknown>(func: T): void
-  static IsFakeNative<T extends () => unknown>(func: T): boolean
+  static SetName<T extends (...params: any[]) => void>(func: T, name: string): T
+  static SetLength<T extends (...params: any[]) => void>(func: T, length: number): T
+  static SetClass<T extends (...params: any[]) => unknown>(func: T, name: string): T
+  static LockPrototype<T extends (...params: any[]) => unknown>(func: T): T
+  static SetFakeNative<T extends (...params: any[]) => unknown>(func: T): void
+  static IsFakeNative<T extends (...params: any[]) => unknown>(func: T): boolean
   static SetGlobalThis(): void
   static __globalThis: typeof globalThis
 }
