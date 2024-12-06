@@ -25,8 +25,8 @@ jobs:
     - name: Check TypeScript compilation
       run: pnpm exec tsc --noEmit
 
-    - name: Build with Rollup
-      run: pnpm exec rollup -c
+    - name: Build with Rolldown
+      run: pnpm exec rolldown -c
 
     - name: Run script from dist/codegen.js
       run: pnpm exec node dist/codegen.js
