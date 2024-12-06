@@ -6,7 +6,7 @@
 	"main": "dist/index.js",
 	"type": "module",
 	"scripts": {
-		"build": "npx rolldown -c",
+		"build": "rolldown -c",
 		"test-js": "node tests-js/index.js",
 		"codegen": "tsx src/codegen/codegen.ts"
 	},
