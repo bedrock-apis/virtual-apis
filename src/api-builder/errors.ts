@@ -13,6 +13,7 @@ export const ErrorMessages = {
   NoPrivilege: (kind: NativeKind, id: string) => `Native ${kind} [${id}] does not have required privileges.`,
 };
 
+// We want to have constructors separated, because the stack trace of the error is where the method is constructed
 export const ErrorConstructors = {
   NewExpected: Kernel.Constructor('TypeError'),
   NoConstructor: Kernel.Constructor('ReferenceError'),

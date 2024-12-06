@@ -1,6 +1,6 @@
+import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
 import { ErrorConstructors, ErrorMessages } from './errors';
-import { NATIVE_OBJECTS } from './index';
 import { Kernel } from './kernel';
 
 export class APIBuilder {
@@ -55,7 +55,7 @@ export class APIBuilder {
     // Build arrow function so the methods are not possible to call with new expression
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound
-      if (!NATIVE_OBJECTS.has(that as object))
+      if (!APIWrapper.NATIVE_HANDLES.has(that as object))
         throw new ErrorConstructors.BoundToPrototype(
           ErrorMessages.BoundToPrototype('function', `${definition.classId}::${id}`),
         );
@@ -65,7 +65,8 @@ export class APIBuilder {
       //let error = functionType.ValidArgumentTypes(params);
       //if(error) throw new error.ctor(error.message);
 
-      const results = definition.__APICall(that, id, params);
+      // TODO: Yes
+      const results = null; /*definition.__APICall(that, id, params);*/
 
       // TODO: Implement Type checking
       //error = functionType.ResolveReturnType(returnKind);

@@ -1,9 +1,8 @@
-import { MetadataFunctionArgumentDefinition } from '../codegen/ScriptModule';
 import { APIBuilder } from './api-builder';
 import { APIWrapper } from './api-wrapper';
 import { NativeEvent } from './events';
 import { Kernel } from './kernel';
-import { DefaultMetadataType } from './type-validators/default-types';
+import { BaseType, ParamsDefinition } from './type-validators';
 
 // Class for single fake api definition
 
@@ -61,6 +60,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
 
     return data;
   }
+  /**
+   * If specific handle is type of this definition
+   */
+  public isThisType(handle: unknown): handle is this["apiClass"]["prototype"]{
+    return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
+  }
 
 
 
@@ -77,8 +82,8 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   public addMethod<Name extends string>(
     name: Name,
     isStatic: boolean = false,
-    params?: MetadataFunctionArgumentDefinition,
-    returnType?: DefaultMetadataType,
+    params?: ParamsDefinition,
+    returnType?: BaseType,
   ) {
     (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name);
 
@@ -88,6 +93,14 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   
 
 
+
+  /*
+  Properties are the same as the methods rn so lets focus on methods and implement properties later on
+  */
+  public addProperty(){}
+  public addStaticProperty(){}
+ 
+  /*
 
 
   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
@@ -111,7 +124,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   public __APICall(that: unknown, id: string, params: unknown[]) {
     console.log('call: ' + id);
   }
-
+  */
   /**
    * TRASH HERE
    * @param factory
