@@ -8,7 +8,7 @@ export default defineConfig([
           /node:/g
         ],
         output: {
-          file: "./dist/codegen.js",
+          file: "codegen.js",
         }
     },
     {
@@ -17,7 +17,7 @@ export default defineConfig([
           "typescript"
         ],
         output: {
-          file: "./dist/api-builder.js",
+          file: "api-builder.js",
         }
     }
 ]);
