@@ -9,7 +9,7 @@ export class APIBuilder {
    * @param definition Class Definition
    * @returns API Class function
    */
-  public static CreateConstructor<T extends ClassDefinition<any, unknown>>(definition: T): T['apiClass'] {
+  public static CreateConstructor<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T) {
     // Create function as constructor
     const ctor = function () {
       // Constructor should be callable only with "NEW" keyword
@@ -24,6 +24,7 @@ export class APIBuilder {
       //if(error) throw new error.ctor(error.message)
 
       // Call Native constructor and sets its result as new.target.prototype
+      // eslint-disable-next-line prefer-rest-params
       const result = Kernel.__setPrototypeOf(definition.__newAPIInstance(arguments), new.target.prototype);
       return result;
     };
@@ -42,7 +43,7 @@ export class APIBuilder {
     Kernel.SetClass(ctor, definition.classId);
 
     // return the Fake API Class
-    return ctor as any;
+    return ctor as T['apiClass'];
   }
 
   /**
@@ -50,11 +51,11 @@ export class APIBuilder {
    * @param id Name of the function
    * @returns Fake API Functions
    */
-  public static CreateMethod<T extends ClassDefinition<any>>(definition: T, id: string) {
+  public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T, id: string) {
     // Build arrow function so the methods are not possible to call with new expression
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound
-      if (!NATIVE_OBJECTS.has(that as any))
+      if (!NATIVE_OBJECTS.has(that as object))
         throw new ErrorConstructors.BoundToPrototype(
           ErrorMessages.BoundToPrototype('function', `${definition.classId}::${id}`),
         );

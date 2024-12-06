@@ -40,13 +40,24 @@ export const CodeBuilder = {
   createExportConst(identifierName: string, value: ts.Expression) {
     return factory.createVariableStatement(
       [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList([
-        factory.createVariableDeclaration(factory.createIdentifier(identifierName), undefined, undefined, value),
-      ]),
+      factory.createVariableDeclarationList(
+        [factory.createVariableDeclaration(factory.createIdentifier(identifierName), undefined, undefined, value)],
+        ts.NodeFlags.Const,
+      ),
     );
   },
   createNewCall(identifierName: string, params: ts.Expression[]) {
     return factory.createNewExpression(factory.createIdentifier(identifierName), undefined, params);
+  },
+  builderCall(nodeToBeCalled: ts.Expression, methodName: string, params: ts.Expression[]) {
+    return factory.createCallExpression(
+      factory.createPropertyAccessExpression(nodeToBeCalled, factory.createIdentifier(methodName)),
+      undefined,
+      params,
+    );
+  },
+  string(string: string) {
+    return factory.createStringLiteral(string);
   },
 };
 
@@ -58,16 +69,43 @@ const MODULE_NAME_IDENTITY = i`MC`;
 
 const definitions = data.classes.map(data => {
   const name = data.name;
-  let node: ts.Node = CodeBuilder.createNewCall('ClassDefention', [
-    i`${name}`,
-    data.base_types[0]?.name ? i`${data.base_types[0].name}` : factory.createNull(),
-  ]);
-  return node;
+  const nameString = CodeBuilder.string(name);
+  const nameDefinition = `${name}Definition`;
+  const baseClass = data.base_types[0]?.name ? i`${data.base_types[0].name}` : factory.createNull();
+
+  let node: ts.Expression = CodeBuilder.createNewCall('ClassDefintion', [nameString, baseClass]);
+
+  for (const method of data.functions) {
+    if (method.is_constructor) continue;
+
+    node = CodeBuilder.builderCall(node, 'addMethod', [CodeBuilder.string(method.name)]);
+  }
+
+  return [
+    CodeBuilder.createExportConst(nameDefinition, node),
+
+    factory.createVariableStatement(
+      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createPropertyAccessExpression(
+              factory.createIdentifier(nameDefinition),
+              factory.createIdentifier('apiClass'),
+            ),
+          ),
+        ],
+        ts.NodeFlags.Const,
+      ),
+    ),
+  ];
 });
 
-const body = [CodeBuilder.importAsFrom(MODULE_NAME_IDENTITY, '@minecraft/server'), ...definitions];
+const body = [CodeBuilder.importAsFrom(MODULE_NAME_IDENTITY, '@minecraft/server'), ...definitions.flat()];
 
-console.log('Success');
 // Create a printer to print the AST back to a string
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.CarriageReturnLineFeed,
@@ -86,6 +124,5 @@ fs.writeFileSync('./dist/generatedCode2.js', jsCode);
 function i(data: TemplateStringsArray, ...params: unknown[]) {
   return factory.createIdentifier(data.map((e, i) => e + (params[i] ?? '')).join(''));
 }
-function o() {
-  return factory.createObjectLiteralExpression([], false);
-}
+
+console.log('Success');

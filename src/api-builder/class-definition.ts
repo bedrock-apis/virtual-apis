@@ -1,23 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// TODO Remove the line above
+
 import { APIBuilder } from './api-builder';
 import { Kernel } from './kernel';
 
 // Class for single fake api definition
 
-export class ClassDefinition<T extends ClassDefinition | null = null, P = object> {
-  /**
-   * Fake API Class Name
-   */
-  public readonly classId: string;
-
+export class ClassDefinition<T extends ClassDefinition | null = null, P = object, Static extends object = object> {
   public readonly nativeCache = Kernel.constructor('WeakMap');
 
   public readonly cache = Kernel.Construct('WeakMap');
-
-  public readonly parent: T;
-
-  // HARDCODED VALUES FOR NOW
-  public readonly hasConstructor: boolean = false;
-  public readonly newExpected: boolean = true;
 
   /**
    * TODO: Improve the types tho
@@ -26,7 +18,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     new (...any: unknown[]): P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
     readonly name: string;
     readonly prototype: P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
-  };
+  } & Static;
 
   /**
    *
@@ -35,22 +27,41 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
    *
    * TODO: Add option to set constructor api validation
    */
-  public constructor(classId: string, parent: T) {
-    this.classId = classId;
-    this.parent = parent;
+  public constructor(
+    /**
+     * Fake API Class Name
+     */
+    public readonly classId: string,
+    public readonly parent: T,
+    public readonly hasConstructor: boolean = false,
+    public readonly newExpected: boolean = true,
+  ) {
     this.apiClass = APIBuilder.CreateConstructor(this);
   }
 
-  public addMethod<S extends string>(name: S): ClassDefinition<T, P & { [N in S]: Function }> {
-    this.apiClass.prototype[name] = APIBuilder.CreateMethod(this, name);
-    return this as any;
+  public addMethod<MethodType extends CallableFunction, Name extends string>(name: Name) {
+    (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name);
+
+    return this as ClassDefinition<T, P & Record<Name, MethodType>>;
+  }
+
+  public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
+    // TODO
+
+    return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
+  }
+
+  public addStaticProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
+    // TODO
+
+    return this as ClassDefinition<T, P, Static & Record<Name, PropertyType>>;
   }
 
   public __newAPIInstance(params: IArguments) {
     console.log('New instance creation');
     return Kernel.__create(null);
   }
-  public __APICall(that: any, id: string, params: any[]) {
+  public __APICall(that: unknown, id: string, params: unknown[]) {
     console.log('call: ' + id);
   }
 
