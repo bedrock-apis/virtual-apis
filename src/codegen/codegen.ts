@@ -29,17 +29,7 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
     for (const method of classMeta.functions) {
       if (method.is_constructor) continue;
 
-      node = t.methodCall(
-        node,
-        ADD_METHOD_NAME,
-        [
-          t.createFunctionType(
-            method.arguments.map(e => [e.name, t.toType(e.type.name)]),
-            t.toType(method.return_type.name),
-          ),
-        ],
-        [t.v(method.name)],
-      );
+      node = t.methodCall(node, ADD_METHOD_NAME, [t.v(method.name)]);
     }
 
     node = addProperties(node, ADD_PROPERTY_NAME, classMeta.properties);
@@ -94,7 +84,6 @@ function addProperties(
     node = t.methodCall(
       node,
       methodName,
-      [t.toType(property.type.name)],
       [
         t.v(property.name),
         t.v(toDefaultType(property.type)),
