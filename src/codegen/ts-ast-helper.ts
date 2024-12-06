@@ -48,10 +48,15 @@ export const TypeScriptAstHelper = {
   createNewCall(identifier: ts.Identifier, params: ts.Expression[]) {
     return factory.createNewExpression(identifier, undefined, params);
   },
-  mehodCall(nodeToBeCalled: ts.Expression, methodName: string, params: ts.Expression[]) {
+  methodCall(
+    nodeToBeCalled: ts.Expression,
+    methodName: string,
+    typeParams: ts.TypeNode[] | undefined,
+    params: ts.Expression[],
+  ) {
     return factory.createCallExpression(
       factory.createPropertyAccessExpression(nodeToBeCalled, factory.createIdentifier(methodName)),
-      undefined,
+      typeParams,
       params,
     );
   },
@@ -76,7 +81,47 @@ export const TypeScriptAstHelper = {
         throw new TypeError('Unknown type');
     }
   },
+  createFunctionType(params: [name: string, type: ts.TypeNode][], returnType: ts.TypeNode) {
+    return factory.createFunctionTypeNode(
+      undefined,
+      params.map(([name, type]) =>
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          factory.createIdentifier(name),
+          undefined,
+          type,
+          undefined,
+        ),
+      ),
+      returnType,
+    );
+  },
+
+  toType(string: string) {
+    const keywordType = toKeywordType(string);
+    return keywordType
+      ? factory.createKeywordTypeNode(keywordType)
+      : factory.createTypeReferenceNode(factory.createIdentifier(string), undefined);
+  },
 };
+
+function toKeywordType(string: string) {
+  switch (string) {
+    case 'string':
+      return ts.SyntaxKind.StringKeyword;
+    case 'number':
+    case 'int32':
+    case 'varint':
+      return ts.SyntaxKind.NumberKeyword;
+    case 'boolean':
+      return ts.SyntaxKind.BooleanKeyword;
+    case 'bigint':
+      return ts.SyntaxKind.BigIntKeyword;
+    default:
+      return undefined;
+  }
+}
 
 function o() {
   return factory.createObjectLiteralExpression([], false);
