@@ -26,7 +26,7 @@ export const TypeScriptAstHelper = {
   },
   methodCall(nodeToBeCalled: ts.Expression, methodName: string, params: ts.Expression[]) {
     return factory.createCallExpression(
-      factory.createPropertyAccessExpression(nodeToBeCalled, factory.createIdentifier(methodName)),
+      this.accessBy(nodeToBeCalled, factory.createIdentifier(methodName)),
       undefined,
       params,
     );

@@ -36,7 +36,7 @@ async function Main(): Promise<number> {
 
   console.time('codegen');
   // Execute Code Gen
-  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName, false);
+  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName, true);
   console.timeEnd('codegen');
 
   if (!existsSync('./bin')) {

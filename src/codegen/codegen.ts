@@ -12,6 +12,7 @@ const CLASS_DEFINITION_NAME = t.i`${ClassDefinition.name}`;
 const DEFINTIONS_IDENTITY = t.i`DEFINITIONS`;
 const DEFINTIONS_CLASS_ACCESS_IDENTITY = t.i`apiClass`;
 const ADD_METHOD_NAME = 'addMethod';
+const ADD_CONSTRUCTOR_NAME = 'addConstructor';
 const ADD_PROPERTY_NAME = 'addProperty';
 const ADD_STATIC_PROPERTY_NAME = 'addStaticProperty';
 
@@ -23,13 +24,22 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
     const name = classMeta.name;
     const nameString = t.v(name);
     const baseClass = classMeta.base_types[0]?.name ? t.v(classMeta.base_types[0].name) : t.v(null);
+    const hasConstructor = t.v(true);
+    const newRequired = t.v(true);
 
-    let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_NAME, undefined, [nameString, baseClass]);
+    let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_NAME, undefined, [
+      nameString,
+      baseClass,
+      hasConstructor,
+      newRequired,
+    ]);
 
     for (const method of classMeta.functions) {
-      if (method.is_constructor) continue;
-
-      node = t.methodCall(node, ADD_METHOD_NAME, [t.v(method.name)]);
+      node = t.methodCall(node, method.is_constructor ? ADD_CONSTRUCTOR_NAME : ADD_METHOD_NAME, [
+        t.v(method.name),
+        t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) }))),
+        t.v(toDefaultType(method.return_type)),
+      ]);
     }
 
     node = addProperties(node, ADD_PROPERTY_NAME, classMeta.properties);
