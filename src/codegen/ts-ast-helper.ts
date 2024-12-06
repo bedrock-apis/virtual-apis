@@ -56,7 +56,7 @@ export const TypeScriptAstHelper = {
   ) {
     return factory.createCallExpression(
       factory.createPropertyAccessExpression(nodeToBeCalled, factory.createIdentifier(methodName)),
-      typeParams,
+      undefined, //typeParams,
       params,
     );
   },

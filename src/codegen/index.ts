@@ -1,45 +1,45 @@
-import {exit} from "node:process";
-import { mkdir, writeFile } from "node:fs/promises";
-import {generateModule} from './codegen';
-import { MetadataModuleDefinition } from "./ScriptModule";
-import { existsSync } from "node:fs";
+import { existsSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { exit } from 'node:process';
+import { generateModule } from './codegen';
+import { MetadataModuleDefinition } from './ScriptModule';
 
-Main().then(exit, e=>{
-    console.error(e);
-    exit(-1);
+Main().then(exit, e => {
+  console.error(e);
+  exit(-1);
 });
 
+async function Main(): Promise<number> {
+  // Fetch Latest Metadata
+  const response = await fetch(
+    `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/${'preview'}/metadata/script_modules/@minecraft/server_1.1.0.json`,
+  );
 
-async function Main(): Promise<number>{
-    // Fetch Latest Metadata
-    const response = await fetch(`https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/${"preview"}/metadata/script_modules/@minecraft/server_1.1.0.json`);
+  // Check for validity
+  if (!response.ok) {
+    console.error('Failed to fetch metadata');
+    return -1;
+  }
 
-    // Check for validity
-    if(!response.ok){
-        console.error("Failed to fetch metadata");
-        return -1;
-    }
+  // JSON Parsed metadata
+  const metadata = (await response.json()) as MetadataModuleDefinition;
+  const moduleName = metadata.name.split('/')[1] ?? null;
 
-    // JSON Parsed metadata
-    const METADATA = (await response.json()) as MetadataModuleDefinition;
+  if (!moduleName) {
+    console.error(`Failed to generate files for ${metadata.name}, invalid module name`);
+    return -1;
+  }
 
-    // Execute Code Gen
-    const [fakeAPIs, definitionAPIs] = generateModule(METADATA);
+  // Execute Code Gen
+  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName);
 
-    const MODULE_SHORT_NAME = METADATA.name.split("/")[1]??null;
+  if (!existsSync('./bin')) {
+    await mkdir('./bin/');
+  }
 
-    if(!MODULE_SHORT_NAME) {
-        console.error(`Failed to generate files for ${METADATA.name}, invalid module name`);
-        return -1;
-    }
+  await writeFile(`./bin/${moduleName}.js`, exportsCode);
+  await writeFile(`./bin/${moduleName}.native.js`, definitionsCode);
 
-    if(!existsSync("./bin")){
-        await mkdir("./bin/");
-    }
-
-    await writeFile(`./bin/${MODULE_SHORT_NAME}.js`, fakeAPIs);
-    await writeFile(`./bin/${MODULE_SHORT_NAME}.native.js`, definitionAPIs);
-    
-    // 0 Is success otherwise false
-    return 0;
+  // 0 Is success otherwise false
+  return 0;
 }
