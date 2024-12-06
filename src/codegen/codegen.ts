@@ -4,6 +4,7 @@ import { ClassDefinition } from '../api-builder';
 // Just for sake of test
 import * as prettier from 'prettier';
 
+import { toDefaultType } from '../api-builder/type-validators/default-types';
 import { MetadataConstantDefinition, MetadataModuleDefinition, MetadataPropertyMemberDefinition } from './ScriptModule';
 import { TypeScriptAstHelper as t } from './ts-ast-helper';
 
@@ -55,7 +56,7 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
       exportDeclarations.push(
         t.createEnum(
           enumMeta.name,
-          enumMeta.constants.filter(e => !!e.value).map(e => [e.name, e.value as string]),
+          enumMeta.constants.filter(e => !!e.name && !!e.value).map(e => [e.name, t.v(e.value)]),
         ),
       );
     }
@@ -66,7 +67,10 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
   async function writeCode(body: ts.Node[]) {
     // Emit the JavaScript code
     const resultCode = printer.printList(
-      ts.ListFormat.AllowTrailingComma,
+      ts.ListFormat.AllowTrailingComma |
+        ts.ListFormat.MultiLine |
+        ts.ListFormat.MultiLineBlockStatements |
+        ts.ListFormat.Indented,
       body as unknown as ts.NodeArray<ts.Node>,
       ts.createSourceFile('file.js', '', ts.ScriptTarget.ES2020, false, ts.ScriptKind.JS),
     );
@@ -91,7 +95,12 @@ function addProperties(
       node,
       methodName,
       [t.toType(property.type.name)],
-      [t.v(property.name), t.v(property.is_read_only)],
+      [
+        t.v(property.name),
+        t.v(toDefaultType(property.type)),
+        t.v(property.is_read_only),
+        'value' in property ? t.v(property.value) : undefined,
+      ].filter(e => !!e),
     );
   }
   return node;

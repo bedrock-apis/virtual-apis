@@ -10,10 +10,12 @@ Main().then(exit, e => {
 });
 
 async function Main(): Promise<number> {
+  console.time('fetch start');
   // Fetch Latest Metadata
   const response = await fetch(
-    `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/${'preview'}/metadata/script_modules/@minecraft/server_1.1.0.json`,
+    `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/${'stable'}/metadata/script_modules/@minecraft/server_1.17.0-beta.json`,
   );
+  console.timeEnd('fetch start');
 
   // Check for validity
   if (!response.ok) {
@@ -21,17 +23,21 @@ async function Main(): Promise<number> {
     return -1;
   }
 
+  console.time('fetch json parse');
   // JSON Parsed metadata
   const metadata = (await response.json()) as MetadataModuleDefinition;
   const moduleName = metadata.name.split('/')[1] ?? null;
+  console.timeEnd('fetch json parse');
 
   if (!moduleName) {
     console.error(`Failed to generate files for ${metadata.name}, invalid module name`);
     return -1;
   }
 
+  console.time('codegen');
   // Execute Code Gen
-  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName);
+  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName, false);
+  console.timeEnd('codegen');
 
   if (!existsSync('./bin')) {
     await mkdir('./bin/');

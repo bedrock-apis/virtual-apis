@@ -48,7 +48,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
   }
 
-  public addStaticProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
+  public addStaticProperty<PropertyType, Name extends string>(
+    name: Name,
+    type: string,
+    isReadonly: boolean,
+    defaultValue: unknown,
+  ) {
     // TODO
 
     return this as ClassDefinition<T, P, Static & Record<Name, PropertyType>>;

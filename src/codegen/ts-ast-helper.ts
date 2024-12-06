@@ -68,17 +68,20 @@ export const TypeScriptAstHelper = {
       case 'boolean':
         return data ? factory.createTrue() : factory.createFalse();
       case 'number':
+        if (data < 0)
+          return factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, factory.createNumericLiteral(-data));
         return factory.createNumericLiteral(data);
+
       case 'string':
         return factory.createStringLiteral(data);
       case 'object':
-        return data ? o() : factory.createNull();
+        return data ? objectToExpression(data) : factory.createNull();
       case 'undefined':
         return this.i`undefined`;
       case 'bigint':
         return factory.createBigIntLiteral(data + 'n');
       default:
-        throw new TypeError('Unknown type');
+        throw new TypeError(`Unknown type: ${data}`);
     }
   },
   createFunctionType(params: [name: string, type: ts.TypeNode][], returnType: ts.TypeNode) {
@@ -112,7 +115,7 @@ export const TypeScriptAstHelper = {
    * @param values
    * @returns
    */
-  createEnum(name: string, values: [name: string, value: string][]) {
+  createEnum(name: string, values: [name: string, value: ts.Expression][]) {
     return factory.createVariableStatement(
       [factory.createToken(ts.SyntaxKind.ExportKeyword)],
       factory.createVariableDeclarationList(
@@ -148,7 +151,7 @@ export const TypeScriptAstHelper = {
                             factory.createStringLiteral(name),
                           ),
                           factory.createToken(ts.SyntaxKind.EqualsToken),
-                          factory.createStringLiteral(value),
+                          value,
                         ),
                       ),
                     ),
@@ -198,6 +201,17 @@ function toKeywordType(string: string) {
   }
 }
 
-function o() {
-  return factory.createObjectLiteralExpression([], false);
+function objectToExpression(object: object) {
+  if (Array.isArray(object)) {
+    return factory.createArrayLiteralExpression(
+      object.map(e => TypeScriptAstHelper.v(e)),
+      false,
+    );
+  }
+  return factory.createObjectLiteralExpression(
+    Object.entries(object).map(([key, value]) =>
+      factory.createPropertyAssignment(factory.createIdentifier(key), TypeScriptAstHelper.v(value)),
+    ),
+    false,
+  );
 }
