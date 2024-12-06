@@ -25,7 +25,7 @@ export class APIBuilder {
 
       // Call Native constructor and sets its result as new.target.prototype
       // eslint-disable-next-line prefer-rest-params
-      const result = Kernel.__setPrototypeOf(definition.__newAPIInstance(arguments), new.target.prototype);
+      const result = Kernel.__setPrototypeOf(definition.construct(arguments)[0], new.target.prototype);
       return result;
     };
 

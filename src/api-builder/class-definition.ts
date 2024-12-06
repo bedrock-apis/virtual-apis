@@ -1,15 +1,17 @@
 import { MetadataFunctionArgumentDefinition } from '../codegen/ScriptModule';
 import { APIBuilder } from './api-builder';
+import { APIWrapper } from './api-wrapper';
+import { NativeEvent } from './events';
 import { Kernel } from './kernel';
 import { DefaultMetadataType } from './type-validators/default-types';
 
 // Class for single fake api definition
 
-export class ClassDefinition<T extends ClassDefinition | null = null, P = object, Static extends object = object> {
-  public readonly nativeCache = Kernel.constructor('WeakMap');
-
-  public readonly cache = Kernel.Construct('WeakMap');
-
+export class ClassDefinition<T extends ClassDefinition | null = null, P = object, S extends object = object> {
+  private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
+  private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
+  public readonly onConstruct: NativeEvent<[object, object, this, ArrayLike<unknown>]>;
+  public readonly constructorId: string;
   /**
    * TODO: Improve the types tho
    */
@@ -17,7 +19,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     new (...any: unknown[]): P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
     readonly name: string;
     readonly prototype: P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
-  } & Static;
+  } & S & (T extends ClassDefinition ? Omit<T['apiClass'], "prototype" | "name"> : object);
 
   /**
    *
@@ -34,10 +36,47 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     public readonly newExpected: boolean = true,
   ) {
     this.apiClass = APIBuilder.CreateConstructor(this);
+    this.constructorId = `${classId}:constructor`;
+    if(APIWrapper.NATIVE_EVENTS.has(this.constructorId)){
+      throw Kernel.Construct("ReferenceError", true, `Class with this id already exists '${classId}'`);
+    }
+    (APIWrapper.NATIVE_EVENTS as unknown as Map<unknown, unknown>).set(this.constructorId, this.onConstruct = new NativeEvent());
   }
 
+  /**
+   * 
+   * @param params IArguments passed by api context, unpredictable but type safe
+   * @returns handle and cache pair
+   */
+  public construct(params: ArrayLike<unknown>): [object, object] {
+    let data = this.parent?.construct(params);
+    if(!data) data = [Kernel.__create(null), Kernel.__create(null)];
+    const [handle, cache] = data;
+
+    APIWrapper.NATIVE_HANDLES.add(handle);
+    this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
+    this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
+
+    this.onConstruct.trigger(handle, cache, this, params);
+
+    return data;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  
   public addMethod<Name extends string>(
     name: Name,
+    isStatic: boolean = false,
     params?: MetadataFunctionArgumentDefinition,
     returnType?: DefaultMetadataType,
   ) {
@@ -45,6 +84,11 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
 
     return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }
+
+  
+
+
+
 
   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
     // TODO
@@ -61,19 +105,9 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     // TODO
     (this.apiClass as Record<Name, unknown>)[name] = defaultValue;
 
-    return this as ClassDefinition<T, P, Static & Record<Name, PropertyType>>;
+    return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
   }
 
-  public addConstructor(params: MetadataFunctionArgumentDefinition) {
-    // TODO
-
-    return this;
-  }
-
-  public __newAPIInstance(params: IArguments) {
-    console.log('New instance creation');
-    return Kernel.__create(null);
-  }
   public __APICall(that: unknown, id: string, params: unknown[]) {
     console.log('call: ' + id);
   }

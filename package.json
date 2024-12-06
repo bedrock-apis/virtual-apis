@@ -9,6 +9,7 @@
     "build": "rolldown -c",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "all": "rolldown -c && node ./dist/codegen.js",
     "codegen": "tsx src/codegen/index.ts",
     "test": "vitest"
   },
