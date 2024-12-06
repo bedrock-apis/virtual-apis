@@ -84,27 +84,11 @@ const definitions = data.classes.map(data => {
   return [
     CodeBuilder.createExportConst(nameDefinition, node),
 
-    factory.createVariableStatement(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createPropertyAccessExpression(
-              factory.createIdentifier(nameDefinition),
-              factory.createIdentifier('apiClass'),
-            ),
-          ),
-        ],
-        ts.NodeFlags.Const,
-      ),
-    ),
+    CodeBuilder.createExportConst(name, factory.createPropertyAccessExpression(i`${nameDefinition}`, i`apiClass`)),
   ];
 });
 
-const body = [CodeBuilder.importAsFrom(MODULE_NAME_IDENTITY, '@minecraft/server'), ...definitions.flat()];
+const body: ts.Node[] = [CodeBuilder.importAsFrom(MODULE_NAME_IDENTITY, '@minecraft/server'), ...definitions.flat()];
 
 // Create a printer to print the AST back to a string
 const printer = ts.createPrinter({
@@ -112,14 +96,14 @@ const printer = ts.createPrinter({
 });
 
 // Emit the JavaScript code
-const jsCode = printer.printList(
-  ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine,
+const resultCode = printer.printList(
+  ts.ListFormat.AllowTrailingComma | ts.ListFormat.MultiLine | ts.ListFormat.MultiLineBlockStatements,
   body as unknown as ts.NodeArray<ts.Node>,
-  null as any,
+  ts.createSourceFile('', '', ts.ScriptTarget.Latest),
 );
 
 // Write the JavaScript code to a file
-fs.writeFileSync('./dist/generatedCode2.js', jsCode);
+fs.writeFileSync('./dist/generatedCode.js', resultCode);
 
 function i(data: TemplateStringsArray, ...params: unknown[]) {
   return factory.createIdentifier(data.map((e, i) => e + (params[i] ?? '')).join(''));

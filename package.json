@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rolldown -c",
     "codegen": "tsx src/codegen/codegen.ts",
-    "test-js": "node tests-js/index.js"
+    "test": "vitest"
   },
   "prettier": {
     "arrowParens": "avoid",

@@ -1,13 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { ClassDefinition } from './class-definition';
 
 describe('tes', () => {
   it('should construct everything', () => {
-    const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA');
-    const PlayerDefinition = new ClassDefinition('Player', EntityDefinition).addMethod('methodB');
-
-    // its hardcoded to be like this for now
-    (PlayerDefinition as any).hasConstructor = true;
+    const EntityDefinition = new ClassDefinition('Entity', null).addMethod<(param: string) => number, 'methodA'>(
+      'methodA',
+    );
+    const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod('methodB');
 
     const Player = PlayerDefinition.apiClass;
     const Entity = EntityDefinition.apiClass;
@@ -16,7 +15,8 @@ describe('tes', () => {
 
     expect(player).toBeInstanceOf(Player);
     expect(player).toBeInstanceOf(Entity);
-    expect(player.methodA()).toMatchInlineSnapshot();
-    expect(player.methodB()).toMatchInlineSnapshot();
+    expectTypeOf(player.methodA).toBeCallableWith('string');
+    expectTypeOf(player.methodB).toBeFunction;
+    expectTypeOf(player.methodB).toBeFunction;
   });
 });
