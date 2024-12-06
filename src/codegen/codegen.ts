@@ -14,7 +14,7 @@ const ADD_METHOD_NAME = 'addMethod';
 const ADD_PROPERTY_NAME = 'addProperty';
 const ADD_STATIC_PROPERTY_NAME = 'addStaticProperty';
 
-export async function generateModule(source: MetadataModuleDefinition, moduleName: string) {
+export async function generateModule(source: MetadataModuleDefinition, moduleName: string, useFormatting = true) {
   const definitions: ts.Node[] = [];
   const exportDeclarations: ts.Node[] = [t.importAsFrom(DEFINTIONS_IDENTITY, `./${moduleName}.native.js`)];
 
@@ -50,21 +50,15 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
     );
   }
 
-  function addProperties(
-    node: ts.Expression,
-    methodName: string,
-    properties: MetadataPropertyMemberDefinition[] | MetadataConstantDefinition[],
-  ) {
-    for (const property of properties) {
-      node = t.methodCall(
-        node,
-        methodName,
-        [t.toType(property.type.name)],
-        [t.v(property.name), t.v(property.is_read_only)],
+  if (source.enums)
+    for (const enumMeta of source.enums) {
+      exportDeclarations.push(
+        t.createEnum(
+          enumMeta.name,
+          enumMeta.constants.filter(e => !!e.value).map(e => [e.name, e.value as string]),
+        ),
       );
     }
-    return node;
-  }
 
   // Create a printer to print the AST back to a string
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
@@ -74,15 +68,31 @@ export async function generateModule(source: MetadataModuleDefinition, moduleNam
     const resultCode = printer.printList(
       ts.ListFormat.AllowTrailingComma,
       body as unknown as ts.NodeArray<ts.Node>,
-      ts.createSourceFile('', '', ts.ScriptTarget.Latest),
+      ts.createSourceFile('file.js', '', ts.ScriptTarget.ES2020, false, ts.ScriptKind.JS),
     );
 
     // Prettify code
-    return await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 });
+    return useFormatting ? await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 }) : resultCode;
   }
 
   const definitionsCode = await writeCode(definitions);
   const exportsCode = await writeCode(exportDeclarations);
 
   return { definitionsCode, exportsCode };
+}
+
+function addProperties(
+  node: ts.Expression,
+  methodName: string,
+  properties: MetadataPropertyMemberDefinition[] | MetadataConstantDefinition[],
+) {
+  for (const property of properties) {
+    node = t.methodCall(
+      node,
+      methodName,
+      [t.toType(property.type.name)],
+      [t.v(property.name), t.v(property.is_read_only)],
+    );
+  }
+  return node;
 }

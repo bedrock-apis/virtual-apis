@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "rolldown -c",
-    "codegen": "tsx src/codegen/codegen.ts",
+    "codegen": "tsx src/codegen/index.ts",
     "test": "vitest"
   },
   "prettier": {

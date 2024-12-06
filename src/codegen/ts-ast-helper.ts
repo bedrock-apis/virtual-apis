@@ -98,6 +98,81 @@ export const TypeScriptAstHelper = {
     );
   },
 
+  /**
+   * Emits compiled enum
+   * ```
+   * var Example = function(Example$1) {
+   *	Example$1["a"] = "b";
+   *	Example$1["c"] = "e";
+   *	return Example$1;
+   * }(Example || {});
+   * ```
+   *
+   * @param name
+   * @param values
+   * @returns
+   */
+  createEnum(name: string, values: [name: string, value: string][]) {
+    return factory.createVariableStatement(
+      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createFunctionExpression(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                [
+                  factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    factory.createIdentifier(name + '$1'),
+                    undefined,
+                    undefined,
+                    undefined,
+                  ),
+                ],
+                undefined,
+                factory.createBlock(
+                  [
+                    ...values.map(([name, value]) =>
+                      factory.createExpressionStatement(
+                        factory.createBinaryExpression(
+                          factory.createElementAccessExpression(
+                            factory.createIdentifier(name + '$1'),
+                            factory.createStringLiteral(name),
+                          ),
+                          factory.createToken(ts.SyntaxKind.EqualsToken),
+                          factory.createStringLiteral(value),
+                        ),
+                      ),
+                    ),
+                    factory.createReturnStatement(factory.createIdentifier(name + '$1')),
+                  ],
+                  true,
+                ),
+              ),
+              undefined,
+              [
+                factory.createBinaryExpression(
+                  factory.createIdentifier('Example'),
+                  factory.createToken(ts.SyntaxKind.BarBarToken),
+                  factory.createObjectLiteralExpression([], false),
+                ),
+              ],
+            ),
+          ),
+        ],
+        ts.NodeFlags.None,
+      ),
+    );
+  },
+
   toType(string: string) {
     const keywordType = toKeywordType(string);
     return keywordType
@@ -112,7 +187,7 @@ function toKeywordType(string: string) {
       return ts.SyntaxKind.StringKeyword;
     case 'number':
     case 'int32':
-    case 'varint':
+    case 'variant':
       return ts.SyntaxKind.NumberKeyword;
     case 'boolean':
       return ts.SyntaxKind.BooleanKeyword;

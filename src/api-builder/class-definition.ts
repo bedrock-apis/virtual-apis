@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO Remove the line above
-
 import { APIBuilder } from './api-builder';
 import { Kernel } from './kernel';
 
