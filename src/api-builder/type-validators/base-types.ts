@@ -1,8 +1,8 @@
 import type { MetadataType } from '../../package-builder/ScriptModule';
 import { Kernel } from '../kernel';
 
-const IsFinite = Kernel.__globalThis['isFinite'];
-const Number = Kernel.Constructor('Number');
+const IsFinite = Kernel['globalThis::isFinite'];
+const Number = Kernel['globalThis::Number'];
 
 export abstract class BaseType {
   public static readonly BIND_TYPE_TYPES = Kernel.Construct('Map') as Map<string, BaseType>;
@@ -21,7 +21,7 @@ export class NumberType extends BaseType {
   }
   public validate(object: unknown) {
     if (!IsFinite(Number(object)))
-      return Kernel.Construct('Error', true, 'WTF, we have to test how minecraft reacts on Infinity or NaN');
+      return new Kernel['Error::constructor']('WTF, we have to test how minecraft reacts on Infinity or NaN');
 
     return null;
   }

@@ -39,7 +39,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     this.apiClass = APIBuilder.CreateConstructor(this);
     this.constructorId = `${classId}:constructor`;
     if (APIWrapper.NATIVE_EVENTS.has(this.constructorId)) {
-      throw Kernel.Construct('ReferenceError', true, `Class with this id already exists '${classId}'`);
+      throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
     }
     (APIWrapper.NATIVE_EVENTS as unknown as Map<unknown, unknown>).set(
       this.constructorId,
@@ -104,7 +104,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   }
 
   public __APICall(that: unknown, id: string, params: unknown[]) {
-    console.log('call: ' + id);
+    Kernel.log('call: ' + id);
   }
 
   /**

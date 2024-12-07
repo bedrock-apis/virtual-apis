@@ -13,7 +13,7 @@ export class APIWrapper {
   public static onMethod<T extends MethodCallBack>(eventName: string, callBack: T) {
     const event = this.NATIVE_EVENTS.get(eventName);
     if (!event) {
-      throw Kernel.Construct('ReferenceError', true, `Unknown methodId specified: ${eventName}`);
+      throw new Kernel['ReferenceError::constructor'](`Unknown methodId specified: ${eventName}`);
     }
     event.subscribe(callBack);
   }

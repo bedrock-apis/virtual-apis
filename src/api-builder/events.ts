@@ -19,7 +19,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
     if (SESSIONS.has(this)) {
       const promises: Promise<unknown>[] = [];
       SESSIONS.get(this)?.forEach(method => {
-        promises.push((async () => method(...params))().catch(e => console.error(e, e.stack)));
+        promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
       });
       await Promise.all(promises);
     }
@@ -57,7 +57,7 @@ export function TriggerEvent<R extends unknown[]>(event: NativeEvent<R>, ...para
   if (SESSIONS.has(event)) {
     const promises: Promise<unknown>[] = [];
     SESSIONS.get(event)?.forEach(method => {
-      promises.push((async () => method(...(params as unknown[])))().catch(e => console.error(e, e.stack)));
+      promises.push((async () => method(...(params as unknown[])))().catch(e => Kernel.error(e, e.stack)));
     });
     return promises;
   }

@@ -84,9 +84,9 @@ export class APIBuilder {
     Kernel.SetName(ctor, id);
 
     // Handle with proxy for support with "this" callback
-    const final = new Proxy(ctor, {
+    const final = new Kernel['globalThis::Proxy'](ctor, {
       apply(t, that, params) {
-        return t(that, params);
+        return (t as typeof ctor)(that, params);
       },
     });
 

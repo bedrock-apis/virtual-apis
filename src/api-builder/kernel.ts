@@ -1,21 +1,52 @@
-export class Kernel {
+/* eslint-disable @typescript-eslint/unified-signatures */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable custom/no-globals */
+
+const __create = Object.create;
+const __definitions = Object.getOwnPropertyDescriptors;
+
+type GlobalConstructorKeys = {
+  [K in keyof typeof globalThis]: (typeof globalThis)[K] extends new (...args: any) => any ? K : never;
+}[keyof typeof globalThis];
+
+type KernelType = {
+  [K in GlobalConstructorKeys as `${K}::constructor`]: (typeof globalThis)[K];
+} & {
+  [K in GlobalConstructorKeys as `${K}::prototype`]: (typeof globalThis)[K]['prototype'];
+} & {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  [K in GlobalConstructorKeys as `${K}::static`]: Omit<(typeof globalThis)[K], keyof Function>;
+} & {
+  [K in keyof typeof globalThis as `globalThis::${K}`]: (typeof globalThis)[K];
+};
+class KernelClass {
   public static __call: CallableFunction['call'] = Function.prototype.call; // Type to Type call method
   public static call = Function.prototype.call.bind(Function.prototype.call);
   public static __setPrototypeOf = Object.setPrototypeOf;
   public static __defineProperty = Object.defineProperty;
   public static __create = Object.create;
-  public static Construct<T extends keyof typeof globalThis>(
+  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
+    name: T,
+    useNew?: boolean,
+  ): S extends { new (): infer I } | { (): infer I } ? I : never;
+  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
+    name: T,
+    useNew?: boolean,
+    ...args: S extends { new (...params: infer I): unknown } | { (...params: infer I): infer I } ? I : []
+  ): S extends { new (): infer I } | { (): infer I } ? I : never;
+  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
     name: T,
     useNew = true,
     ...args: unknown[]
-  ): (typeof globalThis)[T] extends { new (): infer I } | { (): infer I } ? I : never {
+  ): S extends { new (): infer I } | { (): infer I } ? I : never {
+    console.log(name);
     if (useNew)
-      return Kernel.__setPrototypeOf(
+      return KernelClass.__setPrototypeOf(
         new KernelStorage[name + '::constructor'](...args),
         KernelStorage[name + '::prototype'],
       );
     else
-      return Kernel.__setPrototypeOf(
+      return KernelClass.__setPrototypeOf(
         KernelStorage[name + '::constructor'](...args),
         KernelStorage[name + '::prototype'],
       );
@@ -25,7 +56,7 @@ export class Kernel {
     object: unknown,
     name: T,
   ): (typeof globalThis)[T] extends { new (): infer I } | { (): infer I } ? I : never {
-    return Kernel.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
+    return KernelClass.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
   }
 
   public static Constructor<T extends keyof typeof globalThis>(name: T) {
@@ -49,7 +80,7 @@ export class Kernel {
   }
 
   public static SetName<T extends CallableFunction>(func: T, name: string): T {
-    Kernel.__defineProperty(func, 'name', {
+    KernelClass.__defineProperty(func, 'name', {
       value: name,
       enumerable: false,
       configurable: true,
@@ -59,7 +90,7 @@ export class Kernel {
   }
 
   public static SetLength<T extends CallableFunction>(func: T, length: number): T {
-    Kernel.__defineProperty(func, 'length', {
+    KernelClass.__defineProperty(func, 'length', {
       value: length,
       enumerable: false,
       configurable: true,
@@ -69,13 +100,13 @@ export class Kernel {
   }
 
   public static SetClass<T extends CallableFunction>(func: T, name: string): T {
-    Kernel.SetName(func, name);
-    Kernel.SetFakeNative(func);
-    return Kernel.LockPrototype(func);
+    KernelClass.SetName(func, name);
+    KernelClass.SetFakeNative(func);
+    return KernelClass.LockPrototype(func);
   }
 
   public static LockPrototype<T extends CallableFunction>(func: T): T {
-    Kernel.__defineProperty(func, 'prototype', {
+    KernelClass.__defineProperty(func, 'prototype', {
       value: func.prototype,
       enumerable: false,
       configurable: false,
@@ -93,34 +124,38 @@ export class Kernel {
     else return false;
   }
   public static SetGlobalThis() {}
-  public static __globalThis = globalThis;
+  public static IsolatedCopy<T extends object>(obj: T): T {
+    return __create(null, __definitions(obj));
+  }
+  public static log = console.log;
+  public static error = console.error;
+  public static warn = console.warn;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KernelStorage = Kernel as unknown as Record<string, any>;
+const KernelStorage = KernelClass as unknown as Record<string, any>;
+KernelClass.__setPrototypeOf(KernelStorage, null);
 
-const classes = Object.getOwnPropertyNames(globalThis)
+const globalNames = Object.getOwnPropertyNames(globalThis);
+
+for (const constructor of globalNames
   .map(k => (globalThis as typeof KernelStorage)[k])
-  .filter(v => typeof v === 'function' && v.prototype);
-
-for (const constructor of classes) {
+  .filter(v => typeof v === 'function' && v.prototype)) {
   KernelStorage[constructor.name + '::constructor'] = constructor;
-  KernelStorage[constructor.name + '::prototype'] = Object.defineProperties(
-    {},
-    Object.getOwnPropertyDescriptors(constructor.prototype),
-  );
-  KernelStorage[constructor.name + '::public static '] = Object.defineProperties(
-    {},
-    Object.getOwnPropertyDescriptors(constructor),
-  );
+  KernelStorage[constructor.name + '::prototype'] = KernelClass.IsolatedCopy(constructor.prototype);
+  KernelStorage[constructor.name + '::static'] = KernelClass.IsolatedCopy(constructor);
+}
+for (const globalName of globalNames) {
+  KernelStorage[`globalThis::${globalName}`] = globalThis[globalName as keyof typeof globalThis];
 }
 
-const $native_functions = Kernel.Construct('WeakSet');
+const $native_functions = KernelClass.Construct('WeakSet');
 $native_functions.add(
   (Function.prototype.toString = function () {
     if ($native_functions.has(this) && typeof this === 'function')
       return `function ${this.name}() {\n    [native code]\n}`;
-    const string = Kernel.As(Kernel.call(KernelStorage['Function::prototype'].toString, this), 'String');
+    const string = KernelClass.As(KernelClass.call(KernelStorage['Function::prototype'].toString, this), 'String');
     return string + '';
   }),
 );
+
+export const Kernel = KernelClass as typeof KernelClass & KernelType;

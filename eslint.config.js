@@ -18,7 +18,7 @@ const custom = [
 /** @type {import("typescript-eslint").Config} */
 export default [
   { ignores: ['**/*.js', '**/*.test.ts'] },
-  { files: ['src/**/*.ts}'] },
+  { files: ['src/**/*.ts'] },
   jseslint.configs.recommended,
   ...tseslint.configs.strict,
   {
@@ -46,7 +46,6 @@ function customPlugin() {
        * @param {string} node
        */
       function isRestricted(node) {
-        console.log('isRestricted', node);
         return node in globalThis;
       }
 
@@ -58,6 +57,7 @@ function customPlugin() {
 
       return {
         Program(node) {
+          if (context.filename.includes('package-builder')) return;
           const scope = sourceCode.getScope(node);
 
           // Report variables declared elsewhere (ex: variables defined as "global" by eslint)
