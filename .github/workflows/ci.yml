@@ -34,7 +34,7 @@ jobs:
       - name: Build with Rolldown
         run: pnpm run build
 
-      - name: Run codegen
-        run: pnpm run codegen
+      - name: Build Package
+        run: pnpm run build-package
       - name: Vitest RUn
         run: pnpm exec vitest run
