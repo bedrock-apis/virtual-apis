@@ -1,5 +1,5 @@
 import { ClassDefinition } from './class-definition';
-import { ErrorConstructors, ErrorMessages } from './errors';
+import { Errors } from './errors';
 import { NATIVE_OBJECTS } from './index';
 import { Kernel } from './kernel';
 
@@ -13,11 +13,10 @@ export class APIBuilder {
     // Create function as constructor
     const ctor = function () {
       // Constructor should be callable only with "NEW" keyword
-      if (!new.target) throw new ErrorConstructors.NewExpected(ErrorMessages.NewExpected());
+      if (!new.target) throw Errors.NewExpected();
 
       // If constructor is present for this class
-      if (!definition.hasConstructor)
-        throw new ErrorConstructors.NoConstructor(ErrorMessages.NoConstructor(definition.classId));
+      if (!definition.hasConstructor) throw Errors.NoConstructor(definition.classId);
 
       // TODO: Implement type checking
       // const error = functionType.ValidArgumentTypes(arguments);
@@ -56,9 +55,7 @@ export class APIBuilder {
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound
       if (!NATIVE_OBJECTS.has(that as object))
-        throw new ErrorConstructors.BoundToPrototype(
-          ErrorMessages.BoundToPrototype('function', `${definition.classId}::${id}`),
-        );
+        throw Errors.BoundToPrototype('function', `${definition.classId}::${id}`);
 
       // TODO: Implement privileges and type checking
       //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
