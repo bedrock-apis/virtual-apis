@@ -1,12 +1,12 @@
-import { describe, expect, expectTypeOf, it, test } from 'vitest';
+import { expect, expectTypeOf, suite, test } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
 
 const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA');
 const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod('methodB');
 
-describe('Base API', () => {
-  it('Construction', () => {
+suite('Base API', () => {
+  test('Construction', () => {
     let test: string | null = null;
     EntityDefinition.onConstruct.subscribe((handle, cache, definition, params) => {
       test = 'Constructed';
@@ -23,7 +23,7 @@ describe('Base API', () => {
     expect(test).toEqual('Constructed');
   });
 
-  it('Native Construction', () => {
+  test('Native Construction', () => {
     const Player = PlayerDefinition.apiClass;
     const Entity = EntityDefinition.apiClass;
 
@@ -35,13 +35,13 @@ describe('Base API', () => {
     expect(() => Player.prototype.methodA.call(player));
   });
 
-  it('Normal Constructor', () => {
+  test('Normal Constructor', () => {
     const Player = PlayerDefinition.apiClass;
 
     expect(new Player()).toBeInstanceOf(Player);
   });
 
-  it('Methods', () => {
+  test('Methods', () => {
     const player = new PlayerDefinition.apiClass();
     expectTypeOf(player.methodA).toBeFunction;
     expectTypeOf(player.methodB).toBeFunction;
