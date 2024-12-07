@@ -7,7 +7,7 @@ const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...par
 
 export class NativeEvent<args extends unknown[] = unknown[]> {
   public constructor() {
-    SESSIONS.set(this, new Set());
+    SESSIONS.set(this, Kernel.Construct('Set', true, []) as Set<(...params: unknown[]) => unknown>);
   }
   /**
    * Triggers the event signal.
@@ -20,7 +20,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
       SESSIONS.get(this)?.forEach(method => {
         promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
       });
-      await Promise.all(promises);
+      await Kernel['Promise::static'].all(promises);
     }
   }
   /**
@@ -31,7 +31,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    */
   public subscribe<M extends (...params: args) => void>(method: M): M {
     const t = typeof method;
-    if (t !== 'function') throw new TypeError(`Expected a function, but got ${t}.`);
+    if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
     if (SESSIONS.has(this)) {
       const set: Set<unknown> = SESSIONS.get(this) as Set<unknown>;
       if (!set.has(method)) set.add(method);
@@ -47,7 +47,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    */
   public unsubscribe<M extends (...params: args) => unknown>(method: M): M {
     const t = typeof method;
-    if (t !== 'function') throw new TypeError(`Expected a function, but got ${t}.`);
+    if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
     if (SESSIONS.has(this)) (SESSIONS.get(this) as { delete: (b: unknown) => void })?.delete(method);
     return method;
   }

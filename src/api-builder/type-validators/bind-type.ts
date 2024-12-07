@@ -7,7 +7,8 @@ export class ClassBindType extends BaseType {
     super();
   }
   public validate(object: unknown): Error | null {
-    if (!this.definition.isThisType(object)) return new ReferenceError('No implementation error');
+    if (!this.definition.isThisType(object))
+      return new Kernel['ReferenceError::constructor']('No implementation error');
     return null;
   }
 }
@@ -17,10 +18,10 @@ export class InterfaceBindType extends BaseType {
     super();
   }
   public validate(object: unknown): Error | null {
-    return new ReferenceError('No implementation error');
+    return new Kernel['ReferenceError::constructor']('No implementation error');
   }
   public addProperty(name: string, type: BaseType, isOptional: boolean = false) {
-    this.properties.set(name, { type, isOptional: Boolean(isOptional) });
+    this.properties.set(name, { type, isOptional: Kernel['Boolean::constructor'](isOptional) });
     return this;
   }
 }

@@ -11,7 +11,7 @@ export abstract class BaseType {
   }
   public static resolve(metadataType: MetadataType) {
     // TODO: Metadata type
-    throw new ReferenceError('No implementation error');
+    throw new Kernel['ReferenceError::constructor']('No implementation error');
   }
   public abstract validate(object: unknown): Error | null;
 }
