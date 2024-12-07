@@ -24,10 +24,11 @@ const INTERFACE_BIND_TYPE_IDENTITY = t.i`${InterfaceBindType.name}`;
 const INTERFACE_BIND_TYPE_IDENTITY_ADD_PROPERTY = 'addProperty' satisfies keyof InterfaceBindType;
 const REGISTRY_EXPRESSION = t.accessBy(t.i`BaseType`, 'registry');
 
-export async function generateModule(source: MetadataModuleDefinition, moduleName: string, useFormatting = true) {
+export async function generateModule(source: MetadataModuleDefinition, useFormatting = true) {
+  const MODULE_NAME = source.name.split('/')[1] ?? 'unknown';
   const DEFINITIONS_IDENTITY = t.i`__defs`;
   const definitions: ts.Node[] = [];
-  const exportDeclarations: ts.Node[] = [t.importAsFrom(DEFINITIONS_IDENTITY, `./${moduleName}.native.js`)];
+  const exportDeclarations: ts.Node[] = [t.importAsFrom(DEFINITIONS_IDENTITY, `./${MODULE_NAME}.native.js`)];
 
   for (const interfaceMetadata of source.interfaces) {
     const node = GenerateInterface(interfaceMetadata);

@@ -1,10 +1,12 @@
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import process from 'node:process';
-//import { generateModule } from './codegen';
+import { generateModule } from './codegen';
+import { MetadataModuleDefinition } from './ScriptModule';
 
-const REPO_EXISTS = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable/exist.json`;
+const BASE_LINK = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
+const REPO_EXISTS = `${BASE_LINK}/exist.json`;
 const OUT_DIR = 'package_bin';
 const API_BUILDER = resolve(import.meta.dirname, './api-builder.js');
 type ExistJson = {
@@ -13,7 +15,7 @@ type ExistJson = {
   'flags': string[];
   'SCRIPT_MODULES_MAPPING'?: {
     script_modules: string[];
-    script_modules_mappings: {
+    script_modules_mapping: {
       [key: string]: {
         name: string;
         uuid: string;
@@ -52,6 +54,10 @@ async function Main(): Promise<number> {
     await mkdir(OUT_DIR);
     console.log('Created ' + OUT_DIR);
   }
+  if (!existsSync(resolve(OUT_DIR, './@minecraft'))) {
+    await mkdir(resolve(OUT_DIR, './@minecraft'));
+    console.log('Created ' + OUT_DIR + './@minecraft');
+  }
 
   if (!existsSync(API_BUILDER)) {
     console.log(`Failed to find API builder code file: ` + API_BUILDER);
@@ -70,7 +76,26 @@ async function Main(): Promise<number> {
 
   console.log('Copied ' + API_BUILDER);
 
-  console.log(exists.SCRIPT_MODULES_MAPPING.script_modules);
+  const module_name = exists.SCRIPT_MODULES_MAPPING.script_modules.filter(e => e.startsWith('@minecraft/server'))[0];
+
+  const {
+    name,
+    versions: [first],
+  } = exists.SCRIPT_MODULES_MAPPING.script_modules_mapping[module_name];
+
+  const module_object = await DownloadAndParseJSON(`${BASE_LINK}/metadata/script_modules/${name}_${first}.json`).catch(
+    e => null,
+  );
+
+  if (!module_object) {
+    console.error('Failed to fetch and parse: ' + name);
+    return -1;
+  }
+
+  const { definitionsCode, exportsCode } = await generateModule(module_object as MetadataModuleDefinition, true);
+
+  await writeFile(resolve(OUT_DIR, name + '.native.js'), definitionsCode);
+  await writeFile(resolve(OUT_DIR, name + '.js'), exportsCode);
 
   /*
   // Check for validity
