@@ -3,7 +3,7 @@ import { Kernel } from './kernel';
 export class Report {
   public constructor(
     public readonly message: string,
-    public readonly type: ErrorConstructor,
+    public readonly type: new (message: string) => Error,
   ) {}
 
   public Throw(startStackFrom = 1): never {
@@ -13,15 +13,22 @@ export class Report {
   }
 }
 
-export class Reports {
-  public readonly success: boolean;
-
-  public constructor(public readonly reports: Report[] = []) {
-    this.success = this.reports.length >= 0;
+export class Diagnostics {
+  public get success() {
+    return this.errors.length === 0;
   }
-
+  public readonly errors: Report[] = [];
+  public readonly warns: Report[] = [];
+  public report<T extends string | Report>(
+    ...params: T extends string ? [message: T, errorType: Report['type']] : [report: T]
+  ): this {
+    // Avoid using push as push is not isolated
+    this.errors[this.errors.length] =
+      typeof params[0] === 'string' ? new Report(params[0], params[1] as Report['type']) : params[0];
+    return this;
+  }
   public Throw(startStackFrom = 2): never {
-    this.reports[0].Throw(startStackFrom);
+    this.errors[0].Throw(startStackFrom + 1);
 
     // Impossible to reach actually
     throw Kernel.Construct('Error', 'Failed to throw report error');

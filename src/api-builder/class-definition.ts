@@ -46,7 +46,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
       (this.onConstruct = new NativeEvent()),
     );
 
-    BaseType.register(classId, new ClassBindType(this as ClassDefinition));
+    BaseType.registerBindType(classId, new ClassBindType(this as ClassDefinition));
   }
 
   /**

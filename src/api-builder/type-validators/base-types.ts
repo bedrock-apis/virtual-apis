@@ -1,42 +1,61 @@
 import type { MetadataType } from '../../package-builder/ScriptModule';
-import { Report, Reports } from '../errors';
+import { Report, Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
-
-const IsFinite = Kernel['globalThis::isFinite'];
-const Number = Kernel['globalThis::Number'];
+import { BigIntType, NumberType } from './number-type';
+import { BooleanType } from './boolean-type';
+import { StringType } from './string-type';
+import { FunctionType } from './function-type';
 
 export abstract class BaseType {
   public static readonly BIND_TYPE_TYPES = Kernel.Construct('Map') as Map<string, BaseType>;
-  public static register(name: string, type: BaseType) {
+  public static registerBindType(name: string, type: BaseType) {
     this.BIND_TYPE_TYPES.set(name, type);
   }
   public static resolve(metadataType: MetadataType) {
-    // TODO: Metadata type
-    throw new Kernel['ReferenceError::constructor']('No implementation error');
-  }
-  public abstract validate(object: unknown): Reports;
-}
+    const { name } = metadataType;
 
-export class NumberType extends BaseType {
-  public constructor(public readonly range: { min: number; max: number }) {
-    super();
-  }
-  public validate(object: unknown) {
-    if (!IsFinite(Number(object)))
-      return new Reports([
-        new Report('WTF, we have to test how minecraft reacts on Infinity or NaN', Kernel['Error::constructor']),
-      ]);
+    if (metadataType.is_bind_type) {
+      const bindType = this.BIND_TYPE_TYPES.get(name);
+      if (!bindType) throw Kernel['ReferenceError::constructor']('Unknown bind type: ' + name);
+      return bindType;
+    }
 
-    return new Reports();
+    switch (name) {
+      case 'uint8':
+      case 'int8':
+      case 'uint16':
+      case 'int16':
+      case 'uint32':
+      case 'int32':
+      case 'float':
+      case 'double':
+        return new NumberType(metadataType.valid_range);
+      case 'uint64':
+      case 'int64':
+        return new BigIntType(metadataType.valid_range);
+      case 'boolean':
+        return new BooleanType();
+      case 'string':
+        return new StringType();
+      case 'closure':
+        return new FunctionType();
+      case 'undefined':
+        return new VoidType();
+      default:
+        // TODO: Metadata type
+        throw new Kernel['ReferenceError::constructor'](`BaseType::resolve - UnknownType: ${name}`);
+    }
   }
+  // Diagnostics are always passed by someone who requested this type check
+  public abstract validate(diagnostics: Diagnostics, value: unknown): void;
 }
 
 export class VoidType extends BaseType {
+  public override validate(diagnostics: Diagnostics, value: unknown) {
+    if (value !== undefined) diagnostics.report(new Report('Type Report', Kernel['TypeError::constructor']));
+    throw diagnostics;
+  }
   public constructor() {
     super();
-  }
-  public validate(object: unknown) {
-    if (object === undefined) return new Reports();
-    return new Reports([new Report('Invalid Void Error', Kernel.Constructor('TypeError'))]);
   }
 }
