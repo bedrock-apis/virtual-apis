@@ -1,7 +1,6 @@
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import process from 'node:process';
 import { generateModule } from './codegen';
 import { MetadataModuleDefinition } from './ScriptModule';
 

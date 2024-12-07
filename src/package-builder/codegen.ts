@@ -4,6 +4,7 @@ import { ClassDefinition } from '../api-builder';
 // Just for sake of test
 import * as prettier from 'prettier';
 
+import { InterfaceBindType } from '../api-builder/type-validators/bind-type';
 import { toDefaultType } from '../api-builder/type-validators/default-types';
 import {
   MetadataClassDefinition,
@@ -13,7 +14,6 @@ import {
   MetadataPropertyMemberDefinition,
 } from './ScriptModule';
 import { TypeScriptAstHelper as t } from './ts-ast-helper';
-import { InterfaceBindType } from '../api-builder/type-validators/bind-type';
 
 const CLASS_DEFINITION_IDENTITY = t.i`${ClassDefinition.name}`;
 const CLASS_DEFINITION_IDENTITY_API_CLASS_PROPERTY = 'apiClass' satisfies keyof ClassDefinition;
@@ -107,16 +107,14 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
   const name = classMeta.name;
   const nameString = t.v(name);
   const baseClass = classMeta.base_types[0]?.name ? t.v(classMeta.base_types[0].name) : t.v(null);
-  const hasConstructor = t.v(true);
-  const newRequired = t.v(true);
 
-  let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_IDENTITY, undefined, [nameString]);
+  let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_IDENTITY, undefined, [nameString, baseClass]);
 
   for (const method of classMeta.functions) {
     const paramTypes = t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) })));
 
     if (method.is_constructor) {
-      console.log('SKIPPED CONSTRUCTOR');
+      console.log('SKIPPED CONSTRUCTOR for ', classMeta.name);
     } else {
       node = t.methodCall(node, CLASS_DEFINITION_IDENTITY_ADD_METHOD, [
         t.v(method.name),
