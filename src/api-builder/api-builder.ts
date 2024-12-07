@@ -13,7 +13,7 @@ export class APIBuilder {
     // Create function as constructor
     const ctor = function () {
       // Constructor should be callable only with "NEW" keyword
-      if (!new.target) throw Errors.NewExpected();
+      if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
 
       // If constructor is present for this class
       if (!definition.hasConstructor) throw Errors.NoConstructor(definition.classId);
@@ -55,7 +55,9 @@ export class APIBuilder {
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound
       if (!APIWrapper.NATIVE_HANDLES.has(that as object))
-        throw Errors.BoundToPrototype('function', `${definition.classId}::${id}`);
+        throw new (Kernel.Constructor('ReferenceError'))(
+          `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
+        );
 
       // TODO: Implement privileges and type checking
       //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));

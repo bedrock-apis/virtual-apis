@@ -18,7 +18,8 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     new (...any: unknown[]): P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
     readonly name: string;
     readonly prototype: P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
-  } & S & (T extends ClassDefinition ? Omit<T['apiClass'], "prototype" | "name"> : object);
+  } & S &
+    (T extends ClassDefinition ? Omit<T['apiClass'], 'prototype' | 'name'> : object);
 
   /**
    *
@@ -36,20 +37,23 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   ) {
     this.apiClass = APIBuilder.CreateConstructor(this);
     this.constructorId = `${classId}:constructor`;
-    if(APIWrapper.NATIVE_EVENTS.has(this.constructorId)){
-      throw Kernel.Construct("ReferenceError", true, `Class with this id already exists '${classId}'`);
+    if (APIWrapper.NATIVE_EVENTS.has(this.constructorId)) {
+      throw Kernel.Construct('ReferenceError', true, `Class with this id already exists '${classId}'`);
     }
-    (APIWrapper.NATIVE_EVENTS as unknown as Map<unknown, unknown>).set(this.constructorId, this.onConstruct = new NativeEvent());
+    (APIWrapper.NATIVE_EVENTS as unknown as Map<unknown, unknown>).set(
+      this.constructorId,
+      (this.onConstruct = new NativeEvent()),
+    );
   }
 
   /**
-   * 
+   *
    * @param params IArguments passed by api context, unpredictable but type safe
    * @returns handle and cache pair
    */
   public construct(params: ArrayLike<unknown>): [object, object] {
     let data = this.parent?.construct(params);
-    if(!data) data = [Kernel.__create(null), Kernel.__create(null)];
+    if (!data) data = [Kernel.__create(null), Kernel.__create(null)];
     const [handle, cache] = data;
 
     APIWrapper.NATIVE_HANDLES.add(handle);
@@ -63,22 +67,10 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   /**
    * If specific handle is type of this definition
    */
-  public isThisType(handle: unknown): handle is this["apiClass"]["prototype"]{
+  public isThisType(handle: unknown): handle is this['apiClass']['prototype'] {
     return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-  
   public addMethod<Name extends string>(
     name: Name,
     isStatic: boolean = false,
@@ -90,16 +82,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }
 
-  
-
-
-
   /*
   Properties are the same as the methods rn so lets focus on methods and implement properties later on
   */
-  public addProperty(){}
-  public addStaticProperty(){}
- 
+  public addProperty() {}
+  public addStaticProperty() {}
+
   /*
 
 
