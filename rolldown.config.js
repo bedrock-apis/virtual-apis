@@ -1,6 +1,7 @@
 import { defineConfig } from 'rolldown';
 
-export default defineConfig([
+/**@type {import('rolldown').RolldownOptions[]} */
+export const CONFIG = [
   {
     input: './src/package-builder/index.ts',
     external: ['typescript', /node:/g, 'prettier'],
@@ -15,4 +16,5 @@ export default defineConfig([
       file: 'api-builder.js',
     },
   },
-]);
+];
+export default defineConfig(CONFIG);

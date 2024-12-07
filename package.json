@@ -10,7 +10,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "all": "rolldown -c && node ./dist/build.js",
-    "build-package": "tsx src/package-builder/index.ts",
+    "build-package": "node ./dist/build.js",
     "test": "vitest"
   },
   "prettier": {
