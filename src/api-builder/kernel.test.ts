@@ -16,8 +16,6 @@ suite('Kernel', () => {
       expect(() => map1.set('Test', 'Test1')).toThrow();
       expect(() => map2.set('Test', 'Test2'));
       expect(() => map3.set('Test', 'Test3')).toThrow();
-    } catch (e) {
-      throw e;
     } finally {
       Kernel['Map::constructor']['prototype']['set'] = Kernel['Map::prototype']['set'];
     }
