@@ -1,19 +1,13 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
-import { BaseType, ParamsDefinition } from './type-validators';
+import { ParamsDefinition } from './type-validators';
 
-const EntityDefinition = new ClassDefinition('Entity', null).addMethod(
-  'methodA',
-  false,
-  null as unknown as ParamsDefinition,
-  null as unknown as BaseType,
-);
+const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA', false, new ParamsDefinition());
 const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod(
   'methodB',
   false,
-  null as unknown as ParamsDefinition,
-  null as unknown as BaseType,
+  new ParamsDefinition(),
 );
 
 const Player = PlayerDefinition.apiClass;

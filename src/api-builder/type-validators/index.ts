@@ -1,5 +1,9 @@
 export * from './params-definition';
 export * from './base-types';
+export * from './number-type';
+export * from './string-type';
+export * from './boolean-type';
+export * from './function-type';
 /*
 export class FunctionValidator{
     get min(){return this.metadata.min;}
