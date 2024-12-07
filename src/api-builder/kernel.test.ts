@@ -3,7 +3,7 @@ import { Kernel } from './kernel';
 
 suite('Kernel', () => {
   test('Construct', () => {
-    expectTypeOf(Kernel.Construct('Number'));
+    expectTypeOf(Kernel.Construct('Number')).toEqualTypeOf<Number>();
   });
   test('Prototype Isolation', () => {
     try {
