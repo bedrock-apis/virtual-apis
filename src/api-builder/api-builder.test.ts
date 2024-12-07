@@ -22,18 +22,19 @@ suite('Base API', () => {
   });
 
   test('Native Construction', () => {
-    const player = EntityDefinition.construct([])[0];
+    const entity_handle = EntityDefinition.construct([])[0];
 
-    expect(player).not.toBeInstanceOf(Player);
-    expect(player).not.toBeInstanceOf(Entity);
-    expect(player).not.toBeInstanceOf(Object);
-    expect(() => Player.prototype.methodA.call(player));
+    expect(entity_handle).not.toBeInstanceOf(Player);
+    expect(entity_handle).not.toBeInstanceOf(Entity);
+    expect(entity_handle).not.toBeInstanceOf(Object);
+    expect(() => Player.prototype.methodA.call(entity_handle));
   });
 
   test('Normal Constructor', () => {
     const Player = PlayerDefinition.apiClass;
 
     expect(new Player()).toBeInstanceOf(Player);
+    expect(new Player()).toBeInstanceOf(Entity);
   });
 
   test('Methods', () => {
