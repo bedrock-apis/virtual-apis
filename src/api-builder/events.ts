@@ -20,7 +20,9 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
       SESSIONS.get(this)?.forEach(method => {
         promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
       });
-      await Kernel['Promise::static'].all(promises);
+
+      // all and other methods on Promise has special behavior to return new instance of this thats its being called on
+      await Kernel['Promise::static'].all.call(Kernel['Promise::constructor'], promises);
     }
   }
   /**

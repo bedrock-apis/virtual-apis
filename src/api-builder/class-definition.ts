@@ -63,7 +63,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
     this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 
-    this.onConstruct.trigger(handle, cache, this, params);
+    this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
 
     return data;
   }

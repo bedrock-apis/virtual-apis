@@ -39,7 +39,6 @@ class KernelClass {
     useNew = true,
     ...args: unknown[]
   ): S extends { new (): infer I } | { (): infer I } ? I : never {
-    console.log(name);
     if (useNew)
       return KernelClass.__setPrototypeOf(
         new KernelStorage[name + '::constructor'](...args),
