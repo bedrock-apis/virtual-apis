@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "all": "rolldown -c && node ./dist/codegen.js",
     "codegen": "tsx src/codegen/index.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "format": "prettier -w ./"
   },
   "prettier": {
     "arrowParens": "avoid",
