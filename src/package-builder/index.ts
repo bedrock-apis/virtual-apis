@@ -76,27 +76,20 @@ async function Main(): Promise<number> {
 
   console.log('Copied ' + API_BUILDER);
 
-  const module_name = exists.SCRIPT_MODULES_MAPPING.script_modules.filter(e => e.startsWith('@minecraft/server'))[0];
+  const DATA = exists.SCRIPT_MODULES_MAPPING;
 
-  const {
-    name,
-    versions: [first],
-  } = exists.SCRIPT_MODULES_MAPPING.script_modules_mapping[module_name];
+  const tasks = exists.SCRIPT_MODULES_MAPPING.script_modules
+    .filter(e => e.startsWith('@minecraft'))
+    .map(e => {
+      const { name, versions } = DATA.script_modules_mapping[e];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return GenerateModuleFor(name, versions.sort(compareVersions).at(-1)!);
+    });
 
-  const module_object = await DownloadAndParseJSON(`${BASE_LINK}/metadata/script_modules/${name}_${first}.json`).catch(
-    e => null,
-  );
-
-  if (!module_object) {
-    console.error('Failed to fetch and parse: ' + name);
+  if ((await Promise.all(tasks)).find(e => e !== 0) !== undefined) {
+    console.error('Failed to generate Metadata for at least on module');
     return -1;
   }
-
-  const { definitionsCode, exportsCode } = await generateModule(module_object as MetadataModuleDefinition, true);
-
-  await writeFile(resolve(OUT_DIR, name + '.native.js'), definitionsCode);
-  await writeFile(resolve(OUT_DIR, name + '.js'), exportsCode);
-
   /*
   // Check for validity
   if (!response.ok) {
@@ -138,4 +131,45 @@ async function DownloadAndParseJSON(link: string): Promise<unknown | null> {
   if (!response.ok) return null;
 
   return await response.json();
+}
+
+function compareVersions(a: string, b: string) {
+  const parseVersion = (version: string) =>
+    version.split(/[-.]/).map(part => (isNaN(Number(part)) ? part : Number(part)));
+
+  const aParts = parseVersion(a);
+  const bParts = parseVersion(b);
+
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    if (aParts[i] === undefined) return -1;
+    if (bParts[i] === undefined) return 1;
+    if (typeof aParts[i] === 'string' || typeof bParts[i] === 'string') {
+      if (aParts[i] > bParts[i]) return 1;
+      if (aParts[i] < bParts[i]) return -1;
+    } else {
+      if (aParts[i] > bParts[i]) return 1;
+      if (aParts[i] < bParts[i]) return -1;
+    }
+  }
+  return 0;
+}
+async function GenerateModuleFor(name: string, version: string): Promise<number> {
+  const BUILDED_LINK = `${BASE_LINK}/metadata/script_modules/${name}_${version}.json`;
+
+  console.log('Fetching: ' + BUILDED_LINK);
+  const module_object = await DownloadAndParseJSON(BUILDED_LINK).catch(e => null);
+
+  if (!module_object) {
+    console.error('Failed to fetch or parse: ' + BUILDED_LINK);
+    return -1;
+  }
+
+  const { definitionsCode, exportsCode } = await generateModule(module_object as MetadataModuleDefinition, true);
+
+  await writeFile(resolve(OUT_DIR, name + '.native.js'), definitionsCode);
+  console.log('Generated ' + resolve(OUT_DIR, name + '.native.js'));
+  await writeFile(resolve(OUT_DIR, name + '.js'), exportsCode);
+  console.log('Generated ' + resolve(OUT_DIR, name + '.js'));
+
+  return 0;
 }
