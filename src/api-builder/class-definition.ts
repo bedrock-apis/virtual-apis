@@ -3,6 +3,7 @@ import { APIWrapper } from './api-wrapper';
 import { NativeEvent } from './events';
 import { Kernel } from './kernel';
 import { BaseType, ParamsDefinition } from './type-validators';
+import { ClassBindType } from './type-validators/bind-type';
 
 // Class for single fake api definition
 
@@ -44,6 +45,8 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
       this.constructorId,
       (this.onConstruct = new NativeEvent()),
     );
+
+    BaseType.register(classId, new ClassBindType(this as ClassDefinition));
   }
 
   /**
