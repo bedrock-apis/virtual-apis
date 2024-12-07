@@ -82,15 +82,6 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }
 
-  /*
-  Properties are the same as the methods rn so lets focus on methods and implement properties later on
-  */
-  public addProperty() {}
-  public addStaticProperty() {}
-
-  /*
-
-
   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
     // TODO
 
@@ -112,7 +103,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   public __APICall(that: unknown, id: string, params: unknown[]) {
     console.log('call: ' + id);
   }
-  */
+
   /**
    * TRASH HERE
    * @param factory

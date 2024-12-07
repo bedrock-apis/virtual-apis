@@ -36,3 +36,5 @@ jobs:
 
       - name: Run codegen
         run: pnpm run codegen
+      - name: Vitest RUn
+        run: pnpm exec vitest run
