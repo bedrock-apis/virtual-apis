@@ -5,36 +5,42 @@
 const __create = Object.create;
 const __definitions = Object.getOwnPropertyDescriptors;
 
+type GT = typeof globalThis;
 type GlobalConstructorKeys = {
-  [K in keyof typeof globalThis]: (typeof globalThis)[K] extends new (...args: any) => any ? K : never;
-}[keyof typeof globalThis];
+  [K in keyof GT]: GT[K] extends new (...args: any) => any ? K : never;
+}[keyof GT];
+
+type GCK = GlobalConstructorKeys;
 
 type KernelType = {
-  [K in GlobalConstructorKeys as `${K}::constructor`]: (typeof globalThis)[K];
+  [K in GCK as `${K}::constructor`]: GT[K];
 } & {
-  [K in GlobalConstructorKeys as `${K}::prototype`]: (typeof globalThis)[K]['prototype'];
+  [K in GCK as `${K}::prototype`]: GT[K]['prototype'];
 } & {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  [K in GlobalConstructorKeys as `${K}::static`]: Omit<(typeof globalThis)[K], keyof Function>;
+  [K in GCK as `${K}::static`]: Omit<GT[K], keyof CallableFunction>;
 } & {
-  [K in keyof typeof globalThis as `globalThis::${K}`]: (typeof globalThis)[K];
+  [K in keyof GT as `globalThis::${K}`]: GT[K];
 };
+
 class KernelClass {
-  public static __call: CallableFunction['call'] = Function.prototype.call; // Type to Type call method
+  public static __call = Function.prototype.call; // Type to Type call method
   public static call = Function.prototype.call.bind(Function.prototype.call);
   public static __setPrototypeOf = Object.setPrototypeOf;
   public static __defineProperty = Object.defineProperty;
   public static __create = Object.create;
-  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
+
+  public static Construct<T extends GCK, S extends GT[T]>(
     name: T,
     useNew?: boolean,
   ): S extends { new (): infer I } | { (): infer I } ? I : never;
-  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
+
+  public static Construct<T extends GCK, S extends GT[T]>(
     name: T,
     useNew?: boolean,
     ...args: S extends { new (...params: infer I): unknown } | { (...params: infer I): infer I } ? I : []
   ): S extends { new (): infer I } | { (): infer I } ? I : never;
-  public static Construct<T extends GlobalConstructorKeys, S extends (typeof globalThis)[T]>(
+
+  public static Construct<T extends GCK, S extends GT[T]>(
     name: T,
     useNew = true,
     ...args: unknown[]
@@ -54,27 +60,23 @@ class KernelClass {
   public static As<T extends keyof typeof globalThis>(
     object: unknown,
     name: T,
-  ): (typeof globalThis)[T] extends { new (): infer I } | { (): infer I } ? I : never {
+  ): GT[T] extends { new (): infer I } | { (): infer I } ? I : never {
     return KernelClass.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
   }
 
   public static Constructor<T extends keyof typeof globalThis>(name: T) {
-    return KernelStorage[name + '::constructor'] as (typeof globalThis)[T] extends { new (): void } | { (): void }
-      ? (typeof globalThis)[T]
-      : never;
+    return KernelStorage[name + '::constructor'] as GT[T] extends { new (): void } | { (): void } ? GT[T] : never;
   }
 
   public static Prototype<T extends keyof typeof globalThis>(
     name: T,
-  ): (typeof globalThis)[T] extends { new (): infer I } | { (): infer I } ? I : never {
+  ): GT[T] extends { new (): infer I } | { (): infer I } ? I : never {
     return KernelStorage[name + '::prototype'];
   }
 
   public Static<T extends keyof typeof globalThis>(
     name: T,
-  ): (typeof globalThis)[T] extends { new (): void } | { (): void }
-    ? { [key in keyof (typeof globalThis)[T]]: (typeof globalThis)[T][key] }
-    : never {
+  ): GT[T] extends { new (): void } | { (): void } ? { [key in keyof GT[T]]: GT[T][key] } : never {
     return KernelStorage[name + '::public static '];
   }
 
