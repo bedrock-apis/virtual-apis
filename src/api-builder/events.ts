@@ -7,7 +7,7 @@ const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...par
 
 export class NativeEvent<args extends unknown[] = unknown[]> {
   public constructor() {
-    SESSIONS.set(this, Kernel.Construct('Set', true, []) as Set<(...params: unknown[]) => unknown>);
+    SESSIONS.set(this, Kernel.Construct('Set', []) as Set<(...params: unknown[]) => unknown>);
   }
   /**
    * Triggers the event signal.

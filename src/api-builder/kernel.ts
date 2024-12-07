@@ -29,32 +29,13 @@ class KernelClass {
   public static __defineProperty = Object.defineProperty;
   public static __create = Object.create;
 
-  public static Construct<T extends GCK, S extends GT[T]>(
-    name: T,
-    useNew?: boolean,
-  ): S extends { new (): infer I } | { (): infer I } ? I : never;
-
-  public static Construct<T extends GCK, S extends GT[T]>(
-    name: T,
-    useNew?: boolean,
-    ...args: S extends { new (...params: infer I): unknown } | { (...params: infer I): infer I } ? I : []
-  ): S extends { new (): infer I } | { (): infer I } ? I : never;
-
-  public static Construct<T extends GCK, S extends GT[T]>(
-    name: T,
-    useNew = true,
-    ...args: unknown[]
-  ): S extends { new (): infer I } | { (): infer I } ? I : never {
-    if (useNew)
-      return KernelClass.__setPrototypeOf(
-        new KernelStorage[name + '::constructor'](...args),
-        KernelStorage[name + '::prototype'],
-      );
-    else
-      return KernelClass.__setPrototypeOf(
-        KernelStorage[name + '::constructor'](...args),
-        KernelStorage[name + '::prototype'],
-      );
+  public static Construct<T extends GCK, S extends GT[T]>(name: T): InstanceType<S>;
+  public static Construct<T extends GCK, S extends GT[T]>(name: T, ...args: ConstructorParameters<S>): InstanceType<S>;
+  public static Construct<T extends GCK, S extends GT[T]>(name: T, ...args: unknown[]): InstanceType<S> {
+    return KernelClass.__setPrototypeOf(
+      new KernelStorage[name + '::constructor'](...args),
+      KernelStorage[name + '::prototype'],
+    );
   }
 
   public static As<T extends keyof typeof globalThis>(
