@@ -3,8 +3,8 @@ import tseslint from 'typescript-eslint';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  { ignores: ['dist/**/*', '**/*.test.ts', 'bin/**/*', 'package_bin/**/*'] },
-  { files: ['src/**/*.{js,mjs,cjs,ts}'] },
+  { ignores: ['**/*.js', '**/*.test.ts'] },
+  { files: ['src/**/*.ts}'] },
   jseslint.configs.recommended,
   ...tseslint.configs.strict,
   {

@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import process from 'node:process';
 //import { generateModule } from './codegen';
 
