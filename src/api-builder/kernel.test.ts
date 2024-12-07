@@ -12,10 +12,12 @@ suite('Kernel', () => {
 
     expect(delete (Kernel['Map::constructor']['prototype'] as any)['set']).toBe(true); // Prototype modification emulation
 
-    expect(() => map1.set('Test', 'Test1')).toThrow();
-    expect(() => map2.set('Test', 'Test2'));
-    expect(() => map3.set('Test', 'Test3')).toThrow();
-
-    Kernel['Map::constructor']['prototype']['set'] = Kernel['Map::prototype']['set'];
+    try {
+      expect(() => map1.set('Test', 'Test1')).toThrow();
+      expect(() => map2.set('Test', 'Test2'));
+      expect(() => map3.set('Test', 'Test3')).toThrow();
+    } finally {
+      Kernel['Map::constructor']['prototype']['set'] = Kernel['Map::prototype']['set'];
+    }
   });
 });
