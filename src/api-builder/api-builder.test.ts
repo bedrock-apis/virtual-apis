@@ -1,4 +1,4 @@
-import { expect, expectTypeOf, suite, test } from 'vitest';
+import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
 
@@ -7,10 +7,8 @@ const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, t
 
 suite('Base API', () => {
   test('Construction', () => {
-    let test: string | null = null;
-    EntityDefinition.onConstruct.subscribe((handle, cache, definition, params) => {
-      test = 'Constructed';
-    });
+    const mock = vi.fn();
+    EntityDefinition.onConstruct.subscribe(mock);
 
     const Player = PlayerDefinition.apiClass;
     const Entity = EntityDefinition.apiClass;
@@ -20,7 +18,7 @@ suite('Base API', () => {
     expect(player).toBeInstanceOf(Player);
     expect(player).toBeInstanceOf(Entity);
     expect(EntityDefinition.isThisType(player)).toBeTruthy();
-    expect(test).toEqual('Constructed');
+    expect(mock).toHaveBeenCalledOnce();
   });
 
   test('Native Construction', () => {
