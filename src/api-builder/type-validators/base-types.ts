@@ -1,4 +1,5 @@
 import type { MetadataType } from '../../package-builder/ScriptModule';
+import { Report, Reports } from '../errors';
 import { Kernel } from '../kernel';
 
 const IsFinite = Kernel['globalThis::isFinite'];
@@ -13,25 +14,29 @@ export abstract class BaseType {
     // TODO: Metadata type
     throw new Kernel['ReferenceError::constructor']('No implementation error');
   }
-  public abstract validate(object: unknown): Error | null;
+  public abstract validate(object: unknown): Reports;
 }
+
 export class NumberType extends BaseType {
   public constructor(public readonly range: { min: number; max: number }) {
     super();
   }
   public validate(object: unknown) {
     if (!IsFinite(Number(object)))
-      return new Kernel['Error::constructor']('WTF, we have to test how minecraft reacts on Infinity or NaN');
+      return new Reports([
+        new Report('WTF, we have to test how minecraft reacts on Infinity or NaN', Kernel['Error::constructor']),
+      ]);
 
-    return null;
+    return new Reports();
   }
 }
+
 export class VoidType extends BaseType {
   public constructor() {
     super();
   }
-  public validate(object: unknown): Error | null {
-    if (object === undefined) return null;
-    return new Kernel['globalThis::TypeError']('Invalid Void Error');
+  public validate(object: unknown) {
+    if (object === undefined) return new Reports();
+    return new Reports([new Report('Invalid Void Error', Kernel.Constructor('TypeError'))]);
   }
 }
