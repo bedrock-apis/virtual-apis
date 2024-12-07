@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint';
 /** @type {import("typescript-eslint").Config} */
 const custom = [
   {
+    files: ['src/api-builder/**'],
     plugins: {
       custom: customPlugin(),
     },
@@ -35,26 +36,15 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 function customPlugin() {
   const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
     create(context) {
-      const scopeWalk = new WeakMap();
-      function ScopeHasVariable(name, scope) {
-        if (!scopeWalk.has(scope)) {
-          scopeWalk.set(scope, new Set());
-        }
-      }
-
       /**
        * @param {string} node
        */
       function isRestricted(node) {
-        console.log('isRestricted', node);
         return node in globalThis;
       }
 
       const source = context.sourceCode.text;
       const sourceCode = context.sourceCode;
-
-      // I don't think we should loop the nodes to found local variables, it not worth of it
-      // And its slow asf
 
       return {
         Program(node) {
@@ -63,7 +53,6 @@ function customPlugin() {
           // Report variables declared elsewhere (ex: variables defined as "global" by eslint)
           scope.variables.forEach(variable => {
             if (!variable.defs.length && isRestricted(variable.name)) {
-              if (variable.isTypeVariable) return;
               variable.references.forEach(variable => reportReference(variable.identifier));
             }
           });
@@ -76,25 +65,14 @@ function customPlugin() {
             }
           });
         },
-
-        // i just use what eslint did
-        // Eslint does top-level variables
-
-        // we need to do that too only ensure that its not type
-        // We can use scope of the Node of identifier and get all variables bc they should inherite
-
-        // Scope should be taken from this node not program.
-        // Identifier(node) {
-        //   const name = node.name;
-        //   if (!(node.parent.type === 'ExpressionStatement' || node.parent.type === 'NewExpression')) return;
-        // },
       };
 
       /**
-       *
        * @param {import("@typescript-eslint/utils").TSESTree.Identifier | import("@typescript-eslint/utils").TSESTree.JSXIdentifier} node
        */
       function reportReference(node) {
+        if (node.parent.type.startsWith('TS')) return;
+
         const name = node.name;
         context.report({
           node,

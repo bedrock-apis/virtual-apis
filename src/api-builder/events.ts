@@ -1,5 +1,4 @@
 import { Kernel } from './kernel';
-
 /**
  * Represents an event signal.
  * - The types of the arguments passed to the event handlers.
