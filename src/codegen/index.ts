@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { exit } from 'node:process';
 import { generateModule } from './codegen';
@@ -10,6 +10,7 @@ Main().then(exit, e => {
 });
 
 async function Main(): Promise<number> {
+  /*
   console.time('fetch start');
   // Fetch Latest Metadata
   const response = await fetch(
@@ -25,7 +26,8 @@ async function Main(): Promise<number> {
 
   console.time('fetch json parse');
   // JSON Parsed metadata
-  const metadata = (await response.json()) as MetadataModuleDefinition;
+  const metadata = (await response.json()) as MetadataModuleDefinition;*/
+  const metadata = JSON.parse(readFileSync("./data/server_1.15.0-beta.json").toString());
   const moduleName = metadata.name.split('/')[1] ?? null;
   console.timeEnd('fetch json parse');
 
