@@ -35,6 +35,12 @@ describe('Base API', () => {
     expect(() => Player.prototype.methodA.call(player));
   });
 
+  it('Normal Constructor', () => {
+    const Player = PlayerDefinition.apiClass;
+
+    expect(new Player()).toBeInstanceOf(Player);
+  });
+
   it('Methods', () => {
     const player = new PlayerDefinition.apiClass();
     expectTypeOf(player.methodA).toBeFunction;
