@@ -2,10 +2,10 @@ import { defineConfig } from 'rolldown';
 
 export default defineConfig([
   {
-    input: './src/codegen/index.ts',
+    input: './src/package-builder/index.ts',
     external: ['typescript', /node:/g, 'prettier'],
     output: {
-      file: 'codegen.js',
+      file: 'build.js',
     },
   },
   {

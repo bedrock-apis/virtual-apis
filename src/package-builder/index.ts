@@ -1,23 +1,34 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { exit } from 'node:process';
-import { generateModule } from './codegen';
-import { MetadataModuleDefinition } from './ScriptModule';
+import process from 'node:process';
+//import { generateModule } from './codegen';
 
-Main().then(exit, e => {
-  console.error(e);
-  exit(-1);
-});
+const REPO_EXISTS = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable/exist.json`;
+
+Main().then(
+  r => (process.exitCode = r),
+  e => {
+    console.error(e);
+    process.exit(-1);
+  },
+);
 
 async function Main(): Promise<number> {
-  /*
-  console.time('fetch start');
   // Fetch Latest Metadata
-  const response = await fetch(
-    `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/${'stable'}/metadata/script_modules/@minecraft/server_1.17.0-beta.json`,
-  );
-  console.timeEnd('fetch start');
+  const exists = await (DownloadAndParseJSON(REPO_EXISTS).catch(e => null) as Promise<{
+    'build-version': string;
+    'version': string;
+    'flags': string[];
+  } | null>);
 
+  if (!exists) {
+    console.error('Failed to fetch repository from ' + REPO_EXISTS);
+    return -1;
+  }
+
+  console.log('Fetching from version: ' + exists['build-version']);
+
+  /*
   // Check for validity
   if (!response.ok) {
     console.error('Failed to fetch metadata');
@@ -26,7 +37,7 @@ async function Main(): Promise<number> {
 
   console.time('fetch json parse');
   // JSON Parsed metadata
-  const metadata = (await response.json()) as MetadataModuleDefinition;*/
+  const metadata = (await response.json()) as MetadataModuleDefinition;
   const metadata = JSON.parse(readFileSync('./data/server_1.15.0-beta.json').toString());
   const moduleName = metadata.name.split('/')[1] ?? null;
   console.timeEnd('fetch json parse');
@@ -47,7 +58,15 @@ async function Main(): Promise<number> {
 
   await writeFile(`./bin/${moduleName}.js`, exportsCode);
   await writeFile(`./bin/${moduleName}.native.js`, definitionsCode);
-
-  // 0 Is success otherwise false
+  */
+  // 0 is success
   return 0;
+}
+
+async function DownloadAndParseJSON(link: string): Promise<unknown | null> {
+  const response = await fetch(link);
+
+  if (!response.ok) return null;
+
+  return await response.json();
 }

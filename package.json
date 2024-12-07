@@ -9,10 +9,9 @@
     "build": "rolldown -c",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "all": "rolldown -c && node ./dist/codegen.js",
-    "codegen": "tsx src/codegen/index.ts",
-    "test": "vitest",
-    "format": "prettier -w ./"
+    "all": "rolldown -c && node ./dist/build.js",
+    "build-package": "tsx src/package-builder/index.ts",
+    "test": "vitest"
   },
   "prettier": {
     "arrowParens": "avoid",

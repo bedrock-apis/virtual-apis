@@ -1,4 +1,4 @@
-import type { MetadataType } from '../../codegen/ScriptModule';
+import type { MetadataType } from '../../package-builder/ScriptModule';
 import { Kernel } from '../kernel';
 
 const IsFinite = Kernel.__globalThis['isFinite'];
