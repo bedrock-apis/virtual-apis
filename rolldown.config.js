@@ -4,7 +4,7 @@ import { defineConfig } from 'rolldown';
 export const CONFIG = [
   {
     input: './src/package-builder/index.ts',
-    external: ['typescript', /node:/g, 'prettier'],
+    external: ['typescript', /node\:/g, 'prettier'],
     output: {
       file: 'build.js',
     },

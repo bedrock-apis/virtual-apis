@@ -82,6 +82,11 @@ export const TypeScriptAstHelper = {
             factory.createIdentifier(name),
             undefined,
             undefined,
+            factory.createObjectLiteralExpression(
+              values.map(e => factory.createPropertyAssignment(factory.createStringLiteral(e[0]), e[1])),
+              true,
+            ),
+            /*
             factory.createCallExpression(
               factory.createFunctionExpression(
                 undefined,
@@ -126,10 +131,10 @@ export const TypeScriptAstHelper = {
                   factory.createObjectLiteralExpression([], false),
                 ),
               ],
-            ),
+            ),*/
           ),
         ],
-        ts.NodeFlags.None,
+        ts.NodeFlags.Const,
       ),
     );
   },

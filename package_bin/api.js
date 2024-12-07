@@ -1,17 +1,19 @@
 
 //#region src/api-builder/kernel.ts
-var Kernel = class Kernel {
+const __create = Object.create;
+const __definitions = Object.getOwnPropertyDescriptors;
+var KernelClass = class KernelClass {
 	static __call = Function.prototype.call;
 	static call = Function.prototype.call.bind(Function.prototype.call);
 	static __setPrototypeOf = Object.setPrototypeOf;
 	static __defineProperty = Object.defineProperty;
 	static __create = Object.create;
 	static Construct(name, useNew = true, ...args) {
-		if (useNew) return Kernel.__setPrototypeOf(new KernelStorage[name + "::constructor"](...args), KernelStorage[name + "::prototype"]);
-else return Kernel.__setPrototypeOf(KernelStorage[name + "::constructor"](...args), KernelStorage[name + "::prototype"]);
+		if (useNew) return KernelClass.__setPrototypeOf(new KernelStorage[name + "::constructor"](...args), KernelStorage[name + "::prototype"]);
+else return KernelClass.__setPrototypeOf(KernelStorage[name + "::constructor"](...args), KernelStorage[name + "::prototype"]);
 	}
 	static As(object, name) {
-		return Kernel.__setPrototypeOf(object, KernelStorage[name + "::prototype"]);
+		return KernelClass.__setPrototypeOf(object, KernelStorage[name + "::prototype"]);
 	}
 	static Constructor(name) {
 		return KernelStorage[name + "::constructor"];
@@ -23,7 +25,7 @@ else return Kernel.__setPrototypeOf(KernelStorage[name + "::constructor"](...arg
 		return KernelStorage[name + "::public static "];
 	}
 	static SetName(func, name) {
-		Kernel.__defineProperty(func, "name", {
+		KernelClass.__defineProperty(func, "name", {
 			value: name,
 			enumerable: false,
 			configurable: true,
@@ -32,7 +34,7 @@ else return Kernel.__setPrototypeOf(KernelStorage[name + "::constructor"](...arg
 		return func;
 	}
 	static SetLength(func, length) {
-		Kernel.__defineProperty(func, "length", {
+		KernelClass.__defineProperty(func, "length", {
 			value: length,
 			enumerable: false,
 			configurable: true,
@@ -41,12 +43,12 @@ else return Kernel.__setPrototypeOf(KernelStorage[name + "::constructor"](...arg
 		return func;
 	}
 	static SetClass(func, name) {
-		Kernel.SetName(func, name);
-		Kernel.SetFakeNative(func);
-		return Kernel.LockPrototype(func);
+		KernelClass.SetName(func, name);
+		KernelClass.SetFakeNative(func);
+		return KernelClass.LockPrototype(func);
 	}
 	static LockPrototype(func) {
-		Kernel.__defineProperty(func, "prototype", {
+		KernelClass.__defineProperty(func, "prototype", {
 			value: func.prototype,
 			enumerable: false,
 			configurable: false,
@@ -62,21 +64,29 @@ else return Kernel.__setPrototypeOf(KernelStorage[name + "::constructor"](...arg
 else return false;
 	}
 	static SetGlobalThis() {}
-	static __globalThis = globalThis;
+	static IsolatedCopy(obj) {
+		return __create(null, __definitions(obj));
+	}
+	static log = console.log;
+	static error = console.error;
+	static warn = console.warn;
 };
-const KernelStorage = Kernel;
-const classes = Object.getOwnPropertyNames(globalThis).map((k) => globalThis[k]).filter((v) => typeof v === "function" && v.prototype);
-for (const constructor of classes) {
+const KernelStorage = KernelClass;
+KernelClass.__setPrototypeOf(KernelStorage, null);
+const globalNames = Object.getOwnPropertyNames(globalThis);
+for (const constructor of globalNames.map((k) => globalThis[k]).filter((v) => typeof v === "function" && v.prototype)) {
 	KernelStorage[constructor.name + "::constructor"] = constructor;
-	KernelStorage[constructor.name + "::prototype"] = Object.defineProperties({}, Object.getOwnPropertyDescriptors(constructor.prototype));
-	KernelStorage[constructor.name + "::public static "] = Object.defineProperties({}, Object.getOwnPropertyDescriptors(constructor));
+	KernelStorage[constructor.name + "::prototype"] = KernelClass.IsolatedCopy(constructor.prototype);
+	KernelStorage[constructor.name + "::static"] = KernelClass.IsolatedCopy(constructor);
 }
-const $native_functions = Kernel.Construct("WeakSet");
+for (const globalName of globalNames) KernelStorage[`globalThis::${globalName}`] = globalThis[globalName];
+const $native_functions = KernelClass.Construct("WeakSet");
 $native_functions.add(Function.prototype.toString = function() {
 	if ($native_functions.has(this) && typeof this === "function") return `function ${this.name}() {\n    [native code]\n}`;
-	const string = Kernel.As(Kernel.call(KernelStorage["Function::prototype"].toString, this), "String");
+	const string = KernelClass.As(KernelClass.call(KernelStorage["Function::prototype"].toString, this), "String");
 	return string + "";
 });
+const Kernel = KernelClass;
 
 //#endregion
 //#region src/api-builder/api-wrapper.ts
@@ -86,7 +96,7 @@ var APIWrapper = class {
 	static NATIVE_EVENTS = Kernel.Construct("Map");
 	static onMethod(eventName, callBack) {
 		const event = this.NATIVE_EVENTS.get(eventName);
-		if (!event) throw Kernel.Construct("ReferenceError", true, `Unknown methodId specified: ${eventName}`);
+		if (!event) throw new Kernel["ReferenceError::constructor"](`Unknown methodId specified: ${eventName}`);
 		event.subscribe(callBack);
 	}
 	/**
@@ -103,24 +113,24 @@ var APIWrapper = class {
 
 //#endregion
 //#region src/api-builder/errors.ts
-const TypeError$1 = Kernel.Constructor("TypeError");
-const ReferenceError$1 = Kernel.Constructor("ReferenceError");
+const TypeError = Kernel.Constructor("TypeError");
+const ReferenceError = Kernel.Constructor("ReferenceError");
 const Error = Kernel.Constructor("Error");
 const Errors = {
 	NewExpected() {
-		return new TypeError$1("must be called with new");
+		return new TypeError("must be called with new");
 	},
 	NoConstructor(id) {
-		return new ReferenceError$1(`No constructor for native class '${id}'.`);
+		return new ReferenceError(`No constructor for native class '${id}'.`);
 	},
 	IncorrectNumberOfArguments(t, length) {
-		return new TypeError$1(`Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`);
+		return new TypeError(`Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`);
 	},
 	BoundToPrototype(kind, id) {
-		return new ReferenceError$1(`Native ${kind} [${id}] object bound to prototype does not exist.`);
+		return new ReferenceError(`Native ${kind} [${id}] object bound to prototype does not exist.`);
 	},
 	NoPrivilege(kind, id) {
-		return new ReferenceError$1(`Native ${kind} [${id}] does not have required privileges.`);
+		return new ReferenceError(`Native ${kind} [${id}] does not have required privileges.`);
 	},
 	InvalidAmount(min = 0, max = 256) {
 		return new Error(`Invalid amount. Amount must be greater than ${min} and less than ${max}`);
@@ -129,10 +139,10 @@ const Errors = {
 		return new Error(`timeOfDay must be between ${min} and ${max} (inclusive)`);
 	},
 	ItemTypeDoesNotExist(itemType) {
-		return new TypeError$1(`ItemType '${itemType}' does not exists`);
+		return new TypeError(`ItemType '${itemType}' does not exists`);
 	},
 	NativeOptionalTypeConversationFailed() {
-		return new TypeError$1("Native optional type conversion failed");
+		return new TypeError("Native optional type conversion failed");
 	},
 	FailedTo(action, kind, name) {
 		return new Error(`Failed to ${action} ${kind} '${name}'`);
@@ -185,7 +195,7 @@ var APIBuilder = class {
 		Kernel.SetFakeNative(ctor);
 		Kernel.SetLength(ctor, 0);
 		Kernel.SetName(ctor, id);
-		const final = new Proxy(ctor, { apply(t, that, params) {
+		const final = new Kernel["globalThis::Proxy"](ctor, { apply(t, that, params) {
 			return t(that, params);
 		} });
 		Kernel.SetFakeNative(final);
@@ -205,7 +215,7 @@ var APIBuilder = class {
 const SESSIONS = Kernel.Construct("WeakMap");
 var NativeEvent = class {
 	constructor() {
-		SESSIONS.set(this, new Set());
+		SESSIONS.set(this, Kernel.Construct("Set", true, []));
 	}
 	/**
 	
@@ -220,9 +230,9 @@ var NativeEvent = class {
 		if (SESSIONS.has(this)) {
 			const promises = [];
 			SESSIONS.get(this)?.forEach((method) => {
-				promises.push((async () => method(...params))().catch((e) => console.error(e, e.stack)));
+				promises.push((async () => method(...params))().catch((e) => Kernel.error(e, e.stack)));
 			});
-			await Promise.all(promises);
+			await Kernel["Promise::static"].all.call(Kernel["Promise::constructor"], promises);
 		}
 	}
 	/**
@@ -238,7 +248,7 @@ var NativeEvent = class {
 	*/
 	subscribe(method) {
 		const t = typeof method;
-		if (t !== "function") throw new TypeError(`Expected a function, but got ${t}.`);
+		if (t !== "function") throw new Kernel["TypeError::constructor"](`Expected a function, but got ${t}.`);
 		if (SESSIONS.has(this)) {
 			const set = SESSIONS.get(this);
 			if (!set.has(method)) set.add(method);
@@ -258,7 +268,7 @@ var NativeEvent = class {
 	*/
 	unsubscribe(method) {
 		const t = typeof method;
-		if (t !== "function") throw new TypeError(`Expected a function, but got ${t}.`);
+		if (t !== "function") throw new Kernel["TypeError::constructor"](`Expected a function, but got ${t}.`);
 		if (SESSIONS.has(this)) SESSIONS.get(this)?.delete(method);
 		return method;
 	}
@@ -266,15 +276,15 @@ var NativeEvent = class {
 
 //#endregion
 //#region src/api-builder/type-validators/base-types.ts
-const IsFinite = Kernel.__globalThis["isFinite"];
-const Number = Kernel.Constructor("Number");
+const IsFinite = Kernel["globalThis::isFinite"];
+const Number = Kernel["globalThis::Number"];
 var BaseType = class {
 	static BIND_TYPE_TYPES = Kernel.Construct("Map");
 	static register(name, type) {
 		this.BIND_TYPE_TYPES.set(name, type);
 	}
 	static resolve(metadataType) {
-		throw new ReferenceError("No implementation error");
+		throw new Kernel["ReferenceError::constructor"]("No implementation error");
 	}
 };
 
@@ -286,7 +296,7 @@ var ClassBindType = class extends BaseType {
 		this.definition = definition;
 	}
 	validate(object) {
-		if (!this.definition.isThisType(object)) return new ReferenceError("No implementation error");
+		if (!this.definition.isThisType(object)) return new Kernel["ReferenceError::constructor"]("No implementation error");
 		return null;
 	}
 };
@@ -320,7 +330,7 @@ var ClassDefinition = class {
 		this.newExpected = newExpected;
 		this.apiClass = APIBuilder.CreateConstructor(this);
 		this.constructorId = `${classId}:constructor`;
-		if (APIWrapper.NATIVE_EVENTS.has(this.constructorId)) throw Kernel.Construct("ReferenceError", true, `Class with this id already exists '${classId}'`);
+		if (APIWrapper.NATIVE_EVENTS.has(this.constructorId)) throw new (Kernel.Constructor("ReferenceError"))(`Class with this id already exists '${classId}'`);
 		APIWrapper.NATIVE_EVENTS.set(this.constructorId, this.onConstruct = new NativeEvent());
 		BaseType.register(classId, new ClassBindType(this));
 	}
@@ -340,7 +350,7 @@ var ClassDefinition = class {
 		APIWrapper.NATIVE_HANDLES.add(handle);
 		this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
 		this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
-		this.onConstruct.trigger(handle, cache, this, params);
+		this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
 		return data;
 	}
 	/**
@@ -363,7 +373,7 @@ var ClassDefinition = class {
 		return this;
 	}
 	__APICall(that, id, params) {
-		console.log("call: " + id);
+		Kernel.log("call: " + id);
 	}
 };
 
