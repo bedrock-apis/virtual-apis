@@ -25,11 +25,7 @@ export const TypeScriptAstHelper = {
     return factory.createNewExpression(identifier, undefined, params);
   },
   call(nodeToBeCalled: ts.Expression, params: ts.Expression[]) {
-    return factory.createCallExpression(
-      nodeToBeCalled,
-      undefined,
-      params,
-    );
+    return factory.createCallExpression(nodeToBeCalled, undefined, params);
   },
   methodCall(nodeToBeCalled: ts.Expression, methodName: string, params: ts.Expression[]) {
     return factory.createCallExpression(
