@@ -5,13 +5,13 @@ import { Kernel } from './kernel';
 const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA');
 const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod('methodB');
 
+const Player = PlayerDefinition.apiClass;
+const Entity = EntityDefinition.apiClass;
+
 suite('Base API', () => {
   test('Construction', () => {
     const mock = vi.fn();
     EntityDefinition.onConstruct.subscribe(mock);
-
-    const Player = PlayerDefinition.apiClass;
-    const Entity = EntityDefinition.apiClass;
 
     const player = new Player();
 
@@ -22,9 +22,6 @@ suite('Base API', () => {
   });
 
   test('Native Construction', () => {
-    const Player = PlayerDefinition.apiClass;
-    const Entity = EntityDefinition.apiClass;
-
     const player = EntityDefinition.construct([])[0];
 
     expect(player).not.toBeInstanceOf(Player);
