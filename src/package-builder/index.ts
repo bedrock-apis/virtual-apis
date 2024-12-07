@@ -1,9 +1,12 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { copyFile, mkdir } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 import process from 'node:process';
 //import { generateModule } from './codegen';
 
 const REPO_EXISTS = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable/exist.json`;
+const OUT_DIR = 'package_bin';
+const API_BUILDER = resolve(import.meta.dirname, './api-builder.js');
 
 Main().then(
   r => (process.exitCode = r),
@@ -26,7 +29,36 @@ async function Main(): Promise<number> {
     return -1;
   }
 
+  if (!exists.flags.includes('SCRIPT_MODULES_MAPPING')) {
+    console.error('Generator version mismatch with BDS-DOCS!!!, "SCRIPT_MODULES_MAPPING" is not available');
+    return -1;
+  }
+
   console.log('Fetching from version: ' + exists['build-version']);
+
+  if (!existsSync(OUT_DIR)) {
+    await mkdir(OUT_DIR);
+    console.log('Created ' + OUT_DIR);
+  }
+
+  if (!existsSync(API_BUILDER)) {
+    console.log(`Failed to find API builder code file: ` + API_BUILDER);
+    return -1;
+  }
+
+  const successes = await copyFile(API_BUILDER, resolve(OUT_DIR, './api.js')).then(
+    () => true,
+    () => false,
+  );
+
+  if (!successes) {
+    console.error('Failed to copy api builder file to the package destination: ' + API_BUILDER);
+    return -1;
+  }
+
+  console.log('Copied ' + API_BUILDER);
+
+  console.log((exists as unknown as { ['SCRIPT_MODULES_MAPPING']: object })['SCRIPT_MODULES_MAPPING']);
 
   /*
   // Check for validity
