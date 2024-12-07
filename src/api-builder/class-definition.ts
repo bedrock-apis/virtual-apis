@@ -2,7 +2,7 @@ import { APIBuilder } from './api-builder';
 import { APIWrapper } from './api-wrapper';
 import { NativeEvent } from './events';
 import { Kernel } from './kernel';
-import { BaseType, ParamsDefinition } from './type-validators';
+import { BaseType, ParamsDefinition, VoidType } from './type-validators';
 import { ClassBindType } from './type-validators/bind-type';
 
 // Class for single fake api definition
@@ -77,10 +77,16 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   public addMethod<Name extends string>(
     name: Name,
     isStatic: boolean = false,
-    params?: ParamsDefinition,
-    returnType?: BaseType,
+    params: ParamsDefinition,
+    returnType: BaseType = new VoidType(),
   ) {
-    (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name);
+    (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
+      this,
+      name,
+      isStatic,
+      params,
+      returnType,
+    );
 
     return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }

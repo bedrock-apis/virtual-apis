@@ -2,6 +2,7 @@ import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
 import { Errors } from './errors';
 import { Kernel } from './kernel';
+import { BaseType, ParamsDefinition } from './type-validators';
 
 export class APIBuilder {
   /**
@@ -50,7 +51,13 @@ export class APIBuilder {
    * @param id Name of the function
    * @returns Fake API Functions
    */
-  public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T, id: string) {
+  public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(
+    definition: T,
+    id: string,
+    isStatic: boolean,
+    params: ParamsDefinition,
+    returnType: BaseType,
+  ) {
     // Build arrow function so the methods are not possible to call with new expression
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound

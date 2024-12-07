@@ -40,7 +40,9 @@ function customPlugin() {
        * @param {string} node
        */
       function isRestricted(node) {
-        return node in globalThis;
+        const isInGlobalThis = node in globalThis;
+        if (!isInGlobalThis) return false;
+        return node != 'undefined';
       }
 
       const source = context.sourceCode.text;

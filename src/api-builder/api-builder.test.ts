@@ -1,9 +1,20 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
+import { BaseType, ParamsDefinition } from './type-validators';
 
-const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA');
-const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod('methodB');
+const EntityDefinition = new ClassDefinition('Entity', null).addMethod(
+  'methodA',
+  false,
+  null as unknown as ParamsDefinition,
+  null as unknown as BaseType,
+);
+const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod(
+  'methodB',
+  false,
+  null as unknown as ParamsDefinition,
+  null as unknown as BaseType,
+);
 
 const Player = PlayerDefinition.apiClass;
 const Entity = EntityDefinition.apiClass;
@@ -39,10 +50,16 @@ suite('Base API', () => {
 
   test('Methods', () => {
     const player = new PlayerDefinition.apiClass();
+
+    // TS Check
     expectTypeOf(player.methodA).toBeFunction;
     expectTypeOf(player.methodB).toBeFunction;
+    // JS Check
+    expect(player.methodA).toBeTypeOf('function');
+    expect(player.methodB).toBeTypeOf('function');
+
     expect(player.methodA).toThrowErrorMatchingInlineSnapshot(
-      `[ReferenceError: Native function [Entity::methodA] object bound to prototype does not exist.]`,
+      `[ReferenceError: Native function [Entity::methodA] object bound to prototype does not exist.]`, //👌
     );
     expect(player.methodA.bind(player));
   });

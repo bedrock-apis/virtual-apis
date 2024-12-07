@@ -26,3 +26,12 @@ export class NumberType extends BaseType {
     return null;
   }
 }
+export class VoidType extends BaseType {
+  public constructor() {
+    super();
+  }
+  public validate(object: unknown): Error | null {
+    if (object === undefined) return null;
+    return new Kernel['globalThis::TypeError']('Invalid Void Error');
+  }
+}
