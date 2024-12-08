@@ -6,62 +6,62 @@ import { Kernel } from './kernel';
 const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...params: unknown[]) => unknown>>;
 
 export class NativeEvent<Args extends unknown[] = unknown[]> {
-  public constructor() {
-    SESSIONS.set(this, Kernel.Construct('Set', Kernel.Construct('Array')) as Set<(...params: unknown[]) => unknown>);
-  }
-  /**
-   * Triggers the event signal.
-   * @param params - The arguments to pass to the event handlers.
-   * @returns A promise that resolves with the number of successful event handlers.
-   */
-  public async trigger(...params: Args) {
-    if (SESSIONS.has(this)) {
-      const promises = Kernel.Construct('Array') as Promise<unknown>[];
-      SESSIONS.get(this)?.forEach(method => {
-        promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
-      });
+   public constructor() {
+      SESSIONS.set(this, Kernel.Construct('Set', Kernel.Construct('Array')) as Set<(...params: unknown[]) => unknown>);
+   }
+   /**
+    * Triggers the event signal.
+    * @param params - The arguments to pass to the event handlers.
+    * @returns A promise that resolves with the number of successful event handlers.
+    */
+   public async trigger(...params: Args) {
+      if (SESSIONS.has(this)) {
+         const promises = Kernel.Construct('Array') as Promise<unknown>[];
+         SESSIONS.get(this)?.forEach(method => {
+            promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
+         });
 
-      // all and other methods on Promise has special behavior to return new instance of this thats its being called on
-      await Kernel['Promise::static'].all.call(Kernel['Promise::constructor'], promises);
-    }
-  }
-  /**
-   * Subscribes to the event signal.
-   * @template  k - The type of the event handler function.
-   * @param method - The event handler function to subscribe.
-   * @returns The subscribed event handler function.
-   */
-  public subscribe<M extends (...params: Args) => void>(method: M): M {
-    const t = typeof method;
-    if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
-    if (SESSIONS.has(this)) {
-      const set: Set<unknown> = SESSIONS.get(this) as Set<unknown>;
-      if (!set.has(method)) set.add(method);
-    }
-    return method;
-  }
+         // all and other methods on Promise has special behavior to return new instance of this thats its being called on
+         await Kernel['Promise::static'].all.call(Kernel['Promise::constructor'], promises);
+      }
+   }
+   /**
+    * Subscribes to the event signal.
+    * @template  k - The type of the event handler function.
+    * @param method - The event handler function to subscribe.
+    * @returns The subscribed event handler function.
+    */
+   public subscribe<M extends (...params: Args) => void>(method: M): M {
+      const t = typeof method;
+      if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
+      if (SESSIONS.has(this)) {
+         const set: Set<unknown> = SESSIONS.get(this) as Set<unknown>;
+         if (!set.has(method)) set.add(method);
+      }
+      return method;
+   }
 
-  /**
-   * Unsubscribes from the event signal.
-   * @template k - The type of the event handler function.
-   * @param method - The event handler function to unsubscribe.
-   * @returns The unsubscribed event handler function.
-   */
-  public unsubscribe<M extends (...params: Args) => unknown>(method: M): M {
-    const t = typeof method;
-    if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
-    if (SESSIONS.has(this)) (SESSIONS.get(this) as { delete: (b: unknown) => void })?.delete(method);
-    return method;
-  }
+   /**
+    * Unsubscribes from the event signal.
+    * @template k - The type of the event handler function.
+    * @param method - The event handler function to unsubscribe.
+    * @returns The unsubscribed event handler function.
+    */
+   public unsubscribe<M extends (...params: Args) => unknown>(method: M): M {
+      const t = typeof method;
+      if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
+      if (SESSIONS.has(this)) (SESSIONS.get(this) as { delete: (b: unknown) => void })?.delete(method);
+      return method;
+   }
 }
 
 export function triggerEvent<R extends unknown[]>(event: NativeEvent<R>, ...params: R) {
-  if (SESSIONS.has(event)) {
-    const promises = Kernel.Construct('Array') as Promise<unknown>[];
-    SESSIONS.get(event)?.forEach(method => {
-      promises.push((async () => method(...(params as unknown[])))().catch(e => Kernel.error(e, e.stack)));
-    });
-    return promises;
-  }
-  return Kernel.Construct('Array');
+   if (SESSIONS.has(event)) {
+      const promises = Kernel.Construct('Array') as Promise<unknown>[];
+      SESSIONS.get(event)?.forEach(method => {
+         promises.push((async () => method(...(params as unknown[])))().catch(e => Kernel.error(e, e.stack)));
+      });
+      return promises;
+   }
+   return Kernel.Construct('Array');
 }

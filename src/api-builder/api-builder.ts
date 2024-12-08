@@ -5,110 +5,112 @@ import { Kernel } from './kernel';
 import { ParamsDefinition, Type } from './type-validators';
 
 export class APIBuilder {
-  /**
-   * Builds new Fake API Class
-   * @param definition Class Definition
-   * @returns API Class function
-   */
-  public static CreateConstructor<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T) {
-    // Create function as constructor
-    const ctor = function () {
-      // Constructor should be callable only with "NEW" keyword
-      if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
+   /**
+    * Builds new Fake API Class
+    * @param definition Class Definition
+    * @returns API Class function
+    */
+   public static CreateConstructor<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T) {
+      // Create function as constructor
+      const ctor = function () {
+         // Constructor should be callable only with "NEW" keyword
+         if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
 
-      // If constructor is present for this class
-      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).throw();
+         // If constructor is present for this class
+         if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).throw();
 
-      // TODO: Implement type checking
-      // const error = functionType.ValidArgumentTypes(arguments);
-      //if(error) throw new error.ctor(error.message)
+         // TODO: Implement type checking
+         // const error = functionType.ValidArgumentTypes(arguments);
+         //if(error) throw new error.ctor(error.message)
 
-      // Call Native constructor and sets its result as new.target.prototype
-      // eslint-disable-next-line prefer-rest-params
-      const result = Kernel.__setPrototypeOf(definition.__construct(arguments)[0], new.target.prototype);
-      return result;
-    };
+         // Call Native constructor and sets its result as new.target.prototype
+         // eslint-disable-next-line prefer-rest-params
+         const result = Kernel.__setPrototypeOf(definition.__construct(arguments)[0], new.target.prototype);
+         return result;
+      };
 
-    // Create new prototype with this constructor function
-    ctor.prototype = { constructor: ctor };
+      // Create new prototype with this constructor function
+      ctor.prototype = { constructor: ctor };
 
-    // Check for inheritance
-    const parent = definition.parent;
-    if (parent) {
-      Kernel.__setPrototypeOf(ctor, parent.api);
-      Kernel.__setPrototypeOf(ctor.prototype, parent.api.prototype);
-    }
-
-    // Final sealing so the class has readonly prototype
-    Kernel.SetClass(ctor, definition.classId);
-
-    // return the Fake API Class
-    return ctor as T['api'];
-  }
-
-  /**
-   * @param definition Class Definition
-   * @param id Name of the function
-   * @returns Fake API Functions
-   */
-  public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(
-    definition: T,
-    id: string,
-    paramsDefinition: ParamsDefinition,
-    returnType: Type,
-  ) {
-    // Build arrow function so the methods are not possible to call with new expression
-    const ctor = (that: unknown, params: unknown[]) => {
-      // Check if the object has native bound
-      if (!APIWrapper.nativeHandles.has(that as object))
-        throw new (Kernel.Constructor('ReferenceError'))(
-          `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
-        );
-      const diagnostics = new Diagnostics();
-      paramsDefinition.validate(diagnostics, params);
-
-      if (diagnostics.success) {
-        definition.__call(that, id, params);
+      // Check for inheritance
+      const parent = definition.parent;
+      if (parent) {
+         Kernel.__setPrototypeOf(ctor, parent.api);
+         Kernel.__setPrototypeOf(ctor.prototype, parent.api.prototype);
       }
-      // TODO: Implement privileges and type checking
-      //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
-      //let error = functionType.ValidArgumentTypes(params);
-      //if(error) throw new error.ctor(error.message);
 
-      // TODO: Yes
-      const results = null; /*definition.__APICall(that, id, params);*/
+      // Final sealing so the class has readonly prototype
+      Kernel.SetClass(ctor, definition.classId);
 
-      // TODO: Implement Type checking
-      //error = functionType.ResolveReturnType(returnKind);
-      //if(error) throw new error.ctor(error.message);
+      // return the Fake API Class
+      return ctor as T['api'];
+   }
 
-      return results;
-    };
+   /**
+    * @param definition Class Definition
+    * @param id Name of the function
+    * @returns Fake API Functions
+    */
+   public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(
+      definition: T,
+      id: string,
+      paramsDefinition: ParamsDefinition,
+      returnType: Type,
+   ) {
+      // Build arrow function so the methods are not possible to call with new expression
+      const method = (that: unknown, params: unknown[]) => {
+         // Check if the object has native bound
+         if (!APIWrapper.nativeHandles.has(that as object))
+            throw new (Kernel.Constructor('ReferenceError'))(
+               `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
+            );
+         const diagnostics = new Diagnostics();
+         paramsDefinition.validate(diagnostics, params);
 
-    // Mark function as native
-    Kernel.SetFakeNative(ctor);
+         if (!diagnostics.success) {
+            definition.__reports(that, id, params, diagnostics);
+            diagnostics.throw(1);
+         }
+         definition.__call(that, id, params);
+         // TODO: Implement privileges and type checking
+         //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
+         //let error = functionType.ValidArgumentTypes(params);
+         //if(error) throw new error.ctor(error.message);
 
-    // Set virtual number of params to 0
-    Kernel.SetLength(ctor, 0);
+         // TODO: Yes
+         const results = null; /*definition.__APICall(that, id, params);*/
 
-    // Assign name to this function
-    Kernel.SetName(ctor, id);
+         // TODO: Implement Type checking
+         //error = functionType.ResolveReturnType(returnKind);
+         //if(error) throw new error.ctor(error.message);
 
-    // Handle with proxy for support with "this" callback
-    const final = new Kernel['globalThis::Proxy'](ctor, {
-      apply(t, that, params) {
-        return (t as typeof ctor)(that, params);
-      },
-    });
+         return results;
+      };
 
-    // Set the proxy also as native
-    Kernel.SetFakeNative(final);
+      // Mark function as native
+      Kernel.SetFakeNative(method);
 
-    // Return
-    return final;
-  }
+      // Set virtual number of params to 0
+      Kernel.SetLength(method, 0);
 
-  /**@param {APIClassDefinition} definition @param {FunctionValidator} functionType  */ /*
+      // Assign name to this function
+      Kernel.SetName(method, id);
+
+      // Handle with proxy for support with "this" callback
+      const final = new Kernel['globalThis::Proxy'](method, {
+         apply(t, that, params) {
+            return t(that, params);
+         },
+      });
+
+      // Set the proxy also as native
+      Kernel.SetFakeNative(final);
+
+      // Return
+      return final;
+   }
+
+   /**@param {APIClassDefinition} definition @param {FunctionValidator} functionType  */ /*
     static CreateSetter(definition, id, functionType){
         const ctor = (that, params)=>{
             if(!nativeObjects.has(that)) throw new ErrorConstructors.BoundToPrototype(ErrorMessages.BoundToPrototype("property setter",id));

@@ -1,5 +1,6 @@
 import { APIBuilder } from './api-builder';
 import { APIWrapper } from './api-wrapper';
+import { Diagnostics } from './errors';
 import { NativeEvent } from './events';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type, VoidType } from './type-validators';
@@ -8,116 +9,120 @@ import { ClassBindType } from './type-validators/types/class';
 // Class for single fake api definition
 
 export class ClassDefinition<T extends ClassDefinition | null = null, P = object, S extends object = object> {
-  private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
-  private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
-  public readonly onConstruct: NativeEvent<[object, object, this, ArrayLike<unknown>]>;
-  public readonly constructorId: string;
-  /**
-   * TODO: Improve the types tho
-   */
-  public readonly api: {
-    new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
-    readonly name: string;
-    readonly prototype: P & (T extends ClassDefinition ? T['api']['prototype'] : object);
-  } & S &
-    (T extends ClassDefinition ? Omit<T['api'], 'prototype' | 'name'> : object);
+   private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
+   private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
+   public readonly onConstruct: NativeEvent<[object, object, this, ArrayLike<unknown>]>;
+   public readonly constructorId: string;
+   /**
+    * TODO: Improve the types tho
+    */
+   public readonly api: {
+      new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
+      readonly name: string;
+      readonly prototype: P & (T extends ClassDefinition ? T['api']['prototype'] : object);
+   } & S &
+      (T extends ClassDefinition ? Omit<T['api'], 'prototype' | 'name'> : object);
 
-  /**
-   *
-   * @param classId Fake API Class Name
-   * @param parent Inject inheritance
-   */
-  public constructor(
-    /**
-     * Fake API Class Name
-     */
-    public readonly classId: string,
-    public readonly parent: T,
-    public readonly hasConstructor: boolean = false,
-    public readonly newExpected: boolean = true,
-  ) {
-    this.api = APIBuilder.CreateConstructor(this);
-    this.constructorId = `${classId}:constructor`;
-    if (APIWrapper.nativeEvents.has(this.constructorId)) {
-      throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
-    }
-    (APIWrapper.nativeEvents as unknown as Map<unknown, unknown>).set(
-      this.constructorId,
-      (this.onConstruct = new NativeEvent()),
-    );
+   /**
+    *
+    * @param classId Fake API Class Name
+    * @param parent Inject inheritance
+    */
+   public constructor(
+      /**
+       * Fake API Class Name
+       */
+      public readonly classId: string,
+      public readonly parent: T,
+      public readonly hasConstructor: boolean = false,
+      public readonly newExpected: boolean = true,
+   ) {
+      this.api = APIBuilder.CreateConstructor(this);
+      this.constructorId = `${classId}:constructor`;
+      if (APIWrapper.nativeEvents.has(this.constructorId)) {
+         throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
+      }
+      (APIWrapper.nativeEvents as unknown as Map<unknown, unknown>).set(
+         this.constructorId,
+         (this.onConstruct = new NativeEvent()),
+      );
 
-    Type.RegisterBindType(classId, new ClassBindType(this as ClassDefinition));
-  }
+      Type.RegisterBindType(classId, new ClassBindType(this as ClassDefinition));
+   }
 
-  /**
-   *
-   * @returns New Virtual API Instance of the handle
-   */
-  public create(): this['api']['prototype'] {
-    const [handle, cache] = this.__construct(Kernel.Construct('Array'));
-    return Kernel.__setPrototypeOf(handle, this.api.prototype);
-  }
-  /**
-   * If specific handle is type of this definition
-   */
-  public isThisType(handle: unknown): handle is this['api']['prototype'] {
-    return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
-  }
+   /**
+    *
+    * @returns New Virtual API Instance of the handle
+    */
+   public create(): this['api']['prototype'] {
+      const [handle, cache] = this.__construct(Kernel.Construct('Array'));
+      return Kernel.__setPrototypeOf(handle, this.api.prototype);
+   }
+   /**
+    * If specific handle is type of this definition
+    */
+   public isThisType(handle: unknown): handle is this['api']['prototype'] {
+      return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
+   }
 
-  public addMethod<Name extends string>(name: Name, params: ParamsDefinition, returnType: Type = new VoidType()) {
-    (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
+   public addMethod<Name extends string>(name: Name, params: ParamsDefinition, returnType: Type = new VoidType()) {
+      (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
 
-    return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
-  }
+      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
+   }
 
-  public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
-    // TODO
+   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
+      // TODO
 
-    return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
-  }
+      return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
+   }
 
-  public addStaticProperty<PropertyType, Name extends string>(
-    name: Name,
-    type: string,
-    isReadonly: boolean,
-    defaultValue: unknown,
-  ) {
-    // TODO
-    (this.api as Record<Name, unknown>)[name] = defaultValue;
+   public addStaticProperty<PropertyType, Name extends string>(
+      name: Name,
+      type: string,
+      isReadonly: boolean,
+      defaultValue: unknown,
+   ) {
+      // TODO
+      (this.api as Record<Name, unknown>)[name] = defaultValue;
 
-    return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
-  }
+      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
+   }
 
-  /**
-   *
-   * @param params IArguments passed by api context, unpredictable but type safe
-   * @returns handle and cache pair
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public __construct(params: ArrayLike<unknown>): [object, object] {
-    let data = this.parent?.__construct(params);
-    if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
-    const [handle, cache] = data;
+   /**
+    *
+    * @param params IArguments passed by api context, unpredictable but type safe
+    * @returns handle and cache pair
+    */
+   // eslint-disable-next-line @typescript-eslint/naming-convention
+   public __construct(params: ArrayLike<unknown>): [object, object] {
+      let data = this.parent?.__construct(params);
+      if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
+      const [handle, cache] = data;
 
-    APIWrapper.nativeHandles.add(handle);
-    this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
-    this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
+      APIWrapper.nativeHandles.add(handle);
+      this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
+      this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 
-    this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
+      this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
 
-    return data;
-  }
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public __call(that: unknown, id: string, params: unknown[]) {
-    Kernel.log('call: ' + id);
-  }
+      return data;
+   }
+   // eslint-disable-next-line @typescript-eslint/naming-convention
+   public __call(that: unknown, id: string, params: unknown[]) {
+      Kernel.log('call: ' + id);
+   }
+   // eslint-disable-next-line @typescript-eslint/naming-convention
+   public __reports(that: unknown, id: string, params: unknown[], diagnostics: Diagnostics) {
+      Kernel.log('pre-call: diagnostics ' + diagnostics.errors.length);
+   }
 
-  /**
-   * TRASH HERE
-   * @param factory
-   * @returns
-   */
-  /*
+   /**
+    * TRASH HERE
+    * @param factory
+    * @returns
+    */
+   /*
     setConstructFunction(factory: (cache: any, definition: this, handle: object, data: any) => object){
         this.factory = factory;
         return this;

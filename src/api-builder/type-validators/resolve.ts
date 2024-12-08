@@ -7,37 +7,37 @@ import { BigIntType, NumberType } from './types/number';
 import { StringType } from './types/string';
 
 export function resolveType(metadataType: MetadataType) {
-  const { name } = metadataType;
+   const { name } = metadataType;
 
-  if (metadataType.is_bind_type) {
-    const bindType = Type.bindedTypes.get(name);
-    if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
-    return bindType;
-  }
+   if (metadataType.is_bind_type) {
+      const bindType = Type.bindedTypes.get(name);
+      if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
+      return bindType;
+   }
 
-  switch (name) {
-    case 'uint8':
-    case 'int8':
-    case 'uint16':
-    case 'int16':
-    case 'uint32':
-    case 'int32':
-    case 'float':
-    case 'double':
-      return new NumberType(metadataType.valid_range);
-    case 'uint64':
-    case 'int64':
-      return new BigIntType(metadataType.valid_range);
-    case 'boolean':
-      return new BooleanType();
-    case 'string':
-      return new StringType();
-    case 'closure':
-      return new FunctionType();
-    case 'undefined':
-      return new VoidType();
-    default:
-      // TODO: Metadata type
-      throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
-  }
+   switch (name) {
+      case 'uint8':
+      case 'int8':
+      case 'uint16':
+      case 'int16':
+      case 'uint32':
+      case 'int32':
+      case 'float':
+      case 'double':
+         return new NumberType(metadataType.valid_range);
+      case 'uint64':
+      case 'int64':
+         return new BigIntType(metadataType.valid_range);
+      case 'boolean':
+         return new BooleanType();
+      case 'string':
+         return new StringType();
+      case 'closure':
+         return new FunctionType();
+      case 'undefined':
+         return new VoidType();
+      default:
+         // TODO: Metadata type
+         throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
+   }
 }
