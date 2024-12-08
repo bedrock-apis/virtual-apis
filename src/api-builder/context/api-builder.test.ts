@@ -1,10 +1,10 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
-import { ClassDefinition } from './context/class-definition';
-import { Kernel } from './kernel';
-import { ParamsDefinition } from './type-validators';
-import { ConstructionExecutionContext } from './context/execution-context';
-import { Diagnostics } from './errors';
-import { Context } from './context';
+import { ClassDefinition } from './class-definition';
+import { Kernel } from '../kernel';
+import { ParamsDefinition } from '../type-validators';
+import { ConstructionExecutionContext } from './execution-context';
+import { Diagnostics } from '../errors';
+import { Context } from '.';
 
 const context = new Context();
 const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
@@ -64,7 +64,8 @@ suite('Base API', () => {
       expect(player.methodA).toThrowErrorMatchingInlineSnapshot(
          `[ReferenceError: Native function [Entity::methodA] object bound to prototype does not exist.]`, //👌
       );
-      expect(player.methodA.bind(player));
+      expect(player.methodA.bind(player)).not.toThrow();
+      expect(() => player.methodA()).not.toThrow();
    });
 
    test('Error stack traces', () => {

@@ -124,7 +124,10 @@ export class ClassDefinition<
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
       this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 
-      this.onConstruct.trigger(handle, cache, this, context).catch(Kernel.error);
+      const results = this.onConstruct.invoke(handle, cache, this, context);
+      if (results.successCount !== results.totalCount) {
+         // TODO: Some exceptions were throw by plugin calls
+      }
 
       return data;
    }
