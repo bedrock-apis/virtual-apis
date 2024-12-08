@@ -116,6 +116,8 @@ export class ClassDefinition<
       return this as ClassDefinition<T, P & Record<Name, unknown>>;
    }
 
+   public addStaticFunction() {}
+
    public addStaticConstant<PropertyType, Name extends string>(
       name: Name,
       type: string,

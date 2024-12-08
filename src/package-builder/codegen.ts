@@ -22,8 +22,8 @@ const classDefinitionIApiClassProperty = 'api' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 const classDefinitonAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
-const classDefinitonAddStaticMethod = 'addStaticMethod' satisfies keyof ClassDefinition;
-const classDefinitonAddCallableConstructor = 'addCallableConstructor' satisfies keyof ClassDefinition;
+const classDefinitonAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
+//const classDefinitonAddCallableConstructor = 'addCallableConstructor' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
