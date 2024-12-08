@@ -2,6 +2,15 @@ import { ClassDefinition } from './class-definition';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
 import { DynamicType, ParamsDefinition, type Type } from '../type-validators';
+import { MetadataType } from '../../package-builder/script-module-metadata';
+import { VoidType } from '../type-validators';
+import { ArrayType } from '../type-validators/types/array';
+import { BooleanType } from '../type-validators/types/boolean';
+import { FunctionType } from '../type-validators/types/function';
+import { BigIntType, NumberType } from '../type-validators/types/number';
+import { OptionalType } from '../type-validators/types/optional';
+import { StringType } from '../type-validators/types/string';
+import { VariantType } from '../type-validators/types/variant';
 
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 
@@ -42,6 +51,53 @@ export class Context extends Kernel.Empty {
          this.unresolvedTypes.delete(typeName);
       }
    }
+   public resolveType(metadataType: MetadataType): Type {
+      const { name } = metadataType;
+
+      if (metadataType.is_bind_type) {
+         const bindType = this.getDynamicType(metadataType.name);
+         if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
+         return bindType;
+      }
+
+      switch (name) {
+         case 'uint8':
+         case 'int8':
+         case 'uint16':
+         case 'int16':
+         case 'uint32':
+         case 'int32':
+         case 'float':
+         case 'double':
+            return new NumberType(metadataType.valid_range);
+         case 'uint64':
+         case 'int64':
+            return new BigIntType(metadataType.valid_range as unknown as { min: bigint; max: bigint });
+         case 'boolean':
+            return new BooleanType();
+         case 'string':
+            return new StringType();
+         case 'closure':
+            return new FunctionType();
+         case 'variant':
+            return new VariantType(metadataType.variant_types.map(e => this.resolveType(e)));
+         case 'optional':
+            return new OptionalType(this.resolveType(metadataType.optional_type));
+         case 'undefined':
+            return new VoidType();
+         case 'array':
+            return new ArrayType(this.resolveType(metadataType.element_type));
+         case 'promise':
+         case 'generator':
+         case 'map':
+         case 'this':
+         case 'iterator':
+         default:
+            // TODO: Metadata type
+            throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
+      }
+   }
+
    public constructor() {
       super();
    }

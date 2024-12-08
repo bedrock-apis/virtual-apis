@@ -2,7 +2,6 @@ import { MetadataFunctionArgumentDefinition, Range } from '../../package-builder
 import { Context } from '../context';
 import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
-import { resolveType } from './resolve';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
 import { OptionalType } from './types/optional';
@@ -58,7 +57,7 @@ export class ParamsDefinition extends Kernel.Empty {
 
       for (const param of params) {
          const isOptional = typeof param.details?.default_value !== 'undefined';
-         const type = resolveType(context, param.type);
+         const type = context.resolveType(param.type);
          const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
          const validRange =
             param.details && 'max_value' in param.details && 'min_value' in param.details
