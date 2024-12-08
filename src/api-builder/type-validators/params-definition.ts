@@ -1,4 +1,4 @@
-import { MetadataFunctionArgumentDefinition } from '../../package-builder/ScriptModule';
+import { MetadataFunctionArgumentDefinition } from '../../package-builder/script-module-metadata';
 import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
 import { Type } from './type';

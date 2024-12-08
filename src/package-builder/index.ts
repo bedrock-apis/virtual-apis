@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { generateModule } from './codegen';
-import { MetadataModuleDefinition } from './ScriptModule';
+import { MetadataModuleDefinition } from './script-module-metadata';
 
 const baseLink = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
 const repoExists = `${baseLink}/exist.json`;

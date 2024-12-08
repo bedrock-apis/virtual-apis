@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from 'node:util';
-import { MetadataType } from '../../package-builder/ScriptModule';
+import { MetadataType } from '../../package-builder/script-module-metadata';
 
 const defaultTypes = [
   {

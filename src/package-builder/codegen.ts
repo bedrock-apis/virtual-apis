@@ -13,8 +13,8 @@ import {
   MetadataInterfaceDefinition,
   MetadataModuleDefinition,
   MetadataPropertyMemberDefinition,
-} from './ScriptModule';
-import { TS_AST_HELPER as t } from './ts-ast-helper';
+} from './script-module-metadata';
+import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApiClassProperty = 'class' satisfies keyof ClassDefinition;

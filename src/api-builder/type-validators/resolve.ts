@@ -1,4 +1,4 @@
-import { MetadataType } from '../../package-builder/ScriptModule';
+import { MetadataType } from '../../package-builder/script-module-metadata';
 import { Kernel } from '../kernel';
 import { BooleanType } from './boolean-type';
 import { FunctionType } from './function-type';

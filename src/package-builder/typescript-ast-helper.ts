@@ -1,6 +1,6 @@
 import ts, { factory } from 'typescript';
 
-export const TS_AST_HELPER = {
+export const TYPESCRIPT_AST_HELPER = {
   accessBy(origin: ts.Expression, by: string | ts.Identifier) {
     return factory.createPropertyAccessExpression(origin, by);
   },
@@ -143,13 +143,13 @@ export const TS_AST_HELPER = {
 function objectToExpression(object: object) {
   if (Array.isArray(object)) {
     return factory.createArrayLiteralExpression(
-      object.map(e => TS_AST_HELPER.asIs(e)),
+      object.map(e => TYPESCRIPT_AST_HELPER.asIs(e)),
       false,
     );
   }
   return factory.createObjectLiteralExpression(
     Object.entries(object).map(([key, value]) =>
-      factory.createPropertyAssignment(factory.createIdentifier(key), TS_AST_HELPER.asIs(value)),
+      factory.createPropertyAssignment(factory.createIdentifier(key), TYPESCRIPT_AST_HELPER.asIs(value)),
     ),
     false,
   );
