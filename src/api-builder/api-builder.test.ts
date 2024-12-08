@@ -10,8 +10,8 @@ const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, t
   new ParamsDefinition(),
 );
 
-const Player = PlayerDefinition.apiClass;
-const Entity = EntityDefinition.apiClass;
+const Player = PlayerDefinition.class;
+const Entity = EntityDefinition.class;
 
 suite('Base API', () => {
   test('Construction', () => {
@@ -36,14 +36,14 @@ suite('Base API', () => {
   });
 
   test('Normal Constructor', () => {
-    const Player = PlayerDefinition.apiClass;
+    const Player = PlayerDefinition.class;
 
     expect(new Player()).toBeInstanceOf(Player);
     expect(new Player()).toBeInstanceOf(Entity);
   });
 
   test('Methods', () => {
-    const player = new PlayerDefinition.apiClass();
+    const player = new PlayerDefinition.class();
 
     // TS Check
     expectTypeOf(player.methodA).toBeFunction;
@@ -59,7 +59,7 @@ suite('Base API', () => {
   });
 
   test('Error stack traces', () => {
-    const player = new PlayerDefinition.apiClass();
+    const player = new PlayerDefinition.class();
 
     try {
       player.methodA.call(undefined);

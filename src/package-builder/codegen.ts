@@ -16,24 +16,24 @@ import {
 } from './ScriptModule';
 import { TypeScriptAstHelper as t } from './ts-ast-helper';
 
-const CLASS_DEFINITION_IDENTITY = t.i`${ClassDefinition.name}`;
-const CLASS_DEFINITION_IDENTITY_API_CLASS_PROPERTY = 'apiClass' satisfies keyof ClassDefinition;
-const CLASS_DEFINITION_IDENTITY_ADD_METHOD = 'addMethod' satisfies keyof ClassDefinition;
-const CLASS_DEFINITION_IDENTITY_ADD_PROPERTY = 'addProperty' satisfies keyof ClassDefinition;
+const classDefinitionI = t.i`${ClassDefinition.name}`;
+const classDefinitionIApiClassProperty = 'class' satisfies keyof ClassDefinition;
+const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
+const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 
-const INTERFACE_BIND_TYPE_IDENTITY = t.i`${InterfaceBindType.name}`;
-const INTERFACE_BIND_TYPE_IDENTITY_ADD_PROPERTY = 'addProperty' satisfies keyof InterfaceBindType;
-const REGISTRY_EXPRESSION = t.accessBy(t.i`${Type.name}`, Type.registerBindType.name);
+const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
+const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
+const registerExpression = t.accessBy(t.i`${Type.name}`, Type.RegisterBindType.name);
 
 export async function generateModule(source: MetadataModuleDefinition, useFormatting = true) {
-  const MODULE_NAME = source.name.split('/')[1] ?? 'unknown';
-  const DEFINITIONS_IDENTITY = t.i`__defs`;
+  const moduleName = source.name.split('/')[1] ?? 'unknown';
+  const definitionsI = t.i`__defs`;
   const definitions: ts.Node[] = [];
-  const exportDeclarations: ts.Node[] = [t.importAsFrom(DEFINITIONS_IDENTITY, `./${MODULE_NAME}.native.js`)];
+  const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
 
   for (const interfaceMetadata of source.interfaces) {
     const node = GenerateInterface(interfaceMetadata);
-    definitions.push(t.call(REGISTRY_EXPRESSION, [node]));
+    definitions.push(t.call(registerExpression, [node]));
   }
 
   for (const classMeta of source.classes) {
@@ -43,10 +43,7 @@ export async function generateModule(source: MetadataModuleDefinition, useFormat
 
     definitions.push(t.exportConst(name, node));
     exportDeclarations.push(
-      t.exportConst(
-        name,
-        t.accessBy(t.accessBy(DEFINITIONS_IDENTITY, name), CLASS_DEFINITION_IDENTITY_API_CLASS_PROPERTY),
-      ),
+      t.exportConst(name, t.accessBy(t.accessBy(definitionsI, name), classDefinitionIApiClassProperty)),
     );
   }
 
@@ -109,7 +106,7 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
   const nameString = t.v(name);
   const baseClass = classMeta.base_types[0]?.name ? t.v(classMeta.base_types[0].name) : t.v(null);
 
-  let node: ts.Expression = factory.createNewExpression(CLASS_DEFINITION_IDENTITY, undefined, [nameString, baseClass]);
+  let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [nameString, baseClass]);
 
   for (const method of classMeta.functions) {
     const paramTypes = t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) })));
@@ -117,7 +114,7 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
     if (method.is_constructor) {
       console.log('SKIPPED CONSTRUCTOR for ', classMeta.name);
     } else {
-      node = t.methodCall(node, CLASS_DEFINITION_IDENTITY_ADD_METHOD, [
+      node = t.methodCall(node, classDefinitionIAddMethod, [
         t.v(method.name),
         paramTypes,
         t.v(toDefaultType(method.return_type)),
@@ -125,8 +122,8 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
     }
   }
 
-  node = addProperties(node, CLASS_DEFINITION_IDENTITY_ADD_PROPERTY, classMeta.properties);
-  node = addProperties(node, CLASS_DEFINITION_IDENTITY_ADD_PROPERTY, classMeta.constants);
+  node = addProperties(node, classDefinitonAddProperty, classMeta.properties);
+  node = addProperties(node, classDefinitonAddProperty, classMeta.constants);
 
   return node;
 }
@@ -134,14 +131,10 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
 function GenerateInterface(interfaceMetadata: MetadataInterfaceDefinition) {
   const name = interfaceMetadata.name;
 
-  let node: ts.Expression = factory.createNewExpression(INTERFACE_BIND_TYPE_IDENTITY, undefined, [t.v(name)]);
+  let node: ts.Expression = factory.createNewExpression(interfaceBindTypeI, undefined, [t.v(name)]);
 
   for (const { is_read_only, is_static, name, type } of interfaceMetadata.properties) {
-    node = t.methodCall(node, INTERFACE_BIND_TYPE_IDENTITY_ADD_PROPERTY, [
-      t.v(name),
-      t.v(type.name),
-      t.v('optional_type' in type),
-    ]);
+    node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.v(name), t.v(type.name), t.v('optional_type' in type)]);
   }
 
   return node;

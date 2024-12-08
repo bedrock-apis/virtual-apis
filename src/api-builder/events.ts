@@ -5,7 +5,7 @@ import { Kernel } from './kernel';
  */
 const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...params: unknown[]) => unknown>>;
 
-export class NativeEvent<args extends unknown[] = unknown[]> {
+export class NativeEvent<Args extends unknown[] = unknown[]> {
   public constructor() {
     SESSIONS.set(this, Kernel.Construct('Set', Kernel.Construct('Array')) as Set<(...params: unknown[]) => unknown>);
   }
@@ -14,7 +14,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    * @param params - The arguments to pass to the event handlers.
    * @returns A promise that resolves with the number of successful event handlers.
    */
-  public async trigger(...params: args) {
+  public async trigger(...params: Args) {
     if (SESSIONS.has(this)) {
       const promises = Kernel.Construct('Array') as Promise<unknown>[];
       SESSIONS.get(this)?.forEach(method => {
@@ -31,7 +31,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    * @param method - The event handler function to subscribe.
    * @returns The subscribed event handler function.
    */
-  public subscribe<M extends (...params: args) => void>(method: M): M {
+  public subscribe<M extends (...params: Args) => void>(method: M): M {
     const t = typeof method;
     if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
     if (SESSIONS.has(this)) {
@@ -47,7 +47,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    * @param method - The event handler function to unsubscribe.
    * @returns The unsubscribed event handler function.
    */
-  public unsubscribe<M extends (...params: args) => unknown>(method: M): M {
+  public unsubscribe<M extends (...params: Args) => unknown>(method: M): M {
     const t = typeof method;
     if (t !== 'function') throw new Kernel['TypeError::constructor'](`Expected a function, but got ${t}.`);
     if (SESSIONS.has(this)) (SESSIONS.get(this) as { delete: (b: unknown) => void })?.delete(method);

@@ -26,7 +26,8 @@ export default [
     rules: {
       '@typescript-eslint/no-extraneous-class': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
+      '@typescript-eslint/explicit-member-accessibility': ['warn', { accessibility: 'explicit' }],
+      '@typescript-eslint/naming-convention': ['warn', ...namingConvention()],
     },
   },
   ...custom,
@@ -148,4 +149,53 @@ function customPlugin() {
       'no-globals': noGlobals,
     },
   };
+}
+
+// https://typescript-eslint.io/rules/naming-convention/
+function namingConvention() {
+  return [
+    {
+      selector: 'variable',
+      modifiers: ['const', 'global', 'exported'],
+      format: ['UPPER_CASE'],
+    },
+    {
+      selector: 'variable',
+      modifiers: ['const', 'global'],
+      // PascalCase here is for aliases such as const Number = Kernel['Number::constructor']
+      format: ['camelCase', 'PascalCase'],
+    },
+
+    {
+      selector: 'variable',
+      modifiers: ['destructured'],
+      format: ['camelCase', 'PascalCase', 'snake_case'],
+    },
+
+    {
+      selector: 'variable',
+      format: ['camelCase'],
+    },
+
+    {
+      selector: 'classMethod',
+      modifiers: ['static'],
+      format: ['PascalCase'],
+    },
+
+    { selector: 'classMethod', format: ['camelCase'] },
+
+    { selector: 'classProperty', modifiers: ['readonly', 'private'], format: ['UPPER_CASE'] },
+    { selector: 'classProperty', modifiers: ['readonly', 'public'], format: ['camelCase'] },
+
+    {
+      selector: 'import',
+      format: ['camelCase', 'PascalCase'],
+    },
+
+    {
+      selector: 'typeLike',
+      format: ['PascalCase'],
+    },
+  ];
 }

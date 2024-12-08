@@ -15,12 +15,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   /**
    * TODO: Improve the types tho
    */
-  public readonly apiClass: {
-    new (...any: unknown[]): P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
+  public readonly class: {
+    new (...any: unknown[]): P & (T extends ClassDefinition ? T['class']['prototype'] : object);
     readonly name: string;
-    readonly prototype: P & (T extends ClassDefinition ? T['apiClass']['prototype'] : object);
+    readonly prototype: P & (T extends ClassDefinition ? T['class']['prototype'] : object);
   } & S &
-    (T extends ClassDefinition ? Omit<T['apiClass'], 'prototype' | 'name'> : object);
+    (T extends ClassDefinition ? Omit<T['class'], 'prototype' | 'name'> : object);
 
   /**
    *
@@ -36,17 +36,17 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     public readonly hasConstructor: boolean = false,
     public readonly newExpected: boolean = true,
   ) {
-    this.apiClass = APIBuilder.CreateConstructor(this);
+    this.class = APIBuilder.CreateConstructor(this);
     this.constructorId = `${classId}:constructor`;
-    if (APIWrapper.NATIVE_EVENTS.has(this.constructorId)) {
+    if (APIWrapper.nativeEvents.has(this.constructorId)) {
       throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
     }
-    (APIWrapper.NATIVE_EVENTS as unknown as Map<unknown, unknown>).set(
+    (APIWrapper.nativeEvents as unknown as Map<unknown, unknown>).set(
       this.constructorId,
       (this.onConstruct = new NativeEvent()),
     );
 
-    Type.registerBindType(classId, new ClassBindType(this as ClassDefinition));
+    Type.RegisterBindType(classId, new ClassBindType(this as ClassDefinition));
   }
 
   /**
@@ -59,7 +59,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
     const [handle, cache] = data;
 
-    APIWrapper.NATIVE_HANDLES.add(handle);
+    APIWrapper.nativeHandles.add(handle);
     this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
     this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 
@@ -70,7 +70,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   /**
    * If specific handle is type of this definition
    */
-  public isThisType(handle: unknown): handle is this['apiClass']['prototype'] {
+  public isThisType(handle: unknown): handle is this['class']['prototype'] {
     return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
   }
 
@@ -80,7 +80,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     params: ParamsDefinition,
     returnType: Type = new VoidType(),
   ) {
-    (this.apiClass.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
+    (this.class.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
       this,
       name,
       isStatic,
@@ -104,12 +104,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     defaultValue: unknown,
   ) {
     // TODO
-    (this.apiClass as Record<Name, unknown>)[name] = defaultValue;
+    (this.class as Record<Name, unknown>)[name] = defaultValue;
 
     return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
   }
 
-  public __APICall(that: unknown, id: string, params: unknown[]) {
+  public apiCall(that: unknown, id: string, params: unknown[]) {
     Kernel.log('call: ' + id);
   }
 

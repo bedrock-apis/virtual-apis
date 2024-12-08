@@ -6,7 +6,7 @@ export class Report {
     public readonly type: new (message: string) => Error,
   ) {}
 
-  public Throw(startStackFrom = 1): never {
+  public throw(startStackFrom = 1): never {
     const error = new this.type(this.message);
     error.stack = error.stack?.split('\n    at ').slice(startStackFrom).join('\n    at ') || error.stack;
     throw error;
@@ -27,8 +27,8 @@ export class Diagnostics {
       typeof params[0] === 'string' ? new Report(params[0], params[1] as Report['type']) : params[0];
     return this;
   }
-  public Throw(startStackFrom = 2): never {
-    this.errors[0].Throw(startStackFrom + 1);
+  public throw(startStackFrom = 2): never {
+    this.errors[0].throw(startStackFrom + 1);
 
     // Impossible to reach actually
     throw Kernel.Construct('Error', 'Failed to throw report error');
@@ -45,7 +45,7 @@ const Error = (message: string) => new Report(message, Kernel.Constructor('Error
 
 // Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
 
-export const Errors = {
+export const ERRORS = {
   NoImplementation: ReferenceError('No implementation error'),
   NewExpected: TypeError('must be called with new'),
   NativeTypeConversationFailed: TypeError('Native type conversion failed.'),

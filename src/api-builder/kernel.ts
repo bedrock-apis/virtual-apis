@@ -2,24 +2,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable custom/no-globals */
 
-const __create = Object.create;
-const __definitions = Object.getOwnPropertyDescriptors;
-
-type GT = typeof globalThis;
-type GlobalConstructorKeys = {
-  [K in keyof GT]: GT[K] extends new (...args: any) => any ? K : never;
-}[keyof GT];
-
-type GCK = GlobalConstructorKeys;
+type Global = typeof globalThis;
+type Keys = {
+  [K in keyof Global]: Global[K] extends new (...args: any) => any ? K : never;
+}[keyof Global];
 
 type KernelType = {
-  [K in GCK as `${K}::constructor`]: GT[K];
+  [K in Keys as `${K}::constructor`]: Global[K];
 } & {
-  [K in GCK as `${K}::prototype`]: GT[K]['prototype'];
+  [K in Keys as `${K}::prototype`]: Global[K]['prototype'];
 } & {
-  [K in GCK as `${K}::static`]: Omit<GT[K], keyof CallableFunction>;
+  [K in Keys as `${K}::static`]: Omit<Global[K], keyof CallableFunction>;
 } & {
-  [K in keyof GT as `globalThis::${K}`]: GT[K];
+  [K in keyof Global as `globalThis::${K}`]: Global[K];
 };
 
 class KernelClass {
@@ -27,11 +22,15 @@ class KernelClass {
   public static call = Function.prototype.call.bind(Function.prototype.call);
   public static __setPrototypeOf = Object.setPrototypeOf;
   public static __defineProperty = Object.defineProperty;
+  public static __descriptors = Object.getOwnPropertyDescriptors;
   public static __create = Object.create;
 
-  public static Construct<T extends GCK, S extends GT[T]>(name: T): InstanceType<S>;
-  public static Construct<T extends GCK, S extends GT[T]>(name: T, ...args: ConstructorParameters<S>): InstanceType<S>;
-  public static Construct<T extends GCK, S extends GT[T]>(name: T, ...args: unknown[]): InstanceType<S> {
+  public static Construct<T extends Keys, S extends Global[T]>(name: T): InstanceType<S>;
+  public static Construct<T extends Keys, S extends Global[T]>(
+    name: T,
+    ...args: ConstructorParameters<S>
+  ): InstanceType<S>;
+  public static Construct<T extends Keys, S extends Global[T]>(name: T, ...args: unknown[]): InstanceType<S> {
     return KernelClass.__setPrototypeOf(
       new KernelStorage[name + '::constructor'](...args),
       KernelStorage[name + '::prototype'],
@@ -41,23 +40,25 @@ class KernelClass {
   public static As<T extends keyof typeof globalThis>(
     object: unknown,
     name: T,
-  ): GT[T] extends { new (): infer I } | { (): infer I } ? I : never {
+  ): Global[T] extends { new (): infer I } | { (): infer I } ? I : never {
     return KernelClass.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
   }
 
   public static Constructor<T extends keyof typeof globalThis>(name: T) {
-    return KernelStorage[name + '::constructor'] as GT[T] extends { new (): void } | { (): void } ? GT[T] : never;
+    return KernelStorage[name + '::constructor'] as Global[T] extends { new (): void } | { (): void }
+      ? Global[T]
+      : never;
   }
 
   public static Prototype<T extends keyof typeof globalThis>(
     name: T,
-  ): GT[T] extends { new (): infer I } | { (): infer I } ? I : never {
+  ): Global[T] extends { new (): infer I } | { (): infer I } ? I : never {
     return KernelStorage[name + '::prototype'];
   }
 
-  public Static<T extends keyof typeof globalThis>(
+  public static Static<T extends keyof typeof globalThis>(
     name: T,
-  ): GT[T] extends { new (): void } | { (): void } ? { [key in keyof GT[T]]: GT[T][key] } : never {
+  ): Global[T] extends { new (): void } | { (): void } ? { [key in keyof Global[T]]: Global[T][key] } : never {
     return KernelStorage[name + '::public static '];
   }
 
@@ -98,16 +99,16 @@ class KernelClass {
   }
 
   public static SetFakeNative<T extends CallableFunction>(func: T): void {
-    if (typeof func === 'function') $native_functions.add(func);
+    if (typeof func === 'function') nativeFunctions.add(func);
   }
 
   public static IsFakeNative<T extends CallableFunction>(func: T): boolean {
-    if (typeof func === 'function') return $native_functions.has(func);
+    if (typeof func === 'function') return nativeFunctions.has(func);
     else return false;
   }
   public static SetGlobalThis() {}
   public static IsolatedCopy<T extends object>(obj: T): T {
-    return __create(null, __definitions(obj));
+    return KernelClass.__create(null, KernelClass.__descriptors(obj));
   }
   public static log = console.log;
   public static error = console.error;
@@ -130,14 +131,15 @@ for (const globalName of globalNames) {
   KernelStorage[`globalThis::${globalName}`] = globalThis[globalName as keyof typeof globalThis];
 }
 
-const $native_functions = KernelClass.Construct('WeakSet');
-$native_functions.add(
+const nativeFunctions = KernelClass.Construct('WeakSet');
+nativeFunctions.add(
   (Function.prototype.toString = function () {
-    if ($native_functions.has(this) && typeof this === 'function')
+    if (nativeFunctions.has(this) && typeof this === 'function')
       return `function ${this.name}() {\n    [native code]\n}`;
     const string = KernelClass.As(KernelClass.call(KernelStorage['Function::prototype'].toString, this), 'String');
     return string + '';
   }),
 );
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kernel = KernelClass as typeof KernelClass & KernelType;

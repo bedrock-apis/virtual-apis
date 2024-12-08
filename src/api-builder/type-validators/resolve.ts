@@ -10,7 +10,7 @@ export function resolveType(metadataType: MetadataType) {
   const { name } = metadataType;
 
   if (metadataType.is_bind_type) {
-    const bindType = Type.BIND_TYPE_TYPES.get(name);
+    const bindType = Type.boundTypes.get(name);
     if (!bindType) throw Kernel['ReferenceError::constructor']('Unknown bind type: ' + name);
     return bindType;
   }

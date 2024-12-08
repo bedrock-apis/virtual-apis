@@ -1,20 +1,20 @@
-import { Diagnostics, Errors } from '../errors';
+import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 
-const IsFinite = Kernel['globalThis::isFinite'];
+const isFinite = Kernel['globalThis::isFinite'];
 const Number = Kernel['globalThis::Number'];
-const IsNaN = Kernel['globalThis::isNaN'];
+const isNaN = Kernel['globalThis::isNaN'];
 
 export class NumberType extends Type {
   public constructor(public readonly range: { min: number; max: number }) {
     super();
   }
   public override validate(diagnostics: Diagnostics, value: unknown) {
-    if (typeof value !== 'number') return diagnostics.report(Errors.NativeTypeConversationFailed);
+    if (typeof value !== 'number') return diagnostics.report(ERRORS.NativeTypeConversationFailed);
 
-    if (!IsFinite(Number(value)))
-      return diagnostics.report(Errors.ValueIsNotSupported(IsNaN(value) ? 'NaN' : 'Infinity'));
+    if (!isFinite(Number(value)))
+      return diagnostics.report(ERRORS.ValueIsNotSupported(isNaN(value) ? 'NaN' : 'Infinity'));
 
     if (value < this.range.min || value > this.range.max)
       return diagnostics.report(
@@ -27,7 +27,7 @@ export class NumberType extends Type {
 export class BigIntType extends NumberType {
   public override validate(diagnostics: Diagnostics, value: unknown) {
     if (typeof value !== 'bigint') {
-      return diagnostics.report(Errors.NativeTypeConversationFailed);
+      return diagnostics.report(ERRORS.NativeTypeConversationFailed);
     }
 
     if (value < this.range.min || value > this.range.max)

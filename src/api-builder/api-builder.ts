@@ -1,6 +1,6 @@
 import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
-import { Errors } from './errors';
+import { ERRORS } from './errors';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type } from './type-validators';
 
@@ -17,7 +17,7 @@ export class APIBuilder {
       if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
 
       // If constructor is present for this class
-      if (!definition.hasConstructor) Errors.NoConstructor(definition.classId).Throw();
+      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).Throw();
 
       // TODO: Implement type checking
       // const error = functionType.ValidArgumentTypes(arguments);
@@ -35,15 +35,15 @@ export class APIBuilder {
     // Check for inheritance
     const parent = definition.parent;
     if (parent) {
-      Kernel.__setPrototypeOf(ctor, parent.apiClass);
-      Kernel.__setPrototypeOf(ctor.prototype, parent.apiClass.prototype);
+      Kernel.__setPrototypeOf(ctor, parent.class);
+      Kernel.__setPrototypeOf(ctor.prototype, parent.class.prototype);
     }
 
     // Final sealing so the class has readonly prototype
     Kernel.SetClass(ctor, definition.classId);
 
     // return the Fake API Class
-    return ctor as T['apiClass'];
+    return ctor as T['class'];
   }
 
   /**
@@ -61,7 +61,7 @@ export class APIBuilder {
     // Build arrow function so the methods are not possible to call with new expression
     const ctor = (that: unknown, params: unknown[]) => {
       // Check if the object has native bound
-      if (!APIWrapper.NATIVE_HANDLES.has(that as object))
+      if (!APIWrapper.nativeHandles.has(that as object))
         throw new (Kernel.Constructor('ReferenceError'))(
           `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
         );

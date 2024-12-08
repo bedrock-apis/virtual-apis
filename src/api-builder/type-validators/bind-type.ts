@@ -1,5 +1,5 @@
 import { ClassDefinition } from '../class-definition';
-import { Diagnostics, Errors } from '../errors';
+import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 
@@ -8,20 +8,20 @@ export class ClassBindType extends Type {
     super();
   }
   public validate(diagnostics: Diagnostics, object: unknown): void {
-    if (!this.definition.isThisType(object)) diagnostics.report(Errors.NoImplementation);
+    if (!this.definition.isThisType(object)) diagnostics.report(ERRORS.NoImplementation);
   }
 }
 export class InterfaceBindType extends Type {
   public readonly properties = Kernel.Construct('Map') as Map<string, Type>;
-  public constructor(name: string) {
+  public constructor(public name: string) {
     super();
   }
   public validate(diagnostics: Diagnostics, object: unknown): void {
     if (typeof object === 'function' || typeof object === 'object') Kernel['globalThis::Number'](5);
-    else diagnostics.report(Errors.NativeTypeConversationFailed);
+    else diagnostics.report(ERRORS.NativeTypeConversationFailed);
 
     // TODO: No implementation error
-    diagnostics.report(Errors.NoImplementation);
+    diagnostics.report(ERRORS.NoImplementation);
   }
   public addProperty(name: string, type: Type) {
     this.properties.set(name, type);
