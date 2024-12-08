@@ -1,6 +1,6 @@
-import { Diagnostics } from '../errors';
-import { Kernel } from '../kernel';
-import { Type } from './type';
+import { Diagnostics } from '../../errors';
+import { Kernel } from '../../kernel';
+import { Type } from '../type';
 
 export class FunctionType extends Type {
   public override validate(diagnostics: Diagnostics, value: unknown): void {

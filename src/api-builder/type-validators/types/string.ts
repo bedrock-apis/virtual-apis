@@ -1,5 +1,5 @@
-import { Diagnostics, ERRORS } from '../errors';
-import { Type } from './type';
+import { Diagnostics, ERRORS } from '../../errors';
+import { Type } from '../type';
 
 export class StringType extends Type {
   public override validate(diagnostics: Diagnostics, value: unknown): void {

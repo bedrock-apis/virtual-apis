@@ -1,6 +1,6 @@
-import { Diagnostics, ERRORS } from '../errors';
-import { Kernel } from '../kernel';
-import { Type } from './type';
+import { Diagnostics, ERRORS } from '../../errors';
+import { Kernel } from '../../kernel';
+import { Type } from '../type';
 
 const isFinite = Kernel['globalThis::isFinite'];
 const Number = Kernel['globalThis::Number'];
