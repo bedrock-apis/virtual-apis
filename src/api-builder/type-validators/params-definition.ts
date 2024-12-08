@@ -15,6 +15,7 @@ export class ParamsDefinition {
     } else (this.params as unknown[])[this.params.length] = type;
     return this;
   }
+  public validate(diagnostics: Diagnostics, params: ArrayLike<unknown>) {}
   public static Resolve(metadata: MetadataFunctionArgumentDefinition): ParamsDefinition {
     /**
      * Special logic for handling ranges as the could be different from defined type, check example below 

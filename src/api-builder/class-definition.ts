@@ -15,12 +15,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
   /**
    * TODO: Improve the types tho
    */
-  public readonly class: {
-    new (...any: unknown[]): P & (T extends ClassDefinition ? T['class']['prototype'] : object);
+  public readonly api: {
+    new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
     readonly name: string;
-    readonly prototype: P & (T extends ClassDefinition ? T['class']['prototype'] : object);
+    readonly prototype: P & (T extends ClassDefinition ? T['api']['prototype'] : object);
   } & S &
-    (T extends ClassDefinition ? Omit<T['class'], 'prototype' | 'name'> : object);
+    (T extends ClassDefinition ? Omit<T['api'], 'prototype' | 'name'> : object);
 
   /**
    *
@@ -36,7 +36,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     public readonly hasConstructor: boolean = false,
     public readonly newExpected: boolean = true,
   ) {
-    this.class = APIBuilder.CreateConstructor(this);
+    this.api = APIBuilder.CreateConstructor(this);
     this.constructorId = `${classId}:constructor`;
     if (APIWrapper.nativeEvents.has(this.constructorId)) {
       throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
@@ -54,8 +54,8 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
    * @param params IArguments passed by api context, unpredictable but type safe
    * @returns handle and cache pair
    */
-  public construct(params: ArrayLike<unknown>): [object, object] {
-    let data = this.parent?.construct(params);
+  public __construct(params: ArrayLike<unknown>): [object, object] {
+    let data = this.parent?.__construct(params);
     if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
     const [handle, cache] = data;
 
@@ -68,25 +68,22 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     return data;
   }
   /**
+   *
+   * @returns New Virtual API Instance of the handle
+   */
+  public create(): this['api']['prototype'] {
+    const [handle, cache] = this.__construct(Kernel.Construct('Array'));
+    return Kernel.__setPrototypeOf(handle, this.api.prototype);
+  }
+  /**
    * If specific handle is type of this definition
    */
-  public isThisType(handle: unknown): handle is this['class']['prototype'] {
+  public isThisType(handle: unknown): handle is this['api']['prototype'] {
     return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
   }
 
-  public addMethod<Name extends string>(
-    name: Name,
-    isStatic: boolean = false,
-    params: ParamsDefinition,
-    returnType: Type = new VoidType(),
-  ) {
-    (this.class.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
-      this,
-      name,
-      isStatic,
-      params,
-      returnType,
-    );
+  public addMethod<Name extends string>(name: Name, params: ParamsDefinition, returnType: Type = new VoidType()) {
+    (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
 
     return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
   }
@@ -104,12 +101,12 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     defaultValue: unknown,
   ) {
     // TODO
-    (this.class as Record<Name, unknown>)[name] = defaultValue;
+    (this.api as Record<Name, unknown>)[name] = defaultValue;
 
     return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
   }
 
-  public apiCall(that: unknown, id: string, params: unknown[]) {
+  public __call(that: unknown, id: string, params: unknown[]) {
     Kernel.log('call: ' + id);
   }
 

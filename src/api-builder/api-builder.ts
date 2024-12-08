@@ -1,6 +1,6 @@
 import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
-import { ERRORS } from './errors';
+import { Diagnostics, ERRORS } from './errors';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type } from './type-validators';
 
@@ -17,7 +17,7 @@ export class APIBuilder {
       if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
 
       // If constructor is present for this class
-      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).Throw();
+      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).throw();
 
       // TODO: Implement type checking
       // const error = functionType.ValidArgumentTypes(arguments);
@@ -25,7 +25,7 @@ export class APIBuilder {
 
       // Call Native constructor and sets its result as new.target.prototype
       // eslint-disable-next-line prefer-rest-params
-      const result = Kernel.__setPrototypeOf(definition.construct(arguments)[0], new.target.prototype);
+      const result = Kernel.__setPrototypeOf(definition.__construct(arguments)[0], new.target.prototype);
       return result;
     };
 
@@ -35,15 +35,15 @@ export class APIBuilder {
     // Check for inheritance
     const parent = definition.parent;
     if (parent) {
-      Kernel.__setPrototypeOf(ctor, parent.class);
-      Kernel.__setPrototypeOf(ctor.prototype, parent.class.prototype);
+      Kernel.__setPrototypeOf(ctor, parent.api);
+      Kernel.__setPrototypeOf(ctor.prototype, parent.api.prototype);
     }
 
     // Final sealing so the class has readonly prototype
     Kernel.SetClass(ctor, definition.classId);
 
     // return the Fake API Class
-    return ctor as T['class'];
+    return ctor as T['api'];
   }
 
   /**
@@ -54,8 +54,7 @@ export class APIBuilder {
   public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(
     definition: T,
     id: string,
-    isStatic: boolean,
-    params: ParamsDefinition,
+    paramsDefinition: ParamsDefinition,
     returnType: Type,
   ) {
     // Build arrow function so the methods are not possible to call with new expression
@@ -65,7 +64,12 @@ export class APIBuilder {
         throw new (Kernel.Constructor('ReferenceError'))(
           `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
         );
+      const diagnostics = new Diagnostics();
+      paramsDefinition.validate(diagnostics, params);
 
+      if (diagnostics.success) {
+        definition.__call(that, id, params);
+      }
       // TODO: Implement privileges and type checking
       //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
       //let error = functionType.ValidArgumentTypes(params);

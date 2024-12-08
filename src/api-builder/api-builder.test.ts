@@ -10,8 +10,8 @@ const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, t
   new ParamsDefinition(),
 );
 
-const Player = PlayerDefinition.class;
-const Entity = EntityDefinition.class;
+const Player = PlayerDefinition.api;
+const Entity = EntityDefinition.api;
 
 suite('Base API', () => {
   test('Construction', () => {
@@ -27,7 +27,7 @@ suite('Base API', () => {
   });
 
   test('Native Construction', () => {
-    const entity_handle = EntityDefinition.construct([])[0];
+    const entity_handle = EntityDefinition.__construct([])[0];
 
     expect(entity_handle).not.toBeInstanceOf(Player);
     expect(entity_handle).not.toBeInstanceOf(Entity);
@@ -36,14 +36,14 @@ suite('Base API', () => {
   });
 
   test('Normal Constructor', () => {
-    const Player = PlayerDefinition.class;
+    const Player = PlayerDefinition.api;
 
     expect(new Player()).toBeInstanceOf(Player);
     expect(new Player()).toBeInstanceOf(Entity);
   });
 
   test('Methods', () => {
-    const player = new PlayerDefinition.class();
+    const player = new PlayerDefinition.api();
 
     // TS Check
     expectTypeOf(player.methodA).toBeFunction;
@@ -59,7 +59,7 @@ suite('Base API', () => {
   });
 
   test('Error stack traces', () => {
-    const player = new PlayerDefinition.class();
+    const player = new PlayerDefinition.api();
 
     try {
       player.methodA.call(undefined);
