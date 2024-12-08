@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "bundle": "rolldown -c",
-    "build-package": "rolldown -c && node ./dist/build.js",
+    "codegen": "rolldown -c && node ./dist/build.js",
     "lint": "eslint",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
