@@ -39,4 +39,8 @@ describe('Diagnostics', () => {
         ]
       `);
    });
+
+   test('Diagnostics', () => {
+      expect(() => new Diagnostics().throw()).toThrowErrorMatchingInlineSnapshot(`[Error: Failed to throw report error on successfull diagnostics instance]`);
+   });
 });

@@ -77,17 +77,17 @@ async function main(): Promise<number> {
    console.log('Copied ' + apiBuilder);
 
    const metadata = exists.SCRIPT_MODULES_MAPPING;
-
    const tasks = exists.SCRIPT_MODULES_MAPPING.script_modules
       .filter(e => e.startsWith('@minecraft'))
+      .map(e => metadata.script_modules_mapping[e])
+      .filter(e => !!e)
       .map(e => {
-         const { name, versions } = metadata.script_modules_mapping[e];
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         return generateModuleFor(name, versions.sort(compareVersions).at(-1)!);
+         const { name, versions } = e;
+         return generateModuleFor(name, versions.sort(compareVersions).at(-1));
       });
 
    if ((await Promise.all(tasks)).find(e => e !== 0) !== undefined) {
-      console.error('Failed to generate Metadata for at least on module');
+      console.error('Failed to generate Metadata for at least one module');
       return -1;
    }
 
@@ -97,9 +97,7 @@ async function main(): Promise<number> {
 
 async function downloadAndParseJSON(link: string): Promise<unknown | null> {
    const response = await fetch(link);
-
    if (!response.ok) return null;
-
    return await response.json();
 }
 
