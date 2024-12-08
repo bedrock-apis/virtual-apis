@@ -15,12 +15,13 @@ export class APIBuilder extends Kernel.Empty {
       paramsDefinition: ParamsDefinition,
    ) {
       // Create function as constructor
-      const ctor = function (...params: unknown[]) {
+      // @ts-expect-error We want to explicitly show that this is unsafe & un_isolated array
+      const ctor = function (...params: ArrayLike<unknown>) {
          const diagnostics = new Diagnostics();
          const executionContext = new ConstructionExecutionContext(
             definition as ClassDefinition,
             'constructor',
-            params,
+            Kernel.As(params, 'Array'),
             diagnostics,
          );
          // Constructor should be callable only with "NEW" keyword
@@ -83,12 +84,12 @@ export class APIBuilder extends Kernel.Empty {
    ) {
       const id = `${definition.classId}::${name}`;
       // Build arrow function so the methods are not possible to call with new expression
-      const method = (that: unknown, params: unknown[]) => {
+      const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
             definition as ClassDefinition,
             id,
-            params,
+            Kernel.As(params, 'Array'),
             diagnostics,
             that as object,
          );
@@ -98,7 +99,7 @@ export class APIBuilder extends Kernel.Empty {
          // Validate correctness of this type
          definition.type.validate(diagnostics, that);
          // Validate params
-         paramsDefinition.validate(diagnostics, params);
+         paramsDefinition.validate(diagnostics, executionContext.parameters);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
@@ -217,25 +218,4 @@ export class APIBuilder extends Kernel.Empty {
       // Return
       return final;
    }
-   /**@param {APIClassDefinition} definition @param {FunctionValidator} functionType  */ /*
-    static CreateSetter(definition, id, functionType){
-        const ctor = (that, params)=>{
-            if(!nativeObjects.has(that)) throw new ErrorConstructors.BoundToPrototype(ErrorMessages.BoundToPrototype("property setter",id));
-            let error = functionType.ValidArgumentTypes(params);
-            if(error) throw new error.ctor(error.message);
-            const cache = definition.cache.get(that);
-            if(!cache) return undefined;
-            const returnKind = definition.__methodCall(cache, that, id, ...params);            
-            error = functionType.ResolveReturnType(returnKind);
-            if(error) throw new error.ctor(error.message);
-            return returnKind;
-        };
-        Kernel.SetFakeNative(ctor);
-        Kernel.SetLength(ctor, 0);
-        Kernel.SetName(ctor, "");
-
-        const final = new Proxy(ctor, {apply(t,that,params){return t(that,params)}});
-        Kernel.SetFakeNative(final);
-        return final;
-    }*/
 }

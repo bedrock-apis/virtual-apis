@@ -10,7 +10,7 @@ export class ConstructionExecutionContext extends Kernel.Empty {
    public constructor(
       public readonly definition: ClassDefinition,
       public readonly methodId: string,
-      public readonly parameters: ArrayLike<unknown>,
+      public readonly parameters: unknown[],
       public readonly diagnostics: Diagnostics,
    ) {
       super();
@@ -23,7 +23,7 @@ export class ExecutionContext extends ConstructionExecutionContext {
    public constructor(
       definition: ClassDefinition,
       methodId: string,
-      parameters: ArrayLike<unknown>,
+      parameters: unknown[],
       diagnostics: Diagnostics,
       public readonly handle: object | null,
    ) {
