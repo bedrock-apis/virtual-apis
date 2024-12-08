@@ -1,9 +1,9 @@
 import { ClassDefinition } from '../class-definition';
-import { Errors, Diagnostics } from '../errors';
+import { Diagnostics, Errors } from '../errors';
 import { Kernel } from '../kernel';
-import { BaseType } from './base-types';
+import { Type } from './base-types';
 
-export class ClassBindType extends BaseType {
+export class ClassBindType extends Type {
   public constructor(public readonly definition: ClassDefinition) {
     super();
   }
@@ -11,8 +11,8 @@ export class ClassBindType extends BaseType {
     if (!this.definition.isThisType(object)) diagnostics.report(Errors.NoImplementation());
   }
 }
-export class InterfaceBindType extends BaseType {
-  public readonly properties = Kernel.Construct('Map') as Map<string, BaseType>;
+export class InterfaceBindType extends Type {
+  public readonly properties = Kernel.Construct('Map') as Map<string, Type>;
   public constructor(name: string) {
     super();
   }
@@ -20,7 +20,7 @@ export class InterfaceBindType extends BaseType {
     // TODO: No implementation error
     diagnostics.report(Errors.NoImplementation());
   }
-  public addProperty(name: string, type: BaseType) {
+  public addProperty(name: string, type: Type) {
     this.properties.set(name, type);
     return this;
   }

@@ -1,8 +1,8 @@
 import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
-import { BaseType } from './base-types';
+import { Type } from './base-types';
 
-export class FunctionType extends BaseType {
+export class FunctionType extends Type {
   public override validate(diagnostics: Diagnostics, value: unknown): void {
     // TODO: No error message
     if (typeof value !== 'function')

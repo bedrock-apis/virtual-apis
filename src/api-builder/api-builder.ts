@@ -2,7 +2,7 @@ import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
 import { Errors } from './errors';
 import { Kernel } from './kernel';
-import { BaseType, ParamsDefinition } from './type-validators';
+import { ParamsDefinition, Type } from './type-validators';
 
 export class APIBuilder {
   /**
@@ -56,7 +56,7 @@ export class APIBuilder {
     id: string,
     isStatic: boolean,
     params: ParamsDefinition,
-    returnType: BaseType,
+    returnType: Type,
   ) {
     // Build arrow function so the methods are not possible to call with new expression
     const ctor = (that: unknown, params: unknown[]) => {

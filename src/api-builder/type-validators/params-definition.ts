@@ -1,7 +1,7 @@
 import { MetadataFunctionArgumentDefinition } from '../../package-builder/ScriptModule';
 import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
-import { BaseType } from './base-types';
+import { Type } from './base-types';
 
 export class ParamsDefinition {
   public requiredParams: number = 0;
@@ -38,10 +38,10 @@ export class ParamsDefinition {
     return new this();
   }
 }
-export class ParamType extends BaseType {
+export class ParamType extends Type {
   public constructor(
     public readonly isOptional: boolean,
-    public readonly type: BaseType,
+    public readonly type: Type,
   ) {
     super();
   }

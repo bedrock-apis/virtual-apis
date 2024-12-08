@@ -1,11 +1,11 @@
 import { Diagnostics, Errors } from '../errors';
 import { Kernel } from '../kernel';
-import { BaseType } from './base-types';
+import { Type } from './base-types';
 
 const IsFinite = Kernel['globalThis::isFinite'];
 const Number = Kernel['globalThis::Number'];
 
-export class NumberType extends BaseType {
+export class NumberType extends Type {
   public constructor(public readonly range: { min: number; max: number }) {
     super();
   }

@@ -4,6 +4,7 @@ import { ClassDefinition } from '../api-builder';
 // Just for sake of test
 import * as prettier from 'prettier';
 
+import { Type } from '../api-builder/type-validators';
 import { InterfaceBindType } from '../api-builder/type-validators/bind-type';
 import { toDefaultType } from '../api-builder/type-validators/default-types';
 import {
@@ -14,7 +15,6 @@ import {
   MetadataPropertyMemberDefinition,
 } from './ScriptModule';
 import { TypeScriptAstHelper as t } from './ts-ast-helper';
-import { BaseType } from '../api-builder/type-validators';
 
 const CLASS_DEFINITION_IDENTITY = t.i`${ClassDefinition.name}`;
 const CLASS_DEFINITION_IDENTITY_API_CLASS_PROPERTY = 'apiClass' satisfies keyof ClassDefinition;
@@ -23,7 +23,7 @@ const CLASS_DEFINITION_IDENTITY_ADD_PROPERTY = 'addProperty' satisfies keyof Cla
 
 const INTERFACE_BIND_TYPE_IDENTITY = t.i`${InterfaceBindType.name}`;
 const INTERFACE_BIND_TYPE_IDENTITY_ADD_PROPERTY = 'addProperty' satisfies keyof InterfaceBindType;
-const REGISTRY_EXPRESSION = t.accessBy(t.i`${BaseType.name}`, BaseType.registerBindType.name);
+const REGISTRY_EXPRESSION = t.accessBy(t.i`${Type.name}`, Type.registerBindType.name);
 
 export async function generateModule(source: MetadataModuleDefinition, useFormatting = true) {
   const MODULE_NAME = source.name.split('/')[1] ?? 'unknown';
