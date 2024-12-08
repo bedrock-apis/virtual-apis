@@ -1,3 +1,4 @@
+export * from './bind-type';
 export * from './boolean-type';
 export * from './function-type';
 export * from './number-type';
