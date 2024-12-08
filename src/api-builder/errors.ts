@@ -46,11 +46,11 @@ const Error = (message: string) => new Report(message, Kernel.Constructor('Error
 // Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
 
 export const Errors = {
-  NoImplementation: () => ReferenceError('No implementation error'),
-  NewExpected: () => TypeError('must be called with new'),
+  NoImplementation: ReferenceError('No implementation error'),
+  NewExpected: TypeError('must be called with new'),
+  NativeTypeConversationFailed: TypeError('Native type conversion failed.'),
+  NativeOptionalTypeConversationFailed: TypeError('Native optional type conversion failed'),
   NoConstructor: (id: string) => ReferenceError(`No constructor for native class '${id}'.`),
-  NativeTypeConversationFailed: () => TypeError('Native type conversion failed.'),
-  NativeOptionalTypeConversationFailed: () => TypeError('Native optional type conversion failed'),
   ValueIsNotSupported: (value: 'Infinity' | 'NaN') => TypeError(`${value} value is not supported.`),
 
   BoundToPrototype(kind: NativeKind, id: string) {

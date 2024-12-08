@@ -1,7 +1,7 @@
 import { MetadataFunctionArgumentDefinition } from '../../package-builder/ScriptModule';
 import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
-import { Type } from './base-types';
+import { Type } from './type';
 
 export class ParamsDefinition {
   public requiredParams: number = 0;

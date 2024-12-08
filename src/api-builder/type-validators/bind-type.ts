@@ -1,14 +1,14 @@
 import { ClassDefinition } from '../class-definition';
 import { Diagnostics, Errors } from '../errors';
 import { Kernel } from '../kernel';
-import { Type } from './base-types';
+import { Type } from './type';
 
 export class ClassBindType extends Type {
   public constructor(public readonly definition: ClassDefinition) {
     super();
   }
   public validate(diagnostics: Diagnostics, object: unknown): void {
-    if (!this.definition.isThisType(object)) diagnostics.report(Errors.NoImplementation());
+    if (!this.definition.isThisType(object)) diagnostics.report(Errors.NoImplementation);
   }
 }
 export class InterfaceBindType extends Type {
@@ -18,9 +18,10 @@ export class InterfaceBindType extends Type {
   }
   public validate(diagnostics: Diagnostics, object: unknown): void {
     if (typeof object === 'function' || typeof object === 'object') Kernel['globalThis::Number'](5);
-    else diagnostics.report('Incorrect Type', Kernel['TypeError::constructor']);
+    else diagnostics.report(Errors.NativeTypeConversationFailed);
+
     // TODO: No implementation error
-    diagnostics.report(Errors.NoImplementation());
+    diagnostics.report(Errors.NoImplementation);
   }
   public addProperty(name: string, type: Type) {
     this.properties.set(name, type);
