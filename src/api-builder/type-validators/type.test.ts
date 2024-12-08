@@ -1,7 +1,9 @@
 import { describe, test } from 'vitest';
-import { ClassDefinition } from '../class-definition';
+import { ClassDefinition } from '../context/class-definition';
+import { Context } from '../context';
 
-const ItemStack = new ClassDefinition('ItemStack', null).api;
+const context = new Context();
+const ItemStack = context.createClassDefinition('ItemStack', null).api;
 
 const TEST_DATA: [testCase: () => void, errorText: string][] = [
    [() => (ItemStack as any)(), 'TypeError: must be called with new'],

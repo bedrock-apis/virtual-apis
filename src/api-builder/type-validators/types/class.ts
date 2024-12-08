@@ -1,4 +1,4 @@
-import { ClassDefinition } from '../../class-definition';
+import { ClassDefinition } from '../../context/class-definition';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Type } from '../type';
 

@@ -35,7 +35,7 @@ export class Diagnostics extends Kernel.Empty {
       this.errors[0].throw(startStackFrom + 1);
 
       // Impossible to reach actually
-      throw Kernel.Construct('Error', 'Failed to throw report error');
+      throw Kernel.Construct('Error', 'Failed to throw report instance');
    }
 }
 

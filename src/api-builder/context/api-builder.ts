@@ -1,9 +1,8 @@
-import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
-import { Diagnostics, ERRORS } from './errors';
+import { Diagnostics, ERRORS } from '../errors';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
-import { Kernel } from './kernel';
-import { ParamsDefinition, Type } from './type-validators';
+import { Kernel } from '../kernel';
+import { ParamsDefinition, Type } from '../type-validators';
 
 export class APIBuilder extends Kernel.Empty {
    /**
@@ -95,7 +94,8 @@ export class APIBuilder extends Kernel.Empty {
             that as object,
          );
          // Check if the object has native bound
-         if (!APIWrapper.nativeHandles.has(that as object)) diagnostics.report(ERRORS.BoundToPrototype('function', id));
+         if (!definition.context.nativeHandles.has(that as object))
+            diagnostics.report(ERRORS.BoundToPrototype('function', id));
          // Validate correctness of this type
          definition.type.validate(diagnostics, that);
          // Validate params

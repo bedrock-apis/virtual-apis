@@ -1,15 +1,16 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
-import { ClassDefinition } from './class-definition';
+import { ClassDefinition } from './context/class-definition';
 import { Kernel } from './kernel';
 import { ParamsDefinition } from './type-validators';
-import { ConstructionExecutionContext } from './execution-context';
+import { ConstructionExecutionContext } from './context/execution-context';
 import { Diagnostics } from './errors';
+import { Context } from './context';
 
-const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA', new ParamsDefinition());
-const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod(
-   'methodB',
-   new ParamsDefinition(),
-);
+const context = new Context();
+const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA', new ParamsDefinition());
+const PlayerDefinition = context
+   .createClassDefinition('Player', EntityDefinition, true, true)
+   .addMethod('methodB', new ParamsDefinition());
 
 const Player = PlayerDefinition.api;
 const Entity = EntityDefinition.api;

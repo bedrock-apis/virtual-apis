@@ -1,11 +1,11 @@
 import { APIBuilder } from './api-builder';
-import { APIWrapper } from './api-wrapper';
-import { Diagnostics } from './errors';
-import { NativeEvent } from './events';
+import type { Context } from './context';
+import { Diagnostics } from '../errors';
+import { NativeEvent } from '../events';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
-import { Kernel } from './kernel';
-import { ParamsDefinition, Type, VoidType } from './type-validators';
-import { ClassBindType } from './type-validators/types/class';
+import { Kernel } from '../kernel';
+import { ParamsDefinition, Type, VoidType } from '../type-validators';
+import { ClassBindType } from '../type-validators/types/class';
 
 // Class for single fake api definition
 
@@ -35,6 +35,7 @@ export class ClassDefinition<
     * @param parent Inject inheritance
     */
    public constructor(
+      public readonly context: Context,
       /**
        * Fake API Class Name
        */
@@ -47,10 +48,10 @@ export class ClassDefinition<
       super();
       this.api = APIBuilder.CreateConstructor(this, paramsDefinition);
       this.constructorId = `${classId}:constructor`;
-      if (APIWrapper.nativeEvents.has(this.constructorId)) {
+      if (context.nativeEvents.has(this.constructorId)) {
          throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
       }
-      (APIWrapper.nativeEvents as unknown as Map<unknown, unknown>).set(
+      (context.nativeEvents as unknown as Map<unknown, unknown>).set(
          this.constructorId,
          (this.onConstruct = new NativeEvent()),
       );
@@ -115,7 +116,7 @@ export class ClassDefinition<
       if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
       const [handle, cache] = data;
 
-      APIWrapper.nativeHandles.add(handle);
+      this.context.nativeHandles.add(handle);
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
       this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 

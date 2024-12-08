@@ -1,6 +1,6 @@
 import { ClassDefinition } from './class-definition';
-import { Diagnostics } from './errors';
-import { Kernel } from './kernel';
+import { Diagnostics } from '../errors';
+import { Kernel } from '../kernel';
 
 type Mutable<T> = {
    -readonly [P in keyof T]: T[P];
