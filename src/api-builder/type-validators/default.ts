@@ -41,7 +41,7 @@ export function toDefaultType(type: MetadataType) {
    return type;
 }
 
-export function fromDefaultType(type: string | MetadataType) {
+export function fromDefaultType(type: (typeof defaultTypes)[number]['name'] | MetadataType) {
    return typeof type === 'string' ? (defaultTypes.find(e => e.name === type) as MetadataType) : type;
 }
 

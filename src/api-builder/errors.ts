@@ -20,11 +20,14 @@ export class Diagnostics {
    public readonly errors = Kernel.Construct('Array') as Report[];
    public readonly warns = Kernel.Construct('Array') as Report[];
    public report<T extends string | Report>(
-      ...params: T extends string ? [message: T, errorType: Report['type']] : [report: T]
+      ...params: T extends string ? [message: T, errorType: Report['type']] : [...report: T[]]
    ): this {
-      // Avoid using push as push is not isolated
-      this.errors[this.errors.length] =
-         typeof params[0] === 'string' ? new Report(params[0], params[1] as Report['type']) : params[0];
+      if (typeof params[0] === 'string') {
+         this.errors.push(new Report(params[0], params[1] as Report['type']));
+      } else {
+         this.errors.splice(0, this.errors.length);
+         for (const error of params as Report[]) this.errors.push(error);
+      }
       return this;
    }
    public throw(startStackFrom = 2): never {
