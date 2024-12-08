@@ -28,7 +28,7 @@ export class ParamsDefinition extends Kernel.Empty {
          );
 
       for (const [i, value] of params.entries()) {
-         this.params[i].validate(diagnostics, value);
+         this.params[i]?.validate(diagnostics, value);
       }
    }
 
