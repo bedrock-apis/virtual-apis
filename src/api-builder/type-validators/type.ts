@@ -6,6 +6,11 @@ export abstract class Type extends Kernel.Empty {
    public static RegisterBindType(name: string, type: Type) {
       this.bindedTypes.set(name, type);
    }
+   public static ValidateOrThrow(type: Type, value: unknown) {
+      const diagnostics = new Diagnostics();
+      type.validate(diagnostics, value);
+      if (!diagnostics.success) return diagnostics.throw();
+   }
    // Diagnostics are always passed by someone who requested this type check
    public abstract validate(diagnostics: Diagnostics, value: unknown): void;
 }

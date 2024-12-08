@@ -1,13 +1,8 @@
-import { MetadataType } from '../../../package-builder/script-module-metadata';
 import { Diagnostics, ERRORS } from '../../errors';
-import { resolveType } from '../resolve';
 import { Type } from '../type';
 
 export class OptionalType extends Type {
-   public constructor(
-      metadata: MetadataType,
-      private type = resolveType(metadata),
-   ) {
+   public constructor(private type: Type) {
       super();
    }
 

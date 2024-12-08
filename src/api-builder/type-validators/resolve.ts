@@ -4,9 +4,10 @@ import { Type, VoidType } from './type';
 import { BooleanType } from './types/boolean';
 import { FunctionType } from './types/function';
 import { BigIntType, NumberType } from './types/number';
+import { OptionalType } from './types/optional';
 import { StringType } from './types/string';
 
-export function resolveType(metadataType: MetadataType) {
+export function resolveType(metadataType: MetadataType): Type {
    const { name } = metadataType;
 
    if (metadataType.is_bind_type) {
@@ -34,6 +35,8 @@ export function resolveType(metadataType: MetadataType) {
          return new StringType();
       case 'closure':
          return new FunctionType();
+      case 'optional':
+         return new OptionalType(resolveType(metadataType.optional_type));
       case 'undefined':
          return new VoidType();
       default:

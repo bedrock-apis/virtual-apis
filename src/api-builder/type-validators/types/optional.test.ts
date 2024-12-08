@@ -1,24 +1,23 @@
 import { expect, suite, test } from 'vitest';
-import { Diagnostics } from '../../errors';
 import { fromDefaultType } from '../default';
+import { resolveType } from '../resolve';
+import { Type } from '../type';
 import { OptionalType } from './optional';
 
 suite('Optional', () => {
    test('validate', () => {
-      const optional = new OptionalType(fromDefaultType('int32'));
+      const optional = new OptionalType(resolveType(fromDefaultType('int32')));
 
-      const diagnostics = new Diagnostics();
-      optional.validate(diagnostics, 'string');
-      expect(diagnostics).toMatchInlineSnapshot(`
-        Diagnostics {
-          "errors": [
-            Report {
-              "message": "Native optional type conversion failed",
-              "type": [Function],
-            },
-          ],
-          "warns": [],
-        }
-      `);
+      expect(() => Type.ValidateOrThrow(optional, 'string')).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native optional type conversion failed]`,
+      );
+
+      expect(() => Type.ValidateOrThrow(optional, 10000000000)).toThrowErrorMatchingInlineSnapshot(
+         `[Error: Provided integer value was out of range.  Value: 10000000000, argument bounds: [-2147483648, 2147483647]]`,
+      );
+
+      expect(() => Type.ValidateOrThrow(optional, 10)).not.toThrow();
+      expect(() => Type.ValidateOrThrow(optional, undefined)).not.toThrow();
+      expect(() => Type.ValidateOrThrow(optional, null)).not.toThrow();
    });
 });
