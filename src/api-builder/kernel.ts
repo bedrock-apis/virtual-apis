@@ -59,7 +59,7 @@ class KernelClass {
   public static Static<T extends keyof typeof globalThis>(
     name: T,
   ): Global[T] extends { new (): void } | { (): void } ? { [key in keyof Global[T]]: Global[T][key] } : never {
-    return KernelStorage[name + '::public static '];
+    return KernelStorage[name + '::static'];
   }
 
   public static SetName<T extends CallableFunction>(func: T, name: string): T {
@@ -98,11 +98,11 @@ class KernelClass {
     return func;
   }
 
-  public static SetFakeNative<T extends CallableFunction>(func: T): void {
+  public static SetFakeNative(func: CallableFunction | NewableFunction): void {
     if (typeof func === 'function') nativeFunctions.add(func);
   }
 
-  public static IsFakeNative<T extends CallableFunction>(func: T): boolean {
+  public static IsFakeNative(func: CallableFunction | NewableFunction): boolean {
     if (typeof func === 'function') return nativeFunctions.has(func);
     else return false;
   }
@@ -134,8 +134,7 @@ for (const globalName of globalNames) {
 const nativeFunctions = KernelClass.Construct('WeakSet');
 nativeFunctions.add(
   (Function.prototype.toString = function () {
-    if (nativeFunctions.has(this) && typeof this === 'function')
-      return `function ${this.name}() {\n    [native code]\n}`;
+    if (nativeFunctions.has(this)) return `function ${this.name}() {\n    [native code]\n}`;
     const string = KernelClass.As(KernelClass.call(KernelStorage['Function::prototype'].toString, this), 'String');
     return string + '';
   }),

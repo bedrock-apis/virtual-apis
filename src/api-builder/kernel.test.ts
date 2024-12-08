@@ -36,4 +36,45 @@ suite('Kernel', () => {
       Kernel['Array::constructor']['prototype']['push'] = Kernel['Array::prototype']['push'];
     }
   });
+
+  test('Native Functions', () => {
+    expect(Kernel.Constructor('Map').toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
+    expect(Map.toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
+
+    expect(Kernel.IsFakeNative(Kernel.Constructor('Map'))).toBe(false);
+    expect(Kernel.IsFakeNative(Kernel['Map::constructor'])).toBe(false);
+    expect(Kernel.IsFakeNative(Map)).toBe(false);
+    // @ts-expect-error
+    expect(Kernel.IsFakeNative('not a function')).toBe(false);
+
+    expect(Kernel.IsFakeNative(Function.prototype.toString)).toBe(true);
+
+    class Testing {
+      method(a: unknown) {
+        // Do nothing
+      }
+    }
+
+    expect(Testing.toString()).toMatchInlineSnapshot(`
+      "class Testing {
+            method(a) {
+            }
+          }"
+    `);
+
+    Kernel.SetFakeNative(Testing);
+    expect(Testing.toString()).toMatchInlineSnapshot(`
+      "function Testing() {
+          [native code]
+      }"
+    `);
+  });
+
+  test('Prototype', () => {
+    expect(Kernel.Prototype('Map') === Kernel['Map::prototype']).toBeTruthy();
+  });
+
+  test('Static', () => {
+    expect(Kernel.Static('Object') === Kernel['Object::static']).toBeTruthy();
+  });
 });

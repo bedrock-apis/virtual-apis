@@ -10,6 +10,7 @@
     "packagegen": "rolldown -c && node ./dist/build.js",
     "lint": "eslint",
     "test": "vitest",
+    "coverage": "vitest --ui --coverage",
     "typecheck": "tsc --noEmit",
     "check": "rolldown -c && node ./dist/build.js && tsc --noEmit && eslint && vitest --run"
   },
