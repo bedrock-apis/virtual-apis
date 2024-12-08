@@ -90,9 +90,9 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
 }
 
 function generateClassDefinition(classMeta: MetadataClassDefinition) {
-   const name = classMeta.name;
-   const nameString = t.asIs(name);
-   const baseClass = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.null;
+   const classId = classMeta.name;
+   const classIdI = t.asIs(classId);
+   const parent = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.null;
 
    function getArgTypes(args: MetadataFunctionArgumentDefinition[]) {
       return t.asIs(args.map(e => ({ ...e, type: toDefaultType(e.type) })));
@@ -103,8 +103,8 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
 
    let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [
       /* context */ contextI,
-      /* classId */ nameString,
-      /* parent */ baseClass,
+      /* classId */ classIdI,
+      /* parent */ parent,
       /* constructorParams */ constructorArgs,
       /* hasConstructor */ t.asIs(!!constructorType),
       /* newExpected */ t.asIs(true),
