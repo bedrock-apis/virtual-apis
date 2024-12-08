@@ -15,13 +15,12 @@ export class APIBuilder extends Kernel.Empty {
       paramsDefinition: ParamsDefinition,
    ) {
       // Create function as constructor
-      const ctor = function () {
+      const ctor = function (...params: unknown[]) {
          const diagnostics = new Diagnostics();
          const executionContext = new ConstructionExecutionContext(
             definition as ClassDefinition,
             'constructor',
-            // eslint-disable-next-line prefer-rest-params
-            arguments as ArrayLike<unknown>,
+            params,
             diagnostics,
          );
          // Constructor should be callable only with "NEW" keyword
@@ -218,7 +217,6 @@ export class APIBuilder extends Kernel.Empty {
       // Return
       return final;
    }
-
    /**@param {APIClassDefinition} definition @param {FunctionValidator} functionType  */ /*
     static CreateSetter(definition, id, functionType){
         const ctor = (that, params)=>{

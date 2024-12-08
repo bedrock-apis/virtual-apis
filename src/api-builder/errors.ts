@@ -40,7 +40,8 @@ export class Diagnostics extends Kernel.Empty {
    }
 }
 
-export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor';
+export type Range = { min: number; max: number };
+export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
 export type NativeActionKind = 'call' | 'get' | 'set';
 
 const createTypeErrorReport = (message: string) => new Report(message, Kernel.Constructor('TypeError'));
