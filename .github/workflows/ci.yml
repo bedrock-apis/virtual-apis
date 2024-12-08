@@ -35,6 +35,6 @@ jobs:
         run: pnpm run bundle
 
       - name: Build Package
-        run: pnpm run build-package
+        run: pnpm run packagegen
       - name: Vitest RUn
         run: pnpm exec vitest --run
