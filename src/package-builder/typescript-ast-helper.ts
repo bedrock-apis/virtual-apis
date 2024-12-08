@@ -12,6 +12,18 @@ export const TYPESCRIPT_AST_HELPER = {
       undefined,
     );
   },
+  importStarFrom(path: string, identifies: ts.Identifier[]) {
+    return factory.createImportDeclaration(
+      undefined,
+      factory.createImportClause(
+        false,
+        undefined,
+        factory.createNamedImports(identifies.map(e => factory.createImportSpecifier(false, undefined, e))),
+      ),
+      this.asIs(path),
+      undefined,
+    );
+  },
   exportConst(identifierName: string, value: ts.Expression) {
     return factory.createVariableStatement(
       [factory.createToken(ts.SyntaxKind.ExportKeyword)],

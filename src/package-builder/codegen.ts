@@ -23,17 +23,19 @@ const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
-const registerExpression = t.accessBy(t.i`${Type.name}`, Type.RegisterBindType.name);
 
-export async function generateModule(source: MetadataModuleDefinition, useFormatting = true) {
+const typeI = t.i`${Type.name}`;
+const typeIRegisterBindType = t.accessBy(typeI, Type.RegisterBindType.name);
+
+export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
   const moduleName = source.name.split('/')[1] ?? 'unknown';
   const definitionsI = t.i`__`;
-  const definitions: ts.Node[] = [];
+  const definitions: ts.Node[] = [t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, typeI])];
   const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
 
   for (const interfaceMetadata of source.interfaces) {
     const node = generateInterfaceDefinition(interfaceMetadata);
-    definitions.push(t.call(registerExpression, [node]));
+    definitions.push(t.call(typeIRegisterBindType, [node]));
   }
 
   for (const classMeta of source.classes) {

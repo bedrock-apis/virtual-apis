@@ -7,6 +7,7 @@ import { MetadataModuleDefinition } from './script-module-metadata';
 const baseLink = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
 const repoExists = `${baseLink}/exist.json`;
 const outDir = 'packages';
+const apiFilename = 'api.js';
 const apiBuilder = resolve(import.meta.dirname, './api-builder.js');
 type ExistJson = {
   'build-version': string;
@@ -63,7 +64,7 @@ async function main(): Promise<number> {
     return -1;
   }
 
-  const successes = await copyFile(apiBuilder, resolve(outDir, './api.js')).then(
+  const successes = await copyFile(apiBuilder, resolve(outDir, apiFilename)).then(
     () => true,
     () => false,
   );
@@ -126,14 +127,14 @@ async function generateModuleFor(name: string, version: string): Promise<number>
   const builderLink = `${baseLink}/metadata/script_modules/${name}_${version}.json`;
 
   console.log('Fetching: ' + builderLink);
-  const moduleObject = await downloadAndParseJSON(builderLink).catch(e => null);
+  const moduleObject = (await downloadAndParseJSON(builderLink).catch(e => null)) as MetadataModuleDefinition;
 
   if (!moduleObject) {
     console.error('Failed to fetch or parse: ' + builderLink);
     return -1;
   }
 
-  const { definitionsCode, exportsCode } = await generateModule(moduleObject as MetadataModuleDefinition, true);
+  const { definitionsCode, exportsCode } = await generateModule(moduleObject, apiFilename, true);
 
   await writeFile(resolve(outDir, name + '.native.js'), definitionsCode);
   console.log('Generated ' + resolve(outDir, name + '.native.js'));
