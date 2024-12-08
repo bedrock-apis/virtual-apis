@@ -1,5 +1,3 @@
-// @ts-check
-
 import eslint from '@eslint/js';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import tseslint from 'typescript-eslint';
@@ -29,6 +27,7 @@ function customPluginConfig() {
          },
          rules: {
             'custom/no-globals': 'error',
+            'custom/no-default-extends': 'error',
          },
       },
    ]);
@@ -136,6 +135,34 @@ function customPlugin() {
       defaultOptions: [],
    });
 
+   const noDefaultClasses = ESLintUtils.RuleCreator.withoutDocs({
+      meta: {
+         type: 'problem',
+         hasSuggestions: true,
+         fixable: 'code',
+         messages: {
+            extendsEmpty: `Use Kernel.Empty as parent class for isolation security`,
+         },
+         schema: [],
+      },
+      create(context) {
+         return {
+            ClassDeclaration(node) {
+               if (node.superClass === null) {
+                  context.report({
+                     messageId: 'extendsEmpty',
+                     node: node.id,
+                     fix: fixer => {
+                        return [fixer.insertTextBefore(node.body, ' extends Kernel.Empty')];
+                     },
+                  });
+               }
+            },
+         };
+      },
+      defaultOptions: [],
+   });
+
    /**
     * @param {import("@typescript-eslint/utils").TSESTree.Node} node
     */
@@ -147,6 +174,7 @@ function customPlugin() {
    return {
       rules: {
          'no-globals': noGlobals,
+         'no-default-extends': noDefaultClasses,
       },
    };
 }

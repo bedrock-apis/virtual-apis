@@ -1,10 +1,12 @@
 import { Kernel } from './kernel';
 
-export class Report {
+export class Report extends Kernel.Empty {
    public constructor(
       public readonly message: string,
       public readonly type: new (message: string) => Error,
-   ) {}
+   ) {
+      super();
+   }
 
    public throw(startStackFrom = 1): never {
       const error = new this.type(this.message);
@@ -13,7 +15,7 @@ export class Report {
    }
 }
 
-export class Diagnostics {
+export class Diagnostics extends Kernel.Empty {
    public get success() {
       return this.errors.length === 0;
    }
