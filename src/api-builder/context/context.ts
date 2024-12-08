@@ -6,15 +6,15 @@ import { DynamicType, ParamsDefinition, type Type } from '../type-validators';
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 
 export class Context extends Kernel.Empty {
-   private readonly dynamicTypes = Kernel.Construct('Map') as Map<string, Type>;
+   private readonly types = Kernel.Construct('Map') as Map<string, Type>;
    private readonly unresolvedTypes = Kernel.Construct('Map') as Map<string, DynamicType>;
    /**
     * Register new type
     * @param name
     * @param type
     */
-   public registerDynamicType(name: string, type: Type) {
-      this.dynamicTypes.set(name, type);
+   public registerType(name: string, type: Type) {
+      this.types.set(name, type);
    }
    /**
     * Get dynamic type that will resolve once this.resolveAll is called
@@ -33,7 +33,7 @@ export class Context extends Kernel.Empty {
     */
    public resolveAllDynamicTypes() {
       for (const typeName of this.unresolvedTypes.keys()) {
-         const resolvedType = this.dynamicTypes.get(typeName);
+         const resolvedType = this.types.get(typeName);
          if (!resolvedType) continue;
          // It is available trust me!!!
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
