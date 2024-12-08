@@ -10,6 +10,12 @@ import { OptionalType } from '../type-validators/types/optional';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
+/*0
+import { isGeneratorObject, isPromise } from 'node:util/types';
+
+isGeneratorObject();
+isPromise();
+*/
 
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 

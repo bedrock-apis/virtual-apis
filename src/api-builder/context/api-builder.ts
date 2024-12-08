@@ -175,14 +175,17 @@ export class APIBuilder extends Kernel.Empty {
             diagnostics,
             that as object,
          );
+
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object))
             diagnostics.report(ERRORS.BoundToPrototype('setter', id));
-         // Validate correctness of this type
-         definition.type.validate(diagnostics, that);
 
          // Validate params
          paramType.validate(diagnostics, params[0]);
+
+         // Validate correctness of this type
+         // If that fails it should throw "Failed to set member"
+         definition.type.validate(diagnostics, that);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
@@ -257,14 +260,18 @@ export class APIBuilder extends Kernel.Empty {
             that as object,
          );
          // Check if the object has native bound
-         if (!definition.context.nativeHandles.has(that as object))
-            diagnostics.report(ERRORS.BoundToPrototype('getter', id));
+         if (!definition.context.nativeHandles.has(that as object)) {
+            diagnostics.warn(ERRORS.BoundToPrototype('getter', id));
+         }
+
          // Validate correctness of this type
          definition.type.validate(diagnostics, that);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
             definition.__reports(executionContext);
+            // Hardcoded
+            return undefined;
             diagnostics.throw(1);
          }
 
@@ -276,6 +283,8 @@ export class APIBuilder extends Kernel.Empty {
          if (!diagnostics.success) {
             // TODO: What design of our plugin system we want right?
             // definition.__reports(executionContext);
+            // Hardcoded
+            return undefined;
             diagnostics.throw(1);
          }
          // TODO: Implement privileges and type checking

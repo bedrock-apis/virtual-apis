@@ -1,7 +1,7 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from '../kernel';
-import { ParamsDefinition } from '../type-validators';
+import { BooleanType, ParamsDefinition } from '../type-validators';
 import { ConstructionExecutionContext } from './execution-context';
 import { Diagnostics } from '../errors';
 import { Context } from '.';
@@ -10,7 +10,8 @@ const context = new Context();
 const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
 const PlayerDefinition = context
    .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true, true)
-   .addMethod('methodB');
+   .addMethod('methodB')
+   .addProperty<boolean, 'test'>('test', new BooleanType(), false);
 
 const Player = PlayerDefinition.api;
 const Entity = EntityDefinition.api;
@@ -66,6 +67,21 @@ suite('Base API', () => {
       );
       expect(player.methodA.bind(player)).not.toThrow();
       expect(() => player.methodA()).not.toThrow();
+   });
+
+   test('Property', () => {
+      const player = new PlayerDefinition.api();
+
+      const { get, set } = Object.getOwnPropertyDescriptor(PlayerDefinition.api.prototype, 'test') ?? {};
+      expect(set).toThrowError();
+      expect(get).not.toThrow();
+      expect(() => (set as any)?.call(player)).toThrow();
+      expect(() => set?.call(player, 5)).toThrow();
+      expect(() => set?.call(player, false)).not.toThrow();
+      expect(get?.call({})).toBeTypeOf('undefined');
+
+      expect(() => (player.test = 5)).toThrow();
+      expect(get?.call(player)).not.toBeTypeOf('undefined');
    });
 
    test('Error stack traces', () => {

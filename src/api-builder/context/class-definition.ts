@@ -6,16 +6,17 @@ import { ClassBindType } from '../type-validators/types/class';
 import { APIBuilder } from './api-builder';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
-
 // Class for single fake api definition
 
 export class ClassDefinition<
    T extends ClassDefinition | null = null,
    P = object,
    S extends object = object,
+   NAME extends string = string,
 > extends Kernel.Empty {
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
+   public readonly virtualApis = Kernel.Construct('Map') as Map<string, (...args: unknown[]) => unknown>;
    public readonly onConstruct: NativeEvent<[object, object, this, ConstructionExecutionContext]>;
    public readonly constructorId: string;
    public readonly type: Type;
@@ -24,11 +25,14 @@ export class ClassDefinition<
     */
    public readonly api: {
       new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
-      readonly name: string;
+      readonly name: NAME;
       readonly prototype: P & (T extends ClassDefinition ? T['api']['prototype'] : object);
    } & S &
       (T extends ClassDefinition ? Omit<T['api'], 'prototype' | 'name'> : object);
 
+   public getAPIMethod<T extends keyof P>(name: T) {
+      return this.virtualApis.get(`${this.classId}::${name.toString()}`) as P[typeof name];
+   }
    /**
     *
     * @param classId Fake API Class Name
@@ -55,7 +59,7 @@ export class ClassDefinition<
          this.constructorId,
          (this.onConstruct = new NativeEvent()),
       );
-
+      this.virtualApis.set(this.constructorId, this.api as () => unknown);
       context.registerType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
 
@@ -86,32 +90,30 @@ export class ClassDefinition<
       params: ParamsDefinition = new ParamsDefinition(),
       returnType: Type = new VoidType(),
    ) {
-      (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
-
+      const method = ((this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
+         this,
+         name,
+         params,
+         returnType,
+      ));
+      this.virtualApis.set(`${this.classId}::${name}`, method as () => unknown);
       return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
    }
 
-   public addStaticMethod<Name extends string>(
-      name: Name,
-      params: ParamsDefinition = new ParamsDefinition(),
-      returnType: Type = new VoidType(),
-   ) {
-      // TODO
-      // (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
-
-      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
-   }
-
-   public addCallableConstructor(params: ParamsDefinition = new ParamsDefinition()) {
+   public addProperty<PropertyType, Name extends string>(name: Name, type: Type, isReadonly: boolean) {
       // TODO
 
-      return this;
-   }
-
-   public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
-      // TODO
-
-      return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
+      const getter = APIBuilder.CreateGetter(this as ClassDefinition, name, type);
+      const setter = isReadonly ? undefined : APIBuilder.CreateSetter(this as ClassDefinition, name, type);
+      Kernel.__defineProperty(this.api.prototype, name, {
+         configurable: true,
+         enumerable: true,
+         get: getter as () => void,
+         set: setter as (n: unknown) => void,
+      });
+      this.virtualApis.set(`${this.classId}::${name} getter`, getter as () => unknown);
+      if (setter) this.virtualApis.set(`${this.classId}::${name} setter`, setter as () => unknown);
+      return this as ClassDefinition<T, P & Record<Name, unknown>>;
    }
 
    public addStaticConstant<PropertyType, Name extends string>(
