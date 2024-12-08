@@ -28,7 +28,7 @@ export function resolveType(metadataType: MetadataType): Type {
          return new NumberType(metadataType.valid_range);
       case 'uint64':
       case 'int64':
-         return new BigIntType(metadataType.valid_range);
+         return new BigIntType(metadataType.valid_range as unknown as { min: bigint; max: bigint });
       case 'boolean':
          return new BooleanType();
       case 'string':
