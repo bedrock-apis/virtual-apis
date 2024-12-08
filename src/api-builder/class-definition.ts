@@ -56,7 +56,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
    */
   public construct(params: ArrayLike<unknown>): [object, object] {
     let data = this.parent?.construct(params);
-    if (!data) data = [Kernel.__create(null), Kernel.__create(null)];
+    if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
     const [handle, cache] = data;
 
     APIWrapper.NATIVE_HANDLES.add(handle);

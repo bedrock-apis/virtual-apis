@@ -5,21 +5,35 @@ suite('Kernel', () => {
   test('Construct', () => {
     expectTypeOf(Kernel.Construct('Number')).toEqualTypeOf<Number>();
   });
-  test('Prototype Isolation', () => {
-    const map1 = new (Kernel.Constructor('Map'))();
-    const map2 = Kernel.Construct('Map');
-    const map3 = new Kernel['globalThis::Map']();
 
+  test('Prototype Isolation', () => {
+    const normalMap = new (Kernel.Constructor('Map'))();
+    const kernelMap = new Kernel['globalThis::Map']();
+    const kernelConstructedMap = Kernel.Construct('Map');
+
+    expect(kernelConstructedMap).not.toBeInstanceOf(Map);
     expect(delete (Kernel['Map::constructor']['prototype'] as any)['set']).toBe(true); // Prototype modification emulation
 
     try {
-      expect(() => map1.set('Test', 'Test1')).toThrow();
-      expect(() => map2.set('Test', 'Test2'));
-      expect(() => map3.set('Test', 'Test3')).toThrow();
+      expect(() => normalMap.set('Test', 'Test1')).toThrow();
+      expect(() => kernelMap.set('Test', 'Test3')).toThrow();
+      expect(() => kernelConstructedMap.set('Test', 'Test2')).not.toThrow();
     } finally {
       Kernel['Map::constructor']['prototype']['set'] = Kernel['Map::prototype']['set'];
     }
+  });
 
-    expect(map2).not.toBeInstanceOf(Map);
+  test('Array Prototype Isolation', () => {
+    const normalArray = [];
+    const kernelArray = Kernel.Construct('Array') as number[];
+
+    expect(delete (Kernel['Array::constructor']['prototype'] as any)['push']).toBe(true); // Prototype modification emulation
+
+    try {
+      expect(() => normalArray.push(1)).toThrow();
+      expect(() => kernelArray.push(1)).not.toThrow();
+    } finally {
+      Kernel['Array::constructor']['prototype']['push'] = Kernel['Array::prototype']['push'];
+    }
   });
 });

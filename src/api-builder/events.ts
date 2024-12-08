@@ -7,7 +7,7 @@ const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...par
 
 export class NativeEvent<args extends unknown[] = unknown[]> {
   public constructor() {
-    SESSIONS.set(this, Kernel.Construct('Set', []) as Set<(...params: unknown[]) => unknown>);
+    SESSIONS.set(this, Kernel.Construct('Set', Kernel.Construct('Array')) as Set<(...params: unknown[]) => unknown>);
   }
   /**
    * Triggers the event signal.
@@ -16,7 +16,7 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
    */
   public async trigger(...params: args) {
     if (SESSIONS.has(this)) {
-      const promises: Promise<unknown>[] = [];
+      const promises = Kernel.Construct('Array') as Promise<unknown>[];
       SESSIONS.get(this)?.forEach(method => {
         promises.push((async () => method(...params))().catch(e => Kernel.error(e, e.stack)));
       });
@@ -56,11 +56,11 @@ export class NativeEvent<args extends unknown[] = unknown[]> {
 }
 export function TriggerEvent<R extends unknown[]>(event: NativeEvent<R>, ...params: R) {
   if (SESSIONS.has(event)) {
-    const promises: Promise<unknown>[] = [];
+    const promises = Kernel.Construct('Array') as Promise<unknown>[];
     SESSIONS.get(event)?.forEach(method => {
       promises.push((async () => method(...(params as unknown[])))().catch(e => Kernel.error(e, e.stack)));
     });
     return promises;
   }
-  return [];
+  return Kernel.Construct('Array');
 }

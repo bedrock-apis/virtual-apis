@@ -34,15 +34,27 @@ export default [
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 function customPlugin() {
+  const kernelConstruct = 'Kernel.Construct';
+
   const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
+    meta: {
+      type: 'problem',
+      hasSuggestions: true,
+      fixable: 'code',
+      messages: {
+        useKernel: `Use ${kernelConstruct}{{ args }} instead`,
+        useArray: `You cannot construct array with one element using Kernel.Construct because it will create empty array.`,
+      },
+      schema: [],
+    },
     create(context) {
-      /**
-       * @param {string} node
-       */
-      function isRestricted(node) {
-        const isInGlobalThis = node in globalThis;
-        if (!isInGlobalThis) return false;
-        return node != 'undefined';
+      if (context.filename.includes('package-builder')) return {};
+
+      /** @param {string} name */
+      function isRestricted(name) {
+        if (name === 'undefined') return false;
+
+        return name in globalThis;
       }
 
       const source = context.sourceCode.text;
@@ -50,7 +62,6 @@ function customPlugin() {
 
       return {
         Program(node) {
-          if (context.filename.includes('package-builder')) return;
           const scope = sourceCode.getScope(node);
 
           // Report variables declared elsewhere (ex: variables defined as "global" by eslint)
@@ -68,55 +79,69 @@ function customPlugin() {
             }
           });
         },
+        ArrayExpression(node) {
+          if (
+            node.parent.type === 'TSAsExpression' &&
+            node.parent.typeAnnotation.type === 'TSTypeReference' &&
+            node.parent.typeAnnotation.typeName.type === 'Identifier' &&
+            node.parent.typeAnnotation.typeName.name === 'const'
+          )
+            return; // ignore const a = [] as const because array will be not modified;
+
+          reportReference({ ...node, parent: node });
+        },
       };
 
       /**
-       * @param {import("@typescript-eslint/utils").TSESTree.Identifier | import("@typescript-eslint/utils").TSESTree.JSXIdentifier} node
+       * @import {TSESTree} from "@typescript-eslint/utils"
+       */
+
+      /**
+       * @param {TSESTree.Identifier | TSESTree.JSXIdentifier | TSESTree.ArrayExpression} node
        */
       function reportReference(node) {
         if (node.parent.type.startsWith('TS')) return;
 
-        const name = node.name;
+        const parent = getRange(node.parent);
+        const our = getRange(node);
+        const name = node.type === 'ArrayExpression' ? 'Array' : node.name;
+        const originalArgs =
+          node.parent.type === 'NewExpression'
+            ? source.substring(parent.start + our.start - parent.start + name.length + 1, parent.end - 1)
+            : node.parent.type === 'ArrayExpression'
+              ? source.substring(our.start + 1, our.end - 1)
+              : '';
+
+        const args = `("${name}"${originalArgs ? ', ' + originalArgs : ''})`;
+        const isArrayWithOneElement =
+          node.type === 'ArrayExpression' &&
+          node.elements.length === 1 &&
+          node.elements[0] &&
+          node.elements[0].type === 'Literal' &&
+          typeof node.elements[0].value === 'number';
+
         context.report({
           node,
-          messageId: 'useKernel',
-          data: {
-            name,
-          },
-          fix(fixer) {
-            const getRange = (/** @type {import("@typescript-eslint/utils").TSESTree.Node} */ node) => {
-              const [start, end] = node.range;
-              return { start, end };
-            };
-            const parent = getRange(node.parent);
-            const our = getRange(node);
-            const args = source.substring(parent.start + our.start - parent.start + name.length + 1, parent.end);
-
-            //We could check for available symbols in srcFile
-
-            // It doesn't check whenter id comes from globalThis or is defined locally
-            // possibly use rule source of the https://github.com/eslint/eslint/blob/main/lib/rules/no-restricted-globals.js
-            return [
-              fixer.replaceTextRange(
-                [parent.start, parent.end],
-                `Kernel.Construct("${name}"${node.parent.type === 'NewExpression' ? ', true, ' + args : ')'}`,
-              ),
-            ];
-          },
+          messageId: isArrayWithOneElement ? 'useArray' : 'useKernel',
+          data: { args },
+          fix: !isArrayWithOneElement
+            ? fixer => {
+                return [fixer.replaceTextRange([parent.start, parent.end], `${kernelConstruct}${args}`)];
+              }
+            : undefined,
         });
       }
     },
-    meta: {
-      type: 'problem',
-      hasSuggestions: true,
-      fixable: 'code',
-      messages: {
-        useKernel: 'Use Kernel.Construct("{{ name }}") instead',
-      },
-      schema: [],
-    },
     defaultOptions: [],
   });
+
+  /**
+   * @param {import("@typescript-eslint/utils").TSESTree.Node} node
+   */
+  function getRange(node) {
+    const [start, end] = node.range;
+    return { start, end };
+  }
 
   return {
     rules: {

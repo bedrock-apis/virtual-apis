@@ -1,12 +1,11 @@
-import { V } from 'vitest/dist/chunks/reporters.D7Jzd9GS';
+import { MetadataFunctionArgumentDefinition } from '../../package-builder/ScriptModule';
 import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
 import { BaseType } from './base-types';
-import { MetadataFunctionArgumentDefinition } from '../../package-builder/ScriptModule';
 
 export class ParamsDefinition {
   public requiredParams: number = 0;
-  public params: ArrayLike<ParamType> = Kernel.__setPrototypeOf([], null);
+  public params: ArrayLike<ParamType> = Kernel.__setPrototypeOf(Kernel.Construct('Array'), null);
   public addType(type: ParamType): this {
     if (this.params.length === this.requiredParams && !type.isOptional) {
       (this.params as unknown[])[this.params.length] = type;

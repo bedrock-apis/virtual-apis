@@ -17,8 +17,8 @@ export class Diagnostics {
   public get success() {
     return this.errors.length === 0;
   }
-  public readonly errors: Report[] = [];
-  public readonly warns: Report[] = [];
+  public readonly errors = Kernel.Construct('Array') as Report[];
+  public readonly warns = Kernel.Construct('Array') as Report[];
   public report<T extends string | Report>(
     ...params: T extends string ? [message: T, errorType: Report['type']] : [report: T]
   ): this {
