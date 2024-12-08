@@ -1,4 +1,5 @@
 import { MetadataType } from '../../package-builder/script-module-metadata';
+import { Context } from '../context';
 import { Kernel } from '../kernel';
 import { Type, VoidType } from './type';
 import { ArrayType } from './types/array';
@@ -9,11 +10,11 @@ import { OptionalType } from './types/optional';
 import { StringType } from './types/string';
 import { VariantType } from './types/variant';
 
-export function resolveType(metadataType: MetadataType): Type {
+export function resolveType(context: Context, metadataType: MetadataType): Type {
    const { name } = metadataType;
 
    if (metadataType.is_bind_type) {
-      const bindType = Type.bindedTypes.get(name);
+      const bindType = context.getDynamicType(metadataType.name);
       if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
       return bindType;
    }

@@ -8,3 +8,4 @@ export * from './types/function';
 export * from './types/interface';
 export * from './types/number';
 export * from './types/string';
+export * from './types/dynamic';

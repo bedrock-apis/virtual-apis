@@ -56,7 +56,7 @@ export class ClassDefinition<
          (this.onConstruct = new NativeEvent()),
       );
 
-      Type.RegisterBindType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
+      context.registerDynamicType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
 
    /**

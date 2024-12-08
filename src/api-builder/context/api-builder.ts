@@ -230,7 +230,7 @@ export class APIBuilder extends Kernel.Empty {
    ) {
       const id = `${definition.classId}::${name}`;
       // Build arrow function so the methods are not possible to call with new expression
-      const method = (that: unknown) => {
+      const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
             definition as ClassDefinition,
@@ -281,7 +281,7 @@ export class APIBuilder extends Kernel.Empty {
       // Handle with proxy for support with "this" callback
       const final = new Kernel['globalThis::Proxy'](method, {
          apply(t, that, params) {
-            return t(that, params[0]);
+            return t(that, params);
          },
       });
 
