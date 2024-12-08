@@ -9,5 +9,6 @@
       "crypto",
       "os",
       "process"
-   ]
+   ],
+   "vitest.debugExclude": ["<node_internals>/**", "**/node_modules/**", "src/api-builder/kernel.ts"]
 }

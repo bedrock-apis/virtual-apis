@@ -1,6 +1,7 @@
 import { MetadataType } from '../../package-builder/script-module-metadata';
 import { Kernel } from '../kernel';
 import { Type, VoidType } from './type';
+import { ArrayType } from './types/array';
 import { BooleanType } from './types/boolean';
 import { FunctionType } from './types/function';
 import { BigIntType, NumberType } from './types/number';
@@ -43,6 +44,7 @@ export function resolveType(metadataType: MetadataType): Type {
       case 'undefined':
          return new VoidType();
       case 'array':
+         return new ArrayType(resolveType(metadataType.element_type));
       case 'promise':
       case 'generator':
       case 'map':
