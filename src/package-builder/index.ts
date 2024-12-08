@@ -79,12 +79,17 @@ async function main(): Promise<number> {
    const metadata = exists.SCRIPT_MODULES_MAPPING;
    const tasks = exists.SCRIPT_MODULES_MAPPING.script_modules
       .filter(e => e.startsWith('@minecraft'))
-      .map(e => metadata.script_modules_mapping[e])
-      .filter(e => !!e)
       .map(e => {
-         const { name, versions } = e;
-         return generateModuleFor(name, versions.sort(compareVersions).at(-1));
-      });
+         const meta = metadata.script_modules_mapping[e];
+         if (!meta) return;
+
+         const { name, versions } = meta;
+         const version = versions.sort(compareVersions).at(-1);
+         if (!version) return;
+
+         return generateModuleFor(name, version);
+      })
+      .filter(e => !!e);
 
    if ((await Promise.all(tasks)).find(e => e !== 0) !== undefined) {
       console.error('Failed to generate Metadata for at least one module');
@@ -101,26 +106,28 @@ async function downloadAndParseJSON(link: string): Promise<unknown | null> {
    return await response.json();
 }
 
-function compareVersions(a: string, b: string) {
-   const parseVersion = (version: string) =>
-      version.split(/[-.]/).map(part => (isNaN(Number(part)) ? part : Number(part)));
+function compareVersions(a: string, b: string): number {
+   const [aVersion, aTag] = a.split('-');
+   const [bVersion, bTag] = b.split('-');
 
-   const aParts = parseVersion(a);
-   const bParts = parseVersion(b);
+   const aNums = (aVersion ?? '').split('.').map(Number);
+   const bNums = (bVersion ?? '').split('.').map(Number);
 
-   for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-      if (aParts[i] === undefined) return -1;
-      if (bParts[i] === undefined) return 1;
-      if (typeof aParts[i] === 'string' || typeof bParts[i] === 'string') {
-         if (aParts[i] > bParts[i]) return 1;
-         if (aParts[i] < bParts[i]) return -1;
-      } else {
-         if (aParts[i] > bParts[i]) return 1;
-         if (aParts[i] < bParts[i]) return -1;
-      }
+   for (let i = 0; i < aNums.length || i < bNums.length; i++) {
+      const a = aNums[i] ?? 0;
+      const b = bNums[i] ?? 0;
+      if (a !== b) return a - b;
    }
-   return 0;
+
+   // If versions are the same, compare tags
+   if (aTag === bTag) return 0;
+
+   // Handle cases where either tag is undefined
+   if (!aTag) return -1;
+   if (!bTag) return 1;
+   return [aTag, bTag].sort()[0] == aTag ? 1 : -1;
 }
+
 async function generateModuleFor(name: string, version: string): Promise<number> {
    const builderLink = `${baseLink}/metadata/script_modules/${name}_${version}.json`;
 
