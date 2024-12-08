@@ -131,8 +131,8 @@ export class APIBuilder extends Kernel.Empty {
       // Set virtual number of params to 0
       Kernel.SetLength(method, 0);
 
-      // Assign name to this function
-      Kernel.SetName(method, name);
+      // All these names of methods are empty
+      Kernel.SetName(method, '');
 
       // Handle with proxy for support with "this" callback
       const final = new Kernel['globalThis::Proxy'](method, {
@@ -151,16 +151,15 @@ export class APIBuilder extends Kernel.Empty {
       definition: T,
       name: string,
       paramType: Type,
-      returnType: Type,
    ) {
       const id = `${definition.classId}::${name}`;
       // Build arrow function so the methods are not possible to call with new expression
-      const method = (that: unknown, param: unknown) => {
+      const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
             definition as ClassDefinition,
             id + ' setter',
-            Kernel['Array::constructor'](param),
+            Kernel['Array::constructor'](params),
             diagnostics,
             that as object,
          );
@@ -169,8 +168,82 @@ export class APIBuilder extends Kernel.Empty {
             diagnostics.report(ERRORS.BoundToPrototype('setter', id));
          // Validate correctness of this type
          definition.type.validate(diagnostics, that);
+
          // Validate params
-         paramType.validate(diagnostics, param);
+         paramType.validate(diagnostics, params[0]);
+
+         // Check for diagnostics and report first value
+         if (!diagnostics.success) {
+            definition.__reports(executionContext);
+            diagnostics.throw(1);
+         }
+
+         definition.__call(executionContext);
+
+         // Checks 2
+         if (!diagnostics.success) {
+            // TODO: What design of our plugin system we want right?
+            // definition.__reports(executionContext);
+            diagnostics.throw(1);
+         }
+         // TODO: Implement privileges and type checking
+         //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
+         //let error = functionType.ValidArgumentTypes(params);
+         //if(error) throw new error.ctor(error.message);
+
+         if (executionContext.result !== undefined)
+            diagnostics.warn(
+               'Result should be always undefined for property setter methods: ' + id,
+               Kernel['TypeError::constructor'],
+            );
+
+         return undefined;
+      };
+
+      // Mark function as native
+      Kernel.SetFakeNative(method);
+
+      // Set virtual number of params to 1
+      // for setters its alway 1
+      Kernel.SetLength(method, 1);
+
+      // All these names of methods are empty
+      Kernel.SetName(method, '');
+
+      // Handle with proxy for support with "this" callback
+      const final = new Kernel['globalThis::Proxy'](method, {
+         apply(t, that, params) {
+            return t(that, params);
+         },
+      });
+
+      // Set the proxy also as native
+      Kernel.SetFakeNative(final);
+
+      // Return
+      return final;
+   }
+   public static CreateGetter<T extends ClassDefinition<ClassDefinition | null>>(
+      definition: T,
+      name: string,
+      returnType: Type,
+   ) {
+      const id = `${definition.classId}::${name}`;
+      // Build arrow function so the methods are not possible to call with new expression
+      const method = (that: unknown) => {
+         const diagnostics = new Diagnostics();
+         const executionContext = new ExecutionContext(
+            definition as ClassDefinition,
+            id + ' getter',
+            Kernel['Array::constructor'](),
+            diagnostics,
+            that as object,
+         );
+         // Check if the object has native bound
+         if (!definition.context.nativeHandles.has(that as object))
+            diagnostics.report(ERRORS.BoundToPrototype('getter', id));
+         // Validate correctness of this type
+         definition.type.validate(diagnostics, that);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
@@ -202,8 +275,8 @@ export class APIBuilder extends Kernel.Empty {
       // Set virtual number of params to 0
       Kernel.SetLength(method, 0);
 
-      // Assign name to this function
-      Kernel.SetName(method, name);
+      // All these names of methods are empty
+      Kernel.SetName(method, '');
 
       // Handle with proxy for support with "this" callback
       const final = new Kernel['globalThis::Proxy'](method, {

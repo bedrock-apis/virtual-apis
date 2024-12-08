@@ -32,6 +32,16 @@ export class Diagnostics extends Kernel.Empty {
       }
       return this;
    }
+   public warn<T extends string | Report>(
+      ...params: T extends string ? [message: T, errorType: Report['type']] : [...report: T[]]
+   ): this {
+      if (typeof params[0] === 'string') {
+         this.warns.push(new Report(params[0], params[1] as Report['type']));
+      } else {
+         this.warns.push(...(params as Report[]));
+      }
+      return this;
+   }
    public throw(startStackFrom = 2): never {
       this.errors[0].throw(startStackFrom + 1);
 
