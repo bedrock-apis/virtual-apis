@@ -1,5 +1,7 @@
+import { MetadataType } from '../../../package-builder/script-module-metadata';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Kernel } from '../../kernel';
+import { resolveType } from '../resolve';
 import { Type } from '../type';
 
 export class InterfaceBindType extends Type {
@@ -14,8 +16,8 @@ export class InterfaceBindType extends Type {
       // TODO: No implementation error
       diagnostics.report(ERRORS.NoImplementation);
    }
-   public addProperty(name: string, type: Type) {
-      this.properties.set(name, type);
+   public addProperty(name: string, type: MetadataType) {
+      this.properties.set(name, resolveType(type));
       return this;
    }
 }

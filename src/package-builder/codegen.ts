@@ -85,26 +85,6 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
    return { definitionsCode, exportsCode };
 }
 
-function addProperties(
-   node: ts.Expression,
-   methodName: string,
-   properties: MetadataPropertyMemberDefinition[] | MetadataConstantDefinition[],
-) {
-   for (const property of properties) {
-      node = t.methodCall(
-         node,
-         methodName,
-         [
-            t.asIs(property.name),
-            t.asIs(toDefaultType(property.type)),
-            t.asIs(property.is_read_only),
-            'value' in property ? t.asIs(property.value) : undefined,
-         ].filter(e => !!e),
-      );
-   }
-   return node;
-}
-
 function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const name = classMeta.name;
    const nameString = t.asIs(name);
@@ -126,9 +106,29 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
       }
    }
 
-   node = addProperties(node, classDefinitonAddProperty, classMeta.properties);
-   node = addProperties(node, classDefinitonAddProperty, classMeta.constants);
+   node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.properties);
+   node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.constants);
 
+   return node;
+}
+
+function addPropertiesToClass(
+   node: ts.Expression,
+   methodName: string,
+   properties: MetadataPropertyMemberDefinition[] | MetadataConstantDefinition[],
+) {
+   for (const property of properties) {
+      node = t.methodCall(
+         node,
+         methodName,
+         [
+            t.asIs(property.name),
+            t.asIs(toDefaultType(property.type)),
+            t.asIs(property.is_read_only),
+            'value' in property ? t.asIs(property.value) : undefined,
+         ].filter(e => !!e),
+      );
+   }
    return node;
 }
 
@@ -137,12 +137,8 @@ function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinit
 
    let node: ts.Expression = factory.createNewExpression(interfaceBindTypeI, undefined, [t.asIs(name)]);
 
-   for (const { is_read_only, is_static, name, type } of interfaceMetadata.properties) {
-      node = t.methodCall(node, interfaceBindTypeIAddProperty, [
-         t.asIs(name),
-         t.asIs(type.name),
-         t.asIs('optional_type' in type),
-      ]);
+   for (const { name, type } of interfaceMetadata.properties) {
+      node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.asIs(name), t.asIs(type)]);
    }
 
    return node;
