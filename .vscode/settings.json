@@ -2,5 +2,12 @@
    "files.autoSave": "onFocusChange",
    "editor.formatOnSave": true,
    "editor.defaultFormatter": "esbenp.prettier-vscode",
-   "typescript.preferences.autoImportSpecifierExcludeRegexes": ["node:test", "typescript"]
+   "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+      "node:test",
+      "typescript",
+      "dns",
+      "crypto",
+      "os",
+      "process"
+   ]
 }

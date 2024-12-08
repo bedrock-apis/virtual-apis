@@ -6,6 +6,7 @@ suite('NumberType', () => {
    test('Number', () => {
       const type = new NumberType({ min: 10, max: 20 });
 
+      expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
       expect(() => Type.ValidateOrThrow(type, 9)).toThrowErrorMatchingInlineSnapshot(
          `[Error: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
       );
