@@ -6,6 +6,7 @@ import { FunctionType } from './types/function';
 import { BigIntType, NumberType } from './types/number';
 import { OptionalType } from './types/optional';
 import { StringType } from './types/string';
+import { VariantType } from './types/variant';
 
 export function resolveType(metadataType: MetadataType): Type {
    const { name } = metadataType;
@@ -35,10 +36,18 @@ export function resolveType(metadataType: MetadataType): Type {
          return new StringType();
       case 'closure':
          return new FunctionType();
+      case 'variant':
+         return new VariantType(metadataType.variant_types.map(resolveType));
       case 'optional':
          return new OptionalType(resolveType(metadataType.optional_type));
       case 'undefined':
          return new VoidType();
+      case 'array':
+      case 'promise':
+      case 'generator':
+      case 'map':
+      case 'this':
+      case 'iterator':
       default:
          // TODO: Metadata type
          throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
