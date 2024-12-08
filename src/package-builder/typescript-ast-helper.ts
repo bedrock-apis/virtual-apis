@@ -74,6 +74,8 @@ export const TYPESCRIPT_AST_HELPER = {
       }
    },
 
+   null: factory.createNull(),
+
    /**
     * Emits compiled enum
     * ```

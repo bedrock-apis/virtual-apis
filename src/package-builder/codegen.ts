@@ -10,6 +10,7 @@ import { InterfaceBindType } from '../api-builder/type-validators/types/interfac
 import {
    MetadataClassDefinition,
    MetadataConstantDefinition,
+   MetadataFunctionArgumentDefinition,
    MetadataInterfaceDefinition,
    MetadataModuleDefinition,
    MetadataPropertyMemberDefinition,
@@ -20,7 +21,9 @@ const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApiClassProperty = 'api' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
-const classDefinitonAddStaticProperty = 'addStaticProperty' satisfies keyof ClassDefinition;
+const classDefinitonAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
+const classDefinitonAddStaticMethod = 'addStaticMethod' satisfies keyof ClassDefinition;
+const classDefinitonAddCallableConstructor = 'addCallableConstructor' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
@@ -89,26 +92,32 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
 function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const name = classMeta.name;
    const nameString = t.asIs(name);
-   const baseClass = classMeta.base_types[0]?.name ? t.asIs(classMeta.base_types[0].name) : t.asIs(null);
+   const baseClass = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.null;
+
+   function getArgTypes(args: MetadataFunctionArgumentDefinition[]) {
+      return t.asIs(args.map(e => ({ ...e, type: toDefaultType(e.type) })));
+   }
+
+   const constructorType = classMeta.functions.find(e => e.is_constructor);
+   const constructorArgs = constructorType ? getArgTypes(constructorType.arguments) : t.null;
 
    let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [
-      contextI,
-      nameString,
-      baseClass,
+      /* context */ contextI,
+      /* classId */ nameString,
+      /* parent */ baseClass,
+      /* constructorParams */ constructorArgs,
+      /* hasConstructor */ t.asIs(!!constructorType),
+      /* newExpected */ t.asIs(true),
    ]);
 
-   for (const { name, return_type, arguments: args, is_constructor } of classMeta.functions) {
-      if (is_constructor) {
-         console.warn('Skipping constructor for', classMeta.name);
-      } else {
-         const argTypes = t.asIs(args.map(e => ({ ...e, type: toDefaultType(e.type) })));
+   for (const { name, return_type, is_static, arguments: args, is_constructor } of classMeta.functions) {
+      if (is_constructor) continue;
 
-         node = t.methodCall(node, classDefinitionIAddMethod, [
-            t.asIs(name),
-            argTypes,
-            t.asIs(toDefaultType(return_type)),
-         ]);
-      }
+      node = t.methodCall(node, is_static ? classDefinitonAddStaticMethod : classDefinitionIAddMethod, [
+         t.asIs(name),
+         getArgTypes(args),
+         t.asIs(toDefaultType(return_type)),
+      ]);
    }
 
    node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.properties);

@@ -41,12 +41,12 @@ export class ClassDefinition<
        */
       public readonly classId: string,
       public readonly parent: T,
-      public readonly paramsDefinition: ParamsDefinition = new ParamsDefinition(),
+      public readonly constructorParams: ParamsDefinition = new ParamsDefinition(),
       public readonly hasConstructor: boolean = false,
       public readonly newExpected: boolean = true,
    ) {
       super();
-      this.api = APIBuilder.CreateConstructor(this, paramsDefinition);
+      this.api = APIBuilder.CreateConstructor(this, constructorParams);
       this.constructorId = `${classId}:constructor`;
       if (context.nativeEvents.has(this.constructorId)) {
          throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
@@ -91,13 +91,30 @@ export class ClassDefinition<
       return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
    }
 
+   public addStaticMethod<Name extends string>(
+      name: Name,
+      params: ParamsDefinition = new ParamsDefinition(),
+      returnType: Type = new VoidType(),
+   ) {
+      // TODO
+      // (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
+
+      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
+   }
+
+   public addCallableConstructor(params: ParamsDefinition = new ParamsDefinition()) {
+      // TODO
+
+      return this;
+   }
+
    public addProperty<PropertyType, Name extends string>(name: Name, type: string, isReadonly: boolean) {
       // TODO
 
       return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
    }
 
-   public addStaticProperty<PropertyType, Name extends string>(
+   public addStaticConstant<PropertyType, Name extends string>(
       name: Name,
       type: string,
       isReadonly: boolean,

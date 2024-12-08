@@ -1,9 +1,7 @@
-import { ClassDefinition } from './class-definition';
+import { MetadataType } from '../../package-builder/script-module-metadata';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
-import { DynamicType, ParamsDefinition, type Type } from '../type-validators';
-import { MetadataType } from '../../package-builder/script-module-metadata';
-import { VoidType } from '../type-validators';
+import { DynamicType, ParamsDefinition, VoidType, type Type } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';
 import { FunctionType } from '../type-validators/types/function';
@@ -11,19 +9,20 @@ import { BigIntType, NumberType } from '../type-validators/types/number';
 import { OptionalType } from '../type-validators/types/optional';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
+import { ClassDefinition } from './class-definition';
 
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 
 export class Context extends Kernel.Empty {
-   private readonly types = Kernel.Construct('Map') as Map<string, Type>;
-   private readonly unresolvedTypes = Kernel.Construct('Map') as Map<string, DynamicType>;
+   private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
+   private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
    /**
     * Register new type
     * @param name
     * @param type
     */
    public registerType(name: string, type: Type) {
-      this.types.set(name, type);
+      this.TYPES.set(name, type);
    }
    /**
     * Get dynamic type that will resolve once this.resolveAll is called
@@ -31,9 +30,9 @@ export class Context extends Kernel.Empty {
     * @returns
     */
    public getDynamicType(name: string) {
-      let dynamicType = this.unresolvedTypes.get(name);
+      let dynamicType = this.UNRESOLVED_TYPES.get(name);
       if (!dynamicType) {
-         this.unresolvedTypes.set(name, (dynamicType = new DynamicType()));
+         this.UNRESOLVED_TYPES.set(name, (dynamicType = new DynamicType()));
       }
       return dynamicType;
    }
@@ -41,14 +40,14 @@ export class Context extends Kernel.Empty {
     * Tries to resolve all unresolved types
     */
    public resolveAllDynamicTypes() {
-      for (const typeName of this.unresolvedTypes.keys()) {
-         const resolvedType = this.types.get(typeName);
+      for (const typeName of this.UNRESOLVED_TYPES.keys()) {
+         const resolvedType = this.TYPES.get(typeName);
          if (!resolvedType) continue;
          // It is available trust me!!!
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const unresolvedType = this.unresolvedTypes.get(typeName)!;
+         const unresolvedType = this.UNRESOLVED_TYPES.get(typeName)!;
          unresolvedType.setType(resolvedType);
-         this.unresolvedTypes.delete(typeName);
+         this.UNRESOLVED_TYPES.delete(typeName);
       }
    }
    public resolveType(metadataType: MetadataType): Type {
