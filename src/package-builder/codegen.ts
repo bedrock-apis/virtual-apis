@@ -14,7 +14,7 @@ import {
   MetadataModuleDefinition,
   MetadataPropertyMemberDefinition,
 } from './ScriptModule';
-import { TypeScriptAstHelper as t } from './ts-ast-helper';
+import { TS_AST_HELPER as t } from './ts-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApiClassProperty = 'class' satisfies keyof ClassDefinition;
@@ -27,19 +27,19 @@ const registerExpression = t.accessBy(t.i`${Type.name}`, Type.RegisterBindType.n
 
 export async function generateModule(source: MetadataModuleDefinition, useFormatting = true) {
   const moduleName = source.name.split('/')[1] ?? 'unknown';
-  const definitionsI = t.i`__defs`;
+  const definitionsI = t.i`__`;
   const definitions: ts.Node[] = [];
   const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
 
   for (const interfaceMetadata of source.interfaces) {
-    const node = GenerateInterface(interfaceMetadata);
+    const node = generateInterfaceDefinition(interfaceMetadata);
     definitions.push(t.call(registerExpression, [node]));
   }
 
   for (const classMeta of source.classes) {
     const name = classMeta.name;
 
-    const node = GenerateClass(classMeta);
+    const node = generateClassDefinition(classMeta);
 
     definitions.push(t.exportConst(name, node));
     exportDeclarations.push(
@@ -52,7 +52,7 @@ export async function generateModule(source: MetadataModuleDefinition, useFormat
       exportDeclarations.push(
         t.createEnum(
           enumMeta.name,
-          enumMeta.constants.filter(e => !!e.name && !!e.value).map(e => [e.name, t.v(e.value)]),
+          enumMeta.constants.filter(e => !!e.name && !!e.value).map(e => [e.name, t.asIs(e.value)]),
         ),
       );
     }
@@ -91,33 +91,33 @@ function addProperties(
       node,
       methodName,
       [
-        t.v(property.name),
-        t.v(toDefaultType(property.type)),
-        t.v(property.is_read_only),
-        'value' in property ? t.v(property.value) : undefined,
+        t.asIs(property.name),
+        t.asIs(toDefaultType(property.type)),
+        t.asIs(property.is_read_only),
+        'value' in property ? t.asIs(property.value) : undefined,
       ].filter(e => !!e),
     );
   }
   return node;
 }
 
-function GenerateClass(classMeta: MetadataClassDefinition) {
+function generateClassDefinition(classMeta: MetadataClassDefinition) {
   const name = classMeta.name;
-  const nameString = t.v(name);
-  const baseClass = classMeta.base_types[0]?.name ? t.v(classMeta.base_types[0].name) : t.v(null);
+  const nameString = t.asIs(name);
+  const baseClass = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.asIs(null);
 
   let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [nameString, baseClass]);
 
-  for (const method of classMeta.functions) {
-    const paramTypes = t.v(method.arguments.map(e => ({ ...e, type: toDefaultType(e.type) })));
-
-    if (method.is_constructor) {
-      console.log('SKIPPED CONSTRUCTOR for ', classMeta.name);
+  for (const { name, return_type, arguments: args, is_constructor } of classMeta.functions) {
+    if (is_constructor) {
+      console.warn('Skipping constructor for', classMeta.name);
     } else {
+      const argTypes = t.asIs(args.map(e => ({ ...e, type: toDefaultType(e.type) })));
+
       node = t.methodCall(node, classDefinitionIAddMethod, [
-        t.v(method.name),
-        paramTypes,
-        t.v(toDefaultType(method.return_type)),
+        t.asIs(name),
+        argTypes,
+        t.asIs(toDefaultType(return_type)),
       ]);
     }
   }
@@ -128,13 +128,17 @@ function GenerateClass(classMeta: MetadataClassDefinition) {
   return node;
 }
 
-function GenerateInterface(interfaceMetadata: MetadataInterfaceDefinition) {
+function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinition) {
   const name = interfaceMetadata.name;
 
-  let node: ts.Expression = factory.createNewExpression(interfaceBindTypeI, undefined, [t.v(name)]);
+  let node: ts.Expression = factory.createNewExpression(interfaceBindTypeI, undefined, [t.asIs(name)]);
 
   for (const { is_read_only, is_static, name, type } of interfaceMetadata.properties) {
-    node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.v(name), t.v(type.name), t.v('optional_type' in type)]);
+    node = t.methodCall(node, interfaceBindTypeIAddProperty, [
+      t.asIs(name),
+      t.asIs(type.name),
+      t.asIs('optional_type' in type),
+    ]);
   }
 
   return node;

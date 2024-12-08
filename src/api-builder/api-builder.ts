@@ -17,7 +17,7 @@ export class APIBuilder {
       if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
 
       // If constructor is present for this class
-      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).Throw();
+      if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).throw();
 
       // TODO: Implement type checking
       // const error = functionType.ValidArgumentTypes(arguments);

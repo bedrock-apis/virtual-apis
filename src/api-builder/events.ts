@@ -54,7 +54,8 @@ export class NativeEvent<Args extends unknown[] = unknown[]> {
     return method;
   }
 }
-export function TriggerEvent<R extends unknown[]>(event: NativeEvent<R>, ...params: R) {
+
+export function triggerEvent<R extends unknown[]>(event: NativeEvent<R>, ...params: R) {
   if (SESSIONS.has(event)) {
     const promises = Kernel.Construct('Array') as Promise<unknown>[];
     SESSIONS.get(event)?.forEach(method => {

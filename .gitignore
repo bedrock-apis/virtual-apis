@@ -1,5 +1,5 @@
 bin
-package_bin
+packages
 # Logs
 logs
 *.log

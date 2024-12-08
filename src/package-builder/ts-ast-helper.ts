@@ -1,6 +1,6 @@
 import ts, { factory } from 'typescript';
 
-export const TypeScriptAstHelper = {
+export const TS_AST_HELPER = {
   accessBy(origin: ts.Expression, by: string | ts.Identifier) {
     return factory.createPropertyAccessExpression(origin, by);
   },
@@ -37,7 +37,7 @@ export const TypeScriptAstHelper = {
   i(name: TemplateStringsArray, ...params: unknown[]) {
     return factory.createIdentifier(name.map((e, i) => e + (params[i] ?? '')).join(''));
   },
-  v(data: unknown): ts.Expression {
+  asIs(data: unknown): ts.Expression {
     switch (typeof data) {
       case 'boolean':
         return data ? factory.createTrue() : factory.createFalse();
@@ -143,13 +143,13 @@ export const TypeScriptAstHelper = {
 function objectToExpression(object: object) {
   if (Array.isArray(object)) {
     return factory.createArrayLiteralExpression(
-      object.map(e => TypeScriptAstHelper.v(e)),
+      object.map(e => TS_AST_HELPER.asIs(e)),
       false,
     );
   }
   return factory.createObjectLiteralExpression(
     Object.entries(object).map(([key, value]) =>
-      factory.createPropertyAssignment(factory.createIdentifier(key), TypeScriptAstHelper.v(value)),
+      factory.createPropertyAssignment(factory.createIdentifier(key), TS_AST_HELPER.asIs(value)),
     ),
     false,
   );
