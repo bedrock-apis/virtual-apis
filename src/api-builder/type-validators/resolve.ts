@@ -11,7 +11,7 @@ export function resolveType(metadataType: MetadataType) {
 
   if (metadataType.is_bind_type) {
     const bindType = Type.boundTypes.get(name);
-    if (!bindType) throw Kernel['ReferenceError::constructor']('Unknown bind type: ' + name);
+    if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
     return bindType;
   }
 
@@ -38,6 +38,6 @@ export function resolveType(metadataType: MetadataType) {
       return new VoidType();
     default:
       // TODO: Metadata type
-      throw new Kernel['ReferenceError::constructor'](`BaseType::resolve - UnknownType: ${name}`);
+      throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
   }
 }
