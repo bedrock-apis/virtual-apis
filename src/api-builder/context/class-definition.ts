@@ -41,9 +41,9 @@ export class ClassDefinition<
        */
       public readonly classId: string,
       public readonly parent: T,
+      public readonly paramsDefinition: ParamsDefinition = new ParamsDefinition(),
       public readonly hasConstructor: boolean = false,
       public readonly newExpected: boolean = true,
-      public readonly paramsDefinition: ParamsDefinition = new ParamsDefinition(),
    ) {
       super();
       this.api = APIBuilder.CreateConstructor(this, paramsDefinition);
@@ -81,7 +81,11 @@ export class ClassDefinition<
       return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
    }
 
-   public addMethod<Name extends string>(name: Name, params: ParamsDefinition, returnType: Type = new VoidType()) {
+   public addMethod<Name extends string>(
+      name: Name,
+      params: ParamsDefinition = new ParamsDefinition(),
+      returnType: Type = new VoidType(),
+   ) {
       (this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(this, name, params, returnType);
 
       return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;

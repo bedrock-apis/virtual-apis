@@ -1,6 +1,7 @@
 import { ClassDefinition } from './class-definition';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
+import { ParamsDefinition } from '../type-validators';
 
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 type ClassParameters<T> = T extends { new (...params: infer R): unknown } ? R : never;
@@ -28,9 +29,10 @@ export class Context extends Kernel.Empty {
    public createClassDefinition<T extends ClassDefinition | null>(
       name: string,
       parent: T,
+      paramDefinition: ParamsDefinition = new ParamsDefinition(),
       hasConstructor = false,
       newExpected = true,
    ): ClassDefinition<T, object, object> {
-      return new ClassDefinition<T, object, object>(this, name, parent, hasConstructor, newExpected);
+      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, hasConstructor, newExpected);
    }
 }

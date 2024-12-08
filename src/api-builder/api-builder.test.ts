@@ -7,10 +7,10 @@ import { Diagnostics } from './errors';
 import { Context } from './context';
 
 const context = new Context();
-const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA', new ParamsDefinition());
+const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
 const PlayerDefinition = context
-   .createClassDefinition('Player', EntityDefinition, true, true)
-   .addMethod('methodB', new ParamsDefinition());
+   .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true, true)
+   .addMethod('methodB');
 
 const Player = PlayerDefinition.api;
 const Entity = EntityDefinition.api;
