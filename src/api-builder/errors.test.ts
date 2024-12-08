@@ -11,6 +11,10 @@ describe('Diagnostics', () => {
       expect(diagnostics.errors).toMatchInlineSnapshot(`
         [
           Report {
+            "message": "Message 0",
+            "type": [Function],
+          },
+          Report {
             "message": "Message 1",
             "type": [Function],
           },
