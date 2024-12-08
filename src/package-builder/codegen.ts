@@ -26,6 +26,7 @@ const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBin
 
 const contextI = t.i`CONTEXT`;
 const contextIRegisterType = t.accessBy(contextI, 'registerType' satisfies keyof Context);
+const contextIResolveType = 'resolveType' satisfies keyof Context;
 
 export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
    const moduleName = source.name.split('/')[1] ?? 'unknown';
@@ -135,10 +136,13 @@ function addPropertiesToClass(
 function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinition) {
    const name = interfaceMetadata.name;
 
-   let node: ts.Expression = factory.createNewExpression(interfaceBindTypeI, undefined, [t.asIs(name)]);
+   let node: ts.Expression = t.createNewCall(interfaceBindTypeI, [t.asIs(name)]);
 
    for (const { name, type } of interfaceMetadata.properties) {
-      node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.asIs(name), t.asIs(type)]);
+      node = t.methodCall(node, interfaceBindTypeIAddProperty, [
+         t.asIs(name),
+         t.methodCall(contextI, contextIResolveType, [t.asIs(type)]),
+      ]);
    }
 
    return node;
