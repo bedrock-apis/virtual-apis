@@ -2,6 +2,8 @@ import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
 import { ParamsDefinition } from './type-validators';
+import { ConstructionExecutionContext } from './execution-context';
+import { Diagnostics } from './errors';
 
 const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA', new ParamsDefinition());
 const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod(
@@ -26,7 +28,14 @@ suite('Base API', () => {
    });
 
    test('Native Construction', () => {
-      const entity_handle = EntityDefinition.__construct([])[0];
+      const entity_handle = EntityDefinition.__construct(
+         new ConstructionExecutionContext(
+            EntityDefinition,
+            EntityDefinition.classId,
+            Kernel.Construct('Array'),
+            new Diagnostics(),
+         ),
+      );
 
       expect(entity_handle).not.toBeInstanceOf(Player);
       expect(entity_handle).not.toBeInstanceOf(Entity);

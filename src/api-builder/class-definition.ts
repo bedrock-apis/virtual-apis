@@ -2,6 +2,7 @@ import { APIBuilder } from './api-builder';
 import { APIWrapper } from './api-wrapper';
 import { Diagnostics } from './errors';
 import { NativeEvent } from './events';
+import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type, VoidType } from './type-validators';
 import { ClassBindType } from './type-validators/types/class';
@@ -15,8 +16,9 @@ export class ClassDefinition<
 > extends Kernel.Empty {
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
-   public readonly onConstruct: NativeEvent<[object, object, this, ArrayLike<unknown>]>;
+   public readonly onConstruct: NativeEvent<[object, object, this, ConstructionExecutionContext]>;
    public readonly constructorId: string;
+   public readonly type: Type;
    /**
     * TODO: Improve the types tho
     */
@@ -40,9 +42,10 @@ export class ClassDefinition<
       public readonly parent: T,
       public readonly hasConstructor: boolean = false,
       public readonly newExpected: boolean = true,
+      public readonly paramsDefinition: ParamsDefinition = new ParamsDefinition(),
    ) {
       super();
-      this.api = APIBuilder.CreateConstructor(this);
+      this.api = APIBuilder.CreateConstructor(this, paramsDefinition);
       this.constructorId = `${classId}:constructor`;
       if (APIWrapper.nativeEvents.has(this.constructorId)) {
          throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
@@ -52,7 +55,7 @@ export class ClassDefinition<
          (this.onConstruct = new NativeEvent()),
       );
 
-      Type.RegisterBindType(classId, new ClassBindType(this as ClassDefinition));
+      Type.RegisterBindType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
 
    /**
@@ -60,7 +63,14 @@ export class ClassDefinition<
     * @returns New Virtual API Instance of the handle
     */
    public create(): this['api']['prototype'] {
-      const [handle, cache] = this.__construct(Kernel.Construct('Array'));
+      const [handle, cache] = this.__construct(
+         new ConstructionExecutionContext(
+            this as ClassDefinition,
+            this.classId,
+            Kernel.Construct('Array'),
+            new Diagnostics(),
+         ),
+      );
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
    /**
@@ -100,8 +110,8 @@ export class ClassDefinition<
     * @returns handle and cache pair
     */
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public __construct(params: ArrayLike<unknown>): [object, object] {
-      let data = this.parent?.__construct(params);
+   public __construct(context: ConstructionExecutionContext): [object, object] {
+      let data = this.parent?.__construct(context);
       if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
       const [handle, cache] = data;
 
@@ -109,17 +119,17 @@ export class ClassDefinition<
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
       this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
 
-      this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
+      this.onConstruct.trigger(handle, cache, this, context).catch(Kernel.error);
 
       return data;
    }
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public __call(that: unknown, id: string, params: unknown[]) {
-      Kernel.log('call: ' + id);
+   public __call(context: ExecutionContext) {
+      Kernel.log('call: ' + context.methodId);
    }
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public __reports(that: unknown, id: string, params: unknown[], diagnostics: Diagnostics) {
-      Kernel.log('pre-call: diagnostics ' + diagnostics.errors.length);
+   public __reports(context: ConstructionExecutionContext) {
+      Kernel.log('pre-call: diagnostics ' + context.diagnostics.errors.length);
    }
 
    /**

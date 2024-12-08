@@ -6,17 +6,28 @@ type Mutable<T> = {
    -readonly [P in keyof T]: T[P];
 };
 
-export class ExecutionConcept extends Kernel.Empty {
-   public readonly resultHasBeenSet: boolean = false;
-   public readonly result: unknown;
+export class ConstructionExecutionContext extends Kernel.Empty {
    public constructor(
       public readonly definition: ClassDefinition,
       public readonly methodId: string,
-      public readonly handle: object,
       public readonly parameters: ArrayLike<unknown>,
       public readonly diagnostics: Diagnostics,
    ) {
       super();
+   }
+}
+
+export class ExecutionContext extends ConstructionExecutionContext {
+   public readonly resultHasBeenSet: boolean = false;
+   public readonly result: unknown;
+   public constructor(
+      definition: ClassDefinition,
+      methodId: string,
+      parameters: ArrayLike<unknown>,
+      diagnostics: Diagnostics,
+      public readonly handle: object | null,
+   ) {
+      super(definition, methodId, parameters, diagnostics);
    }
    public setResult(result: unknown) {
       (this as Mutable<this>).result = result;

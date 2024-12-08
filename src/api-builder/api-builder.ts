@@ -1,7 +1,7 @@
 import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
 import { Diagnostics, ERRORS } from './errors';
-import { ExecutionConcept } from './execution-context';
+import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type } from './type-validators';
 
@@ -11,22 +11,47 @@ export class APIBuilder extends Kernel.Empty {
     * @param definition Class Definition
     * @returns API Class function
     */
-   public static CreateConstructor<T extends ClassDefinition<ClassDefinition | null, unknown>>(definition: T) {
+   public static CreateConstructor<T extends ClassDefinition<ClassDefinition | null, unknown>>(
+      definition: T,
+      paramsDefinition: ParamsDefinition,
+   ) {
       // Create function as constructor
       const ctor = function () {
+         const diagnostics = new Diagnostics();
+         const executionContext = new ConstructionExecutionContext(
+            definition as ClassDefinition,
+            'constructor',
+            // eslint-disable-next-line prefer-rest-params
+            arguments as ArrayLike<unknown>,
+            diagnostics,
+         );
          // Constructor should be callable only with "NEW" keyword
-         if (!new.target) throw new (Kernel.Constructor('TypeError'))('must be called with new');
+         if (!new.target && definition.newExpected) diagnostics.report(ERRORS.NewExpected);
 
          // If constructor is present for this class
-         if (!definition.hasConstructor) ERRORS.NoConstructor(definition.classId).throw();
+         if (!definition.hasConstructor) diagnostics.report(ERRORS.NoConstructor(definition.classId));
 
-         // TODO: Implement type checking
-         // const error = functionType.ValidArgumentTypes(arguments);
-         //if(error) throw new error.ctor(error.message)
+         // Validate Errors
+         paramsDefinition.validate(diagnostics, executionContext.parameters);
+
+         // Checks
+         if (!diagnostics.success) {
+            definition.__reports(executionContext);
+            diagnostics.throw(1);
+         }
 
          // Call Native constructor and sets its result as new.target.prototype
-         // eslint-disable-next-line prefer-rest-params
-         const result = Kernel.__setPrototypeOf(definition.__construct(arguments)[0], new.target.prototype);
+         const result = Kernel.__setPrototypeOf(
+            definition.__construct(executionContext)[0],
+            new.target?.prototype ?? definition.api.prototype,
+         );
+
+         // Checks 2
+         if (!diagnostics.success) {
+            // TODO: What design of our plugin system we want right?
+            // definition.__reports(executionContext);
+            diagnostics.throw(1);
+         }
          return result;
       };
 
@@ -49,50 +74,55 @@ export class APIBuilder extends Kernel.Empty {
 
    /**
     * @param definition Class Definition
-    * @param id Name of the function
+    * @param name Name of the function
     * @returns Fake API Functions
     */
    public static CreateMethod<T extends ClassDefinition<ClassDefinition | null, unknown>>(
       definition: T,
-      id: string,
+      name: string,
       paramsDefinition: ParamsDefinition,
       returnType: Type,
    ) {
+      const id = `${definition.classId}::${name}`;
       // Build arrow function so the methods are not possible to call with new expression
       const method = (that: unknown, params: unknown[]) => {
          const diagnostics = new Diagnostics();
-         const executionContext = new ExecutionConcept(
+         const executionContext = new ExecutionContext(
             definition as ClassDefinition,
             id,
-            that as object,
             params,
             diagnostics,
+            that as object,
          );
          // Check if the object has native bound
-         if (!APIWrapper.nativeHandles.has(that as object))
-            throw new (Kernel.Constructor('ReferenceError'))(
-               `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
-            );
+         if (!APIWrapper.nativeHandles.has(that as object)) diagnostics.report(ERRORS.BoundToPrototype('function', id));
+         // Validate correctness of this type
+         definition.type.validate(diagnostics, that);
+         // Validate params
          paramsDefinition.validate(diagnostics, params);
 
+         // Check for diagnostics and report first value
          if (!diagnostics.success) {
-            definition.__reports(that, id, params, diagnostics);
+            definition.__reports(executionContext);
             diagnostics.throw(1);
          }
-         definition.__call(that, id, params);
+
+         definition.__call(executionContext);
+
+         returnType.validate(diagnostics, executionContext.result);
+
+         // Checks 2
+         if (!diagnostics.success) {
+            // TODO: What design of our plugin system we want right?
+            // definition.__reports(executionContext);
+            diagnostics.throw(1);
+         }
          // TODO: Implement privileges and type checking
          //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
          //let error = functionType.ValidArgumentTypes(params);
          //if(error) throw new error.ctor(error.message);
 
-         // TODO: Yes
-         const results = null; /*definition.__APICall(that, id, params);*/
-
-         // TODO: Implement Type checking
-         //error = functionType.ResolveReturnType(returnKind);
-         //if(error) throw new error.ctor(error.message);
-
-         return results;
+         return executionContext.result;
       };
 
       // Mark function as native
