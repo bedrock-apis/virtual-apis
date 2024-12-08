@@ -25,7 +25,6 @@ export class Context extends Kernel.Empty {
       return this.nativeHandles.has(handle as object);
    }
    // Without first parameter!!!
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    public createClassDefinition<T extends ClassDefinition | null>(
       name: string,
       parent: T,
