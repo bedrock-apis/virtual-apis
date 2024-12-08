@@ -37,6 +37,11 @@ suite('Kernel', () => {
       }
    });
 
+   test('Array', () => {
+      expect(Array.isArray([])).toBe(true);
+      expect(Kernel.Constructor('Array').isArray([])).toBe(true);
+   });
+
    test('Native Functions', () => {
       expect(Kernel.Constructor('Map').toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
       expect(Map.toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
