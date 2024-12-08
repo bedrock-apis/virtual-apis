@@ -4,10 +4,10 @@ import { resolve } from 'node:path';
 import { generateModule } from './codegen';
 import { MetadataModuleDefinition } from './ScriptModule';
 
-const BASE_LINK = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
-const REPO_EXISTS = `${BASE_LINK}/exist.json`;
-const OUT_DIR = 'package_bin';
-const API_BUILDER = resolve(import.meta.dirname, './api-builder.js');
+const baseLink = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
+const repoExists = `${baseLink}/exist.json`;
+const outDir = 'packages';
+const apiBuilder = resolve(import.meta.dirname, './api-builder.js');
 type ExistJson = {
   'build-version': string;
   'version': string;
@@ -25,7 +25,7 @@ type ExistJson = {
   };
 };
 
-Main().then(
+main().then(
   r => (process.exitCode = r),
   e => {
     console.error(e);
@@ -33,12 +33,12 @@ Main().then(
   },
 );
 
-async function Main(): Promise<number> {
+async function main(): Promise<number> {
   // Fetch Latest Metadata
-  const exists = await (DownloadAndParseJSON(REPO_EXISTS).catch(e => null) as Promise<ExistJson | null>);
+  const exists = await (downloadAndParseJSON(repoExists).catch(e => null) as Promise<ExistJson | null>);
 
   if (!exists) {
-    console.error('Failed to fetch repository from ' + REPO_EXISTS);
+    console.error('Failed to fetch repository from ' + repoExists);
     return -1;
   }
 
@@ -49,82 +49,52 @@ async function Main(): Promise<number> {
 
   console.log('Fetching from version: ' + exists['build-version']);
 
-  if (!existsSync(OUT_DIR)) {
-    await mkdir(OUT_DIR);
-    console.log('Created ' + OUT_DIR);
+  if (!existsSync(outDir)) {
+    await mkdir(outDir);
+    console.log('Created ' + outDir);
   }
-  if (!existsSync(resolve(OUT_DIR, './@minecraft'))) {
-    await mkdir(resolve(OUT_DIR, './@minecraft'));
-    console.log('Created ' + OUT_DIR + './@minecraft');
+  if (!existsSync(resolve(outDir, './@minecraft'))) {
+    await mkdir(resolve(outDir, './@minecraft'));
+    console.log('Created ' + outDir + './@minecraft');
   }
 
-  if (!existsSync(API_BUILDER)) {
-    console.log(`Failed to find API builder code file: ` + API_BUILDER);
+  if (!existsSync(apiBuilder)) {
+    console.log(`Failed to find API builder code file: ` + apiBuilder);
     return -1;
   }
 
-  const successes = await copyFile(API_BUILDER, resolve(OUT_DIR, './api.js')).then(
+  const successes = await copyFile(apiBuilder, resolve(outDir, './api.js')).then(
     () => true,
     () => false,
   );
 
   if (!successes) {
-    console.error('Failed to copy api builder file to the package destination: ' + API_BUILDER);
+    console.error('Failed to copy api builder file to the package destination: ' + apiBuilder);
     return -1;
   }
 
-  console.log('Copied ' + API_BUILDER);
+  console.log('Copied ' + apiBuilder);
 
-  const DATA = exists.SCRIPT_MODULES_MAPPING;
+  const metadata = exists.SCRIPT_MODULES_MAPPING;
 
   const tasks = exists.SCRIPT_MODULES_MAPPING.script_modules
     .filter(e => e.startsWith('@minecraft'))
     .map(e => {
-      const { name, versions } = DATA.script_modules_mapping[e];
+      const { name, versions } = metadata.script_modules_mapping[e];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return GenerateModuleFor(name, versions.sort(compareVersions).at(-1)!);
+      return generateModuleFor(name, versions.sort(compareVersions).at(-1)!);
     });
 
   if ((await Promise.all(tasks)).find(e => e !== 0) !== undefined) {
     console.error('Failed to generate Metadata for at least on module');
     return -1;
   }
-  /*
-  // Check for validity
-  if (!response.ok) {
-    console.error('Failed to fetch metadata');
-    return -1;
-  }
 
-  console.time('fetch json parse');
-  // JSON Parsed metadata
-  const metadata = (await response.json()) as MetadataModuleDefinition;
-  const metadata = JSON.parse(readFileSync('./data/server_1.15.0-beta.json').toString());
-  const moduleName = metadata.name.split('/')[1] ?? null;
-  console.timeEnd('fetch json parse');
-
-  if (!moduleName) {
-    console.error(`Failed to generate files for ${metadata.name}, invalid module name`);
-    return -1;
-  }
-
-  console.time('codegen');
-  // Execute Code Gen
-  const { definitionsCode, exportsCode } = await generateModule(metadata, moduleName, true);
-  console.timeEnd('codegen');
-
-  if (!existsSync('./bin')) {
-    await mkdir('./bin/');
-  }
-
-  await writeFile(`./bin/${moduleName}.js`, exportsCode);
-  await writeFile(`./bin/${moduleName}.native.js`, definitionsCode);
-  */
   // 0 is success
   return 0;
 }
 
-async function DownloadAndParseJSON(link: string): Promise<unknown | null> {
+async function downloadAndParseJSON(link: string): Promise<unknown | null> {
   const response = await fetch(link);
 
   if (!response.ok) return null;
@@ -152,23 +122,24 @@ function compareVersions(a: string, b: string) {
   }
   return 0;
 }
-async function GenerateModuleFor(name: string, version: string): Promise<number> {
-  const BUILDED_LINK = `${BASE_LINK}/metadata/script_modules/${name}_${version}.json`;
+async function generateModuleFor(name: string, version: string): Promise<number> {
+  const builderLink = `${baseLink}/metadata/script_modules/${name}_${version}.json`;
 
-  console.log('Fetching: ' + BUILDED_LINK);
-  const module_object = await DownloadAndParseJSON(BUILDED_LINK).catch(e => null);
+  console.log('Fetching: ' + builderLink);
+  const moduleObject = await downloadAndParseJSON(builderLink).catch(e => null);
 
-  if (!module_object) {
-    console.error('Failed to fetch or parse: ' + BUILDED_LINK);
+  if (!moduleObject) {
+    console.error('Failed to fetch or parse: ' + builderLink);
     return -1;
   }
 
-  const { definitionsCode, exportsCode } = await generateModule(module_object as MetadataModuleDefinition, true);
+  const { definitionsCode, exportsCode } = await generateModule(moduleObject as MetadataModuleDefinition, true);
 
-  await writeFile(resolve(OUT_DIR, name + '.native.js'), definitionsCode);
-  console.log('Generated ' + resolve(OUT_DIR, name + '.native.js'));
-  await writeFile(resolve(OUT_DIR, name + '.js'), exportsCode);
-  console.log('Generated ' + resolve(OUT_DIR, name + '.js'));
+  await writeFile(resolve(outDir, name + '.native.js'), definitionsCode);
+  console.log('Generated ' + resolve(outDir, name + '.native.js'));
+  await writeFile(resolve(outDir, name + '.js'), exportsCode);
+  console.log('Generated ' + resolve(outDir, name + '.js'));
+  console.log(' ');
 
   return 0;
 }

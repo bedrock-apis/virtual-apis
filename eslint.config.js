@@ -1,26 +1,13 @@
 // @ts-check
 
-import jseslint from '@eslint/js';
+import eslint from '@eslint/js';
+import { ESLintUtils } from '@typescript-eslint/utils';
 import tseslint from 'typescript-eslint';
 
-/** @type {import("typescript-eslint").Config} */
-const custom = [
-  {
-    files: ['src/api-builder/**'],
-    plugins: {
-      custom: customPlugin(),
-    },
-    rules: {
-      'custom/no-globals': 'error',
-    },
-  },
-];
-
-/** @type {import("typescript-eslint").Config} */
-export default [
+export default tseslint.config([
   { ignores: ['**/*.js', '**/*.test.ts'] },
   { files: ['src/**/*.ts'] },
-  jseslint.configs.recommended,
+  eslint.configs.recommended,
   ...tseslint.configs.strict,
   {
     rules: {
@@ -30,10 +17,23 @@ export default [
       '@typescript-eslint/naming-convention': ['warn', ...namingConvention()],
     },
   },
-  ...custom,
-];
+  ...customPluginConfig(),
+]);
 
-import { ESLintUtils } from '@typescript-eslint/utils';
+function customPluginConfig() {
+  return tseslint.config([
+    {
+      files: ['src/api-builder/**'],
+      plugins: {
+        custom: customPlugin(),
+      },
+      rules: {
+        'custom/no-globals': 'error',
+      },
+    },
+  ]);
+}
+
 function customPlugin() {
   const kernelConstruct = 'Kernel.Construct';
 
@@ -174,6 +174,11 @@ function namingConvention() {
 
     {
       selector: 'variable',
+      format: ['camelCase'],
+    },
+
+    {
+      selector: 'function',
       format: ['camelCase'],
     },
 
