@@ -97,18 +97,6 @@ export class ClassDefinition<
       return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
    }
 
-   public addStaticProperty<PropertyType, Name extends string>(
-      name: Name,
-      type: string,
-      isReadonly: boolean,
-      defaultValue: unknown,
-   ) {
-      // TODO
-      (this.api as Record<Name, unknown>)[name] = defaultValue;
-
-      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
-   }
-
    /**
     *
     * @param params IArguments passed by api context, unpredictable but type safe
