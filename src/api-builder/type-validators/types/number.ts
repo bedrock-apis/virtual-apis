@@ -1,3 +1,4 @@
+import { Range } from '../../../package-builder/script-module-metadata';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
@@ -5,7 +6,7 @@ import { Type } from '../type';
 const isFinite = Kernel['globalThis::isFinite'];
 const isNaN = Kernel['globalThis::isNaN'];
 
-abstract class BaseNumberType<T extends number | bigint> extends Type {
+export abstract class BaseNumberType<T extends number | bigint> extends Type {
    public abstract readonly type: 'number' | 'bigint';
    public abstract readonly isFiniteCheck: boolean;
 
@@ -20,9 +21,13 @@ abstract class BaseNumberType<T extends number | bigint> extends Type {
          return diagnostics.report(ERRORS.ValueIsNotSupported(isNaN(value as unknown as number) ? 'NaN' : 'Infinity'));
       }
 
-      if ((value as number) < this.range.min || (value as number) > this.range.max)
+      BaseNumberType.ValidateRange<T>(diagnostics, value as T, this.range);
+   }
+
+   public static ValidateRange<T extends number | bigint>(diagnostics: Diagnostics, value: T, range: Range<T, T>) {
+      if ((value as number) < range.min || (value as number) > range.max)
          return diagnostics.report(
-            `Provided integer value was out of range.  Value: ${value}, argument bounds: [${this.range.min}, ${this.range.max}]`,
+            `Provided integer value was out of range.  Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
             Kernel['Error::constructor'], // TODO: Resolve ArgumentOutOfBounds error constructor
          );
    }

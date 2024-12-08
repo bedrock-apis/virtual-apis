@@ -1,3 +1,4 @@
+import { Range } from '../package-builder/script-module-metadata';
 import { Kernel } from './kernel';
 
 export class Report extends Kernel.Empty {
@@ -39,7 +40,6 @@ export class Diagnostics extends Kernel.Empty {
    }
 }
 
-export type Range = { min: number; max: number };
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor';
 export type NativeActionKind = 'call' | 'get' | 'set';
 
@@ -74,7 +74,7 @@ export const ERRORS = {
    },
 
    /* Function */
-   IncorrectNumberOfArguments(t: Range, length: number) {
+   IncorrectNumberOfArguments(t: Range<number, number>, length: number) {
       return createTypeErrorReport(
          `Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`,
       );

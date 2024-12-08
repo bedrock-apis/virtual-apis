@@ -62,7 +62,7 @@ export type BaseMetadataType = MetadataTypeErrorable &
 export type MetadataType = { is_bind_type: boolean; is_errorable: boolean; name: MetadataTypeName } & BaseMetadataType;
 export type MetadataFunctionArgumentDetailsDefinition =
    | null
-   | ({ default_value: unknow } | (Range<number, number> & { default_value: unknow }));
+   | ({ default_value: unknow } | { default_value: unknown; max_value: number; min_value: number });
 
 export interface MetadataModuleBaseDefinition extends MetadataDefinition {
    version: string;

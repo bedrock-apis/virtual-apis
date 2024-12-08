@@ -1,26 +1,38 @@
-import { MetadataFunctionArgumentDefinition } from '../../package-builder/script-module-metadata';
-import { Diagnostics } from '../errors';
+import { MetadataFunctionArgumentDefinition, Range } from '../../package-builder/script-module-metadata';
+import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
+import { resolveType } from './resolve';
 import { Type } from './type';
+import { BaseNumberType } from './types/number';
+import { OptionalType } from './types/optional';
 
 export class ParamsDefinition extends Kernel.Empty {
    public requiredParams: number = 0;
-   public params: ArrayLike<ParamType> = Kernel.__setPrototypeOf(Kernel.Construct('Array'), null);
+   public params = Kernel.Construct('Array') as ParamType[];
+
    public addType(type: ParamType): this {
       if (this.params.length === this.requiredParams && !type.isOptional) {
-         (this.params as unknown[])[this.params.length] = type;
+         this.params.push(type);
          this.requiredParams = this.params.length;
       } else if (!type.isOptional) {
-         throw new (Kernel.Constructor('TypeError'))('Required parameter can not be set after optional was defined');
-      } else (this.params as unknown[])[this.params.length] = type;
+         throw Kernel.Construct('TypeError', 'Required parameter cannot be set after optional was defined');
+      } else this.params.push(type);
+
       return this;
    }
-   public validate(diagnostics: Diagnostics, params: ArrayLike<unknown>) {
+
+   public validate(diagnostics: Diagnostics, params: unknown[]) {
       if (params.length > this.params.length)
-         diagnostics.report('Incorrect number of arguments', Kernel['globalThis::Error']);
+         return diagnostics.report(
+            ERRORS.IncorrectNumberOfArguments({ min: this.requiredParams, max: this.params.length }, params.length),
+         );
+
+      for (const [i, value] of params.entries()) {
+         this.params[i].validate(diagnostics, value);
+      }
    }
-   public static Resolve(metadata: MetadataFunctionArgumentDefinition): ParamsDefinition {
-      /**
+
+   /**
      * Special logic for handling ranges as the could be different from defined type, check example below 
             {
               "details": {
@@ -39,18 +51,46 @@ export class ParamsDefinition extends Kernel.Empty {
               }
             },
      */
-      return new this();
+
+   public static Resolve(params: MetadataFunctionArgumentDefinition[]): ParamsDefinition {
+      const definition = new this();
+
+      for (const param of params) {
+         const isOptional = typeof param.details?.default_value !== 'undefined';
+         const type = resolveType(param.type);
+         const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
+         const validRange =
+            param.details && 'max_value' in param.details && 'min_value' in param.details
+               ? { min: param.details.min_value, max: param.details.max_value }
+               : undefined;
+
+         const paramType = new ParamType(
+            isOptional ? new OptionalType(type) : type,
+            isOptional,
+            defaultValue,
+            validRange,
+         );
+         definition.addType(paramType);
+      }
+      return definition;
    }
 }
 export class ParamType extends Type {
    public constructor(
-      public readonly isOptional: boolean,
       public readonly type: Type,
+      public readonly isOptional: boolean,
+      public readonly defaultValue: unknown,
+      public readonly range: Range<number, number> | undefined,
    ) {
       super();
    }
    public validate(diagnostics: Diagnostics, value: unknown): void {
-      //TODO: do something with optional?
-      this.type.validate(diagnostics, value);
+      const validateDiagnostics = new Diagnostics();
+      this.type.validate(validateDiagnostics, value);
+
+      if (this.range) BaseNumberType.ValidateRange(validateDiagnostics, value as number, this.range);
+
+      // TODO Check whenether it returns something like ERRORS.FunctionArgumentExpectedType
+      diagnostics.report(...validateDiagnostics.errors);
    }
 }
