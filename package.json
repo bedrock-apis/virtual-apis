@@ -6,9 +6,8 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "all": "rolldown -c && node ./dist/build.js",
-    "build": "rolldown -c",
-    "build-package": "node ./dist/build.js",
+    "bundle": "rolldown -c",
+    "build-package": "rolldown -c && node ./dist/build.js",
     "lint": "eslint",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
