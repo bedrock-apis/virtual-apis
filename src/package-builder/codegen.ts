@@ -5,8 +5,8 @@ import { ClassDefinition } from '../api-builder';
 import * as prettier from 'prettier';
 
 import { Type } from '../api-builder/type-validators';
-import { InterfaceBindType } from '../api-builder/type-validators/bind-type';
-import { toDefaultType } from '../api-builder/type-validators/default-types';
+import { toDefaultType } from '../api-builder/type-validators/default';
+import { InterfaceBindType } from '../api-builder/type-validators/types/interface';
 import {
   MetadataClassDefinition,
   MetadataConstantDefinition,

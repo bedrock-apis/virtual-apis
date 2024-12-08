@@ -1,16 +1,16 @@
 import { MetadataType } from '../../package-builder/script-module-metadata';
 import { Kernel } from '../kernel';
-import { BooleanType } from './boolean-type';
-import { FunctionType } from './function-type';
-import { BigIntType, NumberType } from './number-type';
-import { StringType } from './string-type';
 import { Type, VoidType } from './type';
+import { BooleanType } from './types/boolean';
+import { FunctionType } from './types/function';
+import { BigIntType, NumberType } from './types/number';
+import { StringType } from './types/string';
 
 export function resolveType(metadataType: MetadataType) {
   const { name } = metadataType;
 
   if (metadataType.is_bind_type) {
-    const bindType = Type.boundTypes.get(name);
+    const bindType = Type.bindedTypes.get(name);
     if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
     return bindType;
   }

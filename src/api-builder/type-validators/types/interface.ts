@@ -1,16 +1,7 @@
-import { ClassDefinition } from '../class-definition';
-import { Diagnostics, ERRORS } from '../errors';
-import { Kernel } from '../kernel';
-import { Type } from './type';
+import { Diagnostics, ERRORS } from '../../errors';
+import { Kernel } from '../../kernel';
+import { Type } from '../type';
 
-export class ClassBindType extends Type {
-  public constructor(public readonly definition: ClassDefinition) {
-    super();
-  }
-  public validate(diagnostics: Diagnostics, object: unknown): void {
-    if (!this.definition.isThisType(object)) diagnostics.report(ERRORS.NoImplementation);
-  }
-}
 export class InterfaceBindType extends Type {
   public readonly properties = Kernel.Construct('Map') as Map<string, Type>;
   public constructor(public name: string) {

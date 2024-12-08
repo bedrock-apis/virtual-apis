@@ -2,9 +2,9 @@ import { Diagnostics, Report } from '../errors';
 import { Kernel } from '../kernel';
 
 export abstract class Type {
-  public static readonly boundTypes = Kernel.Construct('Map') as Map<string, Type>;
+  public static readonly bindedTypes = Kernel.Construct('Map') as Map<string, Type>;
   public static RegisterBindType(name: string, type: Type) {
-    this.boundTypes.set(name, type);
+    this.bindedTypes.set(name, type);
   }
   // Diagnostics are always passed by someone who requested this type check
   public abstract validate(diagnostics: Diagnostics, value: unknown): void;

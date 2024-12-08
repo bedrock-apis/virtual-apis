@@ -3,7 +3,7 @@ import { APIWrapper } from './api-wrapper';
 import { NativeEvent } from './events';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type, VoidType } from './type-validators';
-import { ClassBindType } from './type-validators/bind-type';
+import { ClassBindType } from './type-validators/types/class';
 
 // Class for single fake api definition
 
