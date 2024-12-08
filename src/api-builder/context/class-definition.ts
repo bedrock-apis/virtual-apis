@@ -1,11 +1,11 @@
-import { APIBuilder } from './api-builder';
-import type { Context } from './context';
 import { Diagnostics } from '../errors';
 import { NativeEvent } from '../events';
-import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
+import { APIBuilder } from './api-builder';
+import type { Context } from './context';
+import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 
 // Class for single fake api definition
 
@@ -95,6 +95,18 @@ export class ClassDefinition<
       // TODO
 
       return this as ClassDefinition<T, P & Record<Name, PropertyType>>;
+   }
+
+   public addStaticProperty<PropertyType, Name extends string>(
+      name: Name,
+      type: string,
+      isReadonly: boolean,
+      defaultValue: unknown,
+   ) {
+      // TODO
+      // (this.api as Record<Name, unknown>)[name] = defaultValue;
+
+      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
    }
 
    /**

@@ -20,6 +20,7 @@ const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApiClassProperty = 'api' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
+const classDefinitonAddStaticProperty = 'addStaticProperty' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
@@ -43,7 +44,6 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
 
    for (const classMeta of source.classes) {
       const name = classMeta.name;
-
       const node = generateClassDefinition(classMeta);
 
       definitions.push(t.exportConst(name, node));
@@ -89,9 +89,13 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
 function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const name = classMeta.name;
    const nameString = t.asIs(name);
-   const baseClass = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.asIs(null);
+   const baseClass = classMeta.base_types[0]?.name ? t.asIs(classMeta.base_types[0].name) : t.asIs(null);
 
-   let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [nameString, baseClass]);
+   let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [
+      contextI,
+      nameString,
+      baseClass,
+   ]);
 
    for (const { name, return_type, arguments: args, is_constructor } of classMeta.functions) {
       if (is_constructor) {
@@ -108,7 +112,7 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    }
 
    node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.properties);
-   node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.constants);
+   node = addPropertiesToClass(node, classDefinitonAddStaticProperty, classMeta.constants);
 
    return node;
 }
