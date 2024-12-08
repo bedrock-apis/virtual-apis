@@ -32,9 +32,9 @@ jobs:
         run: pnpm run test
 
       - name: Build with Rolldown
-        run: pnpm run build
+        run: pnpm run bundle
 
       - name: Build Package
         run: pnpm run build-package
       - name: Vitest RUn
-        run: pnpm exec vitest run
+        run: pnpm exec vitest --run
