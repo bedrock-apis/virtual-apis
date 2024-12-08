@@ -21,7 +21,9 @@ export class Diagnostics extends Kernel.Empty {
    }
    public readonly errors = Kernel.Construct('Array') as Report[];
    public readonly warns = Kernel.Construct('Array') as Report[];
-   public report(...params: [message: string, errorType: Report['type']] | [...report: Report[]]): this {
+   public report<T extends string | Report>(
+      ...params: T extends string ? [message: T, errorType: Report['type']] : [...report: T[]]
+   ): this {
       if (typeof params[0] === 'string') {
          this.errors.push(new Report(params[0], params[1] as Report['type']));
       } else {
