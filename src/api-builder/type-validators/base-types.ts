@@ -1,4 +1,3 @@
-import type { MetadataType } from '../../package-builder/ScriptModule';
 import { Diagnostics, Report } from '../errors';
 import { Kernel } from '../kernel';
 
@@ -7,9 +6,6 @@ export abstract class Type {
   public static registerBindType(name: string, type: Type) {
     this.BIND_TYPE_TYPES.set(name, type);
   }
-
-  public static resolve?(metadataType: MetadataType): void;
-
   // Diagnostics are always passed by someone who requested this type check
   public abstract validate(diagnostics: Diagnostics, value: unknown): void;
 }

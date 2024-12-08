@@ -17,6 +17,8 @@ export class InterfaceBindType extends Type {
     super();
   }
   public validate(diagnostics: Diagnostics, object: unknown): void {
+    if (typeof object === 'function' || typeof object === 'object') Kernel['globalThis::Number'](5);
+    else diagnostics.report('Incorrect Type', Kernel['TypeError::constructor']);
     // TODO: No implementation error
     diagnostics.report(Errors.NoImplementation());
   }
