@@ -43,19 +43,15 @@ const TypeError = (message: string) => new Report(message, Kernel.Constructor('T
 const ReferenceError = (message: string) => new Report(message, Kernel.Constructor('ReferenceError'));
 const Error = (message: string) => new Report(message, Kernel.Constructor('Error'));
 
+// Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
+
 export const Errors = {
   NoImplementation: () => ReferenceError('No implementation error'),
   NewExpected: () => TypeError('must be called with new'),
-
-  NoConstructor(id: string) {
-    return ReferenceError(`No constructor for native class '${id}'.`);
-  },
-
-  IncorrectNumberOfArguments(t: Range, length: number) {
-    return TypeError(
-      `Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`,
-    );
-  },
+  NoConstructor: (id: string) => ReferenceError(`No constructor for native class '${id}'.`),
+  NativeTypeConversationFailed: () => TypeError('Native type conversion failed.'),
+  NativeOptionalTypeConversationFailed: () => TypeError('Native optional type conversion failed'),
+  ValueIsNotSupported: (value: 'Infinity' | 'NaN') => TypeError(`${value} value is not supported.`),
 
   BoundToPrototype(kind: NativeKind, id: string) {
     return ReferenceError(`Native ${kind} [${id}] object bound to prototype does not exist.`);
@@ -65,23 +61,28 @@ export const Errors = {
     return ReferenceError(`Native ${kind} [${id}] does not have required privileges.`);
   },
 
-  InvalidAmount(min = 0, max = 256) {
-    return Error(`Invalid amount. Amount must be greater than ${min} and less than ${max}`);
-  },
-
   InvalidTimeOfDay(min = 0, max = 23999) {
     return Error(`timeOfDay must be between ${min} and ${max} (inclusive)`);
   },
 
-  ItemTypeDoesNotExist(itemType: string) {
-    return TypeError(`ItemType '${itemType}' does not exists`);
-  },
-
-  NativeOptionalTypeConversationFailed() {
-    return TypeError('Native optional type conversion failed');
-  },
-
   FailedTo(action: NativeActionKind, kind: NativeKind, name: string) {
     return Error(`Failed to ${action} ${kind} '${name}'`);
+  },
+
+  /* Function */
+  IncorrectNumberOfArguments(t: Range, length: number) {
+    return TypeError(
+      `Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`,
+    );
+  },
+
+  FunctionArgumentExpectedType(error: string, argument: number, type: string) {
+    return TypeError(`${error} Function argument [${argument}] expected type: ${type}`);
+  },
+
+  /* ItemStack */
+  ItemTypeDoesNotExist: (itemType: string) => TypeError(`ItemType '${itemType}' does not exists`),
+  InvalidAmount(min = 0, max = 256) {
+    return Error(`Invalid amount. Amount must be greater than ${min} and less than ${max}`);
   },
 };
