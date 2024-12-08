@@ -3,8 +3,10 @@ import { NativeEvent } from './events';
 import { Kernel } from './kernel';
 
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
-export class APIWrapper {
-   private constructor() {}
+export class APIWrapper extends Kernel.Empty {
+   private constructor() {
+      super();
+   }
    public static readonly nativeHandles = Kernel.Construct('WeakSet');
    public static readonly nativeEvents = Kernel.Construct('Map') as ReadonlyMap<
       string,

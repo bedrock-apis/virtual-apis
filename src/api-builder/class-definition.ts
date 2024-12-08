@@ -8,7 +8,11 @@ import { ClassBindType } from './type-validators/types/class';
 
 // Class for single fake api definition
 
-export class ClassDefinition<T extends ClassDefinition | null = null, P = object, S extends object = object> {
+export class ClassDefinition<
+   T extends ClassDefinition | null = null,
+   P = object,
+   S extends object = object,
+> extends Kernel.Empty {
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
    public readonly onConstruct: NativeEvent<[object, object, this, ArrayLike<unknown>]>;
@@ -37,6 +41,7 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
       public readonly hasConstructor: boolean = false,
       public readonly newExpected: boolean = true,
    ) {
+      super();
       this.api = APIBuilder.CreateConstructor(this);
       this.constructorId = `${classId}:constructor`;
       if (APIWrapper.nativeEvents.has(this.constructorId)) {

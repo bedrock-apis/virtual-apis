@@ -5,8 +5,9 @@ import { Kernel } from './kernel';
  */
 const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...params: unknown[]) => unknown>>;
 
-export class NativeEvent<Args extends unknown[] = unknown[]> {
+export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empty {
    public constructor() {
+      super();
       SESSIONS.set(this, Kernel.Construct('Set', Kernel.Construct('Array')) as Set<(...params: unknown[]) => unknown>);
    }
    /**

@@ -3,7 +3,7 @@ import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 
-export class ParamsDefinition {
+export class ParamsDefinition extends Kernel.Empty {
    public requiredParams: number = 0;
    public params: ArrayLike<ParamType> = Kernel.__setPrototypeOf(Kernel.Construct('Array'), null);
    public addType(type: ParamType): this {

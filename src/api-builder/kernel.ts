@@ -17,7 +17,10 @@ type KernelType = {
    [K in keyof Global as `globalThis::${K}`]: Global[K];
 };
 
+// eslint-disable-next-line custom/no-default-extends
 class KernelClass {
+   // eslint-disable-next-line @typescript-eslint/naming-convention
+   public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
    public static __call = Function.prototype.call; // Type to Type call method
    public static call = Function.prototype.call.bind(Function.prototype.call);
    public static __setPrototypeOf = Object.setPrototypeOf;
@@ -142,3 +145,6 @@ nativeFunctions.add(
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kernel = KernelClass as typeof KernelClass & KernelType;
+
+Kernel.__setPrototypeOf(Kernel.Empty, null);
+Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);

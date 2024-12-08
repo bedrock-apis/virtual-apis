@@ -1,10 +1,11 @@
 import { APIWrapper } from './api-wrapper';
 import { ClassDefinition } from './class-definition';
 import { Diagnostics, ERRORS } from './errors';
+import { ExecutionConcept } from './execution-context';
 import { Kernel } from './kernel';
 import { ParamsDefinition, Type } from './type-validators';
 
-export class APIBuilder {
+export class APIBuilder extends Kernel.Empty {
    /**
     * Builds new Fake API Class
     * @param definition Class Definition
@@ -59,12 +60,19 @@ export class APIBuilder {
    ) {
       // Build arrow function so the methods are not possible to call with new expression
       const method = (that: unknown, params: unknown[]) => {
+         const diagnostics = new Diagnostics();
+         const executionContext = new ExecutionConcept(
+            definition as ClassDefinition,
+            id,
+            that as object,
+            params,
+            diagnostics,
+         );
          // Check if the object has native bound
          if (!APIWrapper.nativeHandles.has(that as object))
             throw new (Kernel.Constructor('ReferenceError'))(
                `Native function [${definition.classId}::${id}] object bound to prototype does not exist.`,
             );
-         const diagnostics = new Diagnostics();
          paramsDefinition.validate(diagnostics, params);
 
          if (!diagnostics.success) {
