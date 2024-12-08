@@ -56,7 +56,7 @@ export class ClassDefinition<
          (this.onConstruct = new NativeEvent()),
       );
 
-      context.registerBindType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
+      context.registerType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
 
    /**

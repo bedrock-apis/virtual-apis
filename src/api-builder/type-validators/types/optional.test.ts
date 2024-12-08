@@ -1,12 +1,14 @@
 import { expect, suite, test } from 'vitest';
 import { fromDefaultType } from '../default';
-import { resolveType } from '../resolve';
 import { Type } from '../type';
 import { OptionalType } from './optional';
+import { Context } from '../../context';
+
+const context = new Context();
 
 suite('Optional', () => {
    test('validate', () => {
-      const optional = new OptionalType(resolveType(fromDefaultType('int32')));
+      const optional = new OptionalType(context.resolveType(fromDefaultType('int32')));
 
       expect(() => Type.ValidateOrThrow(optional, 'string')).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native optional type conversion failed]`,
