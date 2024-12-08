@@ -39,13 +39,13 @@ export function resolveType(context: Context, metadataType: MetadataType): Type 
       case 'closure':
          return new FunctionType();
       case 'variant':
-         return new VariantType(metadataType.variant_types.map(resolveType));
+         return new VariantType(metadataType.variant_types.map(e => resolveType(context, e)));
       case 'optional':
-         return new OptionalType(resolveType(metadataType.optional_type));
+         return new OptionalType(resolveType(context, metadataType.optional_type));
       case 'undefined':
          return new VoidType();
       case 'array':
-         return new ArrayType(resolveType(metadataType.element_type));
+         return new ArrayType(resolveType(context, metadataType.element_type));
       case 'promise':
       case 'generator':
       case 'map':

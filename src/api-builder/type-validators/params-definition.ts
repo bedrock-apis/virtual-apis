@@ -1,4 +1,5 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../package-builder/script-module-metadata';
+import { Context } from '../context';
 import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
 import { resolveType } from './resolve';
@@ -52,12 +53,12 @@ export class ParamsDefinition extends Kernel.Empty {
             },
      */
 
-   public static Resolve(params: MetadataFunctionArgumentDefinition[]): ParamsDefinition {
+   public static Resolve(context: Context, params: MetadataFunctionArgumentDefinition[]): ParamsDefinition {
       const definition = new this();
 
       for (const param of params) {
          const isOptional = typeof param.details?.default_value !== 'undefined';
-         const type = resolveType(param.type);
+         const type = resolveType(context, param.type);
          const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
          const validRange =
             param.details && 'max_value' in param.details && 'min_value' in param.details
