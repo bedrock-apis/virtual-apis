@@ -11,7 +11,8 @@
     "build-package": "node ./dist/build.js",
     "lint": "eslint",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "rolldown -c && node ./dist/build.js && tsc --noEmit && eslint && vitest --run"
   },
   "prettier": {
     "arrowParens": "avoid",
@@ -36,4 +37,3 @@
     "node": ">=20.x.x"
   }
 }
-

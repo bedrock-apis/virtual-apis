@@ -3,10 +3,9 @@ import { ClassDefinition } from './class-definition';
 import { Kernel } from './kernel';
 import { ParamsDefinition } from './type-validators';
 
-const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA', false, new ParamsDefinition());
+const EntityDefinition = new ClassDefinition('Entity', null).addMethod('methodA', new ParamsDefinition());
 const PlayerDefinition = new ClassDefinition('Player', EntityDefinition, true, true).addMethod(
   'methodB',
-  false,
   new ParamsDefinition(),
 );
 

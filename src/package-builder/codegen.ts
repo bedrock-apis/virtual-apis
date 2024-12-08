@@ -17,7 +17,7 @@ import {
 import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
-const classDefinitionIApiClassProperty = 'class' satisfies keyof ClassDefinition;
+const classDefinitionIApiClassProperty = 'api' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 
