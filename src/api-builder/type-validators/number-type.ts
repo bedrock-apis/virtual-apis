@@ -1,4 +1,4 @@
-import { Diagnostics } from '../errors';
+import { Diagnostics, Errors } from '../errors';
 import { Kernel } from '../kernel';
 import { BaseType } from './base-types';
 
@@ -10,31 +10,29 @@ export class NumberType extends BaseType {
     super();
   }
   public override validate(diagnostics: Diagnostics, value: unknown) {
-    if (typeof value !== 'number') {
-      // TODO: Test Minecraft reaction on these scenarios
-      return diagnostics.report('NO ERROR SPECIFIED, CHECK TODOs', Kernel['TypeError::constructor']);
-    }
+    if (typeof value !== 'number') return diagnostics.report(Errors.NativeTypeConversationFailed());
+
     if (!IsFinite(Number(value)))
-      // TODO: Test Minecraft reaction on these scenarios
-      diagnostics.report('WTF, we have to test how minecraft reacts on Infinity or NaN', Kernel['Error::constructor']);
+      return diagnostics.report(Errors.ValueIsNotSupported(Kernel['globalThis::isNaN'](value) ? 'NaN' : 'Infinity'));
 
     if (value < this.range.min || value > this.range.max)
-      // TODO: Test Minecraft reaction on these scenarios
-      diagnostics.report('WTF, we have to test how minecraft reacts on Infinity or NaN', Kernel['Error::constructor']);
-
-    return diagnostics;
+      return diagnostics.report(
+        `Provided integer value was out of range.  Value: ${value}, argument bounds: [${this.range.min}, ${this.range.max}]`,
+        Kernel['Error::constructor'], // TODO: Resolve ArgumentOutOfBounds error constructor
+      );
   }
 }
 export class BigIntType extends NumberType {
   public override validate(diagnostics: Diagnostics, value: unknown) {
     if (typeof value !== 'bigint') {
-      // TODO: Test Minecraft reaction on these scenarios
-      return diagnostics.report('NO ERROR SPECIFIED, CHECK TODOs', Kernel['TypeError::constructor']);
+      return diagnostics.report(Errors.NativeTypeConversationFailed());
     }
 
     if (value < this.range.min || value > this.range.max)
-      // TODO: Test Minecraft reaction on these scenarios
-      diagnostics.report('WTF, we have to test how minecraft reacts on Infinity or NaN', Kernel['Error::constructor']);
+      return diagnostics.report(
+        `Provided integer value was out of range.  Value: ${value}, argument bounds: [${this.range.min}, ${this.range.max}]`,
+        Kernel['Error::constructor'], // TODO: Resolve ArgumentOutOfBounds error constructor
+      );
 
     return diagnostics;
   }
