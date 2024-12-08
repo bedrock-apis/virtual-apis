@@ -51,24 +51,6 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
 
   /**
    *
-   * @param params IArguments passed by api context, unpredictable but type safe
-   * @returns handle and cache pair
-   */
-  public __construct(params: ArrayLike<unknown>): [object, object] {
-    let data = this.parent?.__construct(params);
-    if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
-    const [handle, cache] = data;
-
-    APIWrapper.nativeHandles.add(handle);
-    this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
-    this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
-
-    this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
-
-    return data;
-  }
-  /**
-   *
    * @returns New Virtual API Instance of the handle
    */
   public create(): this['api']['prototype'] {
@@ -106,6 +88,26 @@ export class ClassDefinition<T extends ClassDefinition | null = null, P = object
     return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
   }
 
+  /**
+   *
+   * @param params IArguments passed by api context, unpredictable but type safe
+   * @returns handle and cache pair
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public __construct(params: ArrayLike<unknown>): [object, object] {
+    let data = this.parent?.__construct(params);
+    if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
+    const [handle, cache] = data;
+
+    APIWrapper.nativeHandles.add(handle);
+    this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
+    this.NATIVE_TO_HANDLE_CACHE.set(cache, handle);
+
+    this.onConstruct.trigger(handle, cache, this, params).catch(Kernel.error);
+
+    return data;
+  }
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public __call(that: unknown, id: string, params: unknown[]) {
     Kernel.log('call: ' + id);
   }
