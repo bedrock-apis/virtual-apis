@@ -53,7 +53,6 @@ export abstract class BaseType {
 export class VoidType extends BaseType {
   public override validate(diagnostics: Diagnostics, value: unknown) {
     if (value !== undefined) diagnostics.report(new Report('Type Report', Kernel['TypeError::constructor']));
-    throw diagnostics;
   }
   public constructor() {
     super();

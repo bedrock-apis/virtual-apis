@@ -12,7 +12,7 @@ export class ClassBindType extends BaseType {
   }
 }
 export class InterfaceBindType extends BaseType {
-  public readonly properties = Kernel.Construct('Map') as Map<string, { type: BaseType; isOptional: boolean }>;
+  public readonly properties = Kernel.Construct('Map') as Map<string, BaseType>;
   public constructor(name: string) {
     super();
   }
@@ -20,8 +20,8 @@ export class InterfaceBindType extends BaseType {
     // TODO: No implementation error
     diagnostics.report(Errors.NoImplementation());
   }
-  public addProperty(name: string, type: BaseType, isOptional: boolean = false) {
-    this.properties.set(name, { type, isOptional: Kernel['Boolean::constructor'](isOptional) });
+  public addProperty(name: string, type: BaseType) {
+    this.properties.set(name, type);
     return this;
   }
 }
