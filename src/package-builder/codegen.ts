@@ -4,7 +4,7 @@ import { ClassDefinition } from '../api-builder';
 // Just for sake of test
 import * as prettier from 'prettier';
 
-import { Type } from '../api-builder/type-validators';
+import { Context } from '../api-builder/context';
 import { toDefaultType } from '../api-builder/type-validators/default';
 import { InterfaceBindType } from '../api-builder/type-validators/types/interface';
 import {
@@ -24,20 +24,20 @@ const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
 
-const typeI = t.i`${Type.name}`;
-const typeIRegisterBindType = t.accessBy(typeI, Type.RegisterBindType.name);
+const contextI = t.i`CONTEXT`;
+const contextIRegisterType = t.accessBy(contextI, 'registerType' satisfies keyof Context);
 
 export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
    const moduleName = source.name.split('/')[1] ?? 'unknown';
    const definitionsI = t.i`__`;
    const definitions: ts.Node[] = [
-      t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, typeI]),
+      t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, contextI]),
    ];
    const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
 
    for (const interfaceMetadata of source.interfaces) {
       const node = generateInterfaceDefinition(interfaceMetadata);
-      definitions.push(t.call(typeIRegisterBindType, [node]));
+      definitions.push(t.call(contextIRegisterType, [node]));
    }
 
    for (const classMeta of source.classes) {
