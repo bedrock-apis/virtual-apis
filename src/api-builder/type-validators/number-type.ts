@@ -22,6 +22,7 @@ export class NumberType extends BaseType {
       );
   }
 }
+
 export class BigIntType extends NumberType {
   public override validate(diagnostics: Diagnostics, value: unknown) {
     if (typeof value !== 'bigint') {
