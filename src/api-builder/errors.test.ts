@@ -62,7 +62,7 @@ describe('Report', () => {
             if (!(e instanceof Error) || !e.stack) return e;
             return normalize(e.stack)
                .replaceAll(normalize(process.cwd()), 'cwd')
-               .replace(/\(?file:\/\/\/cwd\/node_modules\/.+/g, '<node_modules>')
+               .replace(/\(?file:\/\/\/?cwd\/node_modules\/.+/g, '<node_modules>')
                .replace(/\n\s+at\s*(runTest|runSuite|runWithTimeout)? <node_modules>/g, '')
                .replace(/\n\s+at\s*.+ \(?node:internal.+\)?/g, '')
                .replace(/\.ts:\d+:\d+/g, '');
