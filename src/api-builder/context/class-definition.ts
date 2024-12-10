@@ -97,10 +97,10 @@ export class ClassDefinition<
          returnType,
       ));
       this.virtualApis.set(`${this.classId}::${name}`, method as () => unknown);
-      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>>;
+      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>, S, NAME>;
    }
 
-   public addProperty<PropertyType, Name extends string>(name: Name, type: Type, isReadonly: boolean) {
+   public addProperty<Name extends string>(name: Name, type: Type, isReadonly: boolean) {
       // TODO
 
       const getter = APIBuilder.CreateGetter(this as ClassDefinition, name, type);
@@ -113,10 +113,16 @@ export class ClassDefinition<
       });
       this.virtualApis.set(`${this.classId}::${name} getter`, getter as () => unknown);
       if (setter) this.virtualApis.set(`${this.classId}::${name} setter`, setter as () => unknown);
-      return this as ClassDefinition<T, P & Record<Name, unknown>>;
+      return this as ClassDefinition<T, P & Record<Name, unknown>, S>;
    }
 
-   public addStaticFunction() {}
+   public addStaticFunction<Name extends string>(
+      name: Name,
+      params: ParamsDefinition = new ParamsDefinition(),
+      returnType: Type = new VoidType(),
+   ) {
+      return this as ClassDefinition<T, P, S & Record<Name, (...params: unknown[]) => unknown>, NAME>;
+   }
 
    public addStaticConstant<PropertyType, Name extends string>(
       name: Name,
@@ -127,7 +133,7 @@ export class ClassDefinition<
       // TODO
       // (this.api as Record<Name, unknown>)[name] = defaultValue;
 
-      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>>;
+      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>, NAME>;
    }
 
    /**
@@ -135,7 +141,6 @@ export class ClassDefinition<
     * @param params IArguments passed by api context, unpredictable but type safe
     * @returns handle and cache pair
     */
-   // eslint-disable-next-line @typescript-eslint/naming-convention
    public __construct(context: ConstructionExecutionContext): [object, object] {
       let data = this.parent?.__construct(context);
       if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
@@ -152,11 +157,9 @@ export class ClassDefinition<
 
       return data;
    }
-   // eslint-disable-next-line @typescript-eslint/naming-convention
    public __call(context: ExecutionContext) {
       Kernel.log('call: ' + context.methodId);
    }
-   // eslint-disable-next-line @typescript-eslint/naming-convention
    public __reports(context: ConstructionExecutionContext) {
       Kernel.log('pre-call: diagnostics ' + context.diagnostics.errors.length);
    }

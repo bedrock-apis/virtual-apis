@@ -8,6 +8,7 @@ export default tseslint.config([
    eslint.configs.recommended,
    ...tseslint.configs.strict,
    {
+      linterOptions: { reportUnusedDisableDirectives: true },
       rules: {
          '@typescript-eslint/no-extraneous-class': 'off',
          '@typescript-eslint/no-unused-vars': 'off',
@@ -200,23 +201,13 @@ function namingConvention() {
          format: ['camelCase', 'PascalCase', 'snake_case'],
       },
 
-      {
-         selector: 'variable',
-         format: ['camelCase'],
-      },
+      { selector: 'variable', format: ['camelCase'] },
 
-      {
-         selector: 'function',
-         format: ['camelCase'],
-      },
+      { selector: 'function', format: ['camelCase'] },
 
-      {
-         selector: 'classMethod',
-         modifiers: ['static'],
-         format: ['PascalCase'],
-      },
+      { selector: 'classMethod', modifiers: ['static'], format: ['PascalCase'] },
 
-      { selector: 'classMethod', format: ['camelCase'] },
+      { selector: 'classMethod', format: ['camelCase'], leadingUnderscore: 'allowDouble' },
 
       { selector: 'classProperty', modifiers: ['readonly', 'private'], format: ['UPPER_CASE'] },
       { selector: 'classProperty', modifiers: ['readonly', 'public'], format: ['camelCase'] },

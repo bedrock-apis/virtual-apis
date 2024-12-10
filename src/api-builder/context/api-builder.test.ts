@@ -1,17 +1,16 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
-import { ClassDefinition } from './class-definition';
+import { Context } from '.';
+import { Diagnostics } from '../errors';
 import { Kernel } from '../kernel';
 import { BooleanType, ParamsDefinition } from '../type-validators';
 import { ConstructionExecutionContext } from './execution-context';
-import { Diagnostics } from '../errors';
-import { Context } from '.';
 
 const context = new Context();
 const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
 const PlayerDefinition = context
    .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true, true)
    .addMethod('methodB')
-   .addProperty<boolean, 'test'>('test', new BooleanType(), false);
+   .addProperty('test', new BooleanType(), false);
 
 const Player = PlayerDefinition.api;
 const Entity = EntityDefinition.api;

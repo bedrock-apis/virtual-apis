@@ -10,6 +10,49 @@ export class ParamsDefinition extends Kernel.Empty {
    public requiredParams: number = 0;
    public params = Kernel.Construct('Array') as ParamType[];
 
+   /**
+     * Special logic for handling ranges as the could be different from defined type, check example below 
+            {
+              "details": {
+                "max_value": 1000.0,
+                "min_value": 0.0
+              },
+              "name": "radius",
+              "type": {
+                "is_bind_type": false,
+                "is_errorable": false,
+                "name": "float",
+                "valid_range": {
+                  "max": 2147483647,
+                  "min": -2147483648
+                }
+              }
+            },
+     */
+
+   public constructor(context?: Context, params?: MetadataFunctionArgumentDefinition[]) {
+      super();
+      if (context && params) {
+         for (const param of params) {
+            const isOptional = typeof param.details?.default_value !== 'undefined';
+            const type = context.resolveType(param.type);
+            const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
+            const validRange =
+               param.details && 'max_value' in param.details && 'min_value' in param.details
+                  ? { min: param.details.min_value, max: param.details.max_value }
+                  : undefined;
+
+            const paramType = new ParamType(
+               isOptional ? new OptionalType(type) : type,
+               isOptional,
+               defaultValue,
+               validRange,
+            );
+            this.addType(paramType);
+         }
+      }
+   }
+
    public addType(type: ParamType): this {
       if (this.params.length === this.requiredParams && !type.isOptional) {
          this.params.push(type);
@@ -31,50 +74,8 @@ export class ParamsDefinition extends Kernel.Empty {
          this.params[i]?.validate(diagnostics, value);
       }
    }
-
-   /**
-     * Special logic for handling ranges as the could be different from defined type, check example below 
-            {
-              "details": {
-                "max_value": 1000.0,
-                "min_value": 0.0
-              },
-              "name": "radius",
-              "type": {
-                "is_bind_type": false,
-                "is_errorable": false,
-                "name": "float",
-                "valid_range": {
-                  "max": 2147483647,
-                  "min": -2147483648
-                }
-              }
-            },
-     */
-
-   public static Resolve(context: Context, params: MetadataFunctionArgumentDefinition[]): ParamsDefinition {
-      const definition = new this();
-
-      for (const param of params) {
-         const isOptional = typeof param.details?.default_value !== 'undefined';
-         const type = context.resolveType(param.type);
-         const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
-         const validRange =
-            param.details && 'max_value' in param.details && 'min_value' in param.details
-               ? { min: param.details.min_value, max: param.details.max_value }
-               : undefined;
-
-         const paramType = new ParamType(
-            isOptional ? new OptionalType(type) : type,
-            isOptional,
-            defaultValue,
-            validRange,
-         );
-         definition.addType(paramType);
-      }
-      return definition;
-   }
 }
+
 export class ParamType extends Type {
    public constructor(
       public readonly type: Type,

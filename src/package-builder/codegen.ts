@@ -1,11 +1,10 @@
 import ts, { factory } from 'typescript';
-import { ClassDefinition } from '../api-builder';
+import { ClassDefinition, ParamsDefinition } from '../api-builder';
 
 // Just for sake of test
 import * as prettier from 'prettier';
 
 import { Context } from '../api-builder/context';
-import { toDefaultType } from '../api-builder/type-validators/default';
 import { InterfaceBindType } from '../api-builder/type-validators/types/interface';
 import {
    MetadataClassDefinition,
@@ -14,16 +13,16 @@ import {
    MetadataInterfaceDefinition,
    MetadataModuleDefinition,
    MetadataPropertyMemberDefinition,
+   MetadataType,
 } from './script-module-metadata';
 import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
-const classDefinitionIApiClassProperty = 'api' satisfies keyof ClassDefinition;
+const classDefinitionIApi = 'api' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 const classDefinitonAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
-const classDefinitonAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
-//const classDefinitonAddCallableConstructor = 'addCallableConstructor' satisfies keyof ClassDefinition;
+const classDefinitonIAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
@@ -31,12 +30,17 @@ const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBin
 const contextI = t.i`CONTEXT`;
 const contextIRegisterType = t.accessBy(contextI, 'registerType' satisfies keyof Context);
 const contextIResolveType = 'resolveType' satisfies keyof Context;
+function createContextResolveType(type: MetadataType) {
+   return t.methodCall(contextI, contextIResolveType, [t.asIs(type)]);
+}
+
+const paramsDefinitionI = t.i`${ParamsDefinition.name}`;
 
 export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
    const moduleName = source.name.split('/')[1] ?? 'unknown';
    const definitionsI = t.i`__`;
    const definitions: ts.Node[] = [
-      t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, contextI]),
+      t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, paramsDefinitionI, contextI]),
    ];
    const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
 
@@ -50,9 +54,7 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
       const node = generateClassDefinition(classMeta);
 
       definitions.push(t.exportConst(name, node));
-      exportDeclarations.push(
-         t.exportConst(name, t.accessBy(t.accessBy(definitionsI, name), classDefinitionIApiClassProperty)),
-      );
+      exportDeclarations.push(t.exportConst(name, t.accessBy(t.accessBy(definitionsI, name), classDefinitionIApi)));
    }
 
    if (source.enums)
@@ -60,7 +62,7 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
          exportDeclarations.push(
             t.createEnum(
                enumMeta.name,
-               enumMeta.constants.filter(e => !!e.name && !!e.value).map(e => [e.name, t.asIs(e.value)]),
+               enumMeta.constants.map(e => [e.name, t.asIs(e.value)]),
             ),
          );
       }
@@ -95,7 +97,7 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const parent = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.null;
 
    function getArgTypes(args: MetadataFunctionArgumentDefinition[]) {
-      return t.asIs(args.map(e => ({ ...e, type: toDefaultType(e.type) })));
+      return t.asIs(args.map(e => ({ ...e, type: e.type })));
    }
 
    const constructorType = classMeta.functions.find(e => e.is_constructor);
@@ -113,10 +115,10 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    for (const { name, return_type, is_static, arguments: args, is_constructor } of classMeta.functions) {
       if (is_constructor) continue;
 
-      node = t.methodCall(node, is_static ? classDefinitonAddStaticMethod : classDefinitionIAddMethod, [
+      node = t.methodCall(node, is_static ? classDefinitonIAddStaticMethod : classDefinitionIAddMethod, [
          t.asIs(name),
-         getArgTypes(args),
-         t.asIs(toDefaultType(return_type)),
+         t.createNewCall(paramsDefinitionI, [contextI, getArgTypes(args)]),
+         createContextResolveType(return_type),
       ]);
    }
 
@@ -137,7 +139,7 @@ function addPropertiesToClass(
          methodName,
          [
             t.asIs(property.name),
-            t.asIs(toDefaultType(property.type)),
+            t.asIs(property.type),
             t.asIs(property.is_read_only),
             'value' in property ? t.asIs(property.value) : undefined,
          ].filter(e => !!e),
@@ -152,10 +154,7 @@ function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinit
    let node: ts.Expression = t.createNewCall(interfaceBindTypeI, [t.asIs(name)]);
 
    for (const { name, type } of interfaceMetadata.properties) {
-      node = t.methodCall(node, interfaceBindTypeIAddProperty, [
-         t.asIs(name),
-         t.methodCall(contextI, contextIResolveType, [t.asIs(type)]),
-      ]);
+      node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.asIs(name), createContextResolveType(type)]);
    }
 
    return node;
