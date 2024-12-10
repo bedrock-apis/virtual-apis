@@ -63,34 +63,32 @@ describe('Report', () => {
             return normalize(e.stack)
                .replaceAll(normalize(process.cwd()), 'cwd')
                .replace(/\(?file:\/\/\/cwd\/node_modules\/.+/g, '<node_modules>')
-               .replace(/\n\s+at\s*(runTest|runSuite|runWithTimeout)? <node_modules>/g, '');
+               .replace(/\n\s+at\s*(runTest|runSuite|runWithTimeout)? <node_modules>/g, '')
+               .replace(/\n\s+at\s*.+ \(?node:internal.+\)?/g, '')
+               .replace(/\.ts:\d+:\d+/g, '');
          }
       }
 
       expect(getAndNormalizeStack(() => report.throw())).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/src/api-builder/errors.test.ts:70:48
-            at getAndNormalizeStack (cwd/src/api-builder/errors.test.ts:60:13)
-            at cwd/src/api-builder/errors.test.ts:70:14
-            at processTicksAndRejections (node:internal/process/task_queues:95:5)"
+            at cwd/src/api-builder/errors.test
+            at getAndNormalizeStack (cwd/src/api-builder/errors.test)
+            at cwd/src/api-builder/errors.test"
       `);
       expect(getAndNormalizeStack(() => report.throw(1))).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/src/api-builder/errors.test.ts:79:48
-            at getAndNormalizeStack (cwd/src/api-builder/errors.test.ts:60:13)
-            at cwd/src/api-builder/errors.test.ts:79:14
-            at processTicksAndRejections (node:internal/process/task_queues:95:5)"
+            at cwd/src/api-builder/errors.test
+            at getAndNormalizeStack (cwd/src/api-builder/errors.test)
+            at cwd/src/api-builder/errors.test"
       `);
       expect(getAndNormalizeStack(() => report.throw(2))).toMatchInlineSnapshot(`
         "Error: Message
-            at getAndNormalizeStack (cwd/src/api-builder/errors.test.ts:60:13)
-            at cwd/src/api-builder/errors.test.ts:88:14
-            at processTicksAndRejections (node:internal/process/task_queues:95:5)"
+            at getAndNormalizeStack (cwd/src/api-builder/errors.test)
+            at cwd/src/api-builder/errors.test"
       `);
       expect(getAndNormalizeStack(() => report.throw(3))).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/src/api-builder/errors.test.ts:96:14
-            at processTicksAndRejections (node:internal/process/task_queues:95:5)"
+            at cwd/src/api-builder/errors.test"
       `);
    });
 });

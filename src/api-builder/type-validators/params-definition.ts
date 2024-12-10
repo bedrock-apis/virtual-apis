@@ -65,7 +65,7 @@ export class ParamsDefinition extends Kernel.Empty {
    }
 
    public validate(diagnostics: Diagnostics, params: unknown[]) {
-      if (params.length > this.params.length)
+      if (params.length > this.params.length || params.length < this.requiredParams)
          return diagnostics.report(
             ERRORS.IncorrectNumberOfArguments({ min: this.requiredParams, max: this.params.length }, params.length),
          );
