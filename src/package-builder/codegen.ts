@@ -20,6 +20,7 @@ import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApi = 'api' satisfies keyof ClassDefinition;
+const classDefinitionICreate = 'create' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
 const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
 const classDefinitonAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
@@ -86,7 +87,7 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
       exportDeclarations.push(
          t.exportConst(
             object.name,
-            t.createNewCall(t.accessBy(t.accessBy(definitionsI, object.type.name), classDefinitionIApi), []),
+            t.methodCall(t.accessBy(definitionsI, object.type.name), classDefinitionICreate, []),
          ),
       );
    }
@@ -173,9 +174,7 @@ function addPropertiesToClass(
 }
 
 function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinition) {
-   const name = interfaceMetadata.name;
-
-   let node: ts.Expression = t.createNewCall(interfaceBindTypeI, [t.asIs(name)]);
+   let node: ts.Expression = t.createNewCall(interfaceBindTypeI, [t.asIs(interfaceMetadata.name)]);
 
    for (const { name, type } of interfaceMetadata.properties) {
       node = t.methodCall(node, interfaceBindTypeIAddProperty, [t.asIs(name), createContextResolveType(type)]);
