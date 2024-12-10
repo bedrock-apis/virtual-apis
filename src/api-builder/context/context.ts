@@ -5,6 +5,7 @@ import { DynamicType, ParamsDefinition, VoidType, type Type } from '../type-vali
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';
 import { FunctionType } from '../type-validators/types/function';
+import { MapType } from '../type-validators/types/map';
 import { BigIntType, NumberType } from '../type-validators/types/number';
 import { OptionalType } from '../type-validators/types/optional';
 import { StringType } from '../type-validators/types/string';
@@ -92,9 +93,10 @@ export class Context extends Kernel.Empty {
             return new VoidType();
          case 'array':
             return new ArrayType(this.resolveType(metadataType.element_type));
+         case 'map':
+            return new MapType(this.resolveType(metadataType.key_type), this.resolveType(metadataType.value_type));
          case 'promise':
          case 'generator':
-         case 'map':
          case 'this':
          case 'iterator':
          default:
