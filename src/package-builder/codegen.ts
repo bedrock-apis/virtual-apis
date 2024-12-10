@@ -52,7 +52,7 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
 
    for (const interfaceMetadata of source.interfaces) {
       const node = generateInterfaceDefinition(interfaceMetadata);
-      definitions.push(t.call(contextIRegisterType, [node]));
+      definitions.push(t.call(contextIRegisterType, [t.asIs(interfaceMetadata.name), node]));
    }
 
    const classesWithResolvedDependencies = resolveDependencies(
@@ -77,6 +77,19 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
       }
 
    exportDeclarations.push(t.methodCall(contextI, contextIResolveAllDynamicTypes, []));
+
+   for (const constant of source.constants) {
+      exportDeclarations.push(t.exportConst(constant.name, t.asIs(constant.value)));
+   }
+
+   for (const object of source.objects) {
+      exportDeclarations.push(
+         t.exportConst(
+            object.name,
+            t.createNewCall(t.accessBy(t.accessBy(definitionsI, object.type.name), classDefinitionIApi), []),
+         ),
+      );
+   }
 
    // Create a printer to print the AST back to a string
    const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
@@ -107,12 +120,12 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const classIdI = t.asIs(classId);
    const parent = classMeta.base_types[0]?.name ? t.i`${classMeta.base_types[0].name}` : t.null;
 
-   function getArgTypes(args: MetadataFunctionArgumentDefinition[]) {
-      return t.asIs(args.map(e => ({ ...e, type: e.type })));
+   function createParamsDefinition(args: MetadataFunctionArgumentDefinition[] = []) {
+      return t.createNewCall(paramsDefinitionI, [contextI, t.asIs(args.map(e => ({ ...e, type: e.type })))]);
    }
 
    const constructorType = classMeta.functions.find(e => e.is_constructor);
-   const constructorArgs = constructorType ? getArgTypes(constructorType.arguments) : t.null;
+   const constructorArgs = createParamsDefinition(constructorType?.arguments);
 
    let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [
       /* context */ contextI,
@@ -128,7 +141,7 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
 
       node = t.methodCall(node, is_static ? classDefinitonIAddStaticMethod : classDefinitionIAddMethod, [
          t.asIs(name),
-         t.createNewCall(paramsDefinitionI, [contextI, getArgTypes(args)]),
+         createParamsDefinition(args),
          createContextResolveType(return_type),
       ]);
    }

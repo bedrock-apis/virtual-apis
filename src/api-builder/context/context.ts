@@ -13,7 +13,7 @@ import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
 /*0
-import { isGeneratorObject, isPromise } from 'node:util/types';
+import { isGeneratorObject, isPromise } from 'node:node:util/types';
 
 isGeneratorObject();
 isPromise();

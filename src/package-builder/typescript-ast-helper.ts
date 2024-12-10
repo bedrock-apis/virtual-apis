@@ -33,8 +33,8 @@ export const TYPESCRIPT_AST_HELPER = {
          ),
       );
    },
-   createNewCall(identifier: ts.Identifier, params: ts.Expression[]) {
-      return factory.createNewExpression(identifier, undefined, params);
+   createNewCall(target: ts.Expression, params: ts.Expression[]) {
+      return factory.createNewExpression(target, undefined, params);
    },
    call(nodeToBeCalled: ts.Expression, params: ts.Expression[]) {
       return factory.createCallExpression(nodeToBeCalled, undefined, params);

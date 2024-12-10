@@ -1,8 +1,8 @@
-import { ClassDefinition } from './class-definition';
 import { Diagnostics, ERRORS } from '../errors';
-import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type } from '../type-validators';
+import { ClassDefinition } from './class-definition';
+import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 
 export class APIBuilder extends Kernel.Empty {
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////

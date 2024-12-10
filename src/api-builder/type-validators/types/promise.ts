@@ -1,4 +1,4 @@
-import { isPromise } from 'util/types';
+import { isPromise } from 'node:util/types';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Type } from '../type';
 

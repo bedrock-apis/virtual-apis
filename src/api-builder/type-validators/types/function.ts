@@ -1,4 +1,4 @@
-import { isGeneratorObject } from 'util/types';
+import { isGeneratorObject } from 'node:util/types';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';

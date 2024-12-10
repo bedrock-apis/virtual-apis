@@ -11,7 +11,13 @@ export class Report extends Kernel.Empty {
 
    public throw(startStackFrom = 1): never {
       const error = new this.type(this.message);
-      error.stack = error.stack?.split('\n    at ').slice(startStackFrom).join('\n    at ') || error.stack;
+      if (!error.stack) throw error;
+
+      const [text, ...stack] = error.stack.split('\n    at ');
+
+      error.stack = Kernel.Constructor('Array')
+         .of(text, ...stack.slice(startStackFrom))
+         .join('\n    at ');
       throw error;
    }
 }
