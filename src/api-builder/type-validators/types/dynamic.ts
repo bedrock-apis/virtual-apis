@@ -7,7 +7,7 @@ export class DynamicType extends Type {
    public readonly type: Type | null = null;
    public validate(diagnostics: Diagnostics, value: unknown): void {
       if (!this.type) {
-         throw Kernel.Construct('Error', 'FatalError od');
+         throw Kernel.Construct('Error', `Failed to call validate on unresolved DynamicType`);
       }
       this.type.validate(diagnostics, value);
    }

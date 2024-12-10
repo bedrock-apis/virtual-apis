@@ -11,6 +11,12 @@ suite('MapType', () => {
       expect(() => Type.ValidateOrThrow(type, {})).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, { key: 0 })).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, { key: 1 })).not.toThrow();
+      expect(() => Type.ValidateOrThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => Type.ValidateOrThrow(type, null)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => Type.ValidateOrThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => Type.ValidateOrThrow(type, 2)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => Type.ValidateOrThrow(type, false)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
       expect(() => Type.ValidateOrThrow(type, { key: -10 })).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
