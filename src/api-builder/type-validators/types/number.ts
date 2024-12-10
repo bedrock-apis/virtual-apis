@@ -1,4 +1,4 @@
-import { Range } from '../../../package-builder/script-module-metadata';
+import { Range } from '../../../script-module-metadata';
 import { Diagnostics, ERRORS } from '../../errors';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';

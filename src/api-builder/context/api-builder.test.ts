@@ -80,6 +80,7 @@ suite('Base API', () => {
       expect(get?.call({})).toBeTypeOf('undefined');
 
       expect(() => (player.test = 5)).toThrow();
+      // TODO Fix test expected undefined not to be type of 'undefined'
       expect(get?.call(player)).not.toBeTypeOf('undefined');
    });
 

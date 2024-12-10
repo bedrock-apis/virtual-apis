@@ -14,7 +14,8 @@ import {
    MetadataModuleDefinition,
    MetadataPropertyMemberDefinition,
    MetadataType,
-} from './script-module-metadata';
+} from '../script-module-metadata';
+import { resolveDependencies } from './dependency-resolver';
 import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
 
 const classDefinitionI = t.i`${ClassDefinition.name}`;
@@ -28,6 +29,7 @@ const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
 
 const contextI = t.i`CONTEXT`;
+const contextIResolveAllDynamicTypes = 'resolveAllDynamicTypes' satisfies keyof Context;
 const contextIRegisterType = t.accessBy(contextI, 'registerType' satisfies keyof Context);
 const contextIResolveType = 'resolveType' satisfies keyof Context;
 function createContextResolveType(type: MetadataType) {
@@ -37,19 +39,26 @@ function createContextResolveType(type: MetadataType) {
 const paramsDefinitionI = t.i`${ParamsDefinition.name}`;
 
 export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
+   const pathToApi = '../' + apiFilename;
    const moduleName = source.name.split('/')[1] ?? 'unknown';
    const definitionsI = t.i`__`;
    const definitions: ts.Node[] = [
-      t.importStarFrom('../' + apiFilename, [classDefinitionI, interfaceBindTypeI, paramsDefinitionI, contextI]),
+      t.importStarFrom(pathToApi, [classDefinitionI, interfaceBindTypeI, paramsDefinitionI, contextI]),
    ];
-   const exportDeclarations: ts.Node[] = [t.importAsFrom(definitionsI, `./${moduleName}.native.js`)];
+   const exportDeclarations: ts.Node[] = [
+      t.importAsFrom(definitionsI, `./${moduleName}.native.js`),
+      t.importStarFrom(pathToApi, [contextI]),
+   ];
 
    for (const interfaceMetadata of source.interfaces) {
       const node = generateInterfaceDefinition(interfaceMetadata);
       definitions.push(t.call(contextIRegisterType, [node]));
    }
 
-   for (const classMeta of source.classes) {
+   const classesWithResolvedDependencies = resolveDependencies(
+      source.classes.map(e => ({ id: e.name, dependencies: e.base_types.map(e => e.name), value: e })),
+   );
+   for (const classMeta of classesWithResolvedDependencies) {
       const name = classMeta.name;
       const node = generateClassDefinition(classMeta);
 
@@ -66,6 +75,8 @@ export async function generateModule(source: MetadataModuleDefinition, apiFilena
             ),
          );
       }
+
+   exportDeclarations.push(t.methodCall(contextI, contextIResolveAllDynamicTypes, []));
 
    // Create a printer to print the AST back to a string
    const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });

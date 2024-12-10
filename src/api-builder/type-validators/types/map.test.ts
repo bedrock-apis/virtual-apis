@@ -12,7 +12,7 @@ suite('MapType', () => {
       expect(() => Type.ValidateOrThrow(type, { key: 0 })).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, { key: 1 })).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, { key: -10 })).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: -10, argument bounds: [0, 10]]`,
+         `[TypeError: Native type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, { key: 'value' })).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,

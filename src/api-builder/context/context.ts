@@ -1,13 +1,14 @@
-import { MetadataType } from '../../package-builder/script-module-metadata';
+import { MetadataType } from '../../script-module-metadata';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
-import { DynamicType, ParamsDefinition, VoidType, type Type } from '../type-validators';
+import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';
-import { FunctionType } from '../type-validators/types/function';
+import { FunctionType, GeneratorType } from '../type-validators/types/function';
 import { MapType } from '../type-validators/types/map';
 import { BigIntType, NumberType } from '../type-validators/types/number';
 import { OptionalType } from '../type-validators/types/optional';
+import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
@@ -61,9 +62,11 @@ export class Context extends Kernel.Empty {
       const { name } = metadataType;
 
       if (metadataType.is_bind_type) {
-         const bindType = this.getDynamicType(metadataType.name);
-         if (!bindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
-         return bindType;
+         const type = this.TYPES.get(name);
+         if (type) return type;
+         const dynamicBindType = this.getDynamicType(metadataType.name);
+         if (!dynamicBindType) throw Kernel['ReferenceError::constructor']('resolveType - Unknown bind type: ' + name);
+         return dynamicBindType;
       }
 
       switch (name) {
@@ -96,7 +99,9 @@ export class Context extends Kernel.Empty {
          case 'map':
             return new MapType(this.resolveType(metadataType.key_type), this.resolveType(metadataType.value_type));
          case 'promise':
+            return new PromiseType();
          case 'generator':
+            return new GeneratorType();
          case 'this':
          case 'iterator':
          default:
@@ -105,9 +110,6 @@ export class Context extends Kernel.Empty {
       }
    }
 
-   public constructor() {
-      super();
-   }
    public readonly nativeHandles = Kernel.Construct('WeakSet');
    public readonly nativeEvents = Kernel.Construct('Map') as ReadonlyMap<
       string,

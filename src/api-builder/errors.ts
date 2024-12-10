@@ -1,4 +1,4 @@
-import { Range } from '../package-builder/script-module-metadata';
+import { Range } from '../script-module-metadata';
 import { Kernel } from './kernel';
 
 export class Report extends Kernel.Empty {
