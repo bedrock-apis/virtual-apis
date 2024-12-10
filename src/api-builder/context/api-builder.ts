@@ -132,27 +132,7 @@ export class APIBuilder extends Kernel.Empty {
          return executionContext.result;
       };
 
-      // Mark function as native
-      Kernel.SetFakeNative(method);
-
-      // Set virtual number of params to 0
-      Kernel.SetLength(method, 0);
-
-      // All these names of methods are empty
-      Kernel.SetName(method, '');
-
-      // Handle with proxy for support with "this" callback
-      const final = new Kernel['globalThis::Proxy'](method, {
-         apply(t, that, params) {
-            return t(that, params);
-         },
-      });
-
-      // Set the proxy also as native
-      Kernel.SetFakeNative(final);
-
-      // Return
-      return final;
+      return this.Finalize(method, 0);
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,28 +195,8 @@ export class APIBuilder extends Kernel.Empty {
          return undefined;
       };
 
-      // Mark function as native
-      Kernel.SetFakeNative(method);
-
-      // Set virtual number of params to 1
-      // for setters its alway 1
-      Kernel.SetLength(method, 1);
-
-      // All these names of methods are empty
-      Kernel.SetName(method, '');
-
-      // Handle with proxy for support with "this" callback
-      const final = new Kernel['globalThis::Proxy'](method, {
-         apply(t, that, params) {
-            return t(that, params);
-         },
-      });
-
-      // Set the proxy also as native
-      Kernel.SetFakeNative(final);
-
-      // Return
-      return final;
+      // for setters virtual number of params is always 1
+      return this.Finalize(method, 1);
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,11 +255,15 @@ export class APIBuilder extends Kernel.Empty {
          return executionContext.result;
       };
 
+      return this.Finalize(method, 0);
+   }
+
+   private static Finalize(method: CallableFunction, length: number) {
       // Mark function as native
       Kernel.SetFakeNative(method);
 
-      // Set virtual number of params to 0
-      Kernel.SetLength(method, 0);
+      // Set virtual number of params
+      Kernel.SetLength(method, length);
 
       // All these names of methods are empty
       Kernel.SetName(method, '');
