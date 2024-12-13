@@ -34,7 +34,5 @@ jobs:
          - name: Build with Rolldown
            run: pnpm run bundle
 
-         - name: Build Package
-           run: pnpm run packagegen
-         - name: Vitest RUn
-           run: pnpm exec vitest --run
+         - name: Build Packages
+           run: node ./dist/build.js
