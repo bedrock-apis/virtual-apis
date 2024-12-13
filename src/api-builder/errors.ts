@@ -67,7 +67,8 @@ export const ERRORS = {
    NoImplementation: createReferenceErrorReport('No implementation error'),
    NewExpected: createTypeErrorReport('must be called with new'),
    NativeTypeConversationFailed: createTypeErrorReport('Native type conversion failed.'),
-   NativeOptionalTypeConversationFailed: createTypeErrorReport('Native optional type conversion failed'),
+   NativeOptionalTypeConversationFailed: createTypeErrorReport('Native optional type conversion failed.'),
+   NativeVariantTypeConversationFailed: createTypeErrorReport('Native variant type conversion failed.'),
    NoConstructor: (id: string) => createReferenceErrorReport(`No constructor for native class '${id}'.`),
    ValueIsNotSupported: (value: 'Infinity' | 'NaN') => createTypeErrorReport(`${value} value is not supported.`),
 
@@ -96,6 +97,18 @@ export const ERRORS = {
 
    FunctionArgumentExpectedType(error: string, argument: number, type: string) {
       return createTypeErrorReport(`${error} Function argument [${argument}] expected type: ${type}`);
+   },
+
+   FunctionArgumentBounds(value: unknown, range: Range<unknown, unknown>, argument: number) {
+      // TODO Somehow resolve ArgumentOutOfBoundsError
+      return createErrorReport(
+         `Unsupported or out of bounds value passed to function argument [${argument}]. Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
+      );
+   },
+   OutOfRange(value: unknown, range: Range<unknown, unknown>) {
+      return createErrorReport(
+         `Provided integer value was out of range.  Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
+      );
    },
 
    /* ItemStack */

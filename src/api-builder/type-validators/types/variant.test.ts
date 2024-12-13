@@ -16,20 +16,20 @@ suite('VariantType', () => {
       expect(() => Type.ValidateOrThrow(type, 5)).not.toThrow();
 
       expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, NaN)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
 
       expect(() => Type.ValidateOrThrow(type, 12)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, -10)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
    });
 
@@ -42,20 +42,20 @@ suite('VariantType', () => {
       expect(() => Type.ValidateOrThrow(type, 'string')).not.toThrow();
 
       expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, NaN)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
 
       expect(() => Type.ValidateOrThrow(type, 12)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
       expect(() => Type.ValidateOrThrow(type, -10)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
    });
 
@@ -64,7 +64,7 @@ suite('VariantType', () => {
 
       expect(() => Type.ValidateOrThrow(type, 'string')).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
    });
 
@@ -73,7 +73,7 @@ suite('VariantType', () => {
 
       expect(() => Type.ValidateOrThrow(type, 'string')).not.toThrow();
       expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Native variant type conversion failed.]`,
       );
    });
 });

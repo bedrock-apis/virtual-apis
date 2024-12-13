@@ -1,9 +1,51 @@
-import { describe, test } from 'vitest';
-import { ClassDefinition } from '../context/class-definition';
+import { expect, suite, test } from 'vitest';
+import { MetadataFunctionArgumentDefinition, MetadataType } from '../../script-module-metadata';
 import { Context } from '../context';
+import { ClassDefinition } from '../context/class-definition';
+import { ParamsDefinition } from './params-definition';
 
 const context = new Context();
-const ItemStack = context.createClassDefinition('ItemStack', null).api;
+
+new ClassDefinition(context, 'ItemType', null, new ParamsDefinition(context, []), false, true).addProperty(
+   'id',
+   context.resolveType({ is_bind_type: false, is_errorable: false, name: 'string' } as unknown as MetadataType),
+   true,
+);
+
+const ItemStack = new ClassDefinition(
+   context,
+   'ItemStack',
+   null,
+   new ParamsDefinition(context, [
+      {
+         details: null,
+         name: 'itemType',
+         type: {
+            is_bind_type: false,
+            is_errorable: false,
+            name: 'variant',
+            variant_types: [
+               { is_bind_type: true, is_errorable: false, name: 'ItemType' },
+               { is_bind_type: false, is_errorable: false, name: 'string' },
+            ],
+         },
+      },
+      {
+         details: { default_value: 1, max_value: 255, min_value: 1 },
+         name: 'amount',
+         type: {
+            is_bind_type: false,
+            is_errorable: false,
+            name: 'int32',
+            valid_range: { max: 2147483647, min: -2147483648 },
+         },
+      },
+   ] as unknown as MetadataFunctionArgumentDefinition[]),
+   true,
+   true,
+).api;
+
+context.resolveAllDynamicTypes();
 
 const TEST_DATA: [testCase: () => void, errorText: string][] = [
    [() => (ItemStack as any)(), 'TypeError: must be called with new'],
@@ -237,8 +279,24 @@ const TEST_DATA: [testCase: () => void, errorText: string][] = [
    [() => new ItemStack(-4000000000, -4000000000), 'TypeError: Native variant type conversion failed.'],
 ];
 
-describe('Type Validation', () => {
+suite('Type Validation', () => {
    test('General', () => {
-      // TODO Write test
+      let i = 0;
+      for (const [fn, apiError] of TEST_DATA) {
+         if (apiError.includes('Invalid item identifier')) continue; // Skip until virtual api is implemented
+
+         try {
+            fn();
+            if (apiError !== 'NO ERROR') throw new Error('No error was thrown');
+         } catch (e) {
+            if (!(e instanceof Error)) throw new TypeError('Not a error was thrown for test ' + fn.toString() + '!');
+
+            const prefix = fn.toString() + '\n\n' + i++ + '\n';
+            const virtualError = prefix + e.name + ': ' + e.message;
+            if (virtualError !== apiError) {
+               expect(virtualError).toEqual(prefix + apiError.replace('ArgumentOutOfBoundsError', 'Error'));
+            }
+         }
+      }
    });
 });

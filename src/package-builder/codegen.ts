@@ -164,7 +164,7 @@ function addPropertiesToClass(
          methodName,
          [
             t.asIs(property.name),
-            t.asIs(property.type),
+            t.methodCall(contextI, contextIResolveType, [t.asIs(property.type)]),
             t.asIs(property.is_read_only),
             'value' in property ? t.asIs(property.value) : undefined,
          ].filter(e => !!e),

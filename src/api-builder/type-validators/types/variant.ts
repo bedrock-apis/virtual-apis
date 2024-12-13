@@ -13,7 +13,6 @@ export class VariantType extends Type {
          if (variantDiagnostic.success) return;
       }
 
-      // TODO Ensure error message is Native type conversation failed
-      diagnostics.report(ERRORS.NativeTypeConversationFailed);
+      diagnostics.report(ERRORS.NativeVariantTypeConversationFailed);
    }
 }

@@ -24,12 +24,17 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
       BaseNumberType.ValidateRange<T>(diagnostics, value as T, this.range);
    }
 
-   public static ValidateRange<T extends number | bigint>(diagnostics: Diagnostics, value: T, range: Range<T, T>) {
-      if ((value as number) < range.min || (value as number) > range.max)
-         return diagnostics.report(
-            `Provided integer value was out of range.  Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
-            Kernel['Error::constructor'], // TODO: Resolve ArgumentOutOfBounds error constructor
-         );
+   public static ValidateRange<T extends number | bigint>(
+      diagnostics: Diagnostics,
+      value: T,
+      range: Range<T, T>,
+      argument?: number,
+   ) {
+      if ((typeof value === 'number' || typeof value === 'bigint') && (value < range.min || value > range.max)) {
+         if (typeof argument === 'number') {
+            diagnostics.report(ERRORS.FunctionArgumentBounds(value, range, argument));
+         } else diagnostics.report(ERRORS.OutOfRange(value, range));
+      }
    }
 }
 

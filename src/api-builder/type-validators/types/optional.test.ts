@@ -11,7 +11,7 @@ suite('Optional', () => {
       const optional = new OptionalType(context.resolveType(fromDefaultType('int32')));
 
       expect(() => Type.ValidateOrThrow(optional, 'string')).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native optional type conversion failed]`,
+         `[TypeError: Native optional type conversion failed.]`,
       );
 
       expect(() => Type.ValidateOrThrow(optional, 10000000000)).toThrowErrorMatchingInlineSnapshot(

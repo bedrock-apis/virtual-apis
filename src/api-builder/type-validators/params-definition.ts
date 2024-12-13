@@ -4,7 +4,6 @@ import { Diagnostics, ERRORS } from '../errors';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
-import { OptionalType } from './types/optional';
 
 export class ParamsDefinition extends Kernel.Empty {
    public requiredParams: number = 0;
@@ -33,21 +32,16 @@ export class ParamsDefinition extends Kernel.Empty {
    public constructor(context?: Context, params?: MetadataFunctionArgumentDefinition[]) {
       super();
       if (context && params) {
-         for (const param of params) {
-            const isOptional = typeof param.details?.default_value !== 'undefined';
+         for (const [i, param] of params.entries()) {
             const type = context.resolveType(param.type);
+            const isOptional = typeof param.details?.default_value !== 'undefined';
             const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
             const validRange =
                param.details && 'max_value' in param.details && 'min_value' in param.details
                   ? { min: param.details.min_value, max: param.details.max_value }
                   : undefined;
 
-            const paramType = new ParamType(
-               isOptional ? new OptionalType(type) : type,
-               isOptional,
-               defaultValue,
-               validRange,
-            );
+            const paramType = new ParamType(type, isOptional, defaultValue, validRange, i);
             this.addType(paramType);
          }
       }
@@ -82,16 +76,21 @@ export class ParamType extends Type {
       public readonly isOptional: boolean,
       public readonly defaultValue: unknown,
       public readonly range: Range<number, number> | undefined,
+      public readonly i: number = 0,
    ) {
       super();
    }
    public validate(diagnostics: Diagnostics, value: unknown): void {
-      const validateDiagnostics = new Diagnostics();
-      this.type.validate(validateDiagnostics, value);
+      if (this.isOptional) value ??= this.defaultValue;
 
-      if (this.range) BaseNumberType.ValidateRange(validateDiagnostics, value as number, this.range);
+      const typeDiagnostics = new Diagnostics();
+      this.type.validate(typeDiagnostics, value);
+
+      if (typeDiagnostics.success && this.range) {
+         BaseNumberType.ValidateRange(typeDiagnostics, value as number, this.range, this.i);
+      }
 
       // TODO Check whenether it returns something like ERRORS.FunctionArgumentExpectedType
-      diagnostics.report(...validateDiagnostics.errors);
+      diagnostics.report(...typeDiagnostics.errors);
    }
 }
