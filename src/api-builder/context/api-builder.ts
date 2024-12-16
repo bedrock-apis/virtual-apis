@@ -22,6 +22,7 @@ export class APIBuilder extends Kernel.Empty {
       const ctor = function (...params: ArrayLike<unknown>) {
          const diagnostics = new Diagnostics();
          const executionContext = new ConstructionExecutionContext(
+            ctor as () => unknown,
             definition as ClassDefinition,
             'constructor',
             Kernel.As(params, 'Array'),
@@ -94,6 +95,7 @@ export class APIBuilder extends Kernel.Empty {
       const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
+            proxyThis as () => unknown,
             definition as ClassDefinition,
             id,
             Kernel.As(params, 'Array'),
@@ -132,7 +134,8 @@ export class APIBuilder extends Kernel.Empty {
          return executionContext.result;
       };
 
-      return this.Finalize(method, 0);
+      const proxyThis = this.Proxyify(method, 0);
+      return proxyThis;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +152,7 @@ export class APIBuilder extends Kernel.Empty {
       const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
+            proxyThis as () => unknown,
             definition as ClassDefinition,
             id + ' setter',
             Kernel['Array::constructor'](params),
@@ -196,7 +200,8 @@ export class APIBuilder extends Kernel.Empty {
       };
 
       // for setters virtual number of params is always 1
-      return this.Finalize(method, 1);
+      const proxyThis = this.Proxyify(method, 0);
+      return proxyThis;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +218,7 @@ export class APIBuilder extends Kernel.Empty {
       const method = (that: unknown, params: ArrayLike<unknown>) => {
          const diagnostics = new Diagnostics();
          const executionContext = new ExecutionContext(
+            proxyThis as () => unknown,
             definition as ClassDefinition,
             id + ' getter',
             Kernel['Array::constructor'](),
@@ -255,10 +261,11 @@ export class APIBuilder extends Kernel.Empty {
          return executionContext.result;
       };
 
-      return this.Finalize(method, 0);
+      const proxyThis = this.Proxyify(method, 0);
+      return proxyThis;
    }
 
-   private static Finalize(method: CallableFunction, length: number) {
+   private static Proxyify(method: CallableFunction, length: number) {
       // Mark function as native
       Kernel.SetFakeNative(method);
 

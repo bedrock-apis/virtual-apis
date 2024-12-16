@@ -31,6 +31,7 @@ suite('Base API', () => {
    test('Native Construction', () => {
       const entity_handle = EntityDefinition.__construct(
          new ConstructionExecutionContext(
+            null,
             EntityDefinition,
             EntityDefinition.classId,
             Kernel.Construct('Array'),

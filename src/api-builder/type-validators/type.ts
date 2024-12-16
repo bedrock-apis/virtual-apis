@@ -13,6 +13,7 @@ export abstract class Type extends Kernel.Empty {
 
 export class VoidType extends Type {
    public override validate(diagnostics: Diagnostics, value: unknown) {
-      if (value !== undefined) diagnostics.report(new Report('Type Report', Kernel['TypeError::constructor']));
+      if (value !== undefined)
+         diagnostics.report(new Report('Type Report: ' + typeof value, Kernel['TypeError::constructor']));
    }
 }

@@ -17,9 +17,19 @@ export class ClassDefinition<
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
    public readonly virtualApis = Kernel.Construct('Map') as Map<string, (...args: unknown[]) => unknown>;
-   public readonly onConstruct: NativeEvent<[object, object, this, ConstructionExecutionContext]>;
+   public readonly onConstruct: NativeEvent<[handle: object, cache: object, this, ConstructionExecutionContext]>;
    public readonly constructorId: string;
    public readonly type: Type;
+   public readonly invocable = Kernel.Construct('WeakMap') as WeakMap<
+      CallableFunction,
+      NativeEvent<[handle: object, cache: object, this, ExecutionContext]>
+   >;
+   private addInvocable(id: string, method: (...args: unknown[]) => unknown) {
+      this.virtualApis.set(id, method);
+      const event = new NativeEvent();
+      this.invocable.set(method, event);
+      (this.context.nativeEvents as Map<unknown, unknown>).set(id, event);
+   }
    /**
     * TODO: Improve the types tho
     */
@@ -70,6 +80,7 @@ export class ClassDefinition<
    public create(): this['api']['prototype'] {
       const [handle, cache] = this.__construct(
          new ConstructionExecutionContext(
+            null,
             this as ClassDefinition,
             this.classId,
             Kernel.Construct('Array'),
@@ -96,7 +107,8 @@ export class ClassDefinition<
          params,
          returnType,
       ));
-      this.virtualApis.set(`${this.classId}::${name}`, method as () => unknown);
+      const id = `${this.classId}::${name}`;
+      this.addInvocable(id, method as () => unknown);
       return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>, S, NAME>;
    }
 
@@ -111,8 +123,9 @@ export class ClassDefinition<
          get: getter as () => void,
          set: setter as (n: unknown) => void,
       });
-      this.virtualApis.set(`${this.classId}::${name} getter`, getter as () => unknown);
-      if (setter) this.virtualApis.set(`${this.classId}::${name} setter`, setter as () => unknown);
+
+      this.addInvocable(`${this.classId}::${name} getter`, getter as () => unknown);
+      if (setter) this.addInvocable(`${this.classId}::${name} setter`, setter as () => unknown);
       return this as ClassDefinition<T, P & Record<Name, unknown>, S>;
    }
 
@@ -158,7 +171,22 @@ export class ClassDefinition<
       return data;
    }
    public __call(context: ExecutionContext) {
-      Kernel.log('call: ' + context.methodId);
+      if (context.self) {
+         const event = this.invocable.get(context.self as (...params: unknown[]) => unknown);
+         if (event) {
+            const result = event.invoke(
+               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+               context.handle!,
+               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+               this.HANDLE_TO_NATIVE_CACHE.get(context.handle!)!,
+               this,
+               context,
+            );
+            if (result.successCount !== result.totalCount) {
+               Kernel.log(result);
+            }
+         }
+      }
    }
    public __reports(context: ConstructionExecutionContext) {
       Kernel.log('pre-call: diagnostics ' + context.diagnostics.errors.length);
