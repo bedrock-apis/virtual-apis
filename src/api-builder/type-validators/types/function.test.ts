@@ -1,11 +1,12 @@
 import { expect, suite, test } from 'vitest';
 import { Type } from '../type';
 import { GeneratorType } from './function';
+import { ValidateThrow } from './helper.test';
 
 suite('FunctionType', () => {
    test('Generator', () => {
       const type = new GeneratorType();
-      expect(() => Type.ValidateOrThrow(type, (function* () {})())).not.toThrow();
-      expect(() => Type.ValidateOrThrow(type, {})).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => ValidateThrow(type, (function* () {})())).not.toThrow();
+      expect(() => ValidateThrow(type, {})).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
    });
 });

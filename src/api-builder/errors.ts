@@ -1,58 +1,6 @@
 import { Range } from '../script-module-metadata';
 import { Kernel } from './kernel';
-
-export class Report extends Kernel.Empty {
-   public constructor(
-      public readonly message: string,
-      public readonly type: new (message: string) => Error,
-   ) {
-      super();
-   }
-
-   public throw(startStackFrom = 1): never {
-      const error = new this.type(this.message);
-      if (!error.stack) throw error;
-
-      const [text, ...stack] = error.stack.split('\n    at ');
-
-      error.stack = Kernel.Constructor('Array')
-         .of(text, ...stack.slice(startStackFrom))
-         .join('\n    at ');
-      throw error;
-   }
-}
-
-export class Diagnostics extends Kernel.Empty {
-   public get success() {
-      return this.errors.length === 0;
-   }
-   public readonly errors = Kernel.Construct('Array') as Report[];
-   public readonly warns = Kernel.Construct('Array') as Report[];
-   public report<T extends string | Report>(
-      ...params: T extends string ? [message: T, errorType: Report['type']] : [...report: T[]]
-   ): this {
-      if (typeof params[0] === 'string') {
-         this.errors.push(new Report(params[0], params[1] as Report['type']));
-      } else {
-         this.errors.push(...(params as Report[]));
-      }
-      return this;
-   }
-   public warn<T extends string | Report>(
-      ...params: T extends string ? [message: T, errorType: Report['type']] : [...report: T[]]
-   ): this {
-      if (typeof params[0] === 'string') {
-         this.warns.push(new Report(params[0], params[1] as Report['type']));
-      } else {
-         this.warns.push(...(params as Report[]));
-      }
-      return this;
-   }
-   public throw(startStackFrom = 2): never {
-      this.errors[0]?.throw(startStackFrom + 1);
-      throw Kernel.Construct('Error', 'Failed to throw report error on successfull diagnostics instance');
-   }
-}
+import { Report } from './diagnostics';
 
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
 export type NativeActionKind = 'call' | 'get' | 'set';

@@ -1,6 +1,7 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../script-module-metadata';
 import { Context } from '../context';
-import { Diagnostics, ERRORS } from '../errors';
+import { ERRORS } from '../errors';
+import { DiagnosticsStack } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
@@ -58,7 +59,7 @@ export class ParamsDefinition extends Kernel.Empty {
       return this;
    }
 
-   public validate(diagnostics: Diagnostics, params: unknown[]) {
+   public validate(diagnostics: DiagnosticsStack, params: unknown[]) {
       if (params.length > this.params.length || params.length < this.requiredParams)
          return diagnostics.report(
             ERRORS.IncorrectNumberOfArguments({ min: this.requiredParams, max: this.params.length }, params.length),
@@ -80,17 +81,17 @@ export class ParamType extends Type {
    ) {
       super();
    }
-   public validate(diagnostics: Diagnostics, value: unknown): void {
+   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
       if (this.isOptional) value ??= this.defaultValue;
 
-      const typeDiagnostics = new Diagnostics();
+      const typeDiagnostics = new DiagnosticsStack();
       this.type.validate(typeDiagnostics, value);
 
-      if (typeDiagnostics.success && this.range) {
+      if (typeDiagnostics.isEmpty && this.range) {
          BaseNumberType.ValidateRange(typeDiagnostics, value as number, this.range, this.i);
       }
 
-      // TODO Check whenether it returns something like ERRORS.FunctionArgumentExpectedType
-      diagnostics.report(...typeDiagnostics.errors);
+      // TODO Check whenever it returns something like ERRORS.FunctionArgumentExpectedType
+      diagnostics.report(...typeDiagnostics.stack);
    }
 }

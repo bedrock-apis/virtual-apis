@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { Diagnostics, Report } from './errors';
+import { Diagnostics, Report } from './diagnostics';
 
 describe('Diagnostics', () => {
    test('Report multiple reports', () => {
       const diagnostics = new Diagnostics();
 
-      diagnostics.report(new Report('Message 0', Error));
-      diagnostics.report(new Report('Message 1', Error), new Report('Message 2', Error));
+      diagnostics.errors.report(new Report('Message 0', Error));
+      diagnostics.errors.report(new Report('Message 1', Error), new Report('Message 2', Error));
 
       expect(diagnostics.errors).toMatchInlineSnapshot(`
         [
@@ -28,7 +28,7 @@ describe('Diagnostics', () => {
    test('Report with string', () => {
       const diagnostics = new Diagnostics();
 
-      diagnostics.report('Message', Error);
+      diagnostics.errors.report('Message', Error);
 
       expect(diagnostics.errors).toMatchInlineSnapshot(`
         [
@@ -42,7 +42,7 @@ describe('Diagnostics', () => {
 
    test('Diagnostics', () => {
       expect(() => new Diagnostics().throw()).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Failed to throw report error on successfull diagnostics instance]`,
+         `[Error: Failed to throw report error on successful diagnostics instance]`,
       );
    });
 });

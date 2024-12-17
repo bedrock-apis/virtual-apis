@@ -1,9 +1,10 @@
 import { isPromise } from 'node:util/types';
-import { Diagnostics, ERRORS } from '../../errors';
+import { ERRORS } from '../../errors';
+import { DiagnosticsStack } from '../../diagnostics';
 import { Type } from '../type';
 
 export class PromiseType extends Type {
-   public validate(diagnostics: Diagnostics, value: unknown): void {
+   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
       if (!isPromise(value)) diagnostics.report(ERRORS.NativeTypeConversationFailed);
    }
 }

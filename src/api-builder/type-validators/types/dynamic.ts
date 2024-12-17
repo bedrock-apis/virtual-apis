@@ -1,11 +1,11 @@
 import { Mutable } from '../../../helper-types';
-import { Diagnostics } from '../../errors';
+import { DiagnosticsStack } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
 export class DynamicType extends Type {
    public readonly type: Type | null = null;
-   public validate(diagnostics: Diagnostics, value: unknown): void {
+   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
       if (!this.type) {
          throw Kernel.Construct('Error', `Failed to call validate on unresolved DynamicType`);
       }

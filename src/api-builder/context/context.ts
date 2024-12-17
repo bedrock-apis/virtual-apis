@@ -12,18 +12,22 @@ import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
-/*0
-import { isGeneratorObject, isPromise } from 'node:node:util/types';
-
-isGeneratorObject();
-isPromise();
-*/
-
+import { OptionKeys } from './context-options';
+import { Diagnostics } from '../diagnostics';
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
-
 export class Context extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
+   private readonly OPTIONS: Record<OptionKeys, boolean> = {
+      StrictReturnTypes: true,
+      GetterRequireValidBound: false,
+   };
+   public setConfigProperty<T extends OptionKeys>(key: T, value: boolean) {
+      this.OPTIONS[key] = value;
+   }
+   public getConfigProperty<T extends OptionKeys>(key: T) {
+      return this.OPTIONS[key];
+   }
    /**
     * Register new type
     * @param name
@@ -134,5 +138,8 @@ export class Context extends Kernel.Empty {
       newExpected = true,
    ): ClassDefinition<T, object, object> {
       return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, hasConstructor, newExpected);
+   }
+   public reportDiagnostics(diagnostics: Diagnostics) {
+      Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name);
    }
 }

@@ -1,5 +1,6 @@
 import { Range } from '../../../script-module-metadata';
-import { Diagnostics, ERRORS } from '../../errors';
+import { ERRORS } from '../../errors';
+import { DiagnosticsStack } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -14,7 +15,7 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
       super();
    }
 
-   public override validate(diagnostics: Diagnostics, value: unknown) {
+   public override validate(diagnostics: DiagnosticsStack, value: unknown) {
       if (typeof value !== this.type) return diagnostics.report(ERRORS.NativeTypeConversationFailed);
 
       if (this.isFiniteCheck && !isFinite(value as unknown as number)) {
@@ -25,7 +26,7 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
    }
 
    public static ValidateRange<T extends number | bigint>(
-      diagnostics: Diagnostics,
+      diagnostics: DiagnosticsStack,
       value: T,
       range: Range<T, T>,
       argument?: number,

@@ -2,13 +2,14 @@ import { expect, suite, test } from 'vitest';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 import { PromiseType } from './promise';
+import { ValidateThrow } from './helper.test';
 
 suite('PromiseType', () => {
    test('Promise', () => {
       const type = new PromiseType();
-      expect(() => Type.ValidateOrThrow(type, new Promise(() => {}))).not.toThrow();
+      expect(() => ValidateThrow(type, new Promise(() => {}))).not.toThrow();
       expect(() =>
-         Type.ValidateOrThrow(
+         ValidateThrow(
             type,
             Kernel.Construct('Promise', () => {}),
          ),
@@ -17,14 +18,26 @@ suite('PromiseType', () => {
 
    test('Not A Promise', () => {
       const type = new PromiseType();
-      expect(() => Type.ValidateOrThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, 10)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, null)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, false)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() =>
-         Type.ValidateOrThrow(type, { then() {}, catch() {}, finally() {} }),
-      ).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => ValidateThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, 10)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, null)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, false)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, { then() {}, catch() {}, finally() {} })).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
    });
 });

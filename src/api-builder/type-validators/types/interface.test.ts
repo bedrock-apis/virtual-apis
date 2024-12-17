@@ -3,6 +3,7 @@ import { MetadataType } from '../../../script-module-metadata';
 import { Context } from '../../context';
 import { Type } from '../type';
 import { InterfaceBindType } from './interface';
+import { ValidateThrow } from './helper.test';
 
 suite('InterfaceType', () => {
    function ref(name: string) {
@@ -114,7 +115,7 @@ suite('InterfaceType', () => {
         ]
       `);
 
-      expect(() => Type.ValidateOrThrow(aType, {})).toThrowErrorMatchingInlineSnapshot(
+      expect(() => ValidateThrow(aType, {})).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });

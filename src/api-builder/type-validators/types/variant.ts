@@ -1,4 +1,5 @@
-import { Diagnostics, ERRORS } from '../../errors';
+import { ERRORS } from '../../errors';
+import { DiagnosticsStack } from '../../diagnostics';
 import { Type } from '../type';
 
 export class VariantType extends Type {
@@ -6,11 +7,11 @@ export class VariantType extends Type {
       super();
    }
 
-   public validate(diagnostics: Diagnostics, value: unknown): void {
+   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
+      const variantDiagnostic = new DiagnosticsStack();
       for (const variant of this.variants) {
-         const variantDiagnostic = new Diagnostics();
          variant.validate(variantDiagnostic, value);
-         if (variantDiagnostic.success) return;
+         if (variantDiagnostic.isEmpty) return;
       }
 
       diagnostics.report(ERRORS.NativeVariantTypeConversationFailed);

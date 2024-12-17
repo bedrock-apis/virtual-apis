@@ -3,35 +3,48 @@ import { Type } from '../type';
 import { MapType } from './map';
 import { NumberType } from './number';
 import { StringType } from './string';
+import { ValidateThrow } from './helper.test';
 
 suite('MapType', () => {
    test('Map', () => {
       const type = new MapType(new StringType(), new NumberType({ max: 10, min: 0 }));
 
-      expect(() => Type.ValidateOrThrow(type, {})).not.toThrow();
-      expect(() => Type.ValidateOrThrow(type, { key: 0 })).not.toThrow();
-      expect(() => Type.ValidateOrThrow(type, { key: 1 })).not.toThrow();
-      expect(() => Type.ValidateOrThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, null)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, 2)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, true)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, false)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
-      expect(() => Type.ValidateOrThrow(type, { key: -10 })).toThrowErrorMatchingInlineSnapshot(
+      expect(() => ValidateThrow(type, {})).not.toThrow();
+      expect(() => ValidateThrow(type, { key: 0 })).not.toThrow();
+      expect(() => ValidateThrow(type, { key: 1 })).not.toThrow();
+      expect(() => ValidateThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => Type.ValidateOrThrow(type, { key: 'value' })).toThrowErrorMatchingInlineSnapshot(
+      expect(() => ValidateThrow(type, null)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => Type.ValidateOrThrow(type, { key: null })).toThrowErrorMatchingInlineSnapshot(
+      expect(() => ValidateThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => Type.ValidateOrThrow(type, { key: undefined })).toThrowErrorMatchingInlineSnapshot(
+      expect(() => ValidateThrow(type, 2)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, false)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, { key: -10 })).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, { key: 'value' })).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, { key: null })).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => ValidateThrow(type, { key: undefined })).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
 
       const symbol = Symbol();
-      expect(() => Type.ValidateOrThrow(type, { [symbol]: 0 })).not.toThrow();
-      expect(() => Type.ValidateOrThrow(type, { 0: 0 })).not.toThrow(); // 0 is converted into string type;
+      expect(() => ValidateThrow(type, { [symbol]: 0 })).not.toThrow();
+      expect(() => ValidateThrow(type, { 0: 0 })).not.toThrow(); // 0 is converted into string type;
    });
 });

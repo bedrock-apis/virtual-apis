@@ -1,4 +1,4 @@
-import { Diagnostics } from '../errors';
+import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';

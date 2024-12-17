@@ -1,7 +1,9 @@
-import { Diagnostics, ERRORS } from '../errors';
+import { ERRORS } from '../errors';
+import { Diagnostics } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type } from '../type-validators';
 import { ClassDefinition } from './class-definition';
+import { ContextOptions } from './context-options';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 
 export class APIBuilder extends Kernel.Empty {
@@ -29,13 +31,13 @@ export class APIBuilder extends Kernel.Empty {
             diagnostics,
          );
          // Constructor should be callable only with "NEW" keyword
-         if (!new.target && definition.newExpected) diagnostics.report(ERRORS.NewExpected);
+         if (!new.target && definition.newExpected) diagnostics.errors.report(ERRORS.NewExpected);
 
          // If constructor is present for this class
-         if (!definition.hasConstructor) diagnostics.report(ERRORS.NoConstructor(definition.classId));
+         if (!definition.hasConstructor) diagnostics.errors.report(ERRORS.NoConstructor(definition.classId));
 
          // Validate Errors
-         paramsDefinition.validate(diagnostics, executionContext.parameters);
+         paramsDefinition.validate(diagnostics.errors, executionContext.parameters);
 
          // Checks
          if (!diagnostics.success) {
@@ -104,11 +106,11 @@ export class APIBuilder extends Kernel.Empty {
          );
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object))
-            diagnostics.report(ERRORS.BoundToPrototype('function', id));
+            diagnostics.errors.report(ERRORS.BoundToPrototype('function', id));
          // Validate correctness of this type
-         definition.type.validate(diagnostics, that);
+         definition.type.validate(diagnostics.errors, that);
          // Validate params
-         paramsDefinition.validate(diagnostics, executionContext.parameters);
+         paramsDefinition.validate(diagnostics.errors, executionContext.parameters);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
@@ -118,13 +120,14 @@ export class APIBuilder extends Kernel.Empty {
 
          definition.__call(executionContext);
 
-         returnType.validate(diagnostics, executionContext.result);
+         this.ValidateReturnType(executionContext, returnType);
 
          // Checks 2
          if (!diagnostics.success) {
             // TODO: What design of our plugin system we want right?
             // definition.__reports(executionContext);
-            diagnostics.throw(1);
+            // +1 proxyify
+            diagnostics.throw(1 + 1);
          }
          // TODO: Implement privileges and type checking
          //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
@@ -162,19 +165,19 @@ export class APIBuilder extends Kernel.Empty {
 
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object))
-            diagnostics.report(ERRORS.BoundToPrototype('setter', id));
+            diagnostics.errors.report(ERRORS.BoundToPrototype('setter', id));
 
          // Validate params
-         paramType.validate(diagnostics, params[0]);
+         paramType.validate(diagnostics.errors, params[0]);
 
          // Validate correctness of this type
          // If that fails it should throw "Failed to set member"
-         definition.type.validate(diagnostics, that);
+         definition.type.validate(diagnostics.errors, that);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
             definition.__reports(executionContext);
-            diagnostics.throw(1);
+            diagnostics.throw(1 + 1);
          }
 
          definition.__call(executionContext);
@@ -183,7 +186,7 @@ export class APIBuilder extends Kernel.Empty {
          if (!diagnostics.success) {
             // TODO: What design of our plugin system we want right?
             // definition.__reports(executionContext);
-            diagnostics.throw(1);
+            diagnostics.throw(1 + 1);
          }
          // TODO: Implement privileges and type checking
          //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
@@ -191,11 +194,10 @@ export class APIBuilder extends Kernel.Empty {
          //if(error) throw new error.ctor(error.message);
 
          if (executionContext.result !== undefined)
-            diagnostics.warn(
+            diagnostics.warns.report(
                'Result should be always undefined for property setter methods: ' + id,
                Kernel['TypeError::constructor'],
             );
-
          return undefined;
       };
 
@@ -227,31 +229,29 @@ export class APIBuilder extends Kernel.Empty {
          );
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object)) {
-            diagnostics.warn(ERRORS.BoundToPrototype('getter', id));
+            diagnostics.errors.report(ERRORS.BoundToPrototype('getter', id));
          }
 
          // Validate correctness of this type
-         definition.type.validate(diagnostics, that);
+         definition.type.validate(diagnostics.errors, that);
 
          // Check for diagnostics and report first value
          if (!diagnostics.success) {
             definition.__reports(executionContext);
-            // Hardcoded
-            return undefined;
-            diagnostics.throw(1);
+            if (!definition.context.getConfigProperty(ContextOptions.GetterRequireValidBound)) return undefined;
+            diagnostics.throw(1 + 1);
          }
 
          definition.__call(executionContext);
 
-         returnType.validate(diagnostics, executionContext.result);
+         this.ValidateReturnType(executionContext, returnType);
 
          // Checks 2
          if (!diagnostics.success) {
             // TODO: What design of our plugin system we want right?
             // definition.__reports(executionContext);
-            // Hardcoded
-            return undefined;
-            diagnostics.throw(1);
+
+            diagnostics.throw(1 + 1);
          }
          // TODO: Implement privileges and type checking
          //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
@@ -287,5 +287,12 @@ export class APIBuilder extends Kernel.Empty {
 
       // Return
       return final;
+   }
+   private static ValidateReturnType(executionContext: ExecutionContext, returnType: Type) {
+      const validate = executionContext.context.getConfigProperty(ContextOptions.StrictReturnTypes);
+      returnType.validate(
+         validate ? executionContext.diagnostics.errors : executionContext.diagnostics.warns,
+         executionContext.result,
+      );
    }
 }

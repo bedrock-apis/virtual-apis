@@ -1,9 +1,11 @@
 import { ClassDefinition } from './class-definition';
-import { Diagnostics } from '../errors';
+import { Diagnostics } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { Mutable } from '../../helper-types';
+import type { Context } from './context';
 
 export class ConstructionExecutionContext extends Kernel.Empty {
+   public readonly context: Context;
    public constructor(
       public readonly self: (new (args: unknown) => unknown) | ((args: unknown) => unknown) | null,
       public readonly definition: ClassDefinition,
@@ -12,6 +14,13 @@ export class ConstructionExecutionContext extends Kernel.Empty {
       public readonly diagnostics: Diagnostics,
    ) {
       super();
+      this.context = definition.context;
+   }
+   public dispose(): 0 | -1 {
+      if (!this.diagnostics.isEmpty) {
+         this.definition.context.reportDiagnostics(this.diagnostics);
+      }
+      return 0;
    }
 }
 

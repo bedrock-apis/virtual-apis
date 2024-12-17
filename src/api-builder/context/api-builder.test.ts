@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { Context } from '.';
-import { Diagnostics } from '../errors';
+import { Diagnostics } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { BooleanType, ParamsDefinition } from '../type-validators';
 import { ConstructionExecutionContext } from './execution-context';

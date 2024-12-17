@@ -116,6 +116,9 @@ class KernelClass {
    public static log = console.log;
    public static error = console.error;
    public static warn = console.warn;
+   public static NewArray<T>(...params: T[]): Array<T> {
+      return Kernel.Construct('Array', ...params) as Array<T>;
+   }
 }
 
 const KernelStorage = KernelClass as unknown as Record<string, any>;
