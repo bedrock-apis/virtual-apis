@@ -34,7 +34,5 @@ export function resolveDependencies<T>(dependables: Dependable<T>[]): T[] {
       resolve(Kernel.Construct('Array') as Dependable<T>[], dependable);
    }
 
-   return Kernel.Constructor('Array')
-      .from(resolvedDependables)
-      .map(e => e.value);
+   return Kernel['Array::static'].from(resolvedDependables).map(e => e.value);
 }

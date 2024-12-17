@@ -32,10 +32,11 @@ suite('ParamsDefinition', () => {
          `[TypeError: Native type conversion failed.]`,
       );
       expect(() => validateThrow(params, ['', 1000000])).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: 1000000, argument bounds: [0, 100000]]`,
+         '[TypeError: Unsupported or out of bounds value passed to function argument [0]. Value: 1000000, argument bounds: [0, 256]]',
+         //`[Error: Provided integer value was out of range.  Value: 1000000, argument bounds: [0, 100000]]`,
       );
       expect(() => validateThrow(params, ['', 257])).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Unsupported or out of bounds value passed to function argument [0]. Value: 257, argument bounds: [0, 256]]`,
+         `[TypeError: Unsupported or out of bounds value passed to function argument [0]. Value: 257, argument bounds: [0, 256]]`,
       );
    });
 

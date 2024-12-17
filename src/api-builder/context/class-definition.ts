@@ -63,7 +63,7 @@ export class ClassDefinition<
       this.api = APIBuilder.CreateConstructor(this, constructorParams);
       this.constructorId = `${classId}:constructor`;
       if (context.nativeEvents.has(this.constructorId)) {
-         throw new (Kernel.Constructor('ReferenceError'))(`Class with this id already exists '${classId}'`);
+         throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
       }
       (context.nativeEvents as unknown as Map<unknown, unknown>).set(
          this.constructorId,

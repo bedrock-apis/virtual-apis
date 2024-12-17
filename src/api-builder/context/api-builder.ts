@@ -1,5 +1,10 @@
-import { ERRORS } from '../errors';
-import { Diagnostics } from '../diagnostics';
+import {
+   Diagnostics,
+   NativeBoundToPrototypeErrorFactory,
+   NewExpectedErrorFactory,
+   NoConstructorErrorFactory,
+   ReferenceErrorFactory,
+} from '../diagnostics';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type } from '../type-validators';
 import { ClassDefinition } from './class-definition';
@@ -31,10 +36,10 @@ export class APIBuilder extends Kernel.Empty {
             diagnostics,
          );
          // Constructor should be callable only with "NEW" keyword
-         if (!new.target && definition.newExpected) diagnostics.errors.report(ERRORS.NewExpected);
+         if (!new.target && definition.newExpected) diagnostics.errors.report(new NewExpectedErrorFactory());
 
          // If constructor is present for this class
-         if (!definition.hasConstructor) diagnostics.errors.report(ERRORS.NoConstructor(definition.classId));
+         if (!definition.hasConstructor) diagnostics.errors.report(new NoConstructorErrorFactory(definition.classId));
 
          // Validate Errors
          paramsDefinition.validate(diagnostics.errors, executionContext.parameters);
@@ -106,7 +111,7 @@ export class APIBuilder extends Kernel.Empty {
          );
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object))
-            diagnostics.errors.report(ERRORS.BoundToPrototype('function', id));
+            diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('function', id));
          // Validate correctness of this type
          definition.type.validate(diagnostics.errors, that);
          // Validate params
@@ -165,7 +170,7 @@ export class APIBuilder extends Kernel.Empty {
 
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object))
-            diagnostics.errors.report(ERRORS.BoundToPrototype('setter', id));
+            diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('setter', id));
 
          // Validate params
          paramType.validate(diagnostics.errors, params[0]);
@@ -195,8 +200,7 @@ export class APIBuilder extends Kernel.Empty {
 
          if (executionContext.result !== undefined)
             diagnostics.warns.report(
-               'Result should be always undefined for property setter methods: ' + id,
-               Kernel['TypeError::constructor'],
+               new ReferenceErrorFactory('Result should be always undefined for property setter methods: ' + id),
             );
          return undefined;
       };
@@ -229,7 +233,7 @@ export class APIBuilder extends Kernel.Empty {
          );
          // Check if the object has native bound
          if (!definition.context.nativeHandles.has(that as object)) {
-            diagnostics.errors.report(ERRORS.BoundToPrototype('getter', id));
+            diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('getter', id));
          }
 
          // Validate correctness of this type

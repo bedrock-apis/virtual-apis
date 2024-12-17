@@ -15,16 +15,16 @@ suite('ArrayType', () => {
          `[TypeError: Native type conversion failed.]`,
       );
       expect(() => validateThrow(type, [undefined])).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Array contains unsupported type.]`,
       );
       expect(() => validateThrow(type, [null])).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Array contains unsupported type.]`,
       );
       expect(() => validateThrow(type, [, , , ,])).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Array contains unsupported type.]`,
       );
       expect(() => validateThrow(type, [1, 2])).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
+         `[TypeError: Array contains unsupported type.]`,
       );
    });
 });

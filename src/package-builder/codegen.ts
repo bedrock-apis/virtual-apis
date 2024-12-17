@@ -22,9 +22,9 @@ const classDefinitionI = t.i`${ClassDefinition.name}`;
 const classDefinitionIApi = 'api' satisfies keyof ClassDefinition;
 const classDefinitionICreate = 'create' satisfies keyof ClassDefinition;
 const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
-const classDefinitonAddProperty = 'addProperty' satisfies keyof ClassDefinition;
-const classDefinitonAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
-const classDefinitonIAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
+const classDefinitionAddProperty = 'addProperty' satisfies keyof ClassDefinition;
+const classDefinitionAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
+const classDefinitionIAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
 
 const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
 const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
@@ -38,7 +38,6 @@ function createContextResolveType(type: MetadataType) {
 }
 
 const paramsDefinitionI = t.i`${ParamsDefinition.name}`;
-
 export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
    const pathToApi = '../' + apiFilename;
    const moduleName = source.name.split('/')[1] ?? 'unknown';
@@ -140,15 +139,15 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    for (const { name, return_type, is_static, arguments: args, is_constructor } of classMeta.functions) {
       if (is_constructor) continue;
 
-      node = t.methodCall(node, is_static ? classDefinitonIAddStaticMethod : classDefinitionIAddMethod, [
+      node = t.methodCall(node, is_static ? classDefinitionIAddStaticMethod : classDefinitionIAddMethod, [
          t.asIs(name),
          createParamsDefinition(args),
          createContextResolveType(return_type),
       ]);
    }
 
-   node = addPropertiesToClass(node, classDefinitonAddProperty, classMeta.properties);
-   node = addPropertiesToClass(node, classDefinitonAddStaticProperty, classMeta.constants);
+   node = addPropertiesToClass(node, classDefinitionAddProperty, classMeta.properties);
+   node = addPropertiesToClass(node, classDefinitionAddStaticProperty, classMeta.constants);
 
    return node;
 }

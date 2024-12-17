@@ -91,7 +91,7 @@ suite('Base API', () => {
       try {
          player.methodA.call(undefined);
       } catch (e) {
-         expect(e).toBeInstanceOf(Kernel.Constructor('ReferenceError'));
+         expect(e).toBeInstanceOf(Kernel['ReferenceError::constructor']);
          expect(e).toBeInstanceOf(ReferenceError);
          expect(e).toMatchInlineSnapshot(
             `[ReferenceError: Native function [Entity::methodA] object bound to prototype does not exist.]`,

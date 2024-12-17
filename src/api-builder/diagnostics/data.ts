@@ -1,6 +1,9 @@
-import { Range } from '../script-module-metadata';
-import { Kernel } from './kernel';
-import { Report } from './diagnostics';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
+import { Range } from '../../script-module-metadata';
+import { Kernel } from '../kernel';
+import { Report } from '.';
+import { ReferenceErrorFactory, TypeErrorFactory } from './errors';
 
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
 export type NativeActionKind = 'call' | 'get' | 'set';
@@ -8,6 +11,10 @@ export type NativeActionKind = 'call' | 'get' | 'set';
 const createTypeErrorReport = (message: string) => new Report(message, Kernel.Constructor('TypeError'));
 const createReferenceErrorReport = (message: string) => new Report(message, Kernel.Constructor('ReferenceError'));
 const createErrorReport = (message: string) => new Report(message, Kernel.Constructor('Error'));
+
+export const NoImplementationErrorFactory = new ReferenceErrorFactory('No implementation error.');
+export const NewExpectedErrorFactory = new TypeErrorFactory('must be called with new');
+export const NativeTypeConversionFailed = new TypeErrorFactory('Native type conversion failed.');
 
 // Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
 

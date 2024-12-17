@@ -1,34 +1,17 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../script-module-metadata';
 import { Context } from '../context';
-import { ERRORS } from '../errors';
-import { DiagnosticsStack } from '../diagnostics';
+import {
+   DiagnosticsStackReport,
+   FunctionArgumentBoundsErrorFactory,
+   IncorrectNumberOfArgumentsErrorFactory,
+} from '../diagnostics';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
 
-export class ParamsDefinition extends Kernel.Empty {
+export class ParamsDefinition extends Type {
    public requiredParams: number = 0;
    public params = Kernel.Construct('Array') as ParamType[];
-
-   /**
-     * Special logic for handling ranges as the could be different from defined type, check example below 
-            {
-              "details": {
-                "max_value": 1000.0,
-                "min_value": 0.0
-              },
-              "name": "radius",
-              "type": {
-                "is_bind_type": false,
-                "is_errorable": false,
-                "name": "float",
-                "valid_range": {
-                  "max": 2147483647,
-                  "min": -2147483648
-                }
-              }
-            },
-     */
 
    public constructor(context?: Context, params?: MetadataFunctionArgumentDefinition[]) {
       super();
@@ -59,39 +42,45 @@ export class ParamsDefinition extends Kernel.Empty {
       return this;
    }
 
-   public validate(diagnostics: DiagnosticsStack, params: unknown[]) {
+   public validate(diagnostics: DiagnosticsStackReport, params: unknown[]) {
       if (params.length > this.params.length || params.length < this.requiredParams)
          return diagnostics.report(
-            ERRORS.IncorrectNumberOfArguments({ min: this.requiredParams, max: this.params.length }, params.length),
+            new IncorrectNumberOfArgumentsErrorFactory(
+               { min: this.requiredParams, max: this.params.length },
+               params.length,
+            ),
          );
 
-      for (const [i, value] of params.entries()) {
-         this.params[i]?.validate(diagnostics, value);
+      for (let i = 0; i < this.params.length; i++) {
+         this.params[i]?.validate(diagnostics, params[i]);
       }
+      return diagnostics;
    }
 }
 
+// TODO: What if undefined is not valid optional type, sendMessage(); sendMessage("String"); sendMessage(undefined);
+// Maybe optional param type doesn't means it could be undefined
 export class ParamType extends Type {
    public constructor(
       public readonly type: Type,
       public readonly isOptional: boolean,
       public readonly defaultValue: unknown,
       public readonly range: Range<number, number> | undefined,
-      public readonly i: number = 0,
+      public readonly index: number = 0,
    ) {
       super();
    }
-   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
+   public validate(diagnostics: DiagnosticsStackReport, value?: unknown) {
       if (this.isOptional) value ??= this.defaultValue;
 
-      const typeDiagnostics = new DiagnosticsStack();
+      const typeDiagnostics = new DiagnosticsStackReport();
       this.type.validate(typeDiagnostics, value);
-
-      if (typeDiagnostics.isEmpty && this.range) {
-         BaseNumberType.ValidateRange(typeDiagnostics, value as number, this.range, this.i);
+      if (this.type instanceof BaseNumberType && this.range) {
+         if ((value as number) < this.range.min || (value as number) > this.range.max)
+            diagnostics.report(new FunctionArgumentBoundsErrorFactory(value, this.range, this.index));
       }
 
       // TODO Check whenever it returns something like ERRORS.FunctionArgumentExpectedType
-      diagnostics.report(...typeDiagnostics.stack);
+      return diagnostics.follow(typeDiagnostics);
    }
 }

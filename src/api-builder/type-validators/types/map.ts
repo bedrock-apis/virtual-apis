@@ -1,5 +1,4 @@
-import { ERRORS } from '../../errors';
-import { DiagnosticsStack } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -11,20 +10,22 @@ export class MapType extends Type {
       super();
    }
 
-   public validate(diagnostics: DiagnosticsStack, map: unknown) {
-      if (typeof map !== 'object' || map === null) return diagnostics.report(ERRORS.NativeTypeConversationFailed);
+   public validate(diagnostics: DiagnosticsStackReport, map: unknown) {
+      if (typeof map !== 'object' || map === null)
+         return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
 
       // TODO Currently it ignores symbol keys validation, need to check how mc reacts on this
       // TODO getOwnPropertyNames/symbols?
-      const mapDiagnostics = new DiagnosticsStack();
-      for (const key of Kernel.Constructor('Object').keys(map)) {
+      const mapDiagnostics = new DiagnosticsStackReport();
+      for (const key of Kernel.ArrayIterator(Kernel['Object::static'].keys(map))) {
          this.keyType.validate(mapDiagnostics, key);
          this.valueType.validate(mapDiagnostics, (map as Record<string, unknown>)[key]);
       }
 
       if (!mapDiagnostics.isEmpty) {
          // TODO Ensure that error is native type conversation failed
-         diagnostics.report(ERRORS.NativeTypeConversationFailed, ...mapDiagnostics.stack);
+         diagnostics.report(new NativeConversionFailedErrorFactory('type'));
       }
+      return diagnostics;
    }
 }

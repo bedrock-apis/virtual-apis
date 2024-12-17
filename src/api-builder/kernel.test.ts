@@ -1,5 +1,6 @@
-import { expect, expectTypeOf, suite, test } from 'vitest';
+import { expect, expectTypeOf, it, suite, test } from 'vitest';
 import { Kernel } from './kernel';
+import { time } from 'console';
 
 suite('Kernel', () => {
    test('Construct', () => {
@@ -7,7 +8,7 @@ suite('Kernel', () => {
    });
 
    test('Prototype Isolation', () => {
-      const normalMap = new (Kernel.Constructor('Map'))();
+      const normalMap = new Kernel['Map::constructor']();
       const kernelMap = new Kernel['globalThis::Map']();
       const kernelConstructedMap = Kernel.Construct('Map');
 
@@ -39,14 +40,13 @@ suite('Kernel', () => {
 
    test('Array', () => {
       expect(Array.isArray([])).toBe(true);
-      expect(Kernel.Constructor('Array').isArray([])).toBe(true);
+      expect(Kernel['Array::static'].isArray([])).toBe(true);
    });
 
    test('Native Functions', () => {
-      expect(Kernel.Constructor('Map').toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
+      expect(Kernel['Map::constructor'].toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
       expect(Map.toString()).toMatchInlineSnapshot(`"function Map() { [native code] }"`);
 
-      expect(Kernel.IsFakeNative(Kernel.Constructor('Map'))).toBe(false);
       expect(Kernel.IsFakeNative(Kernel['Map::constructor'])).toBe(false);
       expect(Kernel.IsFakeNative(Map)).toBe(false);
       // @ts-expect-error
@@ -75,11 +75,41 @@ suite('Kernel', () => {
     `);
    });
 
-   test('Prototype', () => {
-      expect(Kernel.Prototype('Map') === Kernel['Map::prototype']).toBeTruthy();
-   });
+   test('For of isolation', () => {
+      const iterator = Array.prototype[Symbol.iterator];
 
-   test('Static', () => {
-      expect(Kernel.Static('Object') === Kernel['Object::static']).toBeTruthy();
+      // @ts-ignore
+      delete Array.prototype[Symbol.iterator];
+      expect(() => {
+         let _ = [...[5]];
+      }).toThrow();
+      Array.prototype[Symbol.iterator] = iterator;
+
+      expect(() => {
+         try {
+            // @ts-ignore
+            delete Array.prototype[Symbol.iterator];
+            let _ = [...Kernel.ArrayIterator([5])];
+         } finally {
+            Array.prototype[Symbol.iterator] = iterator;
+         }
+      }).not.toThrow();
+   });
+   test('For of isolation 2', () => {
+      const iteratorPrototype = Object.getPrototypeOf(Array.prototype[Symbol.iterator].call([]));
+      const next = iteratorPrototype.next;
+      // @ts-ignore
+      console.log(delete iteratorPrototype.next);
+      expect(() => [...[5]]).toThrow();
+      iteratorPrototype.next = next;
+
+      expect(() => {
+         try {
+            delete iteratorPrototype.next;
+            [...Kernel.ArrayIterator([5])];
+         } finally {
+            iteratorPrototype.next = next;
+         }
+      }).not.toThrow();
    });
 });

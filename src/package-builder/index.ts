@@ -35,25 +35,12 @@ main().then(
 );
 
 async function main(): Promise<number> {
-   // Fetch Latest Metadata
-   const exists = await (downloadAndParseJSON(repoExists).catch(e => null) as Promise<ExistJson | null>);
-
-   if (!exists) {
-      console.error('Failed to fetch repository from ' + repoExists);
-      return -1;
-   }
-
-   if (!exists.flags.includes('SCRIPT_MODULES_MAPPING') || !exists.SCRIPT_MODULES_MAPPING) {
-      console.error('Generator version mismatch with BDS-DOCS!!!, "SCRIPT_MODULES_MAPPING" is not available');
-      return -1;
-   }
-
-   console.log('Fetching from version: ' + exists['build-version']);
-
+   // Static Move Copy
    if (!existsSync(outDir)) {
       await mkdir(outDir);
       console.log('Created ' + outDir);
    }
+
    if (!existsSync(resolve(outDir, './@minecraft'))) {
       await mkdir(resolve(outDir, './@minecraft'));
       console.log('Created ' + outDir + './@minecraft');
@@ -75,6 +62,21 @@ async function main(): Promise<number> {
    }
 
    console.log('Copied ' + apiBuilder);
+
+   // Fetch Latest Metadata
+   const exists = await (downloadAndParseJSON(repoExists).catch(e => null) as Promise<ExistJson | null>);
+
+   if (!exists) {
+      console.error('Failed to fetch repository from ' + repoExists);
+      return -1;
+   }
+
+   if (!exists.flags.includes('SCRIPT_MODULES_MAPPING') || !exists.SCRIPT_MODULES_MAPPING) {
+      console.error('Generator version mismatch with BDS-DOCS!!!, "SCRIPT_MODULES_MAPPING" is not available');
+      return -1;
+   }
+
+   console.log('Fetching from version: ' + exists['build-version']);
 
    const metadata = exists.SCRIPT_MODULES_MAPPING;
    const tasks = exists.SCRIPT_MODULES_MAPPING.script_modules

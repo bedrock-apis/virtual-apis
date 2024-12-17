@@ -1,5 +1,4 @@
-import { ERRORS } from '../../errors';
-import { DiagnosticsStack } from '../../diagnostics';
+import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
 import { Type } from '../type';
 
 export class OptionalType extends Type {
@@ -7,17 +6,13 @@ export class OptionalType extends Type {
       super();
    }
 
-   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
-      if (typeof value === 'undefined' || value === null) return;
-
-      const optionalDiagnostic = new DiagnosticsStack();
-      this.type.validate(optionalDiagnostic, value);
-      if (!optionalDiagnostic.isEmpty)
-         diagnostics.report(
-            // TODO: Reimplement errors in general
-            ...optionalDiagnostic.stack.map(e =>
-               ERRORS.NativeTypeConversationFailed === e ? ERRORS.NativeOptionalTypeConversationFailed : e,
-            ),
-         );
+   public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
+      if (value === undefined || value === null) return diagnostics;
+      const optionals = new DiagnosticsStackReport();
+      this.type.validate(optionals, value);
+      if (optionals.isThrowable) {
+         diagnostics.report(new NativeConversionFailedErrorFactory('optional type'), optionals);
+      }
+      return diagnostics;
    }
 }

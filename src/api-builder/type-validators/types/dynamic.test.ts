@@ -1,7 +1,7 @@
 import { expect, suite, test } from 'vitest';
 import { MetadataType } from '../../../script-module-metadata';
 import { Context } from '../../context';
-import { DiagnosticsStack } from '../../diagnostics';
+import { DiagnosticsStackReport } from '../../diagnostics';
 import { DynamicType } from './dynamic';
 import { StringType } from './string';
 import { validateThrow } from './tests.helper';
@@ -9,7 +9,7 @@ import { validateThrow } from './tests.helper';
 suite('DynamicType', () => {
    test('Dynamic', () => {
       const type = new DynamicType();
-      expect(() => type.validate(new DiagnosticsStack(), null)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => type.validate(new DiagnosticsStackReport(), null)).toThrowErrorMatchingInlineSnapshot(
          `[Error: Failed to call validate on unresolved DynamicType]`,
       );
 

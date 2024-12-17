@@ -1,5 +1,4 @@
 import { expect, suite, test } from 'vitest';
-import { Type } from '../type';
 import { BigIntType, NumberType } from './number';
 import { validateThrow } from './tests.helper';
 
@@ -11,12 +10,14 @@ suite('NumberType', () => {
          `[TypeError: Native type conversion failed.]`,
       );
       expect(() => validateThrow(type, 9)).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
+         // TODO: Check what mc things, Its really just 'Error' and not 'TypeError'?
+         // I changed it to TypeError, but we should test what mc does
+         `[TypeError: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
       );
       expect(() => validateThrow(type, 10)).not.toThrow();
       expect(() => validateThrow(type, 20)).not.toThrow();
       expect(() => validateThrow(type, 21)).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
+         `[TypeError: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
       );
 
       expect(() => validateThrow(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
@@ -29,14 +30,13 @@ suite('NumberType', () => {
 
    test('BigInt', () => {
       const type = new BigIntType({ min: 10n, max: 20n });
-
       expect(() => validateThrow(type, 9n)).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
+         `[TypeError: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
       );
       expect(() => validateThrow(type, 10n)).not.toThrow();
       expect(() => validateThrow(type, 20n)).not.toThrow();
       expect(() => validateThrow(type, 21n)).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
+         `[TypeError: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
       );
 
       expect(() => validateThrow(type, Infinity)).toThrowErrorMatchingInlineSnapshot(

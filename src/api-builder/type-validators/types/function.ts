@@ -1,19 +1,20 @@
 import { isGeneratorObject } from 'node:util/types';
-import { ERRORS } from '../../errors';
-import { DiagnosticsStack } from '../../diagnostics';
-import { Kernel } from '../../kernel';
+import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
 import { Type } from '../type';
 
 export class FunctionType extends Type {
-   public override validate(diagnostics: DiagnosticsStack, value: unknown): void {
+   public override validate(diagnostics: DiagnosticsStackReport, value: unknown) {
       // TODO: No error message
       if (typeof value !== 'function')
-         diagnostics.report('CHECK TODOS, No implementation error', Kernel['Error::constructor']);
+         // TODO: Is it really native type conversion error?
+         diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+      return diagnostics;
    }
 }
 
 export class GeneratorType extends Type {
-   public validate(diagnostics: DiagnosticsStack, value: unknown): void {
-      if (!isGeneratorObject(value)) diagnostics.report(ERRORS.NativeTypeConversationFailed);
+   public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
+      if (!isGeneratorObject(value)) diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+      return diagnostics;
    }
 }

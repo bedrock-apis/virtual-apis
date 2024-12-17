@@ -1,5 +1,8 @@
-import { ERRORS } from '../../errors';
-import { DiagnosticsStack } from '../../diagnostics';
+import {
+   ArrayUnsupportedTypeErrorFactory,
+   DiagnosticsStackReport,
+   NativeConversionFailedErrorFactory,
+} from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -7,11 +10,17 @@ export class ArrayType extends Type {
    public constructor(private readonly type: Type) {
       super();
    }
-   public validate(diagnostics: DiagnosticsStack, value: unknown) {
-      if (!Kernel.Constructor('Array').isArray(value)) return diagnostics.report(ERRORS.NativeTypeConversationFailed);
+   public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
+      if (!Kernel['Array::static'].isArray(value))
+         return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
 
-      for (const element of value as unknown[]) {
-         this.type.validate(diagnostics, element);
+      const elementsDiagnostics = new DiagnosticsStackReport();
+      for (let i = 0; i < value.length; i++) {
+         this.type.validate(elementsDiagnostics, value[i]);
       }
+      if (elementsDiagnostics.isThrowable) {
+         diagnostics.report(new ArrayUnsupportedTypeErrorFactory(), elementsDiagnostics);
+      }
+      return diagnostics;
    }
 }

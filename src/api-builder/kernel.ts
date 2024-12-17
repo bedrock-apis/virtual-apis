@@ -22,8 +22,13 @@ class KernelClass {
    // eslint-disable-next-line @typescript-eslint/naming-convention
    public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
    public static __call = Function.prototype.call; // Type to Type call method
-   public static call = Function.prototype.call.bind(Function.prototype.call);
+   public static call: <T extends () => unknown>(
+      thisFunction: T,
+      thisValue: unknown,
+      ...params: Parameters<T>
+   ) => ReturnType<T> = Function.prototype.call.bind(Function.prototype.call);
    public static __setPrototypeOf = Object.setPrototypeOf;
+   public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
    public static __descriptors = Object.getOwnPropertyDescriptors;
    public static __create = Object.create;
@@ -45,24 +50,6 @@ class KernelClass {
       name: T,
    ): Global[T] extends { new (): infer I } | { (): infer I } ? I : never {
       return KernelClass.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
-   }
-
-   public static Constructor<T extends keyof typeof globalThis>(name: T) {
-      return KernelStorage[name + '::constructor'] as Global[T] extends { new (): void } | { (): void }
-         ? Global[T]
-         : never;
-   }
-
-   public static Prototype<T extends keyof typeof globalThis>(
-      name: T,
-   ): Global[T] extends { new (): infer I } | { (): infer I } ? I : never {
-      return KernelStorage[name + '::prototype'];
-   }
-
-   public static Static<T extends keyof typeof globalThis>(
-      name: T,
-   ): Global[T] extends { new (): void } | { (): void } ? { [key in keyof Global[T]]: Global[T][key] } : never {
-      return KernelStorage[name + '::static'];
    }
 
    public static SetName<T extends CallableFunction>(func: T, name: string): T {
@@ -110,17 +97,34 @@ class KernelClass {
       else return false;
    }
    public static SetGlobalThis() {}
-   public static IsolatedCopy<T extends object>(obj: T): T {
-      return KernelClass.__create(null, KernelClass.__descriptors(obj));
-   }
    public static log = console.log;
    public static error = console.error;
    public static warn = console.warn;
    public static NewArray<T>(...params: T[]): Array<T> {
-      return Kernel.Construct('Array', ...params) as Array<T>;
+      return KernelClass.Construct('Array', ...params) as Array<T>;
+   }
+   public static ArrayIterator<T>(array: T[]): IterableIterator<T> {
+      return KernelClass.__setPrototypeOf(
+         KernelClass.call(Kernel['Array::prototype'].values, array),
+         ARRAY_ITERATOR_PROTOTYPE,
+      );
+   }
+   public static IsolatedCopy<T extends object>(obj: T) {
+      let isolated = ISOLATED_COPIES.get(obj);
+      if (!isolated) {
+         const prototype = KernelClass.__getPrototypeOf(obj);
+         ISOLATED_COPIES.set(
+            obj,
+            (isolated = KernelClass.__create(
+               prototype ? this.IsolatedCopy(prototype) : prototype,
+               KernelClass.__descriptors(obj),
+            )),
+         );
+      }
+      return isolated as T;
    }
 }
-
+const ISOLATED_COPIES = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
 KernelClass.__setPrototypeOf(KernelStorage, null);
 
@@ -145,9 +149,9 @@ nativeFunctions.add(
       return string + '';
    }),
 );
-
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kernel = KernelClass as typeof KernelClass & KernelType;
-
+const ARRAY_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call([])));
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
+Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);

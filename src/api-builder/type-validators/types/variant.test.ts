@@ -19,9 +19,11 @@ suite('VariantType', () => {
       expect(() => validateThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native variant type conversion failed.]`,
       );
+
       expect(() => validateThrow(type, NaN)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native variant type conversion failed.]`,
       );
+
       expect(() => validateThrow(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native variant type conversion failed.]`,
       );

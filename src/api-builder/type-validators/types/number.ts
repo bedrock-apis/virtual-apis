@@ -1,11 +1,14 @@
 import { Range } from '../../../script-module-metadata';
-import { ERRORS } from '../../errors';
-import { DiagnosticsStack } from '../../diagnostics';
+import {
+   DiagnosticsStackReport,
+   NativeConversionFailedErrorFactory,
+   OutOfRangeErrorFactory,
+   ValueIsNotSupportedErrorFactory,
+} from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
 const isFinite = Kernel['globalThis::isFinite'];
-const isNaN = Kernel['globalThis::isNaN'];
 
 export abstract class BaseNumberType<T extends number | bigint> extends Type {
    public abstract readonly type: 'number' | 'bigint';
@@ -15,18 +18,22 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
       super();
    }
 
-   public override validate(diagnostics: DiagnosticsStack, value: unknown) {
-      if (typeof value !== this.type) return diagnostics.report(ERRORS.NativeTypeConversationFailed);
+   public override validate(diagnostics: DiagnosticsStackReport, value: unknown) {
+      if (typeof value !== this.type) return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
 
       if (this.isFiniteCheck && !isFinite(value as unknown as number)) {
-         return diagnostics.report(ERRORS.ValueIsNotSupported(isNaN(value as unknown as number) ? 'NaN' : 'Infinity'));
+         return diagnostics.report(
+            new ValueIsNotSupportedErrorFactory(Kernel.call(Kernel['Number::prototype'].toString, value)),
+         );
       }
 
-      BaseNumberType.ValidateRange<T>(diagnostics, value as T, this.range);
+      if ((value as T) < this.range.min || (value as T) > this.range.max)
+         diagnostics.report(new OutOfRangeErrorFactory(value as T, this.range));
+      return diagnostics;
    }
-
+   /*
    public static ValidateRange<T extends number | bigint>(
-      diagnostics: DiagnosticsStack,
+      diagnostics: DiagnosticsStackReport,
       value: T,
       range: Range<T, T>,
       argument?: number,
@@ -36,15 +43,15 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
             diagnostics.report(ERRORS.FunctionArgumentBounds(value, range, argument));
          } else diagnostics.report(ERRORS.OutOfRange(value, range));
       }
-   }
+   }*/
 }
 
 export class NumberType extends BaseNumberType<number> {
-   public type = 'number' as const;
-   public isFiniteCheck = true;
+   public readonly type = 'number' as const;
+   public readonly isFiniteCheck = true;
 }
 
 export class BigIntType extends BaseNumberType<bigint> {
-   public type = 'bigint' as const;
-   public isFiniteCheck = false;
+   public readonly type = 'bigint' as const;
+   public readonly isFiniteCheck = false;
 }
