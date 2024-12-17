@@ -8,12 +8,11 @@ export class VariantType extends Type {
    }
 
    public validate(diagnostics: DiagnosticsStack, value: unknown): void {
-      const variantDiagnostic = new DiagnosticsStack();
       for (const variant of this.variants) {
+         const variantDiagnostic = new DiagnosticsStack();
          variant.validate(variantDiagnostic, value);
          if (variantDiagnostic.isEmpty) return;
       }
-
       diagnostics.report(ERRORS.NativeVariantTypeConversationFailed);
    }
 }

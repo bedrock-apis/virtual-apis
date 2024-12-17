@@ -1,16 +1,16 @@
 import { expect, suite, test } from 'vitest';
 import { Type } from '../type';
 import { StringType } from './string';
-import { ValidateThrow } from './helper.test';
+import { validateThrow } from './tests.helper';
 
 suite('StringType', () => {
    test('String', () => {
       const type = new StringType();
 
-      expect(() => ValidateThrow(type, '')).not.toThrow();
-      expect(() => ValidateThrow(type, 'not empty string')).not.toThrow();
+      expect(() => validateThrow(type, '')).not.toThrow();
+      expect(() => validateThrow(type, 'not empty string')).not.toThrow();
 
-      expect(() => ValidateThrow(type, 2)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validateThrow(type, 2)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });

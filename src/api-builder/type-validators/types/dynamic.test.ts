@@ -4,7 +4,7 @@ import { Context } from '../../context';
 import { DiagnosticsStack } from '../../diagnostics';
 import { DynamicType } from './dynamic';
 import { StringType } from './string';
-import { ValidateThrow } from './helper.test';
+import { validateThrow } from './tests.helper';
 
 suite('DynamicType', () => {
    test('Dynamic', () => {
@@ -14,8 +14,8 @@ suite('DynamicType', () => {
       );
 
       type.setType(new StringType());
-      expect(() => ValidateThrow(type, '')).not.toThrow();
-      expect(() => ValidateThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validateThrow(type, '')).not.toThrow();
+      expect(() => validateThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });
