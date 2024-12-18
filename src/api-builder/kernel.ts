@@ -6,7 +6,7 @@ type Global = typeof globalThis;
 type Keys = {
    [K in keyof Global]: Global[K] extends new (...args: any) => any ? K : never;
 }[keyof Global];
-
+type ConstructorLike = new (...params: unknown[]) => unknown;
 type KernelType = {
    [K in Keys as `${K}::constructor`]: Global[K];
 } & {
@@ -72,10 +72,10 @@ class KernelClass {
       return func;
    }
 
-   public static SetClass<T extends CallableFunction>(func: T, name: string): T {
-      KernelClass.SetName(func, name);
+   public static SetClass<T extends ConstructorLike | CallableFunction>(func: T, name: string): T {
+      KernelClass.SetName(func as CallableFunction, name);
       KernelClass.SetFakeNative(func);
-      return KernelClass.LockPrototype(func);
+      return KernelClass.LockPrototype(func as CallableFunction) as T;
    }
 
    public static LockPrototype<T extends CallableFunction>(func: T): T {

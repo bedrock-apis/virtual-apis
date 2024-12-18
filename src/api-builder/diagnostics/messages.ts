@@ -6,6 +6,9 @@ export type NativeTypeKind = 'optional type' | 'variant type' | 'type';
 
 // Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
 // `Unsupported or out of bounds value passed to function argument [${argument}]. Value: ${value}, argument bounds: [${range.min}, ${range.max}]`
+export const WARNING_ERROR_MESSAGES = {
+   SettersShouldReturnUndefined: (id: string) => 'Result should be always undefined for property setter methods: ' + id,
+};
 export const PANIC_ERROR_MESSAGES = {
    EmptyDiagnosticsStackInstance: `Failed to throw report error on empty DiagnosticsStack instance.`,
    NoImplementation: `No implementation error.`,

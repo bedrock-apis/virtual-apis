@@ -1,7 +1,6 @@
 import { expect, suite, test } from 'vitest';
 import { MetadataType } from '../../../script-module-metadata';
 import { Context } from '../../context';
-import { Type } from '../type';
 import { InterfaceBindType } from './interface';
 import { validateThrow } from './tests.helper';
 

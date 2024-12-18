@@ -30,13 +30,7 @@ suite('Base API', () => {
 
    test('Native Construction', () => {
       const entity_handle = EntityDefinition.__construct(
-         new ConstructionExecutionContext(
-            null,
-            EntityDefinition,
-            EntityDefinition.classId,
-            Kernel.Construct('Array'),
-            new Diagnostics(),
-         ),
+         new ConstructionExecutionContext(null, EntityDefinition, EntityDefinition.classId, Kernel.Construct('Array')),
       );
 
       expect(entity_handle).not.toBeInstanceOf(Player);

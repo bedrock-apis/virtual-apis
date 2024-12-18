@@ -1,9 +1,9 @@
-import { Diagnostics } from '../diagnostics';
+import { ContextPanicError, Diagnostics, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
-import { APIBuilder } from './api-builder';
+import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './api-builder';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 // Class for single fake api definition
@@ -60,7 +60,7 @@ export class ClassDefinition<
       public readonly newExpected: boolean = true,
    ) {
       super();
-      this.api = APIBuilder.CreateConstructor(this, constructorParams);
+      this.api = createConstructorFor(this, constructorParams);
       this.constructorId = `${classId}:constructor`;
       if (context.nativeEvents.has(this.constructorId)) {
          throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
@@ -79,13 +79,7 @@ export class ClassDefinition<
     */
    public create(): this['api']['prototype'] {
       const [handle, cache] = this.__construct(
-         new ConstructionExecutionContext(
-            null,
-            this as ClassDefinition,
-            this.classId,
-            Kernel.Construct('Array'),
-            new Diagnostics(),
-         ),
+         new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
       );
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
@@ -101,7 +95,7 @@ export class ClassDefinition<
       params: ParamsDefinition = new ParamsDefinition(),
       returnType: Type = new VoidType(),
    ) {
-      const method = ((this.api.prototype as Record<Name, unknown>)[name] = APIBuilder.CreateMethod(
+      const method = ((this.api.prototype as Record<Name, unknown>)[name] = createMethodFor(
          this,
          name,
          params,
@@ -115,8 +109,8 @@ export class ClassDefinition<
    public addProperty<Name extends string>(name: Name, type: Type, isReadonly: boolean) {
       // TODO
 
-      const getter = APIBuilder.CreateGetter(this as ClassDefinition, name, type);
-      const setter = isReadonly ? undefined : APIBuilder.CreateSetter(this as ClassDefinition, name, type);
+      const getter = createGetterFor(this as ClassDefinition, name, type);
+      const setter = isReadonly ? undefined : createSetterFor(this as ClassDefinition, name, type);
       Kernel.__defineProperty(this.api.prototype, name, {
          configurable: true,
          enumerable: true,
@@ -134,6 +128,7 @@ export class ClassDefinition<
       params: ParamsDefinition = new ParamsDefinition(),
       returnType: Type = new VoidType(),
    ) {
+      throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
       return this as ClassDefinition<T, P, S & Record<Name, (...params: unknown[]) => unknown>, NAME>;
    }
 
@@ -145,7 +140,7 @@ export class ClassDefinition<
    ) {
       // TODO
       // (this.api as Record<Name, unknown>)[name] = defaultValue;
-
+      throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
       return this as ClassDefinition<T, P, S & Record<Name, PropertyType>, NAME>;
    }
 
@@ -187,9 +182,6 @@ export class ClassDefinition<
             }
          }
       }
-   }
-   public __reports(context: ConstructionExecutionContext) {
-      Kernel.log('pre-call: diagnostics ' + context.diagnostics.errors.length);
    }
 
    /**
