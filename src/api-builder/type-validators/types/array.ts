@@ -1,8 +1,4 @@
-import {
-   ArrayUnsupportedTypeErrorFactory,
-   DiagnosticsStackReport,
-   NativeConversionFailedErrorFactory,
-} from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -12,14 +8,14 @@ export class ArrayType extends Type {
    }
    public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
       if (!Kernel['Array::static'].isArray(value))
-         return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
 
       const elementsDiagnostics = new DiagnosticsStackReport();
       for (let i = 0; i < value.length; i++) {
          this.type.validate(elementsDiagnostics, value[i]);
       }
       if (elementsDiagnostics.isThrowable) {
-         diagnostics.report(new ArrayUnsupportedTypeErrorFactory(), elementsDiagnostics);
+         diagnostics.report(API_ERRORS_MESSAGES.ArrayUnsupportedType(), elementsDiagnostics);
       }
       return diagnostics;
    }

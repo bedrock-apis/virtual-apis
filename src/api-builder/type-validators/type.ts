@@ -1,4 +1,4 @@
-import { Diagnostics, DiagnosticsStackReport, Report, TypeErrorFactory } from '../diagnostics';
+import { DiagnosticsStackReport, ErrorFactory, TYPE_ERROR_TYPE } from '../diagnostics';
 import { Kernel } from '../kernel';
 
 export abstract class Type extends Kernel.Empty {
@@ -8,7 +8,10 @@ export abstract class Type extends Kernel.Empty {
 
 export class VoidType extends Type {
    public override validate(diagnostics: DiagnosticsStackReport, value: unknown) {
-      if (value !== undefined) diagnostics.report(new TypeErrorFactory('Type Report: ' + typeof value));
+      if (value !== undefined)
+         diagnostics.report(
+            new ErrorFactory('Undefined value expected, but received: ' + typeof value, TYPE_ERROR_TYPE),
+         );
       return diagnostics;
    }
 }

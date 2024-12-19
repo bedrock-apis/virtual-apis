@@ -1,4 +1,4 @@
-import { API_ERRORS_MESSAGES, DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -12,7 +12,8 @@ export class MapType extends Type {
 
    public validate(diagnostics: DiagnosticsStackReport, map: unknown) {
       if (typeof map !== 'object' || map === null)
-         return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+         //TODO: isn't 'function' type also allowed?
+         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
 
       // TODO Currently it ignores symbol keys validation, need to check how mc reacts on this
       // TODO getOwnPropertyNames/symbols?
@@ -24,7 +25,7 @@ export class MapType extends Type {
 
       if (!mapDiagnostics.isEmpty) {
          // TODO Ensure that error is native type conversation failed
-         diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+         diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       }
       return diagnostics;
    }

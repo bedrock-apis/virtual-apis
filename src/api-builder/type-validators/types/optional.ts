@@ -1,4 +1,4 @@
-import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Type } from '../type';
 
 export class OptionalType extends Type {
@@ -11,7 +11,7 @@ export class OptionalType extends Type {
       const optionals = new DiagnosticsStackReport();
       this.type.validate(optionals, value);
       if (optionals.isThrowable) {
-         diagnostics.report(new NativeConversionFailedErrorFactory('optional type'), optionals);
+         diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('optional type'), optionals);
       }
       return diagnostics;
    }

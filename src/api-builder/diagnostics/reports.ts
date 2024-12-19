@@ -1,5 +1,5 @@
 import { Kernel } from '../kernel';
-import { BaseErrorFactory } from './factory/base';
+import { ErrorFactory } from './factory';
 
 export abstract class BaseReport extends Kernel.Empty {
    public abstract readonly isThrowable: boolean;
@@ -9,7 +9,7 @@ export class Report extends BaseReport {
    public readonly isThrowable = true;
    public readonly childReport: BaseReport | null;
    public constructor(
-      public readonly factory: BaseErrorFactory,
+      public readonly factory: ErrorFactory,
       child: BaseReport | null = null,
    ) {
       super();

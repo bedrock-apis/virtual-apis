@@ -1,10 +1,6 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../script-module-metadata';
 import { Context } from '../context';
-import {
-   DiagnosticsStackReport,
-   FunctionArgumentBoundsErrorFactory,
-   IncorrectNumberOfArgumentsErrorFactory,
-} from '../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
@@ -45,7 +41,7 @@ export class ParamsDefinition extends Type {
    public validate(diagnostics: DiagnosticsStackReport, params: unknown[]) {
       if (params.length > this.params.length || params.length < this.requiredParams)
          return diagnostics.report(
-            new IncorrectNumberOfArgumentsErrorFactory(
+            API_ERRORS_MESSAGES.IncorrectNumberOfArguments(
                { min: this.requiredParams, max: this.params.length },
                params.length,
             ),
@@ -77,7 +73,7 @@ export class ParamType extends Type {
       this.type.validate(typeDiagnostics, value);
       if (this.type instanceof BaseNumberType && this.range) {
          if ((value as number) < this.range.min || (value as number) > this.range.max)
-            diagnostics.report(new FunctionArgumentBoundsErrorFactory(value, this.range, this.index));
+            diagnostics.report(API_ERRORS_MESSAGES.FunctionArgumentBounds(value, this.range, this.index));
       }
 
       // TODO Check whenever it returns something like ERRORS.FunctionArgumentExpectedType

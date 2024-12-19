@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
-import { BaseErrorFactory, Diagnostics, Report } from '.';
+import { ErrorFactory, Diagnostics, Report } from '.';
 
 describe('Diagnostics', () => {
    test('Report multiple reports', () => {
       const diagnostics = new Diagnostics();
 
-      diagnostics.errors.report(new BaseErrorFactory('Message 0'));
-      diagnostics.errors.report(new BaseErrorFactory('Message 1'));
-      diagnostics.errors.report(new BaseErrorFactory('Message 2'));
+      diagnostics.errors.report(new ErrorFactory('Message 0'));
+      diagnostics.errors.report(new ErrorFactory('Message 1'));
+      diagnostics.errors.report(new ErrorFactory('Message 2'));
 
       expect(diagnostics.errors.length).toBe(3);
    });
@@ -21,7 +21,7 @@ describe('Diagnostics', () => {
 
 describe('Report', () => {
    test('Throw', () => {
-      const report = new Report(new BaseErrorFactory('Message'));
+      const report = new Report(new ErrorFactory('Message'));
 
       function normalize(path: string) {
          return path.replaceAll('\\', '/');

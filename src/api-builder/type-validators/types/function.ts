@@ -1,5 +1,5 @@
 import { isGeneratorObject } from 'node:util/types';
-import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Type } from '../type';
 
 export class FunctionType extends Type {
@@ -7,14 +7,14 @@ export class FunctionType extends Type {
       // TODO: No error message
       if (typeof value !== 'function')
          // TODO: Is it really native type conversion error?
-         diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+         diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       return diagnostics;
    }
 }
 
 export class GeneratorType extends Type {
    public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
-      if (!isGeneratorObject(value)) diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+      if (!isGeneratorObject(value)) diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       return diagnostics;
    }
 }

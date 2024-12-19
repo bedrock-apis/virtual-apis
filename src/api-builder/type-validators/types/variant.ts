@@ -1,4 +1,4 @@
-import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Type } from '../type';
 
 export class VariantType extends Type {
@@ -14,6 +14,6 @@ export class VariantType extends Type {
          if (s.isEmpty) return diagnostics;
          variants.follow(s);
       }
-      return diagnostics.report(new NativeConversionFailedErrorFactory('variant type'), variants);
+      return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('variant type'), variants);
    }
 }

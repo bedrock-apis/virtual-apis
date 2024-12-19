@@ -1,11 +1,4 @@
-import {
-   Diagnostics,
-   NativeBoundToPrototypeErrorFactory,
-   NewExpectedErrorFactory,
-   NoConstructorErrorFactory,
-   ReferenceErrorFactory,
-   WARNING_ERROR_MESSAGES,
-} from '../diagnostics';
+import { API_ERRORS_MESSAGES, ErrorFactory, QUICK_JS_ENV_ERROR_MESSAGES, WARNING_ERROR_MESSAGES } from '../diagnostics';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type } from '../type-validators';
 import { ClassDefinition } from './class-definition';
@@ -25,10 +18,10 @@ function createFunctionalConstructor(
       const executionContext = contextFactory(params);
       const { definition, diagnostics } = executionContext;
       // Constructor should be callable only with "NEW" keyword
-      if (!new.target && definition.newExpected) diagnostics.errors.report(new NewExpectedErrorFactory());
+      if (!new.target && definition.newExpected) diagnostics.errors.report(QUICK_JS_ENV_ERROR_MESSAGES.NewExpected());
 
       // If constructor is present for this class
-      if (!definition.hasConstructor) diagnostics.errors.report(new NoConstructorErrorFactory(definition.classId));
+      if (!definition.hasConstructor) diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(definition.classId));
 
       // Validate Errors
       paramsDefinition.validate(diagnostics.errors, executionContext.parameters);
@@ -70,7 +63,7 @@ function createFunctionalMethod(
 
       // Check if the object has native bound
       if (!context.nativeHandles.has(that as object))
-         diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('function', methodId));
+         diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('function', methodId));
       // Validate correctness of this type
       definition.type.validate(diagnostics.errors, that);
       // Validate params
@@ -117,7 +110,7 @@ function createFunctionalSetter(
 
       // Check if the object has native bound
       if (!context.nativeHandles.has(that as object))
-         diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('setter', methodId));
+         diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('setter', methodId));
 
       // Validate params
       type.validate(diagnostics.errors, params[0]);
@@ -144,7 +137,10 @@ function createFunctionalSetter(
 
       if (executionContext.result !== undefined)
          diagnostics.warns.report(
-            new ReferenceErrorFactory(WARNING_ERROR_MESSAGES.SettersShouldReturnUndefined(methodId)),
+            ErrorFactory.New(
+               WARNING_ERROR_MESSAGES.SettersShouldReturnUndefined(methodId),
+               Kernel['TypeError::constructor'],
+            ),
          );
       executionContext.dispose();
 
@@ -166,7 +162,7 @@ function createFunctionalGetter(
       const { diagnostics, context, definition, methodId } = executionContext;
       // Check if the object has native bound
       if (!definition.context.nativeHandles.has(that as object)) {
-         diagnostics.errors.report(new NativeBoundToPrototypeErrorFactory('getter', methodId));
+         diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('getter', methodId));
       }
 
       // Validate correctness of this type

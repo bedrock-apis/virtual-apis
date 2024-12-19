@@ -1,10 +1,5 @@
 import { Range } from '../../../script-module-metadata';
-import {
-   DiagnosticsStackReport,
-   NativeConversionFailedErrorFactory,
-   OutOfRangeErrorFactory,
-   ValueIsNotSupportedErrorFactory,
-} from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -19,16 +14,16 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
    }
 
    public override validate(diagnostics: DiagnosticsStackReport, value: unknown) {
-      if (typeof value !== this.type) return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+      if (typeof value !== this.type) return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
 
       if (this.isFiniteCheck && !isFinite(value as unknown as number)) {
          return diagnostics.report(
-            new ValueIsNotSupportedErrorFactory(Kernel.call(Kernel['Number::prototype'].toString, value)),
+            API_ERRORS_MESSAGES.ValueNotSupported(Kernel.call(Kernel['Number::prototype'].toString, value)),
          );
       }
 
       if ((value as T) < this.range.min || (value as T) > this.range.max)
-         diagnostics.report(new OutOfRangeErrorFactory(value as T, this.range));
+         diagnostics.report(API_ERRORS_MESSAGES.OutOfRange(value as T, this.range));
       return diagnostics;
    }
    /*

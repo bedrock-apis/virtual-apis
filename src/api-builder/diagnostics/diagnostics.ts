@@ -1,9 +1,9 @@
 import { Mutable } from '../../helper-types';
 import { Kernel } from '../kernel';
-import { BaseErrorFactory } from './factory';
+import { ErrorFactory } from './factory';
 import { PANIC_ERROR_MESSAGES } from './messages';
 import { ContextPanicError } from './panic';
-import { BaseReport, removeStackFromError, Report } from './reports';
+import { BaseReport, Report } from './reports';
 
 export class DiagnosticsStackReport extends BaseReport {
    public get isThrowable() {
@@ -13,7 +13,7 @@ export class DiagnosticsStackReport extends BaseReport {
    public get length() {
       return this.stack.length;
    }
-   public report(...params: [report: Report] | [report: BaseErrorFactory, child?: BaseReport]): this {
+   public report(...params: [report: Report] | [report: ErrorFactory, child?: BaseReport]): this {
       const report = params[0];
       if (report instanceof Report) this.stack.push(report);
       else this.stack.push(new Report(report, params[1] ?? null));

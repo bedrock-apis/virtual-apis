@@ -1,4 +1,4 @@
-import { DiagnosticsStackReport, NativeConversionFailedErrorFactory } from '../../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
 
@@ -13,7 +13,7 @@ export class InterfaceBindType extends Type {
    }
    public validate(diagnostics: DiagnosticsStackReport, object: unknown) {
       if (typeof object !== 'object' || object === null)
-         return diagnostics.report(new NativeConversionFailedErrorFactory('type'));
+         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
 
       const interfaceDiagnostics = new DiagnosticsStackReport();
       for (const [propertyKey, type] of this.properties) {
@@ -22,7 +22,7 @@ export class InterfaceBindType extends Type {
 
       if (!interfaceDiagnostics.isEmpty) {
          // TODO Ensure that error is native type conversation failed
-         diagnostics.report(new NativeConversionFailedErrorFactory('type'), interfaceDiagnostics);
+         diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'), interfaceDiagnostics);
       }
       return diagnostics;
    }
