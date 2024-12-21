@@ -18,7 +18,7 @@ export const WARNING_ERROR_MESSAGES = {
 export const PANIC_ERROR_MESSAGES = {
    EmptyDiagnosticsStackInstance: `Failed to throw report error on empty DiagnosticsStack instance.`,
    NoImplementation: `No implementation error.`,
-   DynamicTypeNotResolved: `Failed to call validate on unresolved DynamicType`,
+   DynamicTypeNotResolved: (data: unknown) => `Failed to call validate on unresolved DynamicType ${data}`,
 };
 export const QUICK_JS_ENV_ERROR_MESSAGES = {
    NewExpected: () => ErrorFactory.New(`must be called with new`), // TypeError

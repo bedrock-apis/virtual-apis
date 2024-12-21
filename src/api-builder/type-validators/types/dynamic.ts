@@ -6,7 +6,7 @@ export class DynamicType extends Type {
    public readonly type: Type | null = null;
    public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
       if (!this.type) {
-         throw new ContextPanicError(PANIC_ERROR_MESSAGES.DynamicTypeNotResolved);
+         throw new ContextPanicError(PANIC_ERROR_MESSAGES.DynamicTypeNotResolved(''));
       }
       this.type.validate(diagnostics, value);
       return diagnostics;

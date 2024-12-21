@@ -6,7 +6,7 @@ import { ParamsDefinition } from './params-definition';
 
 const context = new Context();
 
-new ClassDefinition(context, 'ItemType', null, new ParamsDefinition(context, []), false, true).addProperty(
+new ClassDefinition(context, 'ItemType', null, null, true).addProperty(
    'id',
    context.resolveType({ is_bind_type: false, is_errorable: false, name: 'string' } as unknown as MetadataType),
    true,
@@ -16,7 +16,7 @@ const ItemStack = new ClassDefinition(
    context,
    'ItemStack',
    null,
-   new ParamsDefinition(context, [
+   ParamsDefinition.From(context, [
       {
          details: null,
          name: 'itemType',
@@ -41,7 +41,6 @@ const ItemStack = new ClassDefinition(
          },
       },
    ] as unknown as MetadataFunctionArgumentDefinition[]),
-   true,
    true,
 ).api;
 

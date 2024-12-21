@@ -109,6 +109,21 @@ class KernelClass {
          ARRAY_ITERATOR_PROTOTYPE,
       );
    }
+   public static MapValuesIterator<T>(map: Map<unknown, T>): IterableIterator<T> {
+      return KernelClass.__setPrototypeOf(
+         KernelClass.call(Kernel['Map::prototype'].values, map),
+         MAP_ITERATOR_PROTOTYPE,
+      );
+   }
+   public static MapKeysIterator<T>(map: Map<T, unknown>): IterableIterator<T> {
+      return KernelClass.__setPrototypeOf(KernelClass.call(Kernel['Map::prototype'].keys, map), MAP_ITERATOR_PROTOTYPE);
+   }
+   public static SetIterator<T>(set: Set<T>): IterableIterator<T> {
+      return KernelClass.__setPrototypeOf(
+         KernelClass.call(Kernel['Set::prototype'].values, set),
+         SET_ITERATOR_PROTOTYPE,
+      );
+   }
    public static IsolatedCopy<T extends object>(obj: T) {
       let isolated = ISOLATED_COPIES.get(obj);
       if (!isolated) {
@@ -130,6 +145,7 @@ KernelClass.__setPrototypeOf(KernelStorage, null);
 
 const globalNames = Object.getOwnPropertyNames(globalThis);
 
+// eslint-disable-next-line custom/no-iterators
 for (const constructor of globalNames
    .map(k => (globalThis as typeof KernelStorage)[k])
    .filter(v => typeof v === 'function' && v.prototype)) {
@@ -137,6 +153,7 @@ for (const constructor of globalNames
    KernelStorage[constructor.name + '::prototype'] = KernelClass.IsolatedCopy(constructor.prototype);
    KernelStorage[constructor.name + '::static'] = KernelClass.IsolatedCopy(constructor);
 }
+// eslint-disable-next-line custom/no-iterators
 for (const globalName of globalNames) {
    KernelStorage[`globalThis::${globalName}`] = globalThis[globalName as keyof typeof globalThis];
 }
@@ -152,6 +169,9 @@ nativeFunctions.add(
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kernel = KernelClass as typeof KernelClass & KernelType;
 const ARRAY_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call([])));
+const MAP_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Map.prototype.values.call(new Map()))); // Key Iterators has same prototype
+const SET_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Set.prototype.values.call(new Set())));
+
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
 Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);

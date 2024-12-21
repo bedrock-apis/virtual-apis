@@ -9,8 +9,8 @@ export class ParamsDefinition extends Type {
    public requiredParams: number = 0;
    public params = Kernel.Construct('Array') as ParamType[];
 
-   public constructor(context?: Context, params?: MetadataFunctionArgumentDefinition[]) {
-      super();
+   public static From(context: Context, params: MetadataFunctionArgumentDefinition[]) {
+      const def = new ParamsDefinition();
       if (context && params) {
          for (const [i, param] of params.entries()) {
             const type = context.resolveType(param.type);
@@ -22,9 +22,13 @@ export class ParamsDefinition extends Type {
                   : undefined;
 
             const paramType = new ParamType(type, isOptional, defaultValue, validRange, i);
-            this.addType(paramType);
+            def.addType(paramType);
          }
       }
+      return def;
+   }
+   public constructor() {
+      super();
    }
 
    public addType(type: ParamType): this {

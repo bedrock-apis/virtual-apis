@@ -1,8 +1,9 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { MetadataModuleDefinition } from '../script-module-metadata';
-import { generateModule } from './codegen';
+import { printModule } from './printer';
+//import { generateModule } from './codegen';
 
 const baseLink = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs/stable`;
 const repoExists = `${baseLink}/exist.json`;
@@ -34,7 +35,17 @@ main().then(
    },
 );
 
+async function test(): Promise<number> {
+   const data = JSON.parse(readFileSync('./data/server_1.15.0-beta.json').toString());
+   const { definitionsCode, exportsCode } = await printModule(data);
+   writeFileSync('./tests/server.native.js', definitionsCode);
+   writeFileSync('./tests/server.js', exportsCode);
+   return 0;
+}
+
 async function main(): Promise<number> {
+   return test();
+   /*
    // Static Move Copy
    if (!existsSync(outDir)) {
       await mkdir(outDir);
@@ -98,7 +109,7 @@ async function main(): Promise<number> {
       return -1;
    }
 
-   // 0 is success
+   // 0 is success*/
    return 0;
 }
 
@@ -141,7 +152,7 @@ async function generateModuleFor(name: string, version: string): Promise<number>
       return -1;
    }
 
-   const { definitionsCode, exportsCode } = await generateModule(moduleObject, apiFilename, true);
+   const { definitionsCode, exportsCode } = await printModule(moduleObject);
 
    await writeFile(resolve(outDir, name + '.native.js'), definitionsCode);
    console.log('Generated ' + resolve(outDir, name + '.native.js'));

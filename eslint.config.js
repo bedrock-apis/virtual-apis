@@ -29,6 +29,7 @@ function customPluginConfig() {
          rules: {
             'custom/no-globals': 'error',
             'custom/no-default-extends': 'error',
+            'custom/no-iterators': 'error'
          },
       },
    ]);
@@ -110,8 +111,8 @@ function customPlugin() {
                node.parent.type === 'NewExpression'
                   ? source.substring(parent.start + our.start - parent.start + name.length + 1, parent.end - 1)
                   : node.parent.type === 'ArrayExpression'
-                    ? source.substring(our.start + 1, our.end - 1)
-                    : '';
+                     ? source.substring(our.start + 1, our.end - 1)
+                     : '';
 
             const args = `("${name}"${originalArgs ? ', ' + originalArgs : ''})`;
             const isArrayWithOneElement =
@@ -127,8 +128,8 @@ function customPlugin() {
                data: { args },
                fix: !isArrayWithOneElement
                   ? fixer => {
-                       return [fixer.replaceTextRange([parent.start, parent.end], `${kernelConstruct}${args}`)];
-                    }
+                     return [fixer.replaceTextRange([parent.start, parent.end], `${kernelConstruct}${args}`)];
+                  }
                   : undefined,
             });
          }
@@ -164,6 +165,53 @@ function customPlugin() {
       defaultOptions: [],
    });
 
+   const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
+      meta: {
+         type: 'problem',
+         hasSuggestions: false,
+         fixable: 'code',
+         messages: {
+            unsafeIterator: `Using iterators is unsafe as iterators are not isolated`,
+            forOfDestructor: `Using destructors in for-of is not permitted.`,
+         },
+         schema: [],
+      },
+      create(context) {
+         return {
+            ForOfStatement(node) {
+               for (const n of node.left.declarations) {
+                  if (n.id.type === "ArrayPattern") context.report({
+                     messageId: 'forOfDestructor',
+                     node: n.id
+                  });
+               }
+               if (node.right.type !== "CallExpression") context.report({
+                  messageId: 'unsafeIterator',
+                  node: node.right
+               });
+               else if (node.right.callee.object?.name !== "Kernel") context.report({
+                  messageId: 'unsafeIterator',
+                  node: node.right
+               });
+            },
+            ArrayPattern(node) {
+               if (node.parent.type === "VariableDeclarator") {
+                  if (!node.parent.init) return;
+                  if (node.parent.init.type !== "CallExpression") context.report({
+                     messageId: 'unsafeIterator',
+                     node: node.parent.init
+                  });
+                  else if (node.parent.init.callee.object?.name !== "Kernel") context.report({
+                     messageId: 'unsafeIterator',
+                     node: node.parent.init
+                  });
+               }
+            }
+         }
+      },
+      defaultOptions: [],
+   });
+
    /**
     * @param {import("@typescript-eslint/utils").TSESTree.Node} node
     */
@@ -176,6 +224,7 @@ function customPlugin() {
       rules: {
          'no-globals': noGlobals,
          'no-default-extends': noDefaultClasses,
+         'no-iterators': noUnsafeIterators
       },
    };
 }

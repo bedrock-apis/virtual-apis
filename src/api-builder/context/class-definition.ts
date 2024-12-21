@@ -20,6 +20,7 @@ export class ClassDefinition<
    public readonly onConstruct: NativeEvent<[handle: object, cache: object, this, ConstructionExecutionContext]>;
    public readonly constructorId: string;
    public readonly type: Type;
+   public readonly hasConstructor: boolean;
    public readonly invocable = Kernel.Construct('WeakMap') as WeakMap<
       CallableFunction,
       NativeEvent<[handle: object, cache: object, this, ExecutionContext]>
@@ -55,12 +56,12 @@ export class ClassDefinition<
        */
       public readonly classId: string,
       public readonly parent: T,
-      public readonly constructorParams: ParamsDefinition = new ParamsDefinition(),
-      public readonly hasConstructor: boolean = false,
+      public readonly constructorParams: ParamsDefinition | null,
       public readonly newExpected: boolean = true,
    ) {
       super();
-      this.api = createConstructorFor(this, constructorParams);
+      this.hasConstructor = Kernel['Boolean::constructor'](constructorParams);
+      this.api = createConstructorFor(this, constructorParams ?? new ParamsDefinition());
       this.constructorId = `${classId}:constructor`;
       if (context.nativeEvents.has(this.constructorId)) {
          throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
@@ -78,8 +79,10 @@ export class ClassDefinition<
     * @returns New Virtual API Instance of the handle
     */
    public create(): this['api']['prototype'] {
-      const [handle, cache] = this.__construct(
-         new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
+      const [handle] = Kernel.ArrayIterator(
+         this.__construct(
+            new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
+         ),
       );
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
@@ -128,7 +131,7 @@ export class ClassDefinition<
       params: ParamsDefinition = new ParamsDefinition(),
       returnType: Type = new VoidType(),
    ) {
-      throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
+      //throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
       return this as ClassDefinition<T, P, S & Record<Name, (...params: unknown[]) => unknown>, NAME>;
    }
 
@@ -152,7 +155,7 @@ export class ClassDefinition<
    public __construct(context: ConstructionExecutionContext): [object, object] {
       let data = this.parent?.__construct(context);
       if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
-      const [handle, cache] = data;
+      const [handle, cache] = Kernel.ArrayIterator(data) as unknown as [object, object];
 
       this.context.nativeHandles.add(handle);
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);

@@ -1,44 +1,37 @@
-import ts, { factory } from 'typescript';
-import { ClassDefinition, ParamsDefinition } from '../api-builder';
-
+import ts from 'typescript';
 // Just for sake of test
 import * as prettier from 'prettier';
 
-import { Context } from '../api-builder/context';
-import { InterfaceBindType } from '../api-builder/type-validators/types/interface';
-import {
-   MetadataClassDefinition,
-   MetadataConstantDefinition,
-   MetadataFunctionArgumentDefinition,
-   MetadataInterfaceDefinition,
-   MetadataModuleDefinition,
-   MetadataPropertyMemberDefinition,
-   MetadataType,
-} from '../script-module-metadata';
-import { resolveDependencies } from './dependency-resolver';
-import { TYPESCRIPT_AST_HELPER as t } from './typescript-ast-helper';
+import { MetadataModuleDefinition } from '../script-module-metadata';
+import { VirtualNativeModule } from './virtual-apis';
 
-const classDefinitionI = t.i`${ClassDefinition.name}`;
-const classDefinitionIApi = 'api' satisfies keyof ClassDefinition;
-const classDefinitionICreate = 'create' satisfies keyof ClassDefinition;
-const classDefinitionIAddMethod = 'addMethod' satisfies keyof ClassDefinition;
-const classDefinitionAddProperty = 'addProperty' satisfies keyof ClassDefinition;
-const classDefinitionAddStaticProperty = 'addStaticConstant' satisfies keyof ClassDefinition;
-const classDefinitionIAddStaticMethod = 'addStaticFunction' satisfies keyof ClassDefinition;
+export async function printModule(source: MetadataModuleDefinition) {
+   const virtualModule = new VirtualNativeModule(source);
+   // Create a printer to print the AST back to a string
+   const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
 
-const interfaceBindTypeI = t.i`${InterfaceBindType.name}`;
-const interfaceBindTypeIAddProperty = 'addProperty' satisfies keyof InterfaceBindType;
+   async function writeCode(body: ts.Node[]) {
+      // Emit the JavaScript code
+      const resultCode = printer.printList(
+         ts.ListFormat.AllowTrailingComma |
+            ts.ListFormat.MultiLine |
+            ts.ListFormat.MultiLineBlockStatements |
+            ts.ListFormat.Indented,
+         body as unknown as ts.NodeArray<ts.Node>,
+         ts.createSourceFile('file.js', '', ts.ScriptTarget.ES2020, false, ts.ScriptKind.JS),
+      );
 
-const contextI = t.i`CONTEXT`;
-const contextIResolveAllDynamicTypes = 'resolveAllDynamicTypes' satisfies keyof Context;
-const contextIRegisterType = t.accessBy(contextI, 'registerType' satisfies keyof Context);
-const contextIResolveType = 'resolveType' satisfies keyof Context;
-function createContextResolveType(type: MetadataType) {
-   return t.methodCall(contextI, contextIResolveType, [t.asIs(type)]);
+      // Prettify code
+      return await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 }); //: resultCode;
+   }
+
+   const definitionsCode = await writeCode([...virtualModule.emit()]);
+   const exportsCode = await writeCode([...virtualModule.emitVirtualAPIs()]);
+
+   return { definitionsCode, exportsCode };
 }
-
-const paramsDefinitionI = t.i`${ParamsDefinition.name}`;
-export async function generateModule(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
+/*
+export async function generateModule2(source: MetadataModuleDefinition, apiFilename: string, useFormatting = true) {
    const pathToApi = '../' + apiFilename;
    const moduleName = source.name.split('/')[1] ?? 'unknown';
    const definitionsI = t.i`__`;
@@ -128,12 +121,12 @@ function generateClassDefinition(classMeta: MetadataClassDefinition) {
    const constructorArgs = createParamsDefinition(constructorType?.arguments);
 
    let node: ts.Expression = factory.createNewExpression(classDefinitionI, undefined, [
-      /* context */ contextI,
-      /* classId */ classIdI,
-      /* parent */ parent,
-      /* constructorParams */ constructorArgs,
-      /* hasConstructor */ t.asIs(!!constructorType),
-      /* newExpected */ t.asIs(true),
+       context  contextI,
+       classId classIdI,
+       parent  parent,
+       constructorParams constructorArgs,
+       hasConstructor t.asIs(!!constructorType),
+       newExpected  t.asIs(true),
    ]);
 
    for (const { name, return_type, is_static, arguments: args, is_constructor } of classMeta.functions) {
@@ -181,3 +174,4 @@ function generateInterfaceDefinition(interfaceMetadata: MetadataInterfaceDefinit
 
    return node;
 }
+*/

@@ -61,6 +61,8 @@ export class Context extends Kernel.Empty {
          unresolvedType.setType(resolvedType);
          this.UNRESOLVED_TYPES.delete(typeName);
       }
+
+      for (const typeName of this.UNRESOLVED_TYPES.keys()) Kernel.warn('Failed to resolve dynamic type: ' + typeName);
    }
    public resolveType(metadataType: MetadataType): Type {
       const { name } = metadataType;
@@ -133,11 +135,10 @@ export class Context extends Kernel.Empty {
    public createClassDefinition<T extends ClassDefinition | null>(
       name: string,
       parent: T,
-      paramDefinition: ParamsDefinition = new ParamsDefinition(),
-      hasConstructor = false,
+      paramDefinition: ParamsDefinition | null,
       newExpected = true,
    ): ClassDefinition<T, object, object> {
-      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, hasConstructor, newExpected);
+      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
    }
    public reportDiagnostics(diagnostics: Diagnostics) {
       Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name);
