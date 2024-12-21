@@ -1,3 +1,5 @@
+import { Kernel } from '../kernel';
+
 export * from './default';
 export * from './params-definition';
 export * from './type';

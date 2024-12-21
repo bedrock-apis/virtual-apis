@@ -178,6 +178,18 @@ function customPlugin() {
       },
       create(context) {
          return {
+            YieldExpression(node) {
+               if (!node.delegate) return;
+               node = node.argument;
+               if (node.type !== "CallExpression") context.report({
+                  messageId: 'unsafeIterator',
+                  node: node
+               });
+               else if (node.callee.object?.name !== "Kernel") context.report({
+                  messageId: 'unsafeIterator',
+                  node: node.node
+               });
+            },
             ForOfStatement(node) {
                for (const n of node.left.declarations) {
                   if (n.id.type === "ArrayPattern") context.report({
