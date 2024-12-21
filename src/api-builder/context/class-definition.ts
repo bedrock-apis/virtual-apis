@@ -3,7 +3,7 @@ import { NativeEvent } from '../events';
 import { Kernel } from '../kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
-import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './api-builder';
+import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
 // Class for single fake api definition
@@ -140,7 +140,7 @@ export class ClassDefinition<
    ) {
       // TODO
       // (this.api as Record<Name, unknown>)[name] = defaultValue;
-      throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
+      Kernel.warn(new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation));
       return this as ClassDefinition<T, P, S & Record<Name, PropertyType>, NAME>;
    }
 

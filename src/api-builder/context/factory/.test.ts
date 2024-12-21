@@ -1,9 +1,8 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
-import { Context } from '.';
-import { Diagnostics } from '../diagnostics';
-import { Kernel } from '../kernel';
-import { BooleanType, ParamsDefinition } from '../type-validators';
-import { ConstructionExecutionContext } from './execution-context';
+import { Context } from '..';
+import { Kernel } from '../../kernel';
+import { BooleanType, ParamsDefinition } from '../../type-validators';
+import { ConstructionExecutionContext } from '../execution-context';
 
 const context = new Context();
 const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
