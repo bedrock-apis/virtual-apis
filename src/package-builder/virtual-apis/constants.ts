@@ -13,6 +13,7 @@ export const CONTEXT_CREATE_CLASS = CONTEXT_IDENTIFIER.access(
 export const CONTEXT_RESOLVE_ALL_EXPRESSION = CONTEXT_IDENTIFIER.methodCall(
    Identifier.Unique(Context.prototype.resolveAllDynamicTypes),
 );
+export const CONTEXT_REGISTER_TYPE = CONTEXT_IDENTIFIER.access(Identifier.Unique(Context.prototype.registerType));
 // Types Features
 export const INTERFACE_BIND_TYPE_NODE = TYPES_IDENTIFIER.access(Identifier.Unique(apiBuilder.Types.InterfaceBindType));
 export const PARAMS_DEFINITION_NODE = TYPES_IDENTIFIER.access(Identifier.Unique(apiBuilder.Types.ParamsDefinition));

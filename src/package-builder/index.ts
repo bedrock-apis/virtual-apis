@@ -44,8 +44,6 @@ async function test(): Promise<number> {
 }
 
 async function main(): Promise<number> {
-   return test();
-   /*
    // Static Move Copy
    if (!existsSync(outDir)) {
       await mkdir(outDir);
@@ -109,7 +107,7 @@ async function main(): Promise<number> {
       return -1;
    }
 
-   // 0 is success*/
+   // 0 is success
    return 0;
 }
 

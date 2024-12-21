@@ -14,6 +14,7 @@ import {
    API_EXPORTS,
    CONTEXT_CREATE_CLASS,
    CONTEXT_IDENTIFIER,
+   CONTEXT_REGISTER_TYPE,
    CONTEXT_RESOLVE_ALL_EXPRESSION,
    CONTEXT_RESOLVE_TYPE,
    INTERFACE_BIND_TYPE_NODE,
@@ -118,7 +119,7 @@ export class VirtualNativeModule {
       for (const func of meta.properties) {
          builderPattern = builderPattern.methodCall(ADD_PROPERTY_IDENTIFIER, [ValueLiteral.GetValue(func.name)]);
       }
-
+      builderPattern = CONTEXT_REGISTER_TYPE.invoke([ValueLiteral.GetValue(id._text), builderPattern]);
       // Emit Export declaration
       yield ASTHelper.VariableExport(id, builderPattern);
    }
