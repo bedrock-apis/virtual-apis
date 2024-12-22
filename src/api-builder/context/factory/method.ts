@@ -74,6 +74,7 @@ export function createMethodFor<T extends ClassDefinition<ClassDefinition | null
                Kernel.As(params, 'Array'),
                that as object,
             ),
+         1,
       ),
    );
 
