@@ -246,15 +246,16 @@ function namingConvention() {
    return [
       {
          selector: 'variable',
-         modifiers: ['const', 'global', 'exported'],
-         format: ['UPPER_CASE'],
+         modifiers: ['const', 'global',], //'exported'
+         format: ['UPPER_CASE', 'PascalCase'],
       },
+      /*
       {
          selector: 'variable',
          modifiers: ['const', 'global'],
          // PascalCase here is for aliases such as const Number = Kernel['Number::constructor']
          format: ['camelCase', 'PascalCase'],
-      },
+      },*/
 
       {
          selector: 'variable',
@@ -265,6 +266,7 @@ function namingConvention() {
       { selector: 'variable', format: ['camelCase'] },
 
       { selector: 'function', format: ['camelCase'] },
+      { selector: 'function', format: ['PascalCase'], modifiers: ['exported'] },
 
       { selector: 'classMethod', modifiers: ['static'], format: ['PascalCase'] },
 
