@@ -23,8 +23,8 @@ class KernelClass {
    public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
    public static __call = Function.prototype.call; // Type to Type call method
    public static call: <T extends (...params: P) => unknown, P extends unknown[]>(
-      thisFunction: T,
-      thisValue: unknown,
+      functionToCall: T,
+      argumentAsThisValue: unknown,
       ...params: unknown[] | P
    ) => ReturnType<T> = Function.prototype.call.bind(Function.prototype.call);
    public static __setPrototypeOf = Object.setPrototypeOf;
