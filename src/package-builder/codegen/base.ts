@@ -25,9 +25,10 @@ class TheNode {
    }
 }
 export type NodeType = ts.Node & TheNode;
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export const NodeConstructor: { new (node: ts.Node): NodeType; readonly prototype: NodeType } = TheNode as unknown as {
    new (node: ts.Node): NodeType;
    readonly prototype: NodeType;
 };
+
 export type TsNode = ts.Node;

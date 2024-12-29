@@ -89,11 +89,11 @@ class KernelClass {
    }
 
    public static SetFakeNative(func: CallableFunction | NewableFunction): void {
-      if (typeof func === 'function') nativeFunctions.add(func);
+      if (typeof func === 'function') NATIVE_FUNCTIONS.add(func);
    }
 
    public static IsFakeNative(func: CallableFunction | NewableFunction): boolean {
-      if (typeof func === 'function') return nativeFunctions.has(func);
+      if (typeof func === 'function') return NATIVE_FUNCTIONS.has(func);
       else return false;
    }
    public static SetGlobalThis() {}
@@ -143,30 +143,30 @@ const ISOLATED_COPIES = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
 KernelClass.__setPrototypeOf(KernelStorage, null);
 
-const globalNames = Object.getOwnPropertyNames(globalThis);
+const GLOBAL_NAMES = Object.getOwnPropertyNames(globalThis);
 
 // eslint-disable-next-line custom/no-iterators
-for (const constructor of globalNames
-   .map(k => (globalThis as typeof KernelStorage)[k])
-   .filter(v => typeof v === 'function' && v.prototype)) {
+for (const constructor of GLOBAL_NAMES.map(k => (globalThis as typeof KernelStorage)[k]).filter(
+   v => typeof v === 'function' && v.prototype,
+)) {
    KernelStorage[constructor.name + '::constructor'] = constructor;
    KernelStorage[constructor.name + '::prototype'] = KernelClass.IsolatedCopy(constructor.prototype);
    KernelStorage[constructor.name + '::static'] = KernelClass.IsolatedCopy(constructor);
 }
 // eslint-disable-next-line custom/no-iterators
-for (const globalName of globalNames) {
+for (const globalName of GLOBAL_NAMES) {
    KernelStorage[`globalThis::${globalName}`] = globalThis[globalName as keyof typeof globalThis];
 }
 
-const nativeFunctions = KernelClass.Construct('WeakSet');
-nativeFunctions.add(
+const NATIVE_FUNCTIONS = KernelClass.Construct('WeakSet');
+NATIVE_FUNCTIONS.add(
    (Function.prototype.toString = function () {
-      if (nativeFunctions.has(this)) return `function ${this.name}() {\n    [native code]\n}`;
+      if (NATIVE_FUNCTIONS.has(this)) return `function ${this.name}() {\n    [native code]\n}`;
       const string = KernelClass.As(KernelClass.call(KernelStorage['Function::prototype'].toString, this), 'String');
       return string + '';
    }),
 );
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export const Kernel = KernelClass as typeof KernelClass & KernelType;
 const ARRAY_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call([])));
 const MAP_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Map.prototype.values.call(new Map()))); // Key Iterators has same prototype

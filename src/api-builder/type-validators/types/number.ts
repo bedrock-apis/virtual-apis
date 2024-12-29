@@ -1,9 +1,6 @@
-import { Range } from '../../../script-module-metadata';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '../../kernel';
 import { Type } from '../type';
-
-const isFinite = Kernel['globalThis::isFinite'];
 
 export abstract class BaseNumberType<T extends number | bigint> extends Type {
    public abstract readonly type: 'number' | 'bigint';
@@ -16,7 +13,7 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
    public override validate(diagnostics: DiagnosticsStackReport, value: unknown) {
       if (typeof value !== this.type) return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
 
-      if (this.isFiniteCheck && !isFinite(value as unknown as number)) {
+      if (this.isFiniteCheck && !Kernel['globalThis::isFinite'](value as unknown as number)) {
          return diagnostics.report(
             API_ERRORS_MESSAGES.ValueNotSupported(Kernel.call(Kernel['Number::prototype'].toString, value)),
          );

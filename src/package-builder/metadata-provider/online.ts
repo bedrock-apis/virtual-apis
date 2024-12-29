@@ -1,5 +1,5 @@
 import { MetadataModuleDefinition } from '../../script-module-metadata';
-import { CompareVersions, FetchJson } from '../helper';
+import { compareVersions, fetchJson } from '../helper';
 import { IMetadataProvider } from './general';
 
 const BASE_LINK = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs`;
@@ -12,7 +12,7 @@ export class OnlineMetadataProvider implements IMetadataProvider {
       this.branch = branchTarget;
    }
    public async *getMetadataModules(): AsyncIterable<MetadataModuleDefinition> {
-      const data = (this.data = await FetchJson<ExistJson>(`${BASE_LINK}/${this.branch}/${REPO_EXISTS_FILE}`));
+      const data = (this.data = await fetchJson<ExistJson>(`${BASE_LINK}/${this.branch}/${REPO_EXISTS_FILE}`));
 
       if (!data) {
          console.error('Failed to fetch repository from ' + REPO_EXISTS_FILE);
@@ -33,7 +33,7 @@ export class OnlineMetadataProvider implements IMetadataProvider {
          if (!info) continue;
 
          const { name, versions } = info;
-         const version = versions.sort(CompareVersions).at(-1);
+         const version = versions.sort(compareVersions).at(-1);
          if (!version) continue;
          const file = `@minecraft/${name}_${version}.json`;
          if (!metadata.script_module_files.includes(file)) {
@@ -42,7 +42,7 @@ export class OnlineMetadataProvider implements IMetadataProvider {
          }
 
          const link = `${BASE_LINK}/${this.branch}/metadata/script_modules/${file}`;
-         const data = await FetchJson<MetadataModuleDefinition>(link);
+         const data = await fetchJson<MetadataModuleDefinition>(link);
          if (!data) {
             console.warn('Failed to fetch and parse JSON data');
             continue;

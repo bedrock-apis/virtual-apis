@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { printModule } from './printer';
-import { f, Fit, Formats, Use } from './console-formatting';
+import { f, fit, Formats, use } from './console-formatting';
 import { IMetadataProvider, SystemFileMetadataProvider } from './metadata-provider';
+import { printModule } from './printer';
 //import { generateModule } from './codegen';
 
 const OUT_DIR = 'packages';
@@ -58,14 +58,14 @@ async function main(provider: IMetadataProvider): Promise<number> {
       reportGenerated(name.slice(11) + '.native.js', definitionsCode.length);
       await writeFile(resolve(OUT_DIR, name + '.js'), exportsCode);
       reportGenerated(name.slice(11) + '.js', exportsCode.length);
-      console.log(`\n${Use('✔', Formats.LightGreen)} Finished in ${Date.now() - time}ms`);
+      console.log(`\n${use('✔', Formats.LightGreen)} Finished in ${Date.now() - time}ms`);
    }
    // 0 is success
    return 0;
 }
 function reportGenerated(file: string, size: number) {
    console.log(
-      f` <GEN>/${'\x1b[0m' + Fit(Use(file, Formats.Cyan), 50)} file | size: ${(size / 1000).toFixed(1)}kB`(
+      f` <GEN>/${'\x1b[0m' + fit(use(file, Formats.Cyan), 50)} file | size: ${(size / 1000).toFixed(1)}kB`(
          Formats.Dark,
       ),
    );

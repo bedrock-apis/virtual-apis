@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
 import { MetadataType } from '../../script-module-metadata';
 
-const defaultTypes = [
+const DEFAULT_TYPES = [
    {
       is_bind_type: false,
       is_errorable: false,
@@ -33,7 +33,7 @@ const defaultTypes = [
 ] as const;
 
 export function isDefaultType(type: MetadataType) {
-   return defaultTypes.find(e => isDeepStrictEqual(e, type));
+   return DEFAULT_TYPES.find(e => isDeepStrictEqual(e, type));
 }
 
 export function toDefaultType(type: MetadataType) {
@@ -41,8 +41,8 @@ export function toDefaultType(type: MetadataType) {
    return type;
 }
 
-export function fromDefaultType(type: (typeof defaultTypes)[number]['name'] | MetadataType) {
-   return typeof type === 'string' ? (defaultTypes.find(e => e.name === type) as MetadataType) : type;
+export function fromDefaultType(type: (typeof DEFAULT_TYPES)[number]['name'] | MetadataType) {
+   return typeof type === 'string' ? (DEFAULT_TYPES.find(e => e.name === type) as MetadataType) : type;
 }
 
-export type DefaultMetadataType = (typeof defaultTypes)[number]['name'] | MetadataType;
+export type DefaultMetadataType = (typeof DEFAULT_TYPES)[number]['name'] | MetadataType;

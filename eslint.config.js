@@ -3,7 +3,7 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
-   { ignores: ['**/*.js', '**/*.test.ts'] },
+   { ignores: ['**/*.js', '**/*.test.ts', 'examples/**'] },
    { files: ['src/**/*.ts'] },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
@@ -29,7 +29,7 @@ function customPluginConfig() {
          rules: {
             'custom/no-globals': 'error',
             'custom/no-default-extends': 'error',
-            'custom/no-iterators': 'error'
+            'custom/no-iterators': 'error',
          },
       },
    ]);
@@ -111,8 +111,8 @@ function customPlugin() {
                node.parent.type === 'NewExpression'
                   ? source.substring(parent.start + our.start - parent.start + name.length + 1, parent.end - 1)
                   : node.parent.type === 'ArrayExpression'
-                     ? source.substring(our.start + 1, our.end - 1)
-                     : '';
+                    ? source.substring(our.start + 1, our.end - 1)
+                    : '';
 
             const args = `("${name}"${originalArgs ? ', ' + originalArgs : ''})`;
             const isArrayWithOneElement =
@@ -181,45 +181,52 @@ function customPlugin() {
             YieldExpression(node) {
                if (!node.delegate) return;
                node = node.argument;
-               if (node.type !== "CallExpression") context.report({
-                  messageId: 'unsafeIterator',
-                  node: node
-               });
-               else if (node.callee.object?.name !== "Kernel") context.report({
-                  messageId: 'unsafeIterator',
-                  node: node.node
-               });
+               if (node.type !== 'CallExpression')
+                  context.report({
+                     messageId: 'unsafeIterator',
+                     node: node,
+                  });
+               else if (node.callee.object?.name !== 'Kernel')
+                  context.report({
+                     messageId: 'unsafeIterator',
+                     node: node.node,
+                  });
             },
             ForOfStatement(node) {
                for (const n of node.left.declarations) {
-                  if (n.id.type === "ArrayPattern") context.report({
-                     messageId: 'forOfDestructor',
-                     node: n.id
-                  });
+                  if (n.id.type === 'ArrayPattern')
+                     context.report({
+                        messageId: 'forOfDestructor',
+                        node: n.id,
+                     });
                }
-               if (node.right.type !== "CallExpression") context.report({
-                  messageId: 'unsafeIterator',
-                  node: node.right
-               });
-               else if (node.right.callee.object?.name !== "Kernel") context.report({
-                  messageId: 'unsafeIterator',
-                  node: node.right
-               });
+               if (node.right.type !== 'CallExpression')
+                  context.report({
+                     messageId: 'unsafeIterator',
+                     node: node.right,
+                  });
+               else if (node.right.callee.object?.name !== 'Kernel')
+                  context.report({
+                     messageId: 'unsafeIterator',
+                     node: node.right,
+                  });
             },
             ArrayPattern(node) {
-               if (node.parent.type === "VariableDeclarator") {
+               if (node.parent.type === 'VariableDeclarator') {
                   if (!node.parent.init) return;
-                  if (node.parent.init.type !== "CallExpression") context.report({
-                     messageId: 'unsafeIterator',
-                     node: node.parent.init
-                  });
-                  else if (node.parent.init.callee.object?.name !== "Kernel") context.report({
-                     messageId: 'unsafeIterator',
-                     node: node.parent.init
-                  });
+                  if (node.parent.init.type !== 'CallExpression')
+                     context.report({
+                        messageId: 'unsafeIterator',
+                        node: node.parent.init,
+                     });
+                  else if (node.parent.init.callee.object?.name !== 'Kernel')
+                     context.report({
+                        messageId: 'unsafeIterator',
+                        node: node.parent.init,
+                     });
                }
-            }
-         }
+            },
+         };
       },
       defaultOptions: [],
    });
@@ -236,7 +243,7 @@ function customPlugin() {
       rules: {
          'no-globals': noGlobals,
          'no-default-extends': noDefaultClasses,
-         'no-iterators': noUnsafeIterators
+         'no-iterators': noUnsafeIterators,
       },
    };
 }
@@ -246,16 +253,14 @@ function namingConvention() {
    return [
       {
          selector: 'variable',
-         modifiers: ['const', 'global',], //'exported'
+         modifiers: ['const', 'global'],
          format: ['UPPER_CASE', 'PascalCase'],
       },
-      /*
       {
          selector: 'variable',
-         modifiers: ['const', 'global'],
-         // PascalCase here is for aliases such as const Number = Kernel['Number::constructor']
-         format: ['camelCase', 'PascalCase'],
-      },*/
+         modifiers: ['const'],
+         format: ['camelCase'],
+      },
 
       {
          selector: 'variable',
@@ -266,10 +271,8 @@ function namingConvention() {
       { selector: 'variable', format: ['camelCase'] },
 
       { selector: 'function', format: ['camelCase'] },
-      { selector: 'function', format: ['PascalCase'], modifiers: ['exported'] },
 
       { selector: 'classMethod', modifiers: ['static'], format: ['PascalCase'] },
-
       { selector: 'classMethod', format: ['camelCase'], leadingUnderscore: 'allowDouble' },
 
       { selector: 'classProperty', modifiers: ['readonly', 'private'], format: ['UPPER_CASE'] },

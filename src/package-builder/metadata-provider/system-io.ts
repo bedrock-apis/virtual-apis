@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { IMetadataProvider } from './general';
 import { resolve } from 'node:path';
 import { MetadataModuleDefinition } from '../../script-module-metadata';
-import { CompareVersions } from '../helper';
+import { compareVersions } from '../helper';
+import { IMetadataProvider } from './general';
 
 const MODULES_PATH = '@minecraft';
 
@@ -21,7 +21,7 @@ export class SystemFileMetadataProvider implements IMetadataProvider {
          const version = versionLike.slice(0, versionLike.lastIndexOf('.'));
          if (!moduleName) continue;
          const current = modulesMap.get(moduleName);
-         if (!current || CompareVersions(current, version) != 1) modulesMap.set(moduleName, version);
+         if (!current || compareVersions(current, version) != 1) modulesMap.set(moduleName, version);
       }
       for (const [name, version] of modulesMap.entries()) {
          const file = resolve(base, `${name}_${version}.json`);

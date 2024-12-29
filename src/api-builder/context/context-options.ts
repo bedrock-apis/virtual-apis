@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ContextOptions = {
    StrictReturnTypes: 'StrictReturnTypes',
    GetterRequireValidBound: 'GetterRequireValidBound',

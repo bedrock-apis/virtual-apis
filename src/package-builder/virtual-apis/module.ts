@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import ts, { factory } from 'typescript';
 import { TsNode, Identifier, Import, NamespaceImport, ValueLiteral, ASTHelper, NodeType } from '../codegen/index';
 import {

@@ -25,7 +25,7 @@ export class ConsoleColorFormat extends ConsoleFormat {
       this.isLight = modifiers >= 60 ? 60 : 0;
    }
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export function f(strings: TemplateStringsArray, ...params: unknown[]) {
    return (...colors: ConsoleFormat[]) => {
       const color = colors.reduce((l, n) => l.merge(n));
@@ -38,18 +38,19 @@ export function f(strings: TemplateStringsArray, ...params: unknown[]) {
       );
    };
 }
-export function Use(data: unknown, color: ConsoleFormat) {
+export function use(data: unknown, color: ConsoleFormat) {
    return `${color.starting}${data}${color.ending}`;
 }
-export function Fit(data: string, size: number) {
+export function fit(data: string, size: number) {
    if (data.length < size) return data + ' '.repeat(size - data.length);
    return data;
 }
 
-type ConsoleColors = (typeof CONSOLE_COLORS)[keyof typeof CONSOLE_COLORS];
+type ConsoleColors = (typeof CONSOLE_COLORS)[Colors];
 type ConsoleModifier =
    | typeof CONSOLE_COLOR_MODIFIERS.BackgroundModifier
    | typeof CONSOLE_COLOR_MODIFIERS.LightModeModifier;
+
 const CONSOLE_COLORS = {
    Black: 0,
    Red: 1,
@@ -62,6 +63,7 @@ const CONSOLE_COLORS = {
    Custom: 8,
    Reset: 9,
 } as const;
+
 const CONSOLE_COLOR_MODIFIERS = {
    Base: 30,
    BackgroundModifier: 10,
@@ -77,11 +79,14 @@ type ConsoleColorFormatsObject = {
    readonly Inverted: ConsoleFormat;
    readonly Censured: ConsoleFormat;
    readonly Canceled: ConsoleFormat;
-} & { [K in keyof typeof CONSOLE_COLORS]: ConsoleFormat } & {
-   [K in keyof typeof CONSOLE_COLORS as `Background${K}`]: ConsoleFormat;
-} & { [K in keyof typeof CONSOLE_COLORS as `Light${K}`]: ConsoleFormat } & {
-   [K in keyof typeof CONSOLE_COLORS as `backgroundLight${K}`]: ConsoleFormat;
+} & { [K in Colors]: ConsoleFormat } & {
+   [K in Colors as `Background${K}`]: ConsoleFormat;
+} & { [K in Colors as `Light${K}`]: ConsoleFormat } & {
+   [K in Colors as `BackgroundLight${K}`]: ConsoleFormat;
 };
+
+type Colors = keyof typeof CONSOLE_COLORS;
+
 export const Formats: ConsoleColorFormatsObject = {
    Dark: new ConsoleFormat(2, 22),
    Italic: new ConsoleFormat(3, 23),
@@ -92,28 +97,20 @@ export const Formats: ConsoleColorFormatsObject = {
    Censured: new ConsoleFormat(8, 28),
    Canceled: new ConsoleFormat(9, 29),
 } as ConsoleColorFormatsObject;
-for (const key of Object.getOwnPropertyNames(CONSOLE_COLORS)) {
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   (Formats as any)[key] = new ConsoleColorFormat(CONSOLE_COLORS[key as keyof typeof CONSOLE_COLORS], 0);
-}
-for (const key of Object.getOwnPropertyNames(CONSOLE_COLORS)) {
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   (Formats as any)[`Background${key}`] = new ConsoleColorFormat(
-      CONSOLE_COLORS[key as keyof typeof CONSOLE_COLORS],
-      CONSOLE_COLOR_MODIFIERS.BackgroundModifier,
-   );
-}
-for (const key of Object.getOwnPropertyNames(CONSOLE_COLORS)) {
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   (Formats as any)[`Light${key}`] = new ConsoleColorFormat(
-      CONSOLE_COLORS[key as keyof typeof CONSOLE_COLORS],
-      CONSOLE_COLOR_MODIFIERS.LightModeModifier,
-   );
-}
-for (const key of Object.getOwnPropertyNames(CONSOLE_COLORS)) {
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   (Formats as any)[`BackgroundLight${key}`] = new ConsoleColorFormat(
-      CONSOLE_COLORS[key as keyof typeof CONSOLE_COLORS],
+
+for (const key of Object.getOwnPropertyNames(CONSOLE_COLORS) as Colors[]) {
+   Formats[`Light${key}`] = new ConsoleColorFormat(CONSOLE_COLORS[key], CONSOLE_COLOR_MODIFIERS.LightModeModifier);
+
+   Formats[`BackgroundLight${key}`] = new ConsoleColorFormat(
+      CONSOLE_COLORS[key],
       (CONSOLE_COLOR_MODIFIERS.LightModeModifier + CONSOLE_COLOR_MODIFIERS.LightModeModifier) as 70,
    );
+
+   Formats[`Background${key}`] = new ConsoleColorFormat(
+      CONSOLE_COLORS[key],
+      CONSOLE_COLOR_MODIFIERS.BackgroundModifier,
+   );
+
+   Formats[key] = new ConsoleColorFormat(CONSOLE_COLORS[key], 0);
 }
+
