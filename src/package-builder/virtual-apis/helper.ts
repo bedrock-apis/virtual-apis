@@ -1,8 +1,7 @@
 import ts, { factory } from 'typescript';
-import { ParamsDefinition } from '../../api-builder/type-validators';
-import { MetadataFunctionDefinition } from '../../script-module-metadata';
+import { MetadataFunctionDefinition, MetadataModuleBaseDefinition } from '../../script-module-metadata';
 import { TsNode, ValueLiteral } from '../codegen/index';
-import { CONTEXT_IDENTIFIER, NULL_KEYWORD, PARAMS_DEFINITION_FROM, PARAMS_DEFINITION_NODE } from './constants';
+import { CONTEXT_IDENTIFIER, NULL_KEYWORD, PARAMS_DEFINITION_FROM } from './constants';
 
 export function constructParams(meta: MetadataFunctionDefinition['arguments']) {
    return PARAMS_DEFINITION_FROM.invoke([CONTEXT_IDENTIFIER, rawASTFor(meta)]);
@@ -41,4 +40,8 @@ function rawObject<O extends object>(object: O | null) {
       ),
       true,
    );
+}
+
+export function metadataModuleFullname(definition: MetadataModuleBaseDefinition) {
+   return definition.name + '@' + definition.version;
 }

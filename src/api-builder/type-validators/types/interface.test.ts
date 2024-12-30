@@ -19,6 +19,7 @@ suite('InterfaceType', () => {
       expect(bType).toBeInstanceOf(InterfaceBindType);
       expect(bType).toMatchInlineSnapshot(`
         InterfaceBindType {
+          "baseType": null,
           "name": "b",
           "properties": Map {},
         }
@@ -30,10 +31,12 @@ suite('InterfaceType', () => {
       expect(aType).toBeInstanceOf(InterfaceBindType);
       expect(aType).toMatchInlineSnapshot(`
         InterfaceBindType {
+          "baseType": null,
           "name": "a",
           "properties": Map {
             "b" => DynamicType {
               "type": InterfaceBindType {
+                "baseType": null,
                 "name": "b",
                 "properties": Map {},
               },
@@ -48,6 +51,7 @@ suite('InterfaceType', () => {
             "b",
             DynamicType {
               "type": InterfaceBindType {
+                "baseType": null,
                 "name": "b",
                 "properties": Map {},
               },
@@ -69,13 +73,16 @@ suite('InterfaceType', () => {
       expect(aType).toBeInstanceOf(InterfaceBindType);
       expect(aType).toMatchInlineSnapshot(`
         InterfaceBindType {
+          "baseType": null,
           "name": "a",
           "properties": Map {
             "b" => InterfaceBindType {
+              "baseType": null,
               "name": "b",
               "properties": Map {
                 "c" => DynamicType {
                   "type": InterfaceBindType {
+                    "baseType": null,
                     "name": "c",
                     "properties": Map {
                       "a" => [Circular],
@@ -93,13 +100,16 @@ suite('InterfaceType', () => {
           [
             "b",
             InterfaceBindType {
+              "baseType": null,
               "name": "b",
               "properties": Map {
                 "c" => DynamicType {
                   "type": InterfaceBindType {
+                    "baseType": null,
                     "name": "c",
                     "properties": Map {
                       "a" => InterfaceBindType {
+                        "baseType": null,
                         "name": "a",
                         "properties": Map {
                           "b" => [Circular],

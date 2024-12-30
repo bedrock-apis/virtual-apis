@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ts, { factory } from 'typescript';
 import { NodeConstructor, NodeType } from './base';
-import { Identifier, ValueLiteral } from './general';
+import { ASTIdentifier, ValueLiteral } from './general';
 
-export abstract class Import extends NodeConstructor {
+export abstract class ASTImport extends NodeConstructor {
    public constructor(type: ts.NamedImports | ts.NamespaceImport, moduleSpecifier: string | ValueLiteral) {
       super(
          factory.createImportDeclaration(
@@ -14,13 +14,13 @@ export abstract class Import extends NodeConstructor {
          ),
       );
    }
-   public abstract import(identifier: Identifier): NodeType;
+   public abstract import(identifier: ASTIdentifier): NodeType;
 }
-export class NamedImport extends Import {
+export class ASTNamedImport extends ASTImport {
    public constructor(moduleSpecifier: string | ValueLiteral) {
       super(factory.createNamedImports([]), moduleSpecifier);
    }
-   public import(identifier: Identifier, as?: Identifier): NodeType {
+   public import(identifier: ASTIdentifier, as?: ASTIdentifier): NodeType {
       const elements = (this as any).importClause?.namedBindings?.elements;
       const importSpecifier = factory.createImportSpecifier(
          false,
@@ -31,13 +31,13 @@ export class NamedImport extends Import {
       return as ?? identifier;
    }
 }
-export class NamespaceImport extends Import {
+export class ASTNamespaceImport extends ASTImport {
    private __identifier;
-   public constructor(identifier: Identifier, moduleSpecifier: string | ValueLiteral) {
+   public constructor(identifier: ASTIdentifier, moduleSpecifier: string | ValueLiteral) {
       super(factory.createNamespaceImport(identifier as any), moduleSpecifier);
       this.__identifier = identifier;
    }
-   public import(identifier: Identifier): NodeType {
+   public import(identifier: ASTIdentifier): NodeType {
       return this.__identifier.access(identifier);
    }
 }

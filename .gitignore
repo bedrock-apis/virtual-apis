@@ -1,5 +1,6 @@
 bin
 packages
+modules
 # Logs
 logs
 *.log

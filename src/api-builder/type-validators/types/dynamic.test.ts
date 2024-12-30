@@ -10,7 +10,7 @@ suite('DynamicType', () => {
    test('Dynamic', () => {
       const type = new DynamicType();
       expect(() => type.validate(new DiagnosticsStackReport(), null)).toThrowErrorMatchingInlineSnapshot(
-         `[Error: Failed to call validate on unresolved DynamicType]`,
+         `[Error: Failed to call validate on unresolved DynamicType ]`,
       );
 
       type.setType(new StringType());

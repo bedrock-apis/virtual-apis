@@ -1,18 +1,21 @@
 {
-   "name": "virtual-api",
+   "name": "@bedrock-apis/virtual-apis",
    "version": "1.0.0",
    "license": "Apache-2.0",
    "author": "bedrock-apis",
    "type": "module",
-   "main": "dist/index.js",
    "scripts": {
-      "bundle": "rolldown -c",
-      "packagegen": "rolldown -c && node ./dist/build.js",
+      "bundle": "rolldown -c && pnpm run typesgen",
+      "packagegen": "rolldown -c && pnpm run typesgen && node ./dist/package-builder.js",
+      "typesgen": "tsc --project tsconfig.build.json",
       "lint": "eslint",
       "test": "vitest",
       "coverage": "vitest --ui --coverage",
       "typecheck": "tsc --noEmit",
-      "check": "rolldown -c && node ./dist/build.js && tsc --noEmit && eslint && vitest --run"
+      "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm packagegen",
+      "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
+      "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
+      "example:vitest": "cd examples/vitest && pnpm run start"
    },
    "prettier": {
       "arrowParens": "avoid",
@@ -36,5 +39,27 @@
    "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab",
    "engines": {
       "node": ">=20.x.x"
+   },
+   "exports": {
+      
+      "./package.json": "./package.json",
+      "./modules/*": "./modules/*",
+      "./loader":  "./dist/loader.js",
+      "./vitest": {
+         "default": "./dist/vitest.js",
+         "types": "./dist/src/loader/vitest.d.ts"
+      },
+      "./plugins/all": "./dist/all.js",
+      "./plugins/core": "./dist/core.js",
+      "./plugins/inventory": "./dist/inventory.js",
+      "./plugins/modules": "./dist/modules.js",
+      ".": {
+         "default": "./dist/index.js",
+         "types": "./dist/src/api-builder/index.d.ts"
+      }
+   },
+   "dependencies": {
+      "rollup": "^4.29.1",
+      "tsx": "^4.19.2"
    }
 }

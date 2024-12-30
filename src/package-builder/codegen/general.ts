@@ -36,15 +36,15 @@ export class ValueLiteral extends NodeConstructor {
       return v instanceof ValueLiteral ? v : new ValueLiteral(v);
    }
 }
-export const IDENTIFIERS = new WeakMap<object, Identifier>();
-export class Identifier extends NodeConstructor {
+export const IDENTIFIERS = new WeakMap<object, ASTIdentifier>();
+export class ASTIdentifier extends NodeConstructor {
    public static Unique(constructor: { name: string }) {
       let unique = IDENTIFIERS.get(constructor);
-      if (!unique) IDENTIFIERS.set(constructor, (unique = new Identifier(constructor.name)));
+      if (!unique) IDENTIFIERS.set(constructor, (unique = new ASTIdentifier(constructor.name)));
       return unique;
    }
    public static Create(name: string) {
-      return new Identifier(name);
+      return new ASTIdentifier(name);
    }
 
    // We want to avoid property collisions with typescript's internal properties

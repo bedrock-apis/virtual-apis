@@ -1,8 +1,11 @@
 import { Context } from './context';
-
 export { Kernel } from './kernel';
-export { ClassDefinition } from './context/class-definition';
-export * as APIFactory from './context/factory';
-export * as Types from './type-validators';
+
 export { ConfigContextOptions } from './context';
+export { ClassDefinition } from './context/class-definition';
+
+export * as APIFactory from './context/factory';
+export * as APIPlugin from './plugin';
+export * as APITypes from './type-validators';
+
 export const CONTEXT = new Context();

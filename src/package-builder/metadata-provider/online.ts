@@ -11,6 +11,7 @@ export class OnlineMetadataProvider implements IMetadataProvider {
    public constructor(branchTarget: 'stable' | 'preview') {
       this.branch = branchTarget;
    }
+   // TODO Return ALL versions
    public async *getMetadataModules(): AsyncIterable<MetadataModuleDefinition> {
       const data = (this.data = await fetchJson<ExistJson>(`${BASE_LINK}/${this.branch}/${REPO_EXISTS_FILE}`));
 
