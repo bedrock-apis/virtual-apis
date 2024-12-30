@@ -9,8 +9,10 @@
          "default": "./dist/index.js",
          "types": "./dist/src/api-builder/index.d.ts"
       },
+      "./package.json": "./package.json",
       "./modules/*": "./modules/*",
       "./plugins/*": "./dist/plugins/*.js",
+      "./loader": "./dist/loader.js",
       "./eslint-plugin": "./eslint-plugin.js",
       "./vitest": {
          "default": "./dist/vitest.js",

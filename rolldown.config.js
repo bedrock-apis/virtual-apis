@@ -31,13 +31,13 @@ export default defineConfig(
    ].map(e => ({ external: EXTERNAL, ...e })),
 );
 
-// @ts-expect-error
+
 PACKAGE_JSON.exports = Object.fromEntries([
    ['.', { default: DIST.index_js, types: DIST.src.api_builder.index_d_ts }],
-   ['./package.json', ROOT.package],
+   ['./package.json', ROOT.package_json],
    ['./modules/*', './modules/*'],
    ['./plugins/*', './dist/plugins/*.js'],
-   ['./loader', DIST.loader],
+   ['./loader', DIST.loader_js],
    ['./eslint-plugin', ROOT.eslint_plugin_js],
    ['./vitest', { default: DIST.vitest_js, types: DIST.src.loader.vitest_d_ts }],
 ]);
