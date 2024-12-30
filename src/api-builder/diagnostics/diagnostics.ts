@@ -1,3 +1,4 @@
+import { it } from 'vitest';
 import { Mutable } from '../../helper-types';
 import { KernelArray } from '../isolation';
 import { Kernel } from '../isolation/kernel';
@@ -33,7 +34,9 @@ export class DiagnosticsStackReport extends BaseReport {
       return this.length === 0;
    }
    public follow(diagnostics: DiagnosticsStackReport) {
-      this.stack.push(...Kernel.ArrayIterator(diagnostics.stack));
+      for(const item of diagnostics.stack.getIterator()){
+         this.stack.push(item);
+      }
       return this;
    }
 }

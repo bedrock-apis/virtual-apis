@@ -3,6 +3,7 @@ import { KernelIterator } from "./kernel.iterators";
 
 const MAP = Kernel.CallBindTo(Kernel["Array::prototype"].map);
 const FILTER = Kernel.CallBindTo(Kernel["Array::prototype"].filter);
+const PUSH = Kernel.CallBindTo(Kernel["Array::prototype"].push);
 export class KernelArray<T> extends Kernel.Empty {
     private constructor(){super();}
     public length = 0;
@@ -20,6 +21,7 @@ export class KernelArray<T> extends Kernel.Empty {
     public getIterator(): KernelIterator<T>{
         return KernelIterator.FromArrayIterator(this as unknown as Iterator<T>);
     }
+    public push(item: T){ return PUSH(this, item); }
 }
 Kernel.__setPrototypeOf(KernelArray, Kernel["Array::static"]);
 Kernel.__setPrototypeOf(KernelArray.prototype, Kernel["Array::prototype"]);
