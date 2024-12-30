@@ -13,7 +13,7 @@ try {
       `${sourceCode}\r\n\r\nexport const DIST = ${JSON.stringify(await objectFromDir('dist'), null, 3)}\r\n\r\nexport const SRC = ${JSON.stringify(await objectFromDir('src'), null, 3)}\r\nexport const ROOT = ${JSON.stringify(await objectFromDir('.', true), null, 3)}\r\n`,
    );
 } catch (e) {
-   console.warn('unable to update directories.js:', e);
+   console.log('unable to update directories.js:', e);
 }
 
 /** @param {string} dir */
