@@ -1,4 +1,4 @@
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { ErrorFactory } from './factory';
 
 export abstract class BaseReport extends Kernel.Empty {

@@ -1,5 +1,5 @@
 import { DiagnosticsStackReport, ErrorFactory, TYPE_ERROR_TYPE } from '../diagnostics';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 
 export abstract class Type extends Kernel.Empty {
    // Diagnostics are always passed by someone who requested this type check

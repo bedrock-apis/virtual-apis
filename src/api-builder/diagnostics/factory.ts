@@ -1,4 +1,4 @@
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 
 export type ErrorConstructor = new (message: string) => Error;
 export class ErrorFactory extends Kernel.Empty {

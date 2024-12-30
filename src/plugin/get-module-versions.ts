@@ -7,7 +7,7 @@ import module from 'node:module';
 import path from 'node:path';
 import url from 'node:url';
 
-import { API_MODULES_JSON_FILENAME, MODULES_DIR } from '../../constants';
+import { API_MODULES_JSON_FILENAME, MODULES_DIR } from '../constants';
 
 export function getModuleVersions(format: 'url' | 'path' = 'url') {
    // It is required to make node think we are importing all modules from the cwd, because

@@ -1,7 +1,7 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../script-module-metadata';
 import { Context } from '../context';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../diagnostics';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
 

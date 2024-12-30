@@ -1,4 +1,4 @@
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Diagnostics, BaseReport } from '../../diagnostics';
 import { Context } from '../context';
 import { Mutable } from '../../../helper-types';

@@ -1,5 +1,5 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Type } from '../type';
 
 export class MapType extends Type {

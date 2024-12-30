@@ -1,5 +1,5 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Type } from '../type';
 
 export abstract class BaseNumberType<T extends number | bigint> extends Type {
@@ -15,7 +15,7 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
 
       if (this.isFiniteCheck && !Kernel['globalThis::isFinite'](value as unknown as number)) {
          return diagnostics.report(
-            API_ERRORS_MESSAGES.ValueNotSupported(Kernel.call(Kernel['Number::prototype'].toString, value)),
+            API_ERRORS_MESSAGES.ValueNotSupported(Kernel.Call(Kernel['Number::prototype'].toString, value)),
          );
       }
 

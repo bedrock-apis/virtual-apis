@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-nocheck
 import { Range } from '../../script-module-metadata';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { Report } from '.';
 import { ReferenceErrorFactory, TypeErrorFactory } from './errors';
 

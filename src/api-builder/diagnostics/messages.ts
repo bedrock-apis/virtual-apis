@@ -1,5 +1,5 @@
 import type { Range } from '../../script-module-metadata';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { ErrorFactory } from './factory';
 
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';

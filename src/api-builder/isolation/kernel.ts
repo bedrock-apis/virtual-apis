@@ -1,4 +1,3 @@
-/* eslint-disable @bedrock-apis/virtual-apis/eslint.plugin/no-default-extends */
 /* eslint-disable @typescript-eslint/unified-signatures */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable custom/no-globals */
@@ -23,11 +22,13 @@ class KernelClass {
    // eslint-disable-next-line @typescript-eslint/naming-convention
    public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
    public static __call = Function.prototype.call; // Type to Type call method
-   public static call: <T extends (...params: P) => unknown, P extends unknown[]>(
+   public static Call: <T extends (...params: P) => unknown, P extends unknown[]>(
       functionToCall: T,
       argumentAsThisValue: unknown,
       ...params: unknown[] | P
    ) => ReturnType<T> = Function.prototype.call.bind(Function.prototype.call);
+   public static CallBindTo: <T extends (...params: P) => unknown, P extends any[]>(functionToBind: T) => 
+      (thisArgument: unknown, ...params: P)=>ReturnType<T> = (func)=>Kernel.Call(Kernel["Function::prototype"].bind, Kernel.Call, null, func);
    public static __setPrototypeOf = Object.setPrototypeOf;
    public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
@@ -106,22 +107,22 @@ class KernelClass {
    }
    public static ArrayIterator<T>(array: T[]): IterableIterator<T> {
       return KernelClass.__setPrototypeOf(
-         KernelClass.call(Kernel['Array::prototype'].values, array),
+         KernelClass.Call(Kernel['Array::prototype'].values, array),
          ARRAY_ITERATOR_PROTOTYPE,
       );
    }
    public static MapValuesIterator<T>(map: Map<unknown, T>): IterableIterator<T> {
       return KernelClass.__setPrototypeOf(
-         KernelClass.call(Kernel['Map::prototype'].values, map),
+         KernelClass.Call(Kernel['Map::prototype'].values, map),
          MAP_ITERATOR_PROTOTYPE,
       );
    }
    public static MapKeysIterator<T>(map: Map<T, unknown>): IterableIterator<T> {
-      return KernelClass.__setPrototypeOf(KernelClass.call(Kernel['Map::prototype'].keys, map), MAP_ITERATOR_PROTOTYPE);
+      return KernelClass.__setPrototypeOf(KernelClass.Call(Kernel['Map::prototype'].keys, map), MAP_ITERATOR_PROTOTYPE);
    }
    public static SetIterator<T>(set: Set<T>): IterableIterator<T> {
       return KernelClass.__setPrototypeOf(
-         KernelClass.call(Kernel['Set::prototype'].values, set),
+         KernelClass.Call(Kernel['Set::prototype'].values, set),
          SET_ITERATOR_PROTOTYPE,
       );
    }
@@ -163,7 +164,7 @@ const NATIVE_FUNCTIONS = KernelClass.Construct('WeakSet');
 NATIVE_FUNCTIONS.add(
    (Function.prototype.toString = function () {
       if (NATIVE_FUNCTIONS.has(this)) return `function ${this.name}() {\n    [native code]\n}`;
-      const string = KernelClass.As(KernelClass.call(KernelStorage['Function::prototype'].toString, this), 'String');
+      const string = KernelClass.As(KernelClass.Call(KernelStorage['Function::prototype'].toString, this), 'String');
       return string + '';
    }),
 );

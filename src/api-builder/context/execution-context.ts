@@ -1,6 +1,6 @@
 import { ClassDefinition } from './class-definition';
 import { BaseReport, Diagnostics } from '../diagnostics';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { Mutable } from '../../helper-types';
 import type { Context } from './context';
 

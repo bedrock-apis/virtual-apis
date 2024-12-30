@@ -1,5 +1,5 @@
 import { API_ERRORS_MESSAGES, ErrorFactory, WARNING_ERROR_MESSAGES } from '../../diagnostics';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
 import { ContextOptions } from '../context-options';

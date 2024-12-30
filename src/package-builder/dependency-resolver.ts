@@ -1,4 +1,4 @@
-import { Kernel } from '../api-builder/kernel';
+import { Kernel } from '../api-builder/isolation/kernel';
 
 interface Dependable<T> {
    id: string;

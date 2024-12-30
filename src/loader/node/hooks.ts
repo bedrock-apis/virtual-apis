@@ -1,4 +1,4 @@
-import { getModuleVersions } from '../../api-builder/plugin/get-module-versions';
+import { getModuleVersions } from '../../plugin/get-module-versions';
 
 const MODULES = getModuleVersions();
 

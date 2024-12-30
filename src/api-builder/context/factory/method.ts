@@ -1,5 +1,5 @@
 import { API_ERRORS_MESSAGES } from '../../diagnostics';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { ParamsDefinition, Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
 import { ExecutionContext } from '../execution-context';

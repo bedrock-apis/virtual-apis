@@ -1,5 +1,5 @@
 import { Mutable } from '../../helper-types';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { ErrorFactory } from './factory';
 import { PANIC_ERROR_MESSAGES } from './messages';
 import { ContextPanicError } from './panic';

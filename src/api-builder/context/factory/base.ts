@@ -1,4 +1,4 @@
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Type } from '../../type-validators';
 import { ContextOptions } from '../context-options';
 import { ExecutionContext } from '../execution-context';

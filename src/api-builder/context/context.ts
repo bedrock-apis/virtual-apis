@@ -1,6 +1,6 @@
 import { MetadataType } from '../../script-module-metadata';
 import { NativeEvent } from '../events';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';

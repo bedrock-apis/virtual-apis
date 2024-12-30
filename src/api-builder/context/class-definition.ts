@@ -1,6 +1,6 @@
 import { ContextPanicError, Diagnostics, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
-import { Kernel } from '../kernel';
+import { Kernel } from '../isolation/kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
 import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';

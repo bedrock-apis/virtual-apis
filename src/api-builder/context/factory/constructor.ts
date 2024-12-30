@@ -1,4 +1,4 @@
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES } from '../../diagnostics';

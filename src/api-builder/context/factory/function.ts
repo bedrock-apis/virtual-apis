@@ -1,4 +1,4 @@
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { ParamsDefinition, Type } from '../../type-validators';
 import { ExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';

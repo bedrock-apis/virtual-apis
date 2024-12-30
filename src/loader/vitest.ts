@@ -1,4 +1,4 @@
-import { getModuleVersions } from '../api-builder/plugin';
+import { getModuleVersions } from '../plugin';
 
 export function getVitestAliases() {
    return Object.fromEntries([...getModuleVersions('path').entries()]);

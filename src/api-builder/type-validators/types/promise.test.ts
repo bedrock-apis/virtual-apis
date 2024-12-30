@@ -1,5 +1,5 @@
 import { expect, suite, test } from 'vitest';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation/kernel';
 import { Type } from '../type';
 import { PromiseType } from './promise';
 import { validateThrow } from './tests.helper';
