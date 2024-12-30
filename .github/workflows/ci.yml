@@ -36,4 +36,4 @@ jobs:
            run: pnpm packagegen
 
          - name: 🧪 Test examples
-           run: pnpm run example:*
+           run: pnpm run examples

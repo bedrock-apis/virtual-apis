@@ -12,7 +12,8 @@
       "test": "vitest",
       "coverage": "vitest --ui --coverage",
       "typecheck": "tsc --noEmit",
-      "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm packagegen",
+      "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm packagegen && pnpm examples",
+      "examples": "pnpm run '/^example:.*/'",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
       "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
       "example:vitest": "cd examples/vitest && pnpm run start"
@@ -41,10 +42,9 @@
       "node": ">=20.x.x"
    },
    "exports": {
-      
       "./package.json": "./package.json",
       "./modules/*": "./modules/*",
-      "./loader":  "./dist/loader.js",
+      "./loader": "./dist/loader.js",
       "./vitest": {
          "default": "./dist/vitest.js",
          "types": "./dist/src/loader/vitest.d.ts"
@@ -62,4 +62,5 @@
       "rollup": "^4.29.1",
       "tsx": "^4.19.2"
    }
+
 }
