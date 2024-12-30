@@ -9,7 +9,7 @@
    },
    "keywords": [],
    "author": "",
-   "license": "ISC",
+   "license": "Apache-2.0",
    "dependencies": {
       "@bedrock-apis/virtual-apis": "workspace:x.x.x",
       "@minecraft/server": "1.0.0",
@@ -17,4 +17,3 @@
    },
    "type": "module"
 }
-

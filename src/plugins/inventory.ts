@@ -1,1 +1,3 @@
-console.log('Inventory core plugin');
+import { Kernel } from '../api-builder';
+
+Kernel.log('Inventory core plugin');

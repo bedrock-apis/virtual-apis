@@ -36,6 +36,7 @@ PACKAGE_JSON.exports = Object.fromEntries([
    ['./package.json', './package.json'],
    ['./modules/*', './modules/*'],
    ['./loader', './dist/loader.js'],
+   ['./eslint-plugin', './eslint.plugin.js'],
    ['./vitest', { default: './dist/vitest.js', types: './dist/src/loader/vitest.d.ts' }],
    ...PLUGINS.map(e => [`./plugins/${path.parse(e.name).name}`, `./dist/${path.parse(e.name).name}.js`]),
 ]);

@@ -4,16 +4,15 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
       "start": "tsx --import @bedrock-apis/virtual-apis/loader ./virtual-apis/load.js"
    },
    "keywords": [],
    "author": "",
-   "license": "ISC",
+   "license": "Apache-2.0",
    "dependencies": {
       "@bedrock-apis/virtual-apis": "workspace:x.x.x",
       "@minecraft/server": "1.0.0"
    },
    "type": "module"
-}
 
+}

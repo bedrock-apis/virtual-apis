@@ -1,3 +1,4 @@
+/* eslint-disable @bedrock-apis/virtual-apis/eslint.plugin/no-default-extends */
 /* eslint-disable @typescript-eslint/unified-signatures */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable custom/no-globals */
