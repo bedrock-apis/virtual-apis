@@ -5,7 +5,7 @@ import * as prettier from 'prettier';
 import { MetadataModuleDefinition } from '../script-module-metadata';
 import { VirtualNativeModule } from './virtual-apis';
 
-export async function printModule(source: MetadataModuleDefinition) {
+export async function printModule(source: MetadataModuleDefinition, format = false) {
    const virtualModule = new VirtualNativeModule(source);
    // Create a printer to print the AST back to a string
    const printer = ts.createPrinter({ newLine: ts.NewLineKind.CarriageReturnLineFeed });
@@ -22,7 +22,7 @@ export async function printModule(source: MetadataModuleDefinition) {
       );
 
       // Prettify code
-      return await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 }); //: resultCode;
+      return format ? await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 }) : resultCode;
    }
 
    const definitionsCode = await writeCode([...virtualModule.emit()]);

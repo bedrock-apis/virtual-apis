@@ -8,7 +8,7 @@ fs.rmSync('dist', { force: true, recursive: true });
 
 /** @type {import('./package.json')} */
 const PACKAGE_JSON = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
-const DEPENDENCIES = Object.keys(PACKAGE_JSON.devDependencies);
+const DEPENDENCIES = Object.keys(PACKAGE_JSON.devDependencies).concat(Object.keys(PACKAGE_JSON.dependencies));
 const PLUGINS = fs.readdirSync('src/plugins', { withFileTypes: true }).filter(e => e.isFile());
 const EXTERNAL = [...module.builtinModules, /node/, ...DEPENDENCIES];
 
