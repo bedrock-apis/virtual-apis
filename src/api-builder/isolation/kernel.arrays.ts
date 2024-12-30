@@ -1,4 +1,5 @@
 import { Kernel } from "./kernel";
+import { KernelIterator } from "./kernel.iterators";
 
 const MAP = Kernel.CallBindTo(Kernel["Array::prototype"].map);
 const FILTER = Kernel.CallBindTo(Kernel["Array::prototype"].filter);
@@ -15,8 +16,8 @@ export class KernelArray<T> extends Kernel.Empty {
     public filter(predicate: (e: T, i: number, t: T[])=>boolean, thisArg?: unknown): KernelArray<T> {
         return Kernel.__setPrototypeOf(FILTER(this, predicate, thisArg), KernelArray.prototype);
     }
-    public getIterator(): IterableIterator<T>{
-        return Kernel.ArrayIterator(this as unknown as T[]);
+    public getIterator(): KernelIterator<T>{
+        return KernelIterator.FromArrayIterator(this as unknown as Iterator<T>);
     }
 }
 Kernel.__setPrototypeOf(KernelArray, Kernel["Array::static"]);

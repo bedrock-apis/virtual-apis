@@ -102,6 +102,7 @@ class KernelClass {
    public static log = console.log;
    public static error = console.error;
    public static warn = console.warn;
+   /*
    public static NewArray<T>(...params: T[]): Array<T> {
       return KernelClass.Construct('Array', ...params) as Array<T>;
    }
@@ -125,7 +126,7 @@ class KernelClass {
          KernelClass.Call(Kernel['Set::prototype'].values, set),
          SET_ITERATOR_PROTOTYPE,
       );
-   }
+   }*/
    public static IsolatedCopy<T extends object>(obj: T) {
       let isolated = ISOLATED_COPIES.get(obj);
       if (!isolated) {
@@ -140,6 +141,8 @@ class KernelClass {
       }
       return isolated as T;
    }
+   // Symbol is not constructor so there is no default copy created
+   public static readonly symbolCopy = KernelClass.IsolatedCopy(Symbol);
 }
 const ISOLATED_COPIES = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
