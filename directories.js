@@ -42,6 +42,7 @@ export const DIST = {
    "api_builder_js": "./dist/api-builder.js",
    "index_js": "./dist/index.js",
    "loader_js": "./dist/loader.js",
+   "package_builder_js": "./dist/package-builder.js",
    "plugins": {
       "all_js": "./dist/plugins/all.js",
       "core_js": "./dist/plugins/core.js",
