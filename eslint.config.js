@@ -22,7 +22,7 @@ export default tseslint.config(
             },
          },
          {
-            ignores: ['src/package-builder/**', 'src/loaders/**'],
+            ignores: ['src/package-builder/**', 'src/loader/**'],
             plugins: {
                custom: bedrock.plugin,
             },

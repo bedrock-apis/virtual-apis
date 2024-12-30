@@ -9,22 +9,17 @@
          "default": "./dist/index.js",
          "types": "./dist/src/api-builder/index.d.ts"
       },
-      "./package.json": "./package.json",
       "./modules/*": "./modules/*",
-      "./loader": "./dist/loader.js",
-      "./eslint-plugin": "./eslint.plugin.js",
+      "./plugins/*": "./dist/plugins/*.js",
+      "./eslint-plugin": "./eslint-plugin.js",
       "./vitest": {
          "default": "./dist/vitest.js",
          "types": "./dist/src/loader/vitest.d.ts"
-      },
-      "./plugins/all": "./dist/all.js",
-      "./plugins/core": "./dist/core.js",
-      "./plugins/inventory": "./dist/inventory.js",
-      "./plugins/modules": "./dist/modules.js"
+      }
    },
    "scripts": {
       "bundle": "rolldown -c && pnpm run typesgen",
-      "packagegen": "rolldown -c && pnpm run typesgen && node ./dist/package-builder.js",
+      "packagegen": "rolldown -c && pnpm run typesgen && node directories.js && node ./dist/package-builder.js",
       "typesgen": "tsc --project tsconfig.build.json",
       "typecheck": "tsc --noEmit",
       "test": "vitest",
