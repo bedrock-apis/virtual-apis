@@ -79,11 +79,9 @@ export class ClassDefinition<
     * @returns New Virtual API Instance of the handle
     */
    public create(): this['api']['prototype'] {
-      const [handle] = Kernel.ArrayIterator(
-         this.__construct(
+      const [handle] = this.__construct(
             new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
-         ),
-      );
+         );
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
    /**

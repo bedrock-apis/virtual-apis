@@ -1,6 +1,7 @@
 import { expect, expectTypeOf, it, suite, test } from 'vitest';
-import { Kernel } from '../kernel';
+import { Kernel } from './kernel';
 import { time } from 'console';
+import { KernelArray } from './kernel.arrays';
 
 suite('Kernel', () => {
    test('Construct', () => {
@@ -89,7 +90,7 @@ suite('Kernel', () => {
          try {
             // @ts-ignore
             delete Array.prototype[Symbol.iterator];
-            let _ = [...Kernel.ArrayIterator([5])];
+            let _ = [...KernelArray.From([5]).getIterator()];
          } finally {
             Array.prototype[Symbol.iterator] = iterator;
          }
@@ -106,7 +107,7 @@ suite('Kernel', () => {
       expect(() => {
          try {
             delete iteratorPrototype.next;
-            [...Kernel.ArrayIterator([5])];
+            [...KernelArray.From([5]).getIterator()];
          } finally {
             iteratorPrototype.next = next;
          }
