@@ -7,6 +7,7 @@ export class KernelArray<T> extends Kernel.Empty {
     private constructor(){super();}
     public length = 0;
     [n: number]: T;
+    public static Construct<T>(...params: T[]): KernelArray<T>{ return KernelArray.From(params);     }
     public static From<T>(array: Array<T>): KernelArray<T>{
         return Kernel.__setPrototypeOf(array, KernelArray.prototype);
     }

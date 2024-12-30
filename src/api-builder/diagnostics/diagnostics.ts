@@ -1,4 +1,5 @@
 import { Mutable } from '../../helper-types';
+import { KernelArray } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { ErrorFactory } from './factory';
 import { PANIC_ERROR_MESSAGES } from './messages';
@@ -9,7 +10,7 @@ export class DiagnosticsStackReport extends BaseReport {
    public get isThrowable() {
       return !this.isEmpty;
    }
-   public readonly stack = Kernel.NewArray<Report>();
+   public readonly stack = KernelArray.Construct<Report>();
    public get length() {
       return this.stack.length;
    }
@@ -26,7 +27,7 @@ export class DiagnosticsStackReport extends BaseReport {
       );
    }
    public clear() {
-      (this as Mutable<this>).stack = Kernel.NewArray<Report>();
+      (this as Mutable<this>).stack = KernelArray.Construct<Report>();
    }
    public get isEmpty() {
       return this.length === 0;

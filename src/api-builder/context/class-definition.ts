@@ -6,6 +6,7 @@ import { ClassBindType } from '../type-validators/types/class';
 import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
+import { KernelArray } from '../isolation';
 // Class for single fake api definition
 
 export class ClassDefinition<
@@ -81,7 +82,7 @@ export class ClassDefinition<
    public create(): this['api']['prototype'] {
       const [handle] = this.__construct(
             new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
-         );
+         ).getIterator();
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
    /**
@@ -150,10 +151,10 @@ export class ClassDefinition<
     * @param params IArguments passed by api context, unpredictable but type safe
     * @returns handle and cache pair
     */
-   public __construct(context: ConstructionExecutionContext): [object, object] {
+   public __construct(context: ConstructionExecutionContext): KernelArray<object> {
       let data = this.parent?.__construct(context);
-      if (!data) data = Kernel.Construct('Array', Kernel.__create(null), Kernel.__create(null)) as [object, object];
-      const [handle, cache] = Kernel.ArrayIterator(data) as unknown as [object, object];
+      if (!data) data = KernelArray.Construct(Kernel.__create(null), Kernel.__create(null));
+      const handle = data[0], cache = data[1];
 
       this.context.nativeHandles.add(handle);
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
