@@ -45,10 +45,11 @@ PACKAGE_JSON.exports = Object.fromEntries([
 fs.writeFileSync('./package.json', JSON.stringify(PACKAGE_JSON, null, 3).replaceAll('\n', '\r\n'));
 fs.mkdirSync('./dist/plugins', { recursive: true });
 await Promise.all(
-   PLUGINS.map(e =>
-      fs.promises.writeFile(
-         `./dist/plugins/${e[0].replace('_ts', '.js').replaceAll('_', '-')}`,
-         `export * from '../${e}'`,
-      ),
-   ),
+   PLUGINS.map(e => {
+      const filename = e[0].replace(/_ts$/, '.js').replaceAll('_', '-') 
+      return fs.promises.writeFile(
+         `./dist/plugins/${filename}`,
+         `export * from '../${filename}'`,
+      )
+   }),
 );
