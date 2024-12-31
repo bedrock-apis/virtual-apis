@@ -1,9 +1,9 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 const kernel = 'Kernel';
+const kernelArrayFrom = 'KernelArray.From';
 /** @param {string} globalName */
 const kernelAccess = globalName => `${kernel}['globalThis::${globalName}']`;
-const kernelConstruct = kernel + '.Construct';
 
 const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
    meta: {
@@ -56,16 +56,16 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
 
             if (node.type.startsWith('TS')) return;
 
-            const our = getRange(node);
-            const args = source.substring(our.start + 1, our.end - 1);
-            const replaceWith = `${kernelAccess('Array')}.from(${args})`;
+            const range = getRange(node);
+            const args = source.substring(range.start + 1, range.end - 1);
+            const replaceWith = `${kernelArrayFrom}(${args})`;
 
             context.report({
                node,
                messageId: 'useKernel',
                data: { args: replaceWith },
                fix(fixer) {
-                  return [fixer.replaceTextRange([our.start, our.end], replaceWith)];
+                  return [fixer.replaceTextRange([range.start, range.end], replaceWith)];
                },
             });
          },
@@ -77,24 +77,15 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
       function reportReference(node) {
          if (node.parent.type.startsWith('TS')) return;
 
-         const parent = getRange(node.parent);
-         const our = getRange(node);
          const name = node.name;
-         const isNew = node.parent.type === 'NewExpression';
-         const args = isNew
-            ? source.substring(parent.start + our.start - parent.start + name.length + 1, parent.end - 1)
-            : '';
-
-         const replaceWith = isNew
-            ? `${kernelConstruct}("${name}"${args ? ', ' + args : ''})`
-            : `${kernelAccess(name)}${args ? `(${args})` : args}`;
+         const replaceWith = kernelAccess(name);
 
          context.report({
             node: node,
             messageId: 'useKernel',
             data: { args: replaceWith },
             fix(fixer) {
-               return [fixer.replaceTextRange(isNew ? [parent.start, parent.end] : [our.start, our.end], replaceWith)];
+               return [fixer.replaceTextRange(node.range, replaceWith)];
             },
          });
       }
@@ -209,7 +200,7 @@ function getRange(node) {
    return { start, end };
 }
 
-const name = '@bedrock-apis/virtual-apis/eslint.plugin';
+const name = '@bedrock-apis/virtual-apis/eslint-plugin';
 
 export const plugin = {
    rules: {
