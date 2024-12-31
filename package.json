@@ -11,7 +11,10 @@
       },
       "./package.json": "./package.json",
       "./modules/*": "./modules/*",
-      "./plugins/*": "./dist/plugins/*.js",
+      "./plugins/*": {
+         "default": "./dist/plugins/*.js",
+         "types": "./dist/src/core-plugins/*"
+      },
       "./loader": "./dist/loader.js",
       "./eslint-plugin": "./eslint-plugin.js",
       "./vitest": {
@@ -21,9 +24,9 @@
    },
    "scripts": {
       "bundle": "rolldown -c && pnpm run typesgen",
-      "packagegen": "rolldown -c && pnpm run typesgen && node directories.js && node ./dist/package-builder.js",
-      "typesgen": "tsc --project tsconfig.build.json",
-      "typecheck": "tsc --noEmit",
+      "packagegen": "node directories.js regenerate && rolldown -c && exitzero pnpm run typesgen && node --enable-source-maps ./dist/package-builder.js",
+      "typesgen": "tsc --pretty --project tsconfig.build.json",
+      "typecheck": "tsc --pretty --noEmit",
       "test": "vitest",
       "coverage": "vitest --ui --coverage",
       "lint": "eslint",
@@ -46,10 +49,11 @@
    },
    "dependencies": {
       "chalk": "^5.4.1",
-      "deepmerge": "^4.3.1",
-      "tsx": "^4.19.2"
+      "deepmerge": "^4.3.1"
    },
    "devDependencies": {
+      "tsx": "^4.19.2",
+      "exitzero": "^1.0.1",
       "@types/node": "^22.10.1",
       "@vitest/coverage-istanbul": "2.1.8",
       "@vitest/ui": "2.1.8",

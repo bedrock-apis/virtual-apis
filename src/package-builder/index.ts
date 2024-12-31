@@ -20,6 +20,7 @@ main(new SystemFileMetadataProvider('./local-docs/')).then(
 
 async function main(provider: IMetadataProvider): Promise<number> {
    const start = Date.now();
+   if (process.env.GITHUB_ACTION) chalk.level = 3;
    console.log(chalk.italic.blueBright`====================================`);
    console.log(chalk.italic.blueBright`== Virtual API Modules Generator ==`);
    console.log(chalk.italic.blueBright`====================================\n`);

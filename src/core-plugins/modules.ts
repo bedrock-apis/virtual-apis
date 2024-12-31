@@ -1,5 +1,5 @@
 import { Kernel } from '../api-builder';
-import { getModuleVersions } from '../plugin/get-module-versions';
+import { getModuleVersions } from '../plugin-api/get-module-versions';
 
 const MODULES = getModuleVersions();
 
