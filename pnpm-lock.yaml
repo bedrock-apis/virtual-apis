@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@minecraft/server':
+        specifier: 1.16.0
+        version: 1.16.0
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
@@ -540,8 +543,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@minecraft/common@1.2.0':
+    resolution: {integrity: sha512-JdmEq4P3Z/FtoBzhLijFgMSVFnFRrUoLwY8DHHrgtFo0mfLTOLTB1RErYjLMsA6b7BGVNxkX/pfFRiH7QZ0XwQ==}
+
   '@minecraft/server@1.0.0':
     resolution: {integrity: sha512-Qp1rPHHhk61fP7tOMIU8bHU2fOA06YyMcmje5EFJS97ZJNp6AzbClC/5W5moC/1itrLRL4Ks0QjeIYnEk3ON1Q==}
+
+  '@minecraft/server@1.16.0':
+    resolution: {integrity: sha512-Rm4lVM8/T8+QLIyAer3tPz1P5FAvJc5MhFrYzIt+sdd6y4DVENu4y9/Vucb19mBXJB/+Dt7uDb8RQG/xAWVExA==}
 
   '@napi-rs/wasm-runtime@0.2.6':
     resolution: {integrity: sha512-z8YVS3XszxFTO73iwvFDNpQIzdMmSDTP/mB3E/ucR37V3Sx57hSExcXyMoNwaucWxnsWf4xfbZv0iZ30jr0M4Q==}
@@ -2046,7 +2055,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@minecraft/common@1.2.0': {}
+
   '@minecraft/server@1.0.0': {}
+
+  '@minecraft/server@1.16.0':
+    dependencies:
+      '@minecraft/common': 1.2.0
 
   '@napi-rs/wasm-runtime@0.2.6':
     dependencies:

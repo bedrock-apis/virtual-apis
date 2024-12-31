@@ -1,10 +1,12 @@
 // CORE PLUGINS ENTRYPOINT
 import '@bedrock-apis/virtual-apis/plugins/all';
-import '@bedrock-apis/virtual-apis/plugins/core';
-import '@bedrock-apis/virtual-apis/plugins/inventory';
+
+// CONFIGURE SPECIFIC PLUGINS
+import './configure';
 
 // CUSTOM PLUGINS ENTRYPOINT
 import './plugin';
 
 // SCRIPT API CODE ENTRYPOINT
 import '../src/index';
+

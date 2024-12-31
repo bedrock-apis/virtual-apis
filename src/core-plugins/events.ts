@@ -1,22 +1,20 @@
+import { Kernel } from '../api-builder';
 import { PluginWithConfig } from '../plugin-api/api';
-
-declare module '../plugin-api/api' {
-   interface PluginStorage {
-      events: {
-         eventsList: Map<string, (...args: unknown[]) => unknown>;
-         trigger(event: string, ...args: unknown[]): unknown;
-      };
-   }
-}
 
 interface Config {
    warnIfEventIsNotImplemented: boolean;
 }
 
 class EventsPlugin extends PluginWithConfig<Config> {
-   public config: Config = {
+   public id = 'events';
+
+   protected config: Config = {
       warnIfEventIsNotImplemented: true,
    };
+
+   public events = new Kernel['globalThis::Map']<string, (...args: unknown[]) => unknown>();
+
+   public trigger(event: string, ...args: unknown[]) {}
 }
 
 export default new EventsPlugin();

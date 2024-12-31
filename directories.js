@@ -156,6 +156,8 @@ export const DIST = {
          events_d_ts: './dist/src/core-plugins/events.d.ts',
          inventory_d_ts: './dist/src/core-plugins/inventory.d.ts',
          modules_d_ts: './dist/src/core-plugins/modules.d.ts',
+         components_d_ts: './dist/src/core-plugins/components.d.ts',
+         effects_d_ts: './dist/src/core-plugins/effects.d.ts',
       },
       loader: {
          DIR: './dist/src/loader/',
@@ -204,8 +206,12 @@ export const DIST = {
       events_js: './dist/plugins/events.js',
       inventory_js: './dist/plugins/inventory.js',
       modules_js: './dist/plugins/modules.js',
+      components_js: './dist/plugins/components.js',
+      effects_js: './dist/plugins/effects.js',
    },
    vitest_js: './dist/vitest.js',
+   components_js: './dist/components.js',
+   effects_js: './dist/effects.js',
 };
 export const SRC = {
    api_builder: {
@@ -297,8 +303,8 @@ export const SRC = {
    constants_ts: './src/constants.ts',
    core_plugins: {
       DIR: './src/core-plugins/',
-      all_ts: './src/core-plugins/all.ts',
-      core_ts: './src/core-plugins/core.ts',
+      components_ts: './src/core-plugins/components.ts',
+      effects_ts: './src/core-plugins/effects.ts',
       events_ts: './src/core-plugins/events.ts',
       inventory_ts: './src/core-plugins/inventory.ts',
       modules_ts: './src/core-plugins/modules.ts',
