@@ -1,4 +1,3 @@
-// @ts-check
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import bedrock from './eslint-plugin.js';

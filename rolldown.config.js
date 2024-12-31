@@ -1,4 +1,3 @@
-// @ts-check
 import fs from 'node:fs';
 import module from 'node:module';
 import { defineConfig } from 'rolldown';
@@ -31,7 +30,6 @@ export default defineConfig(
    ].map(e => ({ external: EXTERNAL, ...e })),
 );
 
-
 PACKAGE_JSON.exports = Object.fromEntries([
    ['.', { default: DIST.index_js, types: DIST.src.api_builder.index_d_ts }],
    ['./package.json', ROOT.package_json],
@@ -46,10 +44,7 @@ fs.writeFileSync('./package.json', JSON.stringify(PACKAGE_JSON, null, 3).replace
 fs.mkdirSync('./dist/plugins', { recursive: true });
 await Promise.all(
    PLUGINS.map(e => {
-      const filename = e[0].replace(/_ts$/, '.js').replaceAll('_', '-') 
-      return fs.promises.writeFile(
-         `./dist/plugins/${filename}`,
-         `export * from '../${filename}'`,
-      )
+      const filename = e[0].replace(/_ts$/, '.js').replaceAll('_', '-');
+      return fs.promises.writeFile(`./dist/plugins/${filename}`, `export * from '../${filename}'`);
    }),
 );

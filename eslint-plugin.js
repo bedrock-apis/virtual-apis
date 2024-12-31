@@ -1,5 +1,3 @@
-// @ts-check
-
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 const kernel = 'Kernel';
