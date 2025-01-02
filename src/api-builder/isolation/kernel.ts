@@ -99,9 +99,9 @@ class KernelClass {
       else return false;
    }
    public static SetGlobalThis() {}
-   public static log = console.log;
-   public static error = console.error;
-   public static warn = console.warn;
+   public static log = globalThis.console.log;
+   public static error = globalThis.console.error;
+   public static warn = globalThis.console.warn;
    /*
    public static NewArray<T>(...params: T[]): Array<T> {
       return KernelClass.Construct('Array', ...params) as Array<T>;

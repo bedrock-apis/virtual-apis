@@ -3,9 +3,9 @@ import { isGeneratorObject, isMapIterator, isSetIterator } from "node:util/types
 /* eslint-disable custom/no-globals */
 
 export const GENERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf((function*(){}).prototype)) as Iterator<unknown>;
-export const ARRAY_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call([]))) as Iterator<unknown>;
-export const MAP_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Map.prototype.values.call(new Map()))) as Iterator<unknown>;
-export const SET_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Set.prototype.values.call(new Set()))) as Iterator<unknown>;
+export const ARRAY_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call(new Array))) as Iterator<unknown>;
+export const MAP_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Map.prototype.values.call(new Map))) as Iterator<unknown>;
+export const SET_ITERATOR_SOURCE = Kernel.IsolatedCopy(Object.getPrototypeOf(Set.prototype.values.call(new Set))) as Iterator<unknown>;
 //@ts-expect-error I hate some of the TS hardcoded things, this is one of them
 export const ITERATOR_SOURCE_SYMBOL: unique symbol = Kernel["globalThis::Symbol"]("Symbol(Kernel.ITERATOR_SOURCE)");
 

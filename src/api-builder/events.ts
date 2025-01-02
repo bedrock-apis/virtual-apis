@@ -36,7 +36,6 @@ export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empt
    public invoke(...params: Args) {
       const output = new InvokeResults();
       if (SESSIONS.has(this)) {
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
          const methods = SESSIONS.get(this)!;
          for (const method of KernelIterator.FromSetIterator(methods.values())) {
             output.totalCount++;

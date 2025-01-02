@@ -14,6 +14,7 @@ import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
 import { OptionKeys } from './context-options';
 import { Diagnostics } from '../diagnostics';
+import { KernelIterator } from '../isolation';
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 export class Context extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
@@ -52,7 +53,7 @@ export class Context extends Kernel.Empty {
     * Tries to resolve all unresolved types
     */
    public resolveAllDynamicTypes() {
-      for (const typeName of this.UNRESOLVED_TYPES.keys()) {
+      for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys())) {
          const resolvedType = this.TYPES.get(typeName);
          if (!resolvedType) continue;
          // It is available trust me!!!
@@ -62,11 +63,10 @@ export class Context extends Kernel.Empty {
          this.UNRESOLVED_TYPES.delete(typeName);
       }
 
-      for (const typeName of this.UNRESOLVED_TYPES.keys()) Kernel.warn('Failed to resolve dynamic type: ' + typeName);
+      for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys())) Kernel.warn('Failed to resolve dynamic type: ' + typeName);
    }
    public resolveType(metadataType: MetadataType): Type {
       const { name } = metadataType;
-
       if (metadataType.is_bind_type) {
          const type = this.TYPES.get(name);
          if (type) return type;
@@ -141,6 +141,6 @@ export class Context extends Kernel.Empty {
       return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
    }
    public reportDiagnostics(diagnostics: Diagnostics) {
-      Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name);
+      Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name, diagnostics);
    }
 }

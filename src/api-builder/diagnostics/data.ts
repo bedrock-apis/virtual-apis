@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-nocheck
 import { Range } from '../../script-module-metadata';
 import { Kernel } from '../isolation/kernel';
