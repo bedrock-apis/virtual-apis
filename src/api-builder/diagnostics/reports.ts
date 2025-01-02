@@ -1,3 +1,4 @@
+import { KernelArray } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { ErrorFactory } from './factory';
 
@@ -23,7 +24,7 @@ export class Report extends BaseReport {
 }
 export function removeStackFromError(stackSize: number, error: Error) {
    if (!error.stack) return error;
-   const [text, ...stack] = error.stack.split('\n    at ');
+   const [text, ...stack] = KernelArray.From(error.stack.split('\n    at ')).getIterator();
    error.stack = Kernel.As(Kernel['Array::static'].of(text, ...stack.slice(stackSize)), 'Array').join('\n    at ');
    return error;
 }

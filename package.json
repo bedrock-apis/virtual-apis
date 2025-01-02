@@ -29,7 +29,7 @@
       "typecheck": "tsc --pretty --noEmit",
       "test": "vitest",
       "coverage": "vitest --ui --coverage",
-      "lint": "eslint",
+      "lint": "eslint src/**/*.ts",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
       "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
       "example:vitest": "cd examples/vitest && pnpm run start",
@@ -54,6 +54,7 @@
    },
    "devDependencies": {
       "@types/node": "^22.10.1",
+      "@typescript-eslint/parser": "^8.19.0",
       "@vitest/coverage-istanbul": "2.1.8",
       "@vitest/ui": "2.1.8",
       "eslint": "^9.16.0",

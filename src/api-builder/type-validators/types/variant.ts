@@ -1,5 +1,5 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
-import { Kernel } from '../../isolation/kernel';
+import { KernelIterator } from '../../isolation';
 import { Type } from '../type';
 
 export class VariantType extends Type {
@@ -9,7 +9,7 @@ export class VariantType extends Type {
 
    public validate(diagnostics: DiagnosticsStackReport, value: unknown) {
       const variants = new DiagnosticsStackReport();
-      for (const variant of Kernel.ArrayIterator(this.variants)) {
+      for (const variant of KernelIterator.FromArrayIterator(this.variants.values())) {
          const s = new DiagnosticsStackReport();
          variant.validate(s, value);
          if (s.isEmpty) return diagnostics;

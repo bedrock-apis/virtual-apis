@@ -173,10 +173,6 @@ NATIVE_FUNCTIONS.add(
 );
 
 export const Kernel = KernelClass as typeof KernelClass & KernelType;
-const ARRAY_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Array.prototype.values.call([])));
-const MAP_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Map.prototype.values.call(new Map()))); // Key Iterators has same prototype
-const SET_ITERATOR_PROTOTYPE = Kernel.IsolatedCopy(Object.getPrototypeOf(Set.prototype.values.call(new Set())));
-
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
 Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);

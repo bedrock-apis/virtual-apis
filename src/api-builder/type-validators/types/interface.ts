@@ -1,4 +1,5 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
+import { KernelIterator } from '../../isolation';
 import { Kernel } from '../../isolation/kernel';
 import { Type } from '../type';
 
@@ -32,13 +33,13 @@ export class InterfaceBindType extends Type {
 
       // TODO: Don't use iterators they are not isolated
       // TODO: Don't use destructors they are not isolated
-      for (const [propertyKey, type] of this.properties) {
+      for (const entry of KernelIterator.FromMapIterator(this.properties.entries())) {
          // TODO: This would trigger getter, we should found a way to access the property value only once,
          // maybe cloning the object when validation being executed?
          // This also solve problem with getter/setter isolation,
          // bc we don't know if getter is executed or not and how many times,
          // that would have also problems with privileges so we should trigger getters only once and only when being validated
-         type.validate(diagnostics, (object as Record<string, unknown>)[propertyKey]);
+         entry[1].validate(diagnostics, (object as Record<string, unknown>)[entry[0]]);
       }
    }
 }

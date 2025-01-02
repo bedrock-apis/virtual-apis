@@ -1,7 +1,6 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
-
 const kernel = 'Kernel';
-const kernelArrayFrom = 'KernelArray.From';
+const kernelArrayConstruct = 'KernelArray.Construct';
 /** @param {string} globalName */
 const kernelAccess = globalName => `${kernel}['globalThis::${globalName}']`;
 
@@ -11,7 +10,7 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
       hasSuggestions: true,
       fixable: 'code',
       messages: {
-         useKernel: `Use {{ args }} instead`,
+         useKernel: `Standalone global {{args}} is not allowed as globalThis could be modified anytime, use Kernel access`
       },
       schema: [],
    },
@@ -23,9 +22,7 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
          return name in globalThis;
       }
 
-      const source = context.sourceCode.text;
       const sourceCode = context.sourceCode;
-
       return {
          Program(node) {
             const scope = sourceCode.getScope(node);
@@ -45,30 +42,6 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
                }
             });
          },
-         ArrayExpression(node) {
-            if (
-               node.parent.type === 'TSAsExpression' &&
-               node.parent.typeAnnotation.type === 'TSTypeReference' &&
-               node.parent.typeAnnotation.typeName.type === 'Identifier' &&
-               node.parent.typeAnnotation.typeName.name === 'const'
-            )
-               return; // ignore const a = [] as const because array will be not modified;
-
-            if (node.type.startsWith('TS')) return;
-
-            const range = getRange(node);
-            const args = source.substring(range.start + 1, range.end - 1);
-            const replaceWith = `${kernelArrayFrom}(${args})`;
-
-            context.report({
-               node,
-               messageId: 'useKernel',
-               data: { args: replaceWith },
-               fix(fixer) {
-                  return [fixer.replaceTextRange([range.start, range.end], replaceWith)];
-               },
-            });
-         },
       };
 
       /** @import {TSESTree} from "@typescript-eslint/utils" */
@@ -83,7 +56,7 @@ const noGlobals = ESLintUtils.RuleCreator.withoutDocs({
          context.report({
             node: node,
             messageId: 'useKernel',
-            data: { args: replaceWith },
+            data: { args: name },
             fix(fixer) {
                return [fixer.replaceTextRange(node.range, replaceWith)];
             },
@@ -121,6 +94,58 @@ const noDefaultClasses = ESLintUtils.RuleCreator.withoutDocs({
    defaultOptions: [],
 });
 
+const noArrayExpression = ESLintUtils.RuleCreator.withoutDocs({
+   meta: {
+      type: 'problem',
+      hasSuggestions: true,
+      fixable: 'code',
+      messages: {
+         arrayExpression: `Array expression is not permitted, vanilla arrays has unsafe prototype!`
+      },
+      schema: [],
+   },
+   create(context) {
+      const sourceCode = context.sourceCode;
+      const checker = sourceCode.parserServices?.program?.getTypeChecker();
+      const map = sourceCode.parserServices?.esTreeNodeToTSNodeMap;
+      if (!map || !checker) return {};
+
+      return {
+         ArrayExpression(node) {
+            if (
+               node.parent.type === 'TSAsExpression' &&
+               node.parent.typeAnnotation.type === 'TSTypeReference' &&
+               node.parent.typeAnnotation.typeName.type === 'Identifier' &&
+               node.parent.typeAnnotation.typeName.name === 'const'
+            )
+               return; // ignore const a = [] as const because array will be not modified;
+
+            if (node.type.startsWith('TS')) return;
+            context.report({
+               messageId: 'arrayExpression',
+               node: node,
+               fix: (fixer) => [fixer.replaceText(node, `${kernelArrayConstruct}(${node.elements.map(map.get.bind(map)).map((e) => e.getText()).join(", ")})`)]
+            });
+
+            /*
+            const range = getRange(node);
+            const args = source.substring(range.start + 1, range.end - 1);
+            const replaceWith = `${kernelArrayFrom}(${args})`;
+
+            context.report({
+               node,
+               messageId: 'useKernel',
+               data: { args: replaceWith },
+               fix(fixer) {
+                  return [fixer.replaceTextRange([range.start, range.end], replaceWith)];
+               },
+            });*/
+         },
+      };
+   },
+   defaultOptions: [],
+});
+
 const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
    meta: {
       type: 'problem',
@@ -133,24 +158,20 @@ const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
       schema: [],
    },
    create(context) {
+      const checker = context.sourceCode.parserServices?.program?.getTypeChecker();
+      const map = context.sourceCode.parserServices?.esTreeNodeToTSNodeMap;
+      if (!map || !checker) return {};
+      function checkNode(node) {
+         if (!node) return;
+         const tsNode = map.get(node);
+         const type = checker.getTypeAtLocation(tsNode);
+         if (type.symbol?.name !== "KernelIterator")
+            context.report({ messageId: 'unsafeIterator', node: node, });
+      }
       return {
          YieldExpression(node) {
             if (!node.delegate) return;
-            // @ts-expect-error TODO Proper type fix
-            node = node.argument;
-
-            // @ts-expect-error TODO Proper type fix
-            if (node.type !== 'CallExpression')
-               context.report({
-                  messageId: 'unsafeIterator',
-                  node: node,
-               });
-            // @ts-expect-error TODO Proper type fix
-            else if (node.callee.object && node.callee.object?.name !== 'Kernel')
-               context.report({
-                  messageId: 'unsafeIterator',
-                  node: node,
-               });
+            checkNode(node.argument);
          },
          ForOfStatement(node) {
             // @ts-expect-error TODO Proper type fix
@@ -161,6 +182,8 @@ const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
                      node: n.id,
                   });
             }
+            checkNode(node.right);
+            /*
             if (node.right.type !== 'CallExpression')
                context.report({
                   messageId: 'unsafeIterator',
@@ -171,11 +194,20 @@ const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
                context.report({
                   messageId: 'unsafeIterator',
                   node: node.right,
-               });
+               });*/
          },
-         ArrayPattern(node) {
+         ArrayPattern(node) {/*
+            context.report({
+               messageId: 'unsafeIterator',
+               node: node,
+               fix: (fixer) => { fixer.replaceText(node, `KernelArray.From(${node.elements.map(map.get.bind(map)).map((e) => e.getText()).join(", ")})`) }
+            });*/
             if (node.parent.type === 'VariableDeclarator') {
-               if (!node.parent.init) return;
+               checkNode(node.parent.init);
+
+
+               /*
+               if (!node.parent.init) return;*/               /*
                if (node.parent.init.type !== 'CallExpression')
                   context.report({
                      messageId: 'unsafeIterator',
@@ -186,7 +218,7 @@ const noUnsafeIterators = ESLintUtils.RuleCreator.withoutDocs({
                   context.report({
                      messageId: 'unsafeIterator',
                      node: node.parent.init,
-                  });
+                  });*/
             }
          },
       };
@@ -207,6 +239,7 @@ export const plugin = {
       'no-globals': noGlobals,
       'no-default-extends': noDefaultClasses,
       'no-iterators': noUnsafeIterators,
+      'no-array-expression': noArrayExpression
    },
 };
 

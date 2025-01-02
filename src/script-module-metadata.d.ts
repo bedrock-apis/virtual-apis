@@ -62,7 +62,7 @@ export type BaseMetadataType = MetadataTypeErrorable &
 export type MetadataType = { is_bind_type: boolean; is_errorable: boolean; name: MetadataTypeName } & BaseMetadataType;
 export type MetadataFunctionArgumentDetailsDefinition =
    | null
-   | ({ default_value: unknow } | { default_value: unknown; max_value: number; min_value: number });
+   | ({ default_value: unknown } | { default_value: unknown; max_value: number; min_value: number });
 
 export interface MetadataModuleBaseDefinition extends MetadataDefinition {
    version: string;
@@ -120,11 +120,4 @@ export type MetadataAliasMapEntry = { name: string; value: string };
 export interface MetadataAliasDefinition extends MetadataDefinition, MetadataTypedDefinition {
    alias_type: 'type_map';
    mappings: MetadataAliasMapEntry[];
-   s: IteratorConstructor;
-}
-
-declare global {
-   interface IteratorObject<T, TReturn, TNext> {
-      offset(next: T, onLast: (l: T) => T): Generator<T, TReturn, TNext>;
-   }
 }

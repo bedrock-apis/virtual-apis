@@ -1,3 +1,4 @@
+import { KernelIterator } from './isolation';
 import { Kernel } from './isolation/kernel';
 /**
  * Represents an event signal.
@@ -37,7 +38,7 @@ export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empt
       if (SESSIONS.has(this)) {
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
          const methods = SESSIONS.get(this)!;
-         for (const method of Kernel.SetIterator(methods)) {
+         for (const method of KernelIterator.FromSetIterator(methods.values())) {
             output.totalCount++;
             try {
                if (method(...params) !== undefined)

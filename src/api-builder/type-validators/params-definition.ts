@@ -1,6 +1,7 @@
 import { MetadataFunctionArgumentDefinition, Range } from '../../script-module-metadata';
 import { Context } from '../context';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../diagnostics';
+import { KernelArray } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
@@ -12,7 +13,8 @@ export class ParamsDefinition extends Type {
    public static From(context: Context, params: MetadataFunctionArgumentDefinition[]) {
       const def = new ParamsDefinition();
       if (context && params) {
-         for (const [i, param] of params.entries()) {
+         let i = 0;
+         for (const param of KernelArray.From(params).getIterator()) {
             const type = context.resolveType(param.type);
             const isOptional = typeof param.details?.default_value !== 'undefined';
             const defaultValue = param.details?.default_value === 'null' ? null : param.details?.default_value;
@@ -23,6 +25,7 @@ export class ParamsDefinition extends Type {
 
             const paramType = new ParamType(type, isOptional, defaultValue, validRange, i);
             def.addType(paramType);
+            i++;
          }
       }
       return def;

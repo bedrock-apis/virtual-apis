@@ -1,4 +1,4 @@
-import { ContextPanicError, Diagnostics, PANIC_ERROR_MESSAGES } from '../diagnostics';
+import { ContextPanicError, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { Kernel } from '../isolation/kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';

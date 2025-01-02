@@ -26,6 +26,12 @@ export class KernelIterator<T> extends Kernel.Empty implements IsolatedIterator<
         else if(isSetIterator(object)) return Kernel.__setPrototypeOf(object, this.isolatedSetIteratorPrototype);
         throw new Kernel["TypeError::constructor"]("object is not native iterator");
     }
+    public static FromMapIterator<S>(object: Iterator<S>): KernelIterator<S>{
+        return Kernel.__setPrototypeOf(object, this.isolatedMapIteratorPrototype);
+    }
+    public static FromSetIterator<S>(object: Iterator<S>): KernelIterator<S>{
+        return Kernel.__setPrototypeOf(object, this.isolatedSetIteratorPrototype);
+    }
     public static FromGenerator<T>(object: Generator<T>): KernelIterator<T>{
         return Kernel.__setPrototypeOf(object, this.isolatedGeneratorPrototype);
     }
