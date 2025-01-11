@@ -1,6 +1,5 @@
-import { expect, expectTypeOf, it, suite, test } from 'vitest';
+import { expect, expectTypeOf, suite, test } from 'vitest';
 import { Kernel } from './kernel';
-import { time } from 'console';
 import { KernelArray } from './kernel.arrays';
 
 suite('Kernel', () => {

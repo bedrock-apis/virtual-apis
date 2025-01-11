@@ -1,3 +1,4 @@
+/* eslint-disable @bedrock-apis/virtual-apis/eslint.plugin/no-default-extends */
 /* eslint-disable @typescript-eslint/unified-signatures */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable custom/no-globals */
@@ -27,8 +28,10 @@ class KernelClass {
       argumentAsThisValue: unknown,
       ...params: unknown[] | P
    ) => ReturnType<T> = Function.prototype.call.bind(Function.prototype.call);
-   public static CallBindTo: <T extends (...params: P) => unknown, P extends any[]>(functionToBind: T) => 
-      (thisArgument: unknown, ...params: P)=>ReturnType<T> = (func)=>Kernel.Call(Kernel["Function::prototype"].bind, Kernel.Call, null, func);
+   public static CallBindTo: <T extends (...params: P) => unknown, P extends any[]>(
+      functionToBind: T,
+   ) => (thisArgument: unknown, ...params: P) => ReturnType<T> = func =>
+      Kernel.Call(Kernel['Function::prototype'].bind, Kernel.Call, null, func);
    public static __setPrototypeOf = Object.setPrototypeOf;
    public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
@@ -142,7 +145,6 @@ class KernelClass {
       return isolated as T;
    }
    // Symbol is not constructor so there is no default copy created
-   public static readonly symbolCopy = KernelClass.IsolatedCopy(Symbol);
 }
 const ISOLATED_COPIES = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
@@ -176,3 +178,4 @@ export const Kernel = KernelClass as typeof KernelClass & KernelType;
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
 Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);
+export const symbolCopy = KernelClass.IsolatedCopy(Symbol);

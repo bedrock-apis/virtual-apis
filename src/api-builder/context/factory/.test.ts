@@ -1,13 +1,13 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { Context } from '..';
-import { Kernel } from '../../kernel';
+import { Kernel } from '../../isolation';
 import { BooleanType, ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 
 const context = new Context();
-const EntityDefinition = context.createClassDefinition('Entity', null).addMethod('methodA');
+const EntityDefinition = context.createClassDefinition('Entity', null, new ParamsDefinition()).addMethod('methodA');
 const PlayerDefinition = context
-   .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true, true)
+   .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true)
    .addMethod('methodB')
    .addProperty('test', new BooleanType(), false);
 
