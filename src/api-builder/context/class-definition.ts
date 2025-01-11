@@ -1,12 +1,12 @@
 import { ContextPanicError, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
+import { KernelArray } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
-import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
-import { KernelArray } from '../isolation';
+import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';
 // Class for single fake api definition
 
 export class ClassDefinition<
@@ -32,9 +32,7 @@ export class ClassDefinition<
       this.invocable.set(method, event);
       (this.context.nativeEvents as Map<unknown, unknown>).set(id, event);
    }
-   /**
-    * TODO: Improve the types tho
-    */
+   /** TODO: Improve the types tho */
    public readonly api: {
       new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
       readonly name: NAME;
@@ -46,15 +44,12 @@ export class ClassDefinition<
       return this.virtualApis.get(`${this.classId}::${name.toString()}`) as P[typeof name];
    }
    /**
-    *
     * @param classId Fake API Class Name
     * @param parent Inject inheritance
     */
    public constructor(
       public readonly context: Context,
-      /**
-       * Fake API Class Name
-       */
+      /** Fake API Class Name */
       public readonly classId: string,
       public readonly parent: T,
       public readonly constructorParams: ParamsDefinition | null,
@@ -75,19 +70,14 @@ export class ClassDefinition<
       context.registerType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
 
-   /**
-    *
-    * @returns New Virtual API Instance of the handle
-    */
+   /** @returns New Virtual API Instance of the handle */
    public create(): this['api']['prototype'] {
       const [handle] = this.__construct(
-            new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
-         ).getIterator();
+         new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
+      ).getIterator();
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
-   /**
-    * If specific handle is type of this definition
-    */
+   /** If specific handle is type of this definition */
    public isThisType(handle: unknown): handle is this['api']['prototype'] {
       return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
    }
@@ -147,14 +137,16 @@ export class ClassDefinition<
    }
 
    /**
-    *
     * @param params IArguments passed by api context, unpredictable but type safe
-    * @returns handle and cache pair
+    * @returns Handle and cache pair
     */
    public __construct(context: ConstructionExecutionContext): KernelArray<object> {
       let data = this.parent?.__construct(context);
       if (!data) data = KernelArray.Construct(Kernel.__create(null), Kernel.__create(null));
-      const handle = data[0], cache = data[1];
+
+      const handle = data[0];
+      const cache = data[1];
+      if (!cache || !handle) throw new Kernel['globalThis::TypeError']('Cache or handle is undefined');
 
       this.context.nativeHandles.add(handle);
       this.HANDLE_TO_NATIVE_CACHE.set(handle, cache);
@@ -188,6 +180,7 @@ export class ClassDefinition<
 
    /**
     * TRASH HERE
+    *
     * @param factory
     * @returns
     */
