@@ -2,6 +2,7 @@ import { KernelIterator } from './isolation';
 import { Kernel } from './isolation/kernel';
 /**
  * Represents an event signal.
+ *
  * - The types of the arguments passed to the event handlers.
  */
 const SESSIONS = Kernel.Construct('WeakMap') as WeakMap<NativeEvent, Set<(...params: unknown[]) => void>>;
@@ -9,6 +10,7 @@ export enum ResultType {
    Warning,
    Error,
 }
+
 export class RunResult extends Kernel.Empty {
    public constructor(
       public readonly method: (...params: unknown[]) => void,
@@ -18,11 +20,13 @@ export class RunResult extends Kernel.Empty {
       super();
    }
 }
+
 export class InvokeResults extends Kernel.Empty {
    public readonly results: Array<RunResult> = Kernel.Construct('Array') as Array<RunResult>;
    public successCount = 0;
    public totalCount = 0;
 }
+
 export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empty {
    public constructor() {
       super();
@@ -30,13 +34,14 @@ export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empt
    }
    /**
     * Triggers the event signal.
+    *
     * @param params - The arguments to pass to the event handlers.
     * @returns A promise that resolves with the number of successful event handlers.
     */
    public invoke(...params: Args) {
       const output = new InvokeResults();
-      if (SESSIONS.has(this)) {
-         const methods = SESSIONS.get(this)!;
+      const methods = SESSIONS.get(this);
+      if (methods) {
          for (const method of KernelIterator.FromSetIterator(methods.values())) {
             output.totalCount++;
             try {
@@ -54,7 +59,8 @@ export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empt
    }
    /**
     * Subscribes to the event signal.
-    * @template  k - The type of the event handler function.
+    *
+    * @template k - The type of the event handler function.
     * @param method - The event handler function to subscribe.
     * @returns The subscribed event handler function.
     */
@@ -70,6 +76,7 @@ export class NativeEvent<Args extends unknown[] = unknown[]> extends Kernel.Empt
 
    /**
     * Unsubscribes from the event signal.
+    *
     * @template k - The type of the event handler function.
     * @param method - The event handler function to unsubscribe.
     * @returns The unsubscribed event handler function.

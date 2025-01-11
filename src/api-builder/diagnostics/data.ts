@@ -1,8 +1,11 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-//@ts-nocheck
+// KEPT AS LEGACY AND NOT USED
+/* eslint-disable */
+/* prettier-disable */
+// @ts-nocheck
+
+import { Report } from '.';
 import { Range } from '../../script-module-metadata';
 import { Kernel } from '../isolation/kernel';
-import { Report } from '.';
 import { ReferenceErrorFactory, TypeErrorFactory } from './errors';
 
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
