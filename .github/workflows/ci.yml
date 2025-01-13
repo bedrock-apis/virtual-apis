@@ -20,16 +20,16 @@ jobs:
            run: corepack enable
 
          - name: 🏗 Install dependencies with pnpm
-           run: pnpm install --frozen-lockfile
+           run: pnpm run repo:init
 
          - name: ✔ Check TypeScript types
-           run: pnpm run typecheck
+           run: pnpm run ci:typecheck
 
          - name: 🚧 Lint
-           run: pnpm run lint
+           run: pnpm run ci:lint
 
          - name: 🧪 Run tests
-           run: pnpm run test
+           run: pnpm run ci:test
 
          - name: 🏗 Bundle generators and build Modules
            run: pnpm packagegen
