@@ -25,9 +25,8 @@ jobs:
          - name: ✔ Check TypeScript types
            run: pnpm run typecheck
 
-           # Disabled for now
-        #  - name: 🚧 Lint
-          #  run: pnpm run lint
+         - name: 🚧 Lint
+           run: pnpm run lint
 
          - name: 🧪 Run tests
            run: pnpm run test
