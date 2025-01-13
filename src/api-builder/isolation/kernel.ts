@@ -1,4 +1,3 @@
-/* eslint-disable @bedrock-apis/virtual-apis/eslint.plugin/no-default-extends */
 /* eslint-disable @typescript-eslint/unified-signatures */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable custom/no-globals */
@@ -144,7 +143,6 @@ class KernelClass {
       }
       return isolated as T;
    }
-   // Symbol is not constructor so there is no default copy created
 }
 const ISOLATED_COPIES = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
@@ -178,4 +176,8 @@ export const Kernel = KernelClass as typeof KernelClass & KernelType;
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
 Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);
-export const symbolCopy = KernelClass.IsolatedCopy(Symbol);
+
+// Symbol is not constructor so there is no default copy created
+// Also we can't use Kernel.SymbolCopy because vitest parser crashes for some reason
+// seems like coverage doesn't supports it
+export const KernelSymbolCopy = KernelClass.IsolatedCopy(Symbol);

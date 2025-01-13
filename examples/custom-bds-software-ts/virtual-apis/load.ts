@@ -1,7 +1,12 @@
 // CORE PLUGINS ENTRYPOINT
 import '@bedrock-apis/virtual-apis/plugins/all';
-import '@bedrock-apis/virtual-apis/plugins/core';
-import '@bedrock-apis/virtual-apis/plugins/inventory';
+
+// CONFIGURE SEPARATE PLUGIN
+import EventsPlugin from '@bedrock-apis/virtual-apis/plugins/events';
+
+EventsPlugin.configure({
+   warnIfEventIsNotImplemented: true,
+});
 
 // CUSTOM PLUGINS ENTRYPOINT
 import './plugin';

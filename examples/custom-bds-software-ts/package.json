@@ -4,7 +4,7 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "start": "./node_modules/.bin/tsx --import @bedrock-apis/virtual-apis/loader ./virtual-apis/load.ts"
+      "start": "tsx --import @bedrock-apis/virtual-apis/loader ./virtual-apis/load.ts"
    },
    "keywords": [],
    "author": "",
@@ -15,5 +15,4 @@
       "tsx": "^4.19.2"
    },
    "type": "module"
-
 }

@@ -24,6 +24,6 @@
       "noUncheckedIndexedAccess": true,
       "skipLibCheck": true
    },
-   "include": ["src/api-builder/", "src/loader/", "src/core-plugins/", "src/plugin-api/"],
+   "include": ["src/api-builder/", "src/loader/", "src/core-plugins/", "src/plugin-api/", "src/tooling/eslint/"],
    "exclude": ["./dist/", "./modules/", "**/*.test.ts"]
 }

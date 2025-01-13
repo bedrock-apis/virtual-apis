@@ -1,5 +1,5 @@
 import { isGeneratorObject, isMapIterator, isSetIterator } from 'node:util/types';
-import { Kernel, symbolCopy } from './kernel';
+import { Kernel, KernelSymbolCopy } from './kernel';
 /* eslint-disable custom/no-globals */
 
 export const GENERATOR_SOURCE = Kernel.IsolatedCopy(
@@ -65,7 +65,7 @@ export class KernelIterator<T> extends Kernel.Empty implements IsolatedIterator<
          : never;
    }
    public [ITERATOR_SOURCE_SYMBOL]: Iterator<T> = null as unknown as Iterator<T>;
-   public [symbolCopy.iterator](): IterableIterator<T> {
+   public [KernelSymbolCopy.iterator](): IterableIterator<T> {
       return this;
    }
    public next(v: unknown): IteratorResult<T, void> {
