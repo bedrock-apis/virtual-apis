@@ -6,7 +6,7 @@
    "type": "module",
    "scripts": {
       "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:build",
-      "repo:build": "pnpm run repo:rolldown && node ./dist/build/index.js",
+      "repo:build": "pnpm run repo:rolldown && node ./dist/build/pre.js",
       "repo:rolldown": "rolldown -c ./tools/configs/rolldown.config.ts",
       "ci:typecheck": "tsc --pretty -p ./tools/configs/tsconfig.ci.json",
       "ci:lint": "eslint src/**/*.ts tools/**/*.ts",
