@@ -5,6 +5,5 @@ declare global {
     declare type $PROJECT_FILE_PATH = F;
     declare type $PROJECT_DIR_PATH = D;
     declare type $PROJECT_PATH = F | D;
-    declare type $Relative<T> = `./${T}`;
 }
 export {};
