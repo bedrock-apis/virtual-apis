@@ -27,7 +27,7 @@ class ExportOption implements RolldownOptions {
 }
 
 export default [
-    new ExportOption("./tools/configs/rolldown.config.ts", "./tools/configs/rolldown.config.js", false),
+    //new ExportOption("./tools/configs/rolldown.config.ts", "./tools/configs/rolldown.config.js", false),
     new ExportOption("./tools/linter/config.ts", "./eslint.config.js", false),
     new ExportOption("./tools/build/index.ts", "./dist/build/index.js", false)
 ] satisfies ConfigExport;

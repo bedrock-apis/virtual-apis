@@ -180,8 +180,7 @@ var config_default = tseslint.config({ ignores: [
 	"**/*.test.ts",
 	"modules/**"
 ] }, eslint.configs.recommended, ...tseslint.configs.strict, {
-	ignores: ["src/utils/**"],
-	files: ["src/**/*.ts"],
+	files: ["src/**/*.ts", "tools/**/*.ts"],
 	languageOptions: {
 		ecmaVersion: 2024,
 		sourceType: "module",
@@ -200,12 +199,7 @@ var config_default = tseslint.config({ ignores: [
 	}
 }, {
 	files: ["src/**/*.ts"],
-	ignores: [
-		"src/package-builder/**",
-		"src/vitest-loader/**",
-		"src/tooling/**",
-		"src/utils/**"
-	],
+	ignores: ["src/vitest-loader/**", "src/utils/**"],
 	rules: {
 		"custom/no-globals": "error",
 		"custom/no-default-extends": "warn",
