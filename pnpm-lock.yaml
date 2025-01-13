@@ -8,19 +8,13 @@ importers:
 
   .:
     dependencies:
-      '@minecraft/server':
-        specifier: 1.16.0
-        version: 1.16.0
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
-      deepmerge:
-        specifier: ^4.3.1
-        version: 4.3.1
-      jiti:
-        specifier: ^2.4.2
-        version: 2.4.2
     devDependencies:
+      '@minecraft/server':
+        specifier: 1.16.0
+        version: 1.16.0
       '@types/node':
         specifier: ^22.10.1
         version: 22.10.2
@@ -33,12 +27,18 @@ importers:
       '@vitest/ui':
         specifier: 2.1.8
         version: 2.1.8(vitest@2.1.8)
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
       eslint:
         specifier: ^9.18.0
         version: 9.18.0(jiti@2.4.2)
       exitzero:
         specifier: ^1.0.1
         version: 1.0.1
+      jiti:
+        specifier: ^2.4.2
+        version: 2.4.2
       prettier:
         specifier: ^3.4.2
         version: 3.4.2
@@ -74,18 +74,6 @@ importers:
         version: 1.0.0
 
   examples/custom-bds-software-ts:
-    dependencies:
-      '@bedrock-apis/virtual-apis':
-        specifier: workspace:x.x.x
-        version: link:../..
-      '@minecraft/server':
-        specifier: 1.0.0
-        version: 1.0.0
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.2
-
-  examples/custom-bds-software-ts-plugin:
     dependencies:
       '@bedrock-apis/virtual-apis':
         specifier: workspace:x.x.x
