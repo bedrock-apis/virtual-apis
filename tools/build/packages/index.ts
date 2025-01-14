@@ -7,7 +7,7 @@ import { IMetadataProvider, SystemFileMetadataProvider } from './metadata-provid
 import { printModule } from './printer';
 import { metadataModuleFullname } from './virtual-apis/helper';
 
-const API_BUILDER_FILENAME = path.join(import.meta.dirname, './index.js');
+const API_BUILDER_FILENAME = 'dist/api/index.js';
 const API_JS_PATH = path.join(MODULES_DIR, API_JS_FILENAME);
 
 main(new SystemFileMetadataProvider('./local-docs/')).then(
@@ -36,7 +36,7 @@ async function main(provider: IMetadataProvider): Promise<number> {
    await fs.mkdir(MODULES_DIR);
    await fs.mkdir(path.join(MODULES_DIR, './@minecraft'));
 
-   const apiJsWriteStatus = await fs.writeFile(API_JS_PATH, 'export * from "../dist/index.js"').then(
+   const apiJsWriteStatus = await fs.writeFile(API_JS_PATH, 'export * from "../dist/api/index.js"').then(
       () => true,
       () => false,
    );
@@ -80,7 +80,9 @@ async function main(provider: IMetadataProvider): Promise<number> {
    return 0;
 }
 function reportGenerated(file: string, size: number) {
-   console.log(`${chalk.gray`<GEN> /`}${fit(chalk.cyan(file), 50)} ${chalk.gray(`file │ size: ${(size / 1000).toFixed(1)}kB`)}`);
+   console.log(
+      `${chalk.gray`<GEN> /`}${fit(chalk.cyan(file), 50)} ${chalk.gray(`file │ size: ${(size / 1000).toFixed(1)}kB`)}`,
+   );
 }
 
 function fit(data: string, size: number) {

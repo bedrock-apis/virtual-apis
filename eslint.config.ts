@@ -1,15 +1,15 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import bedrock from './tools/linter/plugin';
+import bedrock from './tools/eslint/plugin';
 
 export default tseslint.config(
    {
-      ignores: ['**/*.test.ts', './src/utils/**/*', 'dist/**', 'examples/**', '**/*.test.ts', 'modules/**'],
+      ignores: ['**/*.test.ts', 'dist/**', 'examples/**', 'packages/**'],
    },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
    {
-      files: ['src/**/*.ts', 'tools/**/*.ts'],
+      files: ['src/**/*.ts', 'tools/**/*.ts', '*.ts'],
       languageOptions: {
          ecmaVersion: 2024,
          sourceType: 'module',
@@ -34,7 +34,7 @@ export default tseslint.config(
    },
    {
       files: ['src/**/*.ts'],
-      ignores: ['src/vitest-loader/**', 'src/utils/**'],
+      ignores: ['src/loader/**'],
       rules: {
          'custom/no-globals': 'error',
          'custom/no-default-extends': 'warn',

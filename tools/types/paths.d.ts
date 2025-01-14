@@ -2,13 +2,16 @@
 // prettier-ignore
 
 declare global {
-   declare type ProjectFilePath = F;
-   declare type ProjectDirPath = D;
-   declare type ProjectPath = F | D;
+    declare type ProjectFilePath = F;
+    declare type ProjectDirPath = D;
+    declare type ProjectPath = F | D;
 }
 export {};
 
-type F =
+type F = 
+   | 'src/loader/node/hooks.ts'
+   | 'src/loader/node/loader.ts'
+   | 'src/loader/vitest.ts'
    | 'src/plugin/apis/api.ts'
    | 'src/plugin/apis/get-module-versions.ts'
    | 'src/plugin/apis/index.ts'
@@ -80,9 +83,6 @@ type F =
    | 'src/virtual-apis/type-validators/types/tests.helper.ts'
    | 'src/virtual-apis/type-validators/types/variant.test.ts'
    | 'src/virtual-apis/type-validators/types/variant.ts'
-   | 'src/vitest-loader/node/hooks.ts'
-   | 'src/vitest-loader/node/loader.ts'
-   | 'src/vitest-loader/vitest.ts'
    | 'tools/build/packages/codegen/base.ts'
    | 'tools/build/packages/codegen/general.ts'
    | 'tools/build/packages/codegen/helpers.ts'
@@ -102,17 +102,12 @@ type F =
    | 'tools/build/packages/virtual-apis/index.ts'
    | 'tools/build/packages/virtual-apis/module.ts'
    | 'tools/build/repo/paths.ts'
-   | 'tools/build/todo/index.ts'
-   | 'tools/configs/tsconfig.base.json'
-   | 'tools/configs/tsconfig.build.json'
-   | 'tools/configs/tsconfig.ci.json'
-   | 'tools/configs/tsconfig.eslint.json'
-   | 'tools/linter/config.ts'
-   | 'tools/linter/plugin.ts'
-   | 'tools/linter/rules/no-array-expression.ts'
-   | 'tools/linter/rules/no-default-classes.ts'
-   | 'tools/linter/rules/no-global.ts'
-   | 'tools/linter/rules/no-unsafe-iterators.ts'
+   | 'tools/build/repo/todo.ts'
+   | 'tools/eslint/plugin.ts'
+   | 'tools/eslint/rules/no-array-expression.ts'
+   | 'tools/eslint/rules/no-default-classes.ts'
+   | 'tools/eslint/rules/no-global.ts'
+   | 'tools/eslint/rules/no-unsafe-iterators.ts'
    | 'tools/types/index.d.ts'
    | 'tools/types/paths.d.ts'
    | 'tools/types/script-module-metadata.d.ts'
@@ -130,10 +125,13 @@ type F =
    | 'README.md'
    | 'rolldown.config.ts'
    | 'TODO.md'
+   | 'tsconfig.build.json'
    | 'tsconfig.json'
    | 'vitest.config.ts';
 
-type D =
+type D = 
+   | 'src/loader'
+   | 'src/loader/node'
    | 'src/plugin'
    | 'src/plugin/apis'
    | 'src/plugin/core'
@@ -145,8 +143,6 @@ type D =
    | 'src/virtual-apis/isolation'
    | 'src/virtual-apis/type-validators'
    | 'src/virtual-apis/type-validators/types'
-   | 'src/vitest-loader'
-   | 'src/vitest-loader/node'
    | 'tools/build'
    | 'tools/build/packages'
    | 'tools/build/packages/codegen'
@@ -154,9 +150,8 @@ type D =
    | 'tools/build/packages/virtual-apis'
    | 'tools/build/repo'
    | 'tools/build/todo'
-   | 'tools/configs'
-   | 'tools/linter'
-   | 'tools/linter/rules'
+   | 'tools/eslint'
+   | 'tools/eslint/rules'
    | 'tools/types'
    | 'tools/utils'
    | 'src'

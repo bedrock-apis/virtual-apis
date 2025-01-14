@@ -1,7 +1,21 @@
 {
-   "extends": "./tools/configs/tsconfig.base.json",
    "compilerOptions": {
-      "types": ["./tools/types"]
+      "target": "es2022",
+      "lib": ["ES2022"],
+      "module": "ESNext",
+      "moduleResolution": "bundler",
+      "resolveJsonModule": true,
+      "outDir": "dist",
+      "baseUrl": ".",
+      "allowJs": true,
+      "checkJs": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "skipLibCheck": true,
+      "types": ["node", "./tools/types"]
    },
-   "include": ["./src/**/*.ts", "./tools/**/*.ts", "rolldown.config.ts"]
+   "include": ["./src/**/*.ts", "./tools/**/*.ts", "*.config.ts"]
 }

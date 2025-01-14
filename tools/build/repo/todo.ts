@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { readFile } from 'node:fs/promises';
 import { parseSync } from 'oxc-parser';
-import { getFilesRecursive } from 'tools/utils';
+import { getFilesRecursive } from '../../utils';
 
 const matchPattern = /\.ts/;
 const excludePattern = /node_modules|git/;

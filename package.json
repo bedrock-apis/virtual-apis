@@ -5,29 +5,25 @@
    "author": "bedrock-apis",
    "type": "module",
    "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:build",
-      "repo:build": "pnpm run repo:rolldown && node ./dist/build/pre.js",
-      "repo:rolldown": "rolldown -c rolldown.config.ts",
-      "ci:typecheck": "tsc --pretty -p ./tools/configs/tsconfig.ci.json",
-      "ci:lint": "eslint src/**/*.ts tools/**/*.ts",
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
+      "repo:paths": "tsx tools/build/repo/paths",
+      " ": "",
+      "ci:typecheck": "tsc --pretty --noEmit",
+      "ci:lint": "eslint",
       "ci:test": "vitest --run",
-      "ci:all": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
-      "ci:every": "pnpm run repo:build && pnpm run ci:all && pnpm run build:all && pnpm run example:vitest",
-      "build:types": "tsc --pretty -p ./tools/configs/tsconfig.build.json",
-      "build:pack": "node ./dist/build/pack.js",
-      "build:all": "pnpm run build:types && pnpm run build:pack",
-      "": "-----EMPTY----",
-      "bundle": "rolldown -c rolldown.config.ts && pnpm run typesgen",
-      "packagegen": "node directories.js regenerate && rolldown -c rolldown.config.ts && exitzero pnpm run typesgen && node --enable-source-maps ./dist/package-builder.js",
-      "typesgen": "tsc --pretty --project tsconfig.build.json",
-      "typecheck": "tsc --pretty --noEmit",
-      "coverage": "vitest --ui --coverage",
-      "regenerate-directories": "tsx src/tooling/typesafe-fs/regenerate.ts",
+      "ci:tlt": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
+      "ci:all": "pnpm run repo:paths && pnpm run ci:tlt && pnpm run build:all && pnpm run example:vitest",
+      "  ": "",
+      "build:src": "rolldown -c rolldown.config.ts",
+      "build:types": "tsc --pretty -project ./tsconfig.build.json",
+      "build:packages": "tsx tools/build/packages/index.ts",
+      "build:all": "pnpm run build:src && pnpm run build:types && pnpm run build:packages",
+      "   ": "",
+      "test:coverage": "vitest --ui --coverage",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
       "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
       "example:vitest": "cd examples/vitest && pnpm run start",
-      "examples": "pnpm run \"/^example:.*/\"",
-      "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm packagegen && pnpm examples"
+      "examples": "pnpm run \"/^example:.*/\""
    },
    "prettier": {
       "arrowParens": "avoid",
@@ -68,24 +64,27 @@
       "node": ">=20.x.x"
    },
    "exports": {
-      ".": {
-         "default": "./dist/index.js",
-         "types": "./dist/src/api-builder/index.d.ts"
-      },
       "./package.json": "./package.json",
-      "./modules/*": "./modules/*",
-      "./plugins/*": {
-         "default": "./dist/plugins/*.js",
-         "types": "./dist/src/core-plugins/*.d.ts"
-      },
-      "./loader": "./dist/loader.js",
       "./eslint-plugin": {
-         "default": "./dist/eslint-plugin.js",
-         "types": "./dist/src/tooling/eslint/plugin.d.ts"
+         "default": "./dist/eslint/eslint-plugin.js",
+         "types": "./dist/tools/eslint/plugin.d.ts"
+      },
+      ".": {
+         "default": "./dist/api/index.js",
+         "types": "./dist/src/virtual-apis/index.d.ts"
       },
       "./vitest": {
-         "default": "./dist/vitest.js",
+         "default": "./dist/api/vitest.js",
          "types": "./dist/src/loader/vitest.d.ts"
-      }
+      },
+      "./loader": {
+         "default": "./dist/api/loader.js",
+         "types": "./dist/src/loader/node/loader.d.ts"
+      },
+      "./plugins/*": {
+         "default": "./dist/plugins/*.js",
+         "types": "./dist/src/plugin/core/*.d.ts"
+      },
+      "./modules/*": "./modules/*"
    }
 }
