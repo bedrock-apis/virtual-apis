@@ -23,16 +23,16 @@ jobs:
            run: pnpm run repo:init
 
          - name: ✔ Check TypeScript types
-           run: pnpm run ci:typecheck
+           run: pnpm run typecheck
 
          - name: 🚧 Lint
-           run: pnpm run ci:lint
+           run: pnpm run lint
 
          - name: 🧪 Run project tests
-           run: pnpm run ci:test
+           run: pnpm run test
 
          - name: 🏗 Bundle generators and build Modules
-           run: pnpm run build:all
+           run: pnpm run build
 
          - name: 🧪 Run examples tests
            run: pnpm run examples
