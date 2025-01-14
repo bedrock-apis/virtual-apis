@@ -145,6 +145,9 @@ export class Context extends Kernel.Empty {
       return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
    }
    public reportDiagnostics(diagnostics: Diagnostics) {
-      Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name, diagnostics);
+      throw diagnostics.throw(1);
+
+      // TODO Figure out do we really need other implemetation? All tests passes
+      // Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name, diagnostics);
    }
 }

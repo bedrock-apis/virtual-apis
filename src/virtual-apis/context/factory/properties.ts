@@ -76,8 +76,8 @@ function createFunctionalGetter(
 
       // Check for diagnostics and report first value
       if (!diagnostics.success) {
-         executionContext.dispose();
          if (!definition.context.getConfigProperty(ContextOptions.GetterRequireValidBound)) return undefined;
+         executionContext.dispose();
          throw diagnostics.throw(1 + 1);
       }
 
