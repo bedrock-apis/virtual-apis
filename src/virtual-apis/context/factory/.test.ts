@@ -64,18 +64,40 @@ suite('Base API', () => {
 
    test('Property', () => {
       const player = new PlayerDefinition.api();
+      context.setConfigProperty('GetterRequireValidBound', false);
 
       const { get, set } = Object.getOwnPropertyDescriptor(PlayerDefinition.api.prototype, 'test') ?? {};
-      expect(set).toThrowError();
+      expect(set).toThrowErrorMatchingInlineSnapshot(
+         `[ReferenceError: Native setter [Player::test setter] object bound to prototype does not exist.]`,
+      );
       expect(get).not.toThrow();
-      expect(() => (set as any)?.call(player)).toThrow();
-      expect(() => set?.call(player, 5)).toThrow();
-      expect(() => set?.call(player, false)).not.toThrow();
+
+      context.setConfigProperty('GetterRequireValidBound', true);
+      expect(get).toThrowErrorMatchingInlineSnapshot(
+         `[ReferenceError: Native getter [Player::test getter] object bound to prototype does not exist.]`,
+      );
+
+      expect(() => (set as any)?.call(player)).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+      expect(() => set?.call(player, 5)).toThrowError();
+      expect(() => set?.call(player, false)).not.toThrowError();
+
+      context.setConfigProperty('GetterRequireValidBound', false);
       expect(get?.call({})).toBeTypeOf('undefined');
 
-      expect(() => (player.test = 5)).toThrow();
-      // TODO Fix test expected undefined not to be type of 'undefined'
-      // expect(get?.call(player)).not.toBeTypeOf('undefined');
+      context.setConfigProperty('GetterRequireValidBound', true);
+      expect(() => get?.call({})).toThrowErrorMatchingInlineSnapshot(
+         `[ReferenceError: Native getter [Player::test getter] object bound to prototype does not exist.]`,
+      );
+
+      expect(() => (player.test = 5)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+      expect(() => (player.test = true)).not.toThrow();
+
+      context.setConfigProperty('GetterRequireValidBound', false);
+      // TODO Fix
+      // expect(player.test).toBe(true);
+      // expect(get?.call({})).not.toBeTypeOf('undefined');
    });
 
    test('Error stack traces', () => {
