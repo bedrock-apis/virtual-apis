@@ -1,4 +1,4 @@
-declare module "@helper/script-module-metadata" {
+declare module '@helper/script-module-metadata' {
    //@ts-check
    export interface MetadataDefinition {
       name: string;
@@ -60,7 +60,11 @@ declare module "@helper/script-module-metadata" {
       MetadataTypeMap &
       MetadataTypeIteratorResult;
 
-   export type MetadataType = { is_bind_type: boolean; is_errorable: boolean; name: MetadataTypeName } & BaseMetadataType;
+   export type MetadataType = {
+      is_bind_type: boolean;
+      is_errorable: boolean;
+      name: MetadataTypeName;
+   } & BaseMetadataType;
    export type MetadataFunctionArgumentDetailsDefinition =
       | null
       | ({ default_value: unknown } | { default_value: unknown; max_value: number; min_value: number });
@@ -81,7 +85,7 @@ declare module "@helper/script-module-metadata" {
       interfaces: MetadataInterfaceDefinition[];
       type_aliases: MetadataAliasDefinition[];
    }
-   export interface MetadataObjectDefinition extends MetadataMemberDefinition, MetadataTypedDefinition { }
+   export interface MetadataObjectDefinition extends MetadataMemberDefinition, MetadataTypedDefinition {}
    export interface MetadataConstantDefinition extends MetadataObjectDefinition {
       value?: unknown;
    }

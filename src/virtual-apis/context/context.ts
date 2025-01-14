@@ -31,6 +31,7 @@ export class Context extends Kernel.Empty {
    }
    /**
     * Register new type
+    *
     * @param name
     * @param type
     */
@@ -39,6 +40,7 @@ export class Context extends Kernel.Empty {
    }
    /**
     * Get dynamic type that will resolve once this.resolveAll is called
+    *
     * @param name
     * @returns
     */
@@ -49,9 +51,7 @@ export class Context extends Kernel.Empty {
       }
       return dynamicType;
    }
-   /**
-    * Tries to resolve all unresolved types
-    */
+   /** Tries to resolve all unresolved types */
    public resolveAllDynamicTypes() {
       for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys())) {
          const resolvedType = this.TYPES.get(typeName);
@@ -63,7 +63,8 @@ export class Context extends Kernel.Empty {
          this.UNRESOLVED_TYPES.delete(typeName);
       }
 
-      for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys())) Kernel.warn('Failed to resolve dynamic type: ' + typeName);
+      for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys()))
+         Kernel.warn('Failed to resolve dynamic type: ' + typeName);
    }
    public resolveType(metadataType: MetadataType): Type {
       const { name } = metadataType;

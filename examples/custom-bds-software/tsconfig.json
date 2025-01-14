@@ -1,14 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "outDir": "dist"
-  },
-  "include": ["scripts", "virtual-apis"]
+   "compilerOptions": {
+      "target": "ES2020",
+      "module": "ESNext",
+      "moduleResolution": "bundler",
+      "allowJs": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "outDir": "dist"
+   },
+   "include": ["scripts", "virtual-apis"]
 }

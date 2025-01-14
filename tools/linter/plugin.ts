@@ -1,5 +1,3 @@
- 
-
 import noArrayExpression from './rules/no-array-expression';
 import noDefaultClasses from './rules/no-default-classes';
 import noGlobals from './rules/no-global';

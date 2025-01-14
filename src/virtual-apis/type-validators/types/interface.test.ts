@@ -5,19 +5,19 @@ import { InterfaceBindType } from './interface';
 import { validateThrow } from './tests.helper';
 
 suite('InterfaceType', () => {
-  function ref(name: string) {
-    return { is_bind_type: true, name } as unknown as MetadataType;
-  }
+   function ref(name: string) {
+      return { is_bind_type: true, name } as unknown as MetadataType;
+   }
 
-  test('Dependency Resolution', () => {
-    const context = new Context();
-    context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
-    context.registerType('b', new InterfaceBindType('b'));
-    context.resolveAllDynamicTypes();
+   test('Dependency Resolution', () => {
+      const context = new Context();
+      context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
+      context.registerType('b', new InterfaceBindType('b'));
+      context.resolveAllDynamicTypes();
 
-    const bType = context.resolveType(ref('b'));
-    expect(bType).toBeInstanceOf(InterfaceBindType);
-    expect(bType).toMatchInlineSnapshot(`
+      const bType = context.resolveType(ref('b'));
+      expect(bType).toBeInstanceOf(InterfaceBindType);
+      expect(bType).toMatchInlineSnapshot(`
         InterfaceBindType {
           "baseType": null,
           "name": "b",
@@ -25,11 +25,11 @@ suite('InterfaceType', () => {
         }
       `);
 
-    expect([...(bType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`[]`);
+      expect([...(bType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`[]`);
 
-    const aType = context.resolveType(ref('a'));
-    expect(aType).toBeInstanceOf(InterfaceBindType);
-    expect(aType).toMatchInlineSnapshot(`
+      const aType = context.resolveType(ref('a'));
+      expect(aType).toBeInstanceOf(InterfaceBindType);
+      expect(aType).toMatchInlineSnapshot(`
         InterfaceBindType {
           "baseType": null,
           "name": "a",
@@ -45,7 +45,7 @@ suite('InterfaceType', () => {
         }
       `);
 
-    expect([...(aType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`
+      expect([...(aType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`
         [
           [
             "b",
@@ -59,19 +59,19 @@ suite('InterfaceType', () => {
           ],
         ]
       `);
-  });
+   });
 
-  test('Complex Dependency Resolution', () => {
-    const context = new Context();
-    context.registerType('b', new InterfaceBindType('b').addProperty('c', context.resolveType(ref('c'))));
-    context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
-    context.registerType('c', new InterfaceBindType('c').addProperty('a', context.resolveType(ref('a'))));
-    context.resolveAllDynamicTypes();
+   test('Complex Dependency Resolution', () => {
+      const context = new Context();
+      context.registerType('b', new InterfaceBindType('b').addProperty('c', context.resolveType(ref('c'))));
+      context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
+      context.registerType('c', new InterfaceBindType('c').addProperty('a', context.resolveType(ref('a'))));
+      context.resolveAllDynamicTypes();
 
-    const aType = context.resolveType(ref('a'));
+      const aType = context.resolveType(ref('a'));
 
-    expect(aType).toBeInstanceOf(InterfaceBindType);
-    expect(aType).toMatchInlineSnapshot(`
+      expect(aType).toBeInstanceOf(InterfaceBindType);
+      expect(aType).toMatchInlineSnapshot(`
         InterfaceBindType {
           "baseType": null,
           "name": "a",
@@ -95,7 +95,7 @@ suite('InterfaceType', () => {
         }
       `);
 
-    expect([...(aType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`
+      expect([...(aType as InterfaceBindType).properties.entries()]).toMatchInlineSnapshot(`
         [
           [
             "b",
@@ -124,8 +124,8 @@ suite('InterfaceType', () => {
         ]
       `);
 
-    expect(() => validateThrow(aType, {})).toThrowErrorMatchingInlineSnapshot(
-      `[TypeError: Native type conversion failed.]`,
-    );
-  });
+      expect(() => validateThrow(aType, {})).toThrowErrorMatchingInlineSnapshot(
+         `[TypeError: Native type conversion failed.]`,
+      );
+   });
 });
