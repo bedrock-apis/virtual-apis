@@ -32,7 +32,7 @@ jobs:
            run: pnpm run ci:test
 
          - name: 🏗 Bundle generators and build Modules
-           run: pnpm run gen:pack
+           run: pnpm run build:all
 
          - name: 🧪 Run examples tests
            run: pnpm run examples
