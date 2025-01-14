@@ -13,6 +13,7 @@
       "ci:test": "vitest --run",
       "ci:all": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
       "gen:pack": "node ./dist/build/pack.js",
+      "ci:every": "pnpm run repo:build && pnpm run ci:all && pnpm run gen:pack && pnpm run example:vitest",
       "": "-----EMPTY----",
       "bundle": "rolldown -c rolldown.config.ts && pnpm run typesgen",
       "packagegen": "node directories.js regenerate && rolldown -c rolldown.config.ts && exitzero pnpm run typesgen && node --enable-source-maps ./dist/package-builder.js",
