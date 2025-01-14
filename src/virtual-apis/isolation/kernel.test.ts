@@ -99,7 +99,7 @@ suite('Kernel', () => {
       const iteratorPrototype = Object.getPrototypeOf(Array.prototype[Symbol.iterator].call([]));
       const next = iteratorPrototype.next;
       // @ts-ignore
-      console.log(delete iteratorPrototype.next);
+      expect(delete iteratorPrototype.next).toBe(true);
       expect(() => [...[5]]).toThrow();
       iteratorPrototype.next = next;
 

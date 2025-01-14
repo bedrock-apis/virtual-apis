@@ -30,7 +30,6 @@ export function finalize<T extends FunctionNativeHandler>(method: T, length = 0)
 }
 export function validateReturnType(executionContext: ExecutionContext, returnType: Type) {
    const validate = executionContext.context.getConfigProperty(ContextOptions.StrictReturnTypes);
-   Kernel.log(validate);
    returnType.validate(
       validate ? executionContext.diagnostics.errors : executionContext.diagnostics.warns,
       executionContext.result,
