@@ -80,10 +80,10 @@ async function main(provider: IMetadataProvider): Promise<number> {
    return 0;
 }
 function reportGenerated(file: string, size: number) {
-   console.log(`${chalk.gray`<GEN>/`}${fit(chalk.cyan(file), 50)} file │ size: ${(size / 1000).toFixed(1)}kB`);
+   console.log(`${chalk.gray`<GEN> /`}${fit(chalk.cyan(file), 50)} ${chalk.gray(`file │ size: ${(size / 1000).toFixed(1)}kB`)}`);
 }
 
-export function fit(data: string, size: number) {
+function fit(data: string, size: number) {
    if (data.length < size) return data + ' '.repeat(size - data.length);
    return data;
 }

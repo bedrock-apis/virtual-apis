@@ -13,6 +13,7 @@ const external: ExternalOption = [
     /^@/,
     ///^[\w@][^:]/, //Official regex used by rolldown team to mark extern any not relative paths
     ...Object.keys(pg?.devDependencies ?? {}),
+    ...Object.keys(pg?.dependencies ?? {})
 ];
 class ExportOption implements RolldownOptions {
     public readonly output?: RolldownOptions['output'];
@@ -20,34 +21,21 @@ class ExportOption implements RolldownOptions {
     public readonly platform?: 'node' | 'browser' | 'neutral' | undefined = 'node';
     public constructor(
         public readonly input: ProjectFilePath | Array<ProjectFilePath>,
-        output: string = './dist',
+        output: string = 'dist',
         sourcemap = true,
     ) {
         this.output = { sourcemap };
         if (Array.isArray(input)) this.output.dir = output;
         else this.output.file = output;
     }
-    resolve?:
-        | {
-            alias?: Record<string, string[] | string>;
-            aliasFields?: string[][];
-            conditionNames?: string[];
-            extensionAlias?: Record<string, string[]>;
-            exportsFields?: string[][];
-            extensions?: string[];
-            mainFields?: string[];
-            mainFiles?: string[];
-            modules?: string[];
-            symlinks?: boolean;
-            tsconfigFilename?: string;
-        }
-        | undefined = {
-            "tsconfigFilename": "tsconfig.json" satisfies ProjectFilePath
-        };
+    public readonly resolve: RolldownOptions["resolve"] = {
+        "tsconfigFilename": "tsconfig.json" satisfies ProjectFilePath
+    };
 }
 
 export default [
     //new ExportOption("./tools/configs/rolldown.config.ts", "./tools/configs/rolldown.config.js", false),
     //new ExportOption('tools/linter/config.ts', 'eslint.config.js' satisfies $PROJECT_FILE_PATH, false),
     new ExportOption('tools/build/pre/index.ts', './dist/build/pre.js', false),
+    new ExportOption('tools/build/packages/index.ts', 'dist/build/pack.js', false)
 ] satisfies ConfigExport;

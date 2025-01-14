@@ -28,11 +28,11 @@ jobs:
          - name: 🚧 Lint
            run: pnpm run ci:lint
 
-         - name: 🧪 Run tests
+         - name: 🧪 Run project tests
            run: pnpm run ci:test
 
          - name: 🏗 Bundle generators and build Modules
-           run: pnpm packagegen
+           run: pnpm run gen:pack
 
-         - name: 🧪 Test examples
+         - name: 🧪 Run examples tests
            run: pnpm run examples

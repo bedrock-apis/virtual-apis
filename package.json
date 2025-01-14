@@ -12,6 +12,7 @@
       "ci:lint": "eslint src/**/*.ts tools/**/*.ts",
       "ci:test": "vitest --run",
       "ci:all": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
+      "gen:pack": "node ./dist/build/pack.js",
       "": "-----EMPTY----",
       "bundle": "rolldown -c rolldown.config.ts && pnpm run typesgen",
       "packagegen": "node directories.js regenerate && rolldown -c rolldown.config.ts && exitzero pnpm run typesgen && node --enable-source-maps ./dist/package-builder.js",
