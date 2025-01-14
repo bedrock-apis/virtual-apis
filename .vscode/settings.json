@@ -10,5 +10,12 @@
       "os",
       "process"
    ],
-   "vitest.debugExclude": ["<node_internals>/**", "**/node_modules/**", "src/api-builder/kernel.ts"]
+   "vitest.debugExclude": ["<node_internals>/**", "**/node_modules/**", "src/api-builder/kernel.ts"],
+   "explorer.fileNesting.enabled": true,
+   "explorer.fileNesting.expand": false,
+   "explorer.fileNesting.patterns": {
+      "tsconfig.json": "tsconfig.*.json, *.config.ts",
+      "readme.md": "LICENSE, *.md",
+      "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, pnpm-workspace.yaml, bun.lockb, .*"
+   }
 }

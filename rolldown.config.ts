@@ -37,5 +37,6 @@ export default [
     //new ExportOption('tools/linter/config.ts', 'eslint.config.js' satisfies $PROJECT_FILE_PATH, false),
     new ExportOption('tools/build/pre/index.ts', './dist/build/pre.js', false),
     new ExportOption('tools/build/packages/index.ts', 'dist/build/pack.js', false),
+    new ExportOption('tools/build/todo/index.ts', 'dist/build/todos.js', false),
     new ExportOption('src/virtual-apis/index.ts', 'dist/build/index.js', false)
 ] satisfies ConfigExport;
