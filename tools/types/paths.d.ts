@@ -2,9 +2,9 @@
 // prettier-ignore
 
 declare global {
-    declare type ProjectFilePath = F;
-    declare type ProjectDirPath = D;
-    declare type ProjectPath = F | D;
+   declare type ProjectFilePath = F;
+   declare type ProjectDirPath = D;
+   declare type ProjectPath = F | D;
 }
 export {};
 
