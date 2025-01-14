@@ -1,6 +1,20 @@
+// VIRTUAL APIS CONFIG
+import { configure } from '@bedrock-apis/virtual-apis';
+
+configure({
+   GetterRequireValidBound: true,
+   StrictReturnTypes: false,
+});
+
 // CORE PLUGINS ENTRYPOINT
 import '@bedrock-apis/virtual-apis/plugins/all';
-import '@bedrock-apis/virtual-apis/plugins/effects';
+
+// CONFIGURE CORE PLUGIN
+import EventsPlugin from '@bedrock-apis/virtual-apis/plugins/events';
+
+EventsPlugin.configure({
+   warnIfEventIsNotImplemented: true,
+});
 
 // CUSTOM PLUGINS ENTRYPOINT
 import './plugin';

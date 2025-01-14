@@ -1,5 +1,7 @@
 import { MetadataType } from '@helper/script-module-metadata';
+import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
+import { KernelIterator } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
@@ -12,22 +14,23 @@ import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { ClassDefinition } from './class-definition';
-import { OptionKeys } from './context-options';
-import { Diagnostics } from '../diagnostics';
-import { KernelIterator } from '../isolation';
+import { ContextConfig, ContextConfigKeys } from './context-config';
 export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
 export class Context extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
-   private readonly OPTIONS: Record<OptionKeys, boolean> = {
+   private readonly CONFIG: ContextConfig = {
       StrictReturnTypes: true,
       GetterRequireValidBound: false,
    };
-   public setConfigProperty<T extends OptionKeys>(key: T, value: boolean) {
-      this.OPTIONS[key] = value;
+   public setConfigProperty<T extends ContextConfigKeys>(key: T, value: ContextConfig[T]) {
+      this.CONFIG[key] = value;
    }
-   public getConfigProperty<T extends OptionKeys>(key: T) {
-      return this.OPTIONS[key];
+   public getConfigProperty<T extends ContextConfigKeys>(key: T): ContextConfig[T] {
+      return this.CONFIG[key];
+   }
+   public configure(config: Partial<ContextConfig>) {
+      Kernel['globalThis::Object'].assign(this.CONFIG, config);
    }
    /**
     * Register new type

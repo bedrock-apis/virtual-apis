@@ -1,2 +1,2 @@
 export * from './context';
-export { ContextOptions as ConfigContextOptions } from './context-options';
+export { ContextOptions as ConfigContextOptions } from './context-config';

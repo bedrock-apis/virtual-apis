@@ -2,7 +2,7 @@ import { API_ERRORS_MESSAGES, ErrorFactory, WARNING_ERROR_MESSAGES } from '../..
 import { Kernel } from '../../isolation/kernel';
 import { Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
-import { ContextOptions } from '../context-options';
+import { ContextOptions } from '../context-config';
 import { ExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 

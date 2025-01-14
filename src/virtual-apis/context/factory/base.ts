@@ -1,6 +1,6 @@
 import { Kernel } from '../../isolation/kernel';
 import { Type } from '../../type-validators';
-import { ContextOptions } from '../context-options';
+import { ContextOptions } from '../context-config';
 import { ExecutionContext } from '../execution-context';
 
 export type FunctionNativeHandler = (that: unknown, params: ArrayLike<unknown>) => unknown;

@@ -8,7 +8,8 @@
       "dns",
       "crypto",
       "os",
-      "process"
+      "process",
+      "dist"
    ],
    "vitest.debugExclude": ["<node_internals>/**", "**/node_modules/**", "src/api-builder/kernel.ts"],
    "explorer.fileNesting.enabled": true,
