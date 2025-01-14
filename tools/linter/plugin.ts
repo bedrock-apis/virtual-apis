@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 
 import noArrayExpression from './rules/no-array-expression';
 import noDefaultClasses from './rules/no-default-classes';

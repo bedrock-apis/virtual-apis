@@ -1,5 +1,5 @@
 import type { ConfigExport, ExternalOption, RolldownOptions } from 'rolldown';
-import { ReadJson } from './tools/utils';
+import { readJson } from './tools/utils';
 //import { ReadJson } from "../../src/utils";
 //import * as pg from "../../package.json"
 
@@ -7,7 +7,7 @@ import { ReadJson } from './tools/utils';
 // import build-ins only with this prefix "node:..."
 // import { builtinModules } from "node:module"
 
-const pg = await ReadJson<typeof import('package.json')>('package.json');
+const pg = await readJson<typeof import('package.json')>('package.json');
 const external: ExternalOption = [
     /^node:/,
     /^@/,
@@ -19,7 +19,7 @@ class ExportOption implements RolldownOptions {
     public readonly external?: ExternalOption | undefined = external;
     public readonly platform?: 'node' | 'browser' | 'neutral' | undefined = 'node';
     public constructor(
-        public readonly input: $PROJECT_FILE_PATH | Array<$PROJECT_FILE_PATH>,
+        public readonly input: ProjectFilePath | Array<ProjectFilePath>,
         output: string = './dist',
         sourcemap = true,
     ) {
@@ -42,7 +42,7 @@ class ExportOption implements RolldownOptions {
             tsconfigFilename?: string;
         }
         | undefined = {
-            "tsconfigFilename": "tsconfig.json" satisfies $PROJECT_FILE_PATH
+            "tsconfigFilename": "tsconfig.json" satisfies ProjectFilePath
         };
 }
 
