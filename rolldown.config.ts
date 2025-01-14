@@ -11,7 +11,6 @@ const pg = await readJson<typeof import('package.json')>('package.json');
 const external: ExternalOption = [
     /^node:/,
     /^@/,
-    ///^[\w@][^:]/, //Official regex used by rolldown team to mark extern any not relative paths
     ...Object.keys(pg?.devDependencies ?? {}),
     ...Object.keys(pg?.dependencies ?? {})
 ];
@@ -37,5 +36,6 @@ export default [
     //new ExportOption("./tools/configs/rolldown.config.ts", "./tools/configs/rolldown.config.js", false),
     //new ExportOption('tools/linter/config.ts', 'eslint.config.js' satisfies $PROJECT_FILE_PATH, false),
     new ExportOption('tools/build/pre/index.ts', './dist/build/pre.js', false),
-    new ExportOption('tools/build/packages/index.ts', 'dist/build/pack.js', false)
+    new ExportOption('tools/build/packages/index.ts', 'dist/build/pack.js', false),
+    new ExportOption('src/virtual-apis/index.ts', 'dist/build/index.js', false)
 ] satisfies ConfigExport;
