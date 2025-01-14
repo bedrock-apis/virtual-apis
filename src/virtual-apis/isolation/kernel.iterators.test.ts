@@ -1,6 +1,11 @@
 import { expect, suite, test } from 'vitest';
+import { KernelArray } from './kernel.arrays';
 
 suite('Kernel Iterators', () => {
+   test('Array Iterator', () => {
+      const array: any[] = [];
+      expect(() => [...KernelArray.From(array).getIterator()]).not.toThrow();
+   });
    test('Generator Test', () => {
       const prototype = Object.getPrototypeOf(GeneratorFunction.prototype);
       const next = prototype.next;

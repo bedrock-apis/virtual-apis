@@ -43,18 +43,18 @@ describe('Report', () => {
 
       expect(getAndNormalizeStack(() => report.throw())).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/src/api-builder/diagnostics/diagnostics.test
-            at getAndNormalizeStack (cwd/src/api-builder/diagnostics/diagnostics.test)
-            at cwd/src/api-builder/diagnostics/diagnostics.test"
+            at cwd/src/virtual-apis/diagnostics/diagnostics.test
+            at getAndNormalizeStack (cwd/src/virtual-apis/diagnostics/diagnostics.test)
+            at cwd/src/virtual-apis/diagnostics/diagnostics.test"
       `);
       expect(getAndNormalizeStack(() => report.throw(1))).toMatchInlineSnapshot(`
         "Error: Message
-            at getAndNormalizeStack (cwd/src/api-builder/diagnostics/diagnostics.test)
-            at cwd/src/api-builder/diagnostics/diagnostics.test"
+            at getAndNormalizeStack (cwd/src/virtual-apis/diagnostics/diagnostics.test)
+            at cwd/src/virtual-apis/diagnostics/diagnostics.test"
       `);
       expect(getAndNormalizeStack(() => report.throw(2))).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/src/api-builder/diagnostics/diagnostics.test"
+            at cwd/src/virtual-apis/diagnostics/diagnostics.test"
       `);
    });
 });
