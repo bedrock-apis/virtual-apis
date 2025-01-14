@@ -1,6 +1,7 @@
 bin
-./packages
-modules
+packages
+
+
 # Logs
 logs
 *.log
