@@ -1,0 +1,10 @@
+{
+    "extends":"./tools/configs/tsconfig.base.json",
+    "compilerOptions": {
+        "types": [ "./tools/types" ]
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./tools/**/*.ts"
+, "rolldown.config.ts"    ]
+}

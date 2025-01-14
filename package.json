@@ -7,10 +7,10 @@
    "scripts": {
       "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:build",
       "repo:build": "pnpm run repo:rolldown && node ./dist/build/pre.js",
-      "repo:rolldown": "rolldown -c ./tools/configs/rolldown.config.ts",
+      "repo:rolldown": "rolldown -c rolldown.config.ts",
       "ci:typecheck": "tsc --pretty -p ./tools/configs/tsconfig.ci.json",
       "ci:lint": "eslint src/**/*.ts tools/**/*.ts",
-      "ci:test": "vitest",
+      "ci:test": "vitest --run",
       "ci:all": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
       "": "-----EMPTY----",
       "bundle": "rolldown -c rolldown.config.ts && pnpm run typesgen",

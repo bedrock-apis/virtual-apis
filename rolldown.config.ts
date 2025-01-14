@@ -1,5 +1,5 @@
 import type { ConfigExport, ExternalOption, RolldownOptions } from 'rolldown';
-import { ReadJson } from '../utils';
+import { ReadJson } from './tools/utils';
 //import { ReadJson } from "../../src/utils";
 //import * as pg from "../../package.json"
 
@@ -42,12 +42,12 @@ class ExportOption implements RolldownOptions {
             tsconfigFilename?: string;
         }
         | undefined = {
-            "tsconfigFilename": "tools/configs/tsconfig.json" satisfies $PROJECT_FILE_PATH
+            "tsconfigFilename": "tsconfig.json" satisfies $PROJECT_FILE_PATH
         };
 }
 
 export default [
     //new ExportOption("./tools/configs/rolldown.config.ts", "./tools/configs/rolldown.config.js", false),
-    new ExportOption('tools/linter/config.ts', 'eslint.config.js' satisfies $PROJECT_FILE_PATH, false),
+    //new ExportOption('tools/linter/config.ts', 'eslint.config.js' satisfies $PROJECT_FILE_PATH, false),
     new ExportOption('tools/build/pre/index.ts', './dist/build/pre.js', false),
 ] satisfies ConfigExport;

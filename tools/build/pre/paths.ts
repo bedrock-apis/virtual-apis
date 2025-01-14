@@ -20,7 +20,7 @@ export {};
 `);
 
 async function ArrayFromAsync(aGen: AsyncIterable<string>): Promise<string[]> {
-    const entries = [];
+    const entries: string[] = [];
     for await (const e of aGen) {
         entries.push(e);
     }
