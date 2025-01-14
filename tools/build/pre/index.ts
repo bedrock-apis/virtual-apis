@@ -1,1 +1,1 @@
-import "./paths";
+import './paths';

@@ -13,13 +13,13 @@ export const STORAGE = Kernel['globalThis::Symbol']('STORAGE');
 export abstract class Plugin extends Kernel.Empty {
    protected abstract readonly id: string;
 
-   protected onWarning(warning: unknown) { }
-   protected onError(error: unknown) { }
-   protected onPanic(panic: unknown) { }
+   protected onWarning(warning: unknown) {}
+   protected onError(error: unknown) {}
+   protected onPanic(panic: unknown) {}
    protected implement<T extends keyof ModuleTypeMap>(
       className: T,
       implementation: PartialParts<ModuleTypeMap[T]['prototype']>,
-   ) { }
+   ) {}
    protected implementWithStorage<T extends keyof ModuleTypeMap, Storage>(
       className: T,
       id: string,

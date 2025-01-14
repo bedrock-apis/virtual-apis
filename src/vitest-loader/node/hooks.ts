@@ -3,7 +3,7 @@ import { getModuleVersions } from '../../plugin/apis/get-module-versions';
 const MODULES = getModuleVersions();
 
 // Receives data from `register`.
-export async function initialize() { }
+export async function initialize() {}
 
 // Take an `import` or `require` specifier and resolve it to a URL.
 export async function resolve(

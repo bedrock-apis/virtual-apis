@@ -14,7 +14,7 @@ class EventsPlugin extends PluginWithConfig<Config> {
 
    public events = new Kernel['globalThis::Map']<string, (...args: unknown[]) => unknown>();
 
-   public trigger(event: string, ...args: unknown[]) { }
+   public trigger(event: string, ...args: unknown[]) {}
 }
 
 export default new EventsPlugin();

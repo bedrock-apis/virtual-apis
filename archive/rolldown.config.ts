@@ -53,9 +53,10 @@ await fs.writeFile(
 import './modules.js';
 
 ${PLUGINS.filter(e => e.filename !== 'modules.js')
-      .map(({ filename }) => `import './${filename}';`)
-      .join('\r\n')}
-`);
+   .map(({ filename }) => `import './${filename}';`)
+   .join('\r\n')}
+`,
+);
 
 PACKAGE_JSON.exports = Object.fromEntries([
    ['.', { default: FS.dist.index_js, types: FS.dist.src.api_builder.index_d_ts }],

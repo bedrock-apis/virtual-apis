@@ -17,5 +17,8 @@
       "tsconfig.json": "tsconfig.*.json, *.config.ts",
       "readme.md": "LICENSE, *.md",
       "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, pnpm-workspace.yaml, bun.lockb, .*"
+   },
+   "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
    }
 }
