@@ -5,7 +5,7 @@ import { ExecutionContext } from '../execution-context';
 
 export type FunctionNativeHandler = (that: unknown, params: ArrayLike<unknown>) => unknown;
 
-export function proxyify<T extends FunctionNativeHandler>(method: T): T {
+export function proxyify(method: FunctionNativeHandler): (...p: unknown[]) => unknown {
    // Handle with proxy for support with "this" callback
    const final = new Kernel['globalThis::Proxy'](method, {
       apply(t, that, params) {
@@ -14,7 +14,7 @@ export function proxyify<T extends FunctionNativeHandler>(method: T): T {
    });
 
    // Return
-   return final;
+   return final as (...p: unknown[]) => unknown;
 }
 export function finalize<T extends FunctionNativeHandler>(method: T, length = 0): T {
    // Mark function as native

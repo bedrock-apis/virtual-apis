@@ -9,10 +9,13 @@ export class DiagnosticsStackReport extends BaseReport {
    public get isThrowable() {
       return !this.isEmpty;
    }
-   public readonly stack = KernelArray.Construct<Report>();
    public get length() {
       return this.stack.length;
    }
+   public get isEmpty() {
+      return this.length === 0;
+   }
+   public readonly stack = KernelArray.Construct<Report>();
    public report(...params: [report: Report] | [report: ErrorFactory, child?: BaseReport]): this {
       const report = params[0];
       if (report instanceof Report) this.stack.push(report);
@@ -27,9 +30,6 @@ export class DiagnosticsStackReport extends BaseReport {
    }
    public clear() {
       (this as Mutable<this>).stack = KernelArray.Construct<Report>();
-   }
-   public get isEmpty() {
-      return this.length === 0;
    }
    public follow(diagnostics: DiagnosticsStackReport) {
       for (const item of diagnostics.stack.getIterator()) {

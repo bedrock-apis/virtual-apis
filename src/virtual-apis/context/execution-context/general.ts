@@ -1,14 +1,18 @@
 import { Kernel } from '../../isolation/kernel';
-import { Diagnostics, BaseReport } from '../../diagnostics';
+import { Diagnostics, Report } from '../../diagnostics';
 import { Context } from '../context';
+import { KernelArray } from 'src/virtual-apis/isolation';
 
 export class ExecutionContext extends Kernel.Empty {
    public readonly context: Context;
-   public readonly error: BaseReport | null = null;
    public readonly diagnostics: Diagnostics = new Diagnostics();
    public readonly methodId: string;
-   public readonly parameters: unknown[];
-   public constructor(context: Context, methodId: string, parameters: unknown[]) {
+   public readonly parameters: KernelArray<unknown>;
+   public get isSuccessful() {
+      return this.diagnostics.success;
+   }
+   public result: unknown;
+   public constructor(context: Context, methodId: string, parameters: KernelArray<unknown>) {
       super();
       this.context = context;
       this.methodId = methodId;
@@ -20,7 +24,10 @@ export class ExecutionContext extends Kernel.Empty {
       }
       return 0;
    }
-   public throw(error: BaseReport) {
-      (this as Mutable<this>).error = error;
+   public report(error: Report) {
+      this.diagnostics.errors.report(error);
+   }
+   public throw(errorStack: number = 0) {
+      return this.diagnostics.throw(errorStack + 1);
    }
 }

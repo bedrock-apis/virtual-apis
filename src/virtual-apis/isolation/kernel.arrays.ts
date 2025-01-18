@@ -14,7 +14,7 @@ export class KernelArray<T> extends Kernel.Empty {
    public static Construct<T>(...params: T[]): KernelArray<T> {
       return KernelArray.From(params);
    }
-   public static From<T>(array: Array<T>): KernelArray<T> {
+   public static From<T>(array: ArrayLike<T>): KernelArray<T> {
       return Kernel.__setPrototypeOf(array, KernelArray.prototype);
    }
    public map<S>(n: (e: T, i: number, t: T[]) => S): KernelArray<S> {

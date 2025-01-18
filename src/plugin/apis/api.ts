@@ -33,7 +33,7 @@ export abstract class Plugin extends Kernel.Empty {
 export abstract class PluginWithConfig<Config extends object> extends Plugin {
    protected abstract config: Config;
    public configure(config: Config) {
-      Kernel['globalThis::Object'].assign(this.config ?? {}, config);
+      Kernel['Object::static'].assign(this.config ?? {}, config);
    }
 }
 

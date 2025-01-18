@@ -9,6 +9,7 @@ declare global {
 export {};
 
 type F = 
+   | 'src/loader/ecma/index.ts'
    | 'src/loader/node/hooks.ts'
    | 'src/loader/node/loader.ts'
    | 'src/loader/vitest.ts'
@@ -21,13 +22,12 @@ type F =
    | 'src/plugin/core/inventory.ts'
    | 'src/plugin/core/modules.ts'
    | 'src/virtual-apis/context/class-definition.ts'
-   | 'src/virtual-apis/context/context-options.ts'
+   | 'src/virtual-apis/context/context-config.ts'
    | 'src/virtual-apis/context/context.ts'
    | 'src/virtual-apis/context/execution-context/construction.ts'
    | 'src/virtual-apis/context/execution-context/general.ts'
    | 'src/virtual-apis/context/execution-context/index.ts'
    | 'src/virtual-apis/context/execution-context/instance.ts'
-   | 'src/virtual-apis/context/execution-context.ts'
    | 'src/virtual-apis/context/factory/.test.ts'
    | 'src/virtual-apis/context/factory/base.ts'
    | 'src/virtual-apis/context/factory/constructor.ts'
@@ -106,6 +106,7 @@ type F =
    | 'tools/eslint/plugin.ts'
    | 'tools/eslint/rules/no-array-expression.ts'
    | 'tools/eslint/rules/no-default-classes.ts'
+   | 'tools/eslint/rules/no-global.test.ts'
    | 'tools/eslint/rules/no-global.ts'
    | 'tools/eslint/rules/no-unsafe-iterators.ts'
    | 'tools/types/index.d.ts'
@@ -127,10 +128,12 @@ type F =
    | 'TODO.md'
    | 'tsconfig.build.json'
    | 'tsconfig.json'
+   | 'vitest-setup.config.ts'
    | 'vitest.config.ts';
 
 type D = 
    | 'src/loader'
+   | 'src/loader/ecma'
    | 'src/loader/node'
    | 'src/plugin'
    | 'src/plugin/apis'
@@ -149,7 +152,6 @@ type D =
    | 'tools/build/packages/metadata-provider'
    | 'tools/build/packages/virtual-apis'
    | 'tools/build/repo'
-   | 'tools/build/todo'
    | 'tools/eslint'
    | 'tools/eslint/rules'
    | 'tools/types'

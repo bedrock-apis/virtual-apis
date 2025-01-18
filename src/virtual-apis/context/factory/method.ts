@@ -1,18 +1,18 @@
+import { KernelArray } from 'src/virtual-apis/isolation';
 import { API_ERRORS_MESSAGES } from '../../diagnostics';
-import { Kernel } from '../../isolation/kernel';
 import { ParamsDefinition, Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
-import { ExecutionContext } from '../execution-context';
+import { InstanceExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 
 export function createFunctionalMethod(
    paramsDefinition: ParamsDefinition,
    returnType: Type,
-   contextFactory: (...params: Parameters<FunctionNativeHandler>) => ExecutionContext,
+   contextFactory: (that: unknown, params: KernelArray<unknown>) => InstanceExecutionContext,
    trimStack: number = 0,
 ): FunctionNativeHandler {
    return (that: unknown, params: ArrayLike<unknown>) => {
-      const executionContext = contextFactory(that, params);
+      const executionContext = contextFactory(that, KernelArray.From(params));
       const { diagnostics, context, definition, methodId } = executionContext;
 
       // Check if the object has native bound
@@ -30,8 +30,8 @@ export function createFunctionalMethod(
       }
 
       definition.__call(executionContext);
-      if (executionContext.error) {
-         throw executionContext.error.throw(trimStack + 1);
+      if (!executionContext.isSuccessful) {
+         throw executionContext.throw(trimStack + 1);
       }
 
       // TODO: Shouldn't throw as execution context.dispose should be always called
@@ -62,22 +62,14 @@ export function createMethodFor<T extends ClassDefinition<ClassDefinition | null
 ): FunctionNativeHandler {
    const id = `${definition.classId}::${name}`;
    // Build arrow function so the methods are not possible to call with new expression
-   const proxyThis: FunctionNativeHandler = proxyify(
+   const proxyThis = proxyify(
       createFunctionalMethod(
          paramsDefinition,
          returnType,
-         (that, params) =>
-            new ExecutionContext(
-               proxyThis,
-               definition as ClassDefinition,
-               id,
-               Kernel.As(params, 'Array'),
-               that as object,
-            ),
+         (that, params) => new InstanceExecutionContext(definition as ClassDefinition, proxyThis, id, that, params),
          1,
       ),
    );
-
    // Finalize function properties
    finalize(proxyThis, 0);
    // Return builded method

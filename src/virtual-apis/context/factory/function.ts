@@ -1,16 +1,18 @@
+import { KernelArray } from 'src/virtual-apis/isolation';
 import { Kernel } from '../../isolation/kernel';
 import { ParamsDefinition, Type } from '../../type-validators';
-import { ExecutionContext } from '../execution-context';
+import { InstanceExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
+import { ClassDefinition } from '../class-definition';
 
 function createFunctionalFunction(
    paramsDefinition: ParamsDefinition,
    returnType: Type,
-   contextFactory: (params: ArrayLike<unknown>) => ExecutionContext,
+   contextFactory: (that: unknown, params: KernelArray<unknown>) => InstanceExecutionContext,
    trimStack: number = 0,
 ) {
    return (that: unknown, params: ArrayLike<unknown>) => {
-      const executionContext = contextFactory(params);
+      const executionContext = contextFactory(that, KernelArray.From(params));
       const { diagnostics, context, methodId } = executionContext;
 
       // Validate params
@@ -23,8 +25,8 @@ function createFunctionalFunction(
       }
 
       // Run
-      if (executionContext.error) {
-         throw executionContext.error.throw(trimStack + 1);
+      if (!executionContext.isSuccessful) {
+         throw executionContext.throw(trimStack + 1);
       }
 
       // TODO: Shouldn't throw as execution context.dispose should be always called
@@ -48,19 +50,18 @@ function createFunctionalFunction(
    };
 }
 export function createFunction(
+   definition: ClassDefinition,
    fullId: string,
    paramsDefinition: ParamsDefinition,
    returnType: Type,
 ): FunctionNativeHandler {
    const id = fullId;
    // Build arrow function so the methods are not possible to call with new expression
-   const proxyThis: FunctionNativeHandler = proxyify(
+   const proxyThis = proxyify(
       createFunctionalFunction(
          paramsDefinition,
          returnType,
-
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         params => new ExecutionContext(proxyThis, null!, id, Kernel.As(params, 'Array'), null!),
+         (that, params) => new InstanceExecutionContext(definition, proxyThis, id, that, params),
       ),
    );
 

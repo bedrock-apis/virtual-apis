@@ -1,17 +1,20 @@
+import { KernelArray } from 'src/virtual-apis/isolation';
 import { API_ERRORS_MESSAGES, ErrorFactory, WARNING_ERROR_MESSAGES } from '../../diagnostics';
 import { Kernel } from '../../isolation/kernel';
 import { Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
 import { ContextOptions } from '../context-config';
-import { ExecutionContext } from '../execution-context';
+import { InstanceExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 
 function createFunctionalSetter(
    type: Type,
-   contextFactory: (...params: Parameters<FunctionNativeHandler>) => ExecutionContext,
+   contextFactory: (that: unknown, params: KernelArray<unknown>) => InstanceExecutionContext,
+   trimStack: number = 0,
 ): FunctionNativeHandler {
+   // Build arrow function so the methods are not possible to call with new expression
    return (that: unknown, params: ArrayLike<unknown>) => {
-      const executionContext = contextFactory(that, params);
+      const executionContext = contextFactory(that, KernelArray.From(params));
       const { diagnostics, context, definition, methodId } = executionContext;
 
       // Check if the object has native bound
@@ -28,12 +31,12 @@ function createFunctionalSetter(
       // Check for diagnostics and report first value
       if (!diagnostics.success) {
          executionContext.dispose();
-         throw diagnostics.throw(1 + 1);
+         throw diagnostics.throw(trimStack + 1);
       }
 
       definition.__call(executionContext);
-      if (executionContext.error) {
-         throw executionContext.error.throw(1 + 1);
+      if (!executionContext.isSuccessful) {
+         throw executionContext.throw(trimStack + 1);
       }
 
       // TODO: Implement privileges and type checking
@@ -54,18 +57,19 @@ function createFunctionalSetter(
       if (!diagnostics.success) {
          // TODO: What design of our plugin system we want right?
          // definition.__reports(executionContext);
-         throw diagnostics.throw(1 + 1);
+         throw diagnostics.throw(trimStack + 1);
       }
       return undefined;
    };
 }
 function createFunctionalGetter(
    type: Type,
-   contextFactory: (...params: Parameters<FunctionNativeHandler>) => ExecutionContext,
+   contextFactory: (that: unknown, params: KernelArray<unknown>) => InstanceExecutionContext,
+   trimStack: number = 0,
 ): FunctionNativeHandler {
    return (that: unknown, params: ArrayLike<unknown>) => {
-      const executionContext = contextFactory(that, params);
-      const { diagnostics, context, definition, methodId } = executionContext;
+      const executionContext = contextFactory(that, KernelArray.From(params));
+      const { diagnostics, definition, methodId } = executionContext;
       // Check if the object has native bound
       if (!definition.context.nativeHandles.has(that as object)) {
          diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('getter', methodId));
@@ -78,13 +82,13 @@ function createFunctionalGetter(
       if (!diagnostics.success) {
          executionContext.dispose();
          if (!definition.context.getConfigProperty(ContextOptions.GetterRequireValidBound)) return undefined;
-         throw diagnostics.throw(1 + 1);
+         throw diagnostics.throw(trimStack + 1);
       }
 
       definition.__call(executionContext);
 
-      if (executionContext.error) {
-         throw executionContext.error.throw(1 + 1);
+      if (!executionContext.isSuccessful) {
+         throw executionContext.throw(trimStack + 1);
       }
 
       validateReturnType(executionContext, type);
@@ -95,7 +99,7 @@ function createFunctionalGetter(
          // TODO: What design of our plugin system we want right?
          // definition.__reports(executionContext);
 
-         throw diagnostics.throw(1 + 1);
+         throw diagnostics.throw(trimStack + 1);
       }
       // TODO: Implement privileges and type checking
       //if(currentPrivilege && currentPrivilege !== functionType.privilege) throw new ErrorConstructors.NoPrivilege(ErrorMessages.NoPrivilege("function", id));
@@ -105,53 +109,18 @@ function createFunctionalGetter(
       return executionContext.result;
    };
 }
-export function createSetterFor<T extends ClassDefinition<ClassDefinition | null>>(
-   definition: T,
-   name: string,
-   paramType: Type,
-) {
-   const id = `${definition.classId}::${name} setter`;
-   // Build arrow function so the methods are not possible to call with new expression
+export function createPropertyHandler(definition: ClassDefinition, name: string, type: Type, isSetter: boolean) {
+   const id = `${definition.classId}::${name} ${isSetter ? 'setter' : 'getter'}`;
 
-   // for setters virtual number of params is always 1
-   const proxyThis: FunctionNativeHandler = proxyify(
-      createFunctionalSetter(
-         paramType,
-         (that, params) =>
-            new ExecutionContext(
-               proxyThis,
-               definition as ClassDefinition,
-               id,
-               Kernel.As(params, 'Array'),
-               that as object,
-            ),
-      ),
-   );
-
-   finalize(proxyThis, 1);
-   return proxyThis;
-}
-export function createGetterFor<T extends ClassDefinition<ClassDefinition | null>>(
-   definition: T,
-   name: string,
-   type: Type,
-) {
-   const id = `${definition.classId}::${name} getter`;
-   // Build arrow function so the methods are not possible to call with new expression
-   const proxyThis: FunctionNativeHandler = proxyify(
-      createFunctionalGetter(
+   const proxyThis = proxyify(
+      (isSetter ? createFunctionalSetter : createFunctionalGetter)(
          type,
-         (that, params) =>
-            new ExecutionContext(
-               proxyThis,
-               definition as ClassDefinition,
-               id,
-               Kernel.As(params, 'Array'),
-               that as object,
-            ),
+         (that, params) => new InstanceExecutionContext(definition, proxyThis, id, that, params),
+         1,
       ),
    );
 
-   finalize(proxyThis, 0);
+   // for setters virtual number of params is always 1, and getters always 0
+   finalize(proxyThis, isSetter ? 1 : 0);
    return proxyThis;
 }

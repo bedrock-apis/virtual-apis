@@ -30,7 +30,7 @@ export class Context extends Kernel.Empty {
       return this.CONFIG[key];
    }
    public configure(config: Partial<ContextConfig>) {
-      Kernel['globalThis::Object'].assign(this.CONFIG, config);
+      Kernel['Object::static'].assign(this.CONFIG, config);
    }
    /**
     * Register new type

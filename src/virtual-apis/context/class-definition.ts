@@ -5,8 +5,8 @@ import { Kernel } from '../isolation/kernel';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
 import type { Context } from './context';
-import { ConstructionExecutionContext, ExecutionContext } from './execution-context';
-import { createConstructorFor, createGetterFor, createMethodFor, createSetterFor } from './factory';
+import { ConstructionExecutionContext, ExecutionContext, InstanceExecutionContext } from './execution-context';
+import { createConstructorFor, createPropertyHandler, createMethodFor } from './factory';
 // Class for single fake api definition
 
 export class ClassDefinition<
@@ -58,7 +58,7 @@ export class ClassDefinition<
       super();
       this.hasConstructor = Kernel['Boolean::constructor'](constructorParams);
       this.api = createConstructorFor(this, constructorParams ?? new ParamsDefinition());
-      this.constructorId = `${classId}:constructor`;
+      this.constructorId = `${classId}::constructor`;
       if (context.nativeEvents.has(this.constructorId)) {
          throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
       }
@@ -73,7 +73,11 @@ export class ClassDefinition<
    /** @returns New Virtual API Instance of the handle */
    public create(): this['api']['prototype'] {
       const [handle] = this.__construct(
-         new ConstructionExecutionContext(null, this as ClassDefinition, this.classId, Kernel.Construct('Array')),
+         new ConstructionExecutionContext(
+            this.getAPIMethod(this.constructorId as keyof P) as (...p: unknown[]) => unknown,
+            this as ClassDefinition,
+            KernelArray.Construct<unknown>(),
+         ),
       ).getIterator();
       return Kernel.__setPrototypeOf(handle, this.api.prototype);
    }
@@ -101,8 +105,8 @@ export class ClassDefinition<
    public addProperty<Name extends string>(name: Name, type: Type, isReadonly: boolean) {
       // TODO
 
-      const getter = createGetterFor(this as ClassDefinition, name, type);
-      const setter = isReadonly ? undefined : createSetterFor(this as ClassDefinition, name, type);
+      const getter = createPropertyHandler(this as ClassDefinition, name, type, true);
+      const setter = isReadonly ? undefined : createPropertyHandler(this as ClassDefinition, name, type, false);
       Kernel.__defineProperty(this.api.prototype, name, {
          configurable: true,
          enumerable: true,
@@ -159,15 +163,14 @@ export class ClassDefinition<
 
       return data;
    }
-   public __call(context: ExecutionContext) {
-      if (context.self) {
-         const event = this.invocable.get(context.self as (...params: unknown[]) => unknown);
+   public __call(context: InstanceExecutionContext) {
+      if (context.definition) {
+         const event = this.invocable.get(context.method);
          if (event) {
             const result = event.invoke(
+               context.handle as object,
                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-               context.handle!,
-               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-               this.HANDLE_TO_NATIVE_CACHE.get(context.handle!)!,
+               this.HANDLE_TO_NATIVE_CACHE.get(context.handle as object)!,
                this,
                context,
             );

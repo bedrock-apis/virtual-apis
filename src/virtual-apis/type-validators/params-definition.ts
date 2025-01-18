@@ -8,7 +8,7 @@ import { BaseNumberType } from './types/number';
 
 export class ParamsDefinition extends Type {
    public requiredParams: number = 0;
-   public params = Kernel.Construct('Array') as ParamType[];
+   public params: KernelArray<ParamType> = KernelArray.Construct();
 
    public static From(context: Context, params: MetadataFunctionArgumentDefinition[]) {
       const def = new ParamsDefinition();
@@ -45,7 +45,7 @@ export class ParamsDefinition extends Type {
       return this;
    }
 
-   public validate(diagnostics: DiagnosticsStackReport, params: unknown[]) {
+   public validate(diagnostics: DiagnosticsStackReport, params: KernelArray<unknown>) {
       if (params.length > this.params.length || params.length < this.requiredParams)
          return diagnostics.report(
             API_ERRORS_MESSAGES.IncorrectNumberOfArguments(

@@ -3,7 +3,7 @@ export interface ContextConfig {
    GetterRequireValidBound: boolean;
 }
 
-export const ContextOptions: { [K in ContextConfigKeys]: K } = {
+export const ContextOptions: { readonly [K in ContextConfigKeys]: K } = {
    StrictReturnTypes: 'StrictReturnTypes',
    GetterRequireValidBound: 'GetterRequireValidBound',
 } as const;

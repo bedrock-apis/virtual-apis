@@ -3,17 +3,16 @@ import { ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES } from '../../diagnostics';
 import { ClassDefinition } from '../class-definition';
+import { KernelArray } from 'src/virtual-apis/isolation';
 
 export function createFunctionalConstructor(
    paramsDefinition: ParamsDefinition,
-   contextFactory: (params: ArrayLike<unknown>) => ConstructionExecutionContext,
+   contextFactory: (params: KernelArray<unknown>) => ConstructionExecutionContext,
    trimStack: number = 0,
 ): new () => unknown {
    // Create function as constructor
-   return function ctor() {
-      // eslint-disable-next-line prefer-rest-params
-      const params = arguments as ArrayLike<unknown>;
-      const executionContext = contextFactory(params);
+   return function ctor(...params: unknown[]) {
+      const executionContext = contextFactory(KernelArray.From(params));
       const { definition, diagnostics } = executionContext;
       // Constructor should be callable only with "NEW" keyword
       if (!new.target && definition.newExpected) diagnostics.errors.report(QUICK_JS_ENV_ERROR_MESSAGES.NewExpected());
@@ -31,12 +30,9 @@ export function createFunctionalConstructor(
       }
 
       // Call Native constructor and sets its result as new.target.prototype
-      const result = Kernel.__setPrototypeOf(
-         definition.__construct(executionContext)[0],
-         new.target?.prototype ?? definition.api.prototype,
-      );
-      if (executionContext.error) {
-         throw executionContext.error.throw(trimStack + 1);
+      const constructedValue = definition.__construct(executionContext)[0];
+      if (!executionContext.isSuccessful) {
+         throw executionContext.throw(trimStack + 1);
       }
 
       executionContext.dispose();
@@ -46,7 +42,7 @@ export function createFunctionalConstructor(
          // definition.__reports(executionContext);
          throw diagnostics.throw(trimStack + 1);
       }
-      return result;
+      return Kernel.__setPrototypeOf(constructedValue, new.target?.prototype ?? definition.api.prototype);
    } as unknown as new () => unknown;
 }
 
@@ -59,10 +55,9 @@ export function createConstructorFor<T extends ClassDefinition<ClassDefinition |
       paramsDefinition,
       params =>
          new ConstructionExecutionContext(
-            ctor,
+            ctor as unknown as (...p: unknown[]) => unknown,
             definition as ClassDefinition,
-            `${definition.classId}::constructor`,
-            Kernel.As(params, 'Array'),
+            params,
          ),
       0,
    );
