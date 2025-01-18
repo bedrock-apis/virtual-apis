@@ -105,8 +105,8 @@ export class ClassDefinition<
    public addProperty<Name extends string>(name: Name, type: Type, isReadonly: boolean) {
       // TODO
 
-      const getter = createPropertyHandler(this as ClassDefinition, name, type, true);
-      const setter = isReadonly ? undefined : createPropertyHandler(this as ClassDefinition, name, type, false);
+      const getter = createPropertyHandler(this as ClassDefinition, name, type, false);
+      const setter = isReadonly ? undefined : createPropertyHandler(this as ClassDefinition, name, type, true);
       Kernel.__defineProperty(this.api.prototype, name, {
          configurable: true,
          enumerable: true,

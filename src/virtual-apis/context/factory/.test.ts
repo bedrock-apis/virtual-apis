@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, suite, test, vi } from 'vitest';
 import { Context } from '..';
-import { Kernel } from '../../isolation';
+import { Kernel, KernelArray } from '../../isolation';
 import { BooleanType, ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 
@@ -29,7 +29,11 @@ suite('Base API', () => {
 
    test('Native Construction', () => {
       const entity_handle = EntityDefinition.__construct(
-         new ConstructionExecutionContext(null, EntityDefinition, EntityDefinition.classId, Kernel.Construct('Array')),
+         new ConstructionExecutionContext(
+            EntityDefinition.api as () => unknown,
+            EntityDefinition,
+            KernelArray.Construct<unknown>(),
+         ),
       );
 
       expect(entity_handle).not.toBeInstanceOf(Player);

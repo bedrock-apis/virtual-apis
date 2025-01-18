@@ -10,7 +10,7 @@
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
-      "test": "vitest",
+      "test": "vitest --run",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run tlt && pnpm run build && pnpm run examples",
       "  ": "",
