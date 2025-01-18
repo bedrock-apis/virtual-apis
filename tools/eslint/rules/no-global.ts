@@ -1,6 +1,9 @@
-import { ESLintUtils } from '@typescript-eslint/utils';
 import type { TSESTree } from '@typescript-eslint/utils';
-import { kernelAccess } from '../plugin';
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+const kernel = 'Kernel';
+export const kernelAccess = (globalName: string, accessContext = 'globalThis') =>
+   `${kernel}['${accessContext}::${globalName}']`;
 
 export default ESLintUtils.RuleCreator.withoutDocs({
    meta: {
@@ -45,7 +48,8 @@ export default ESLintUtils.RuleCreator.withoutDocs({
          if (node.parent.type.startsWith('TS')) return;
 
          const name = node.name;
-         const replaceWith = kernelAccess(name);
+         const accessType = node.parent.type === 'MemberExpression' ? 'static' : 'globalThis';
+         const replaceWith = kernelAccess(name, accessType);
 
          context.report({
             node: node,

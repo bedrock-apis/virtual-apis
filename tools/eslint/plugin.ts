@@ -4,9 +4,7 @@ import noGlobals from './rules/no-global';
 import noUnsafeIterators from './rules/no-unsafe-iterators';
 
 const name = '@bedrock-apis/virtual-apis/eslint-plugin';
-const kernel = 'Kernel';
 export const kernelArrayConstruct = 'KernelArray.Construct';
-export const kernelAccess = (globalName: string) => `${kernel}['globalThis::${globalName}']`;
 
 export const plugin = {
    rules: {
