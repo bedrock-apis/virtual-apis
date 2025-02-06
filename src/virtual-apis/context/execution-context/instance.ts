@@ -1,21 +1,12 @@
 import { KernelArray } from '../../isolation';
-import { ClassDefinition } from '../class-definition';
+import { Context } from '../context';
 import { ExecutionContext } from '../execution-context';
+import type { APIInfo } from '../managers/factory.info';
 
 export class InstanceExecutionContext extends ExecutionContext {
-   public readonly definition: ClassDefinition;
    public readonly handle: unknown;
-   public readonly method: (this: object, ...p: unknown[]) => unknown;
-   public constructor(
-      definition: ClassDefinition,
-      method: (...p: unknown[]) => unknown,
-      methodId: string,
-      handle: unknown,
-      params: KernelArray<unknown>,
-   ) {
-      super(definition.context, methodId, params);
-      this.definition = definition;
-      this.method = method;
+   public constructor(context: Context, api: APIInfo, handle: unknown, params: KernelArray<unknown>) {
+      super(context, api, params);
       this.handle = handle;
    }
 }

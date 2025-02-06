@@ -19,6 +19,13 @@ export const PANIC_ERROR_MESSAGES = {
    EmptyDiagnosticsStackInstance: `Failed to throw report error on empty DiagnosticsStack instance.`,
    NoImplementation: `No implementation error.`,
    DynamicTypeNotResolved: (data: unknown) => `Failed to call validate on unresolved DynamicType ${data}`,
+   CanNotExtendsFromTypeThatIsNotClass: (id: string) =>
+      `Can not extend class by api type that is not class, type key ${id}`,
+   FailedToResoleAPIType: (id: string) => `Failed to resolve API type, type key ${id}`,
+   DuplicatedAPITypeId: (id: string) => `API type with this id already exists, key ${id}`,
+   InvalidKeyPattern: (id: string) => `Invalid API type key pattern, key '${id}'`,
+   ClassNotRegistered: (id: string) => `API Class type not registered, key '${id}'`,
+   PropertyWithThisNameAlreadyExists: (id: string) => `Property with this name already exists, key '${id}'`,
 };
 export const QUICK_JS_ENV_ERROR_MESSAGES = {
    NewExpected: () => ErrorFactory.New(`must be called with new`), // TypeError

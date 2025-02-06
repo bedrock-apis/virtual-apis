@@ -29,6 +29,9 @@ export class KernelArray<T> extends Kernel.Empty {
    public push(item: T) {
       return PUSH(this, item);
    }
+   public static StringSplit(input: string, delimiter: string) {
+      return KernelArray.From(Kernel.Call(Kernel['String::prototype'].split, input, delimiter));
+   }
 }
 Kernel.__setPrototypeOf(KernelArray, Kernel['Array::static']);
 Kernel.__setPrototypeOf(KernelArray.prototype, Kernel['Array::prototype']);
