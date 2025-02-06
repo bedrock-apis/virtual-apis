@@ -1,9 +1,7 @@
-import { RuleTester } from '@typescript-eslint/rule-tester';
+import { runClassic } from 'eslint-vitest-rule-tester';
 import rule from './no-global';
 
-const tester = new RuleTester();
-
-tester.run('no-global', rule, {
+runClassic('no-global', rule, {
    valid: [{ code: `const map = new Kernel['globalThis::Map']()` }],
    invalid: [
       {
