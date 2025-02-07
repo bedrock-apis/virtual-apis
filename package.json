@@ -38,14 +38,15 @@
    },
    "dependencies": {
       "@typescript-eslint/parser": "^8.20.0",
-      "chalk": "^5.4.1"
+      "chalk": "^5.4.1",
+      "eslint-vitest-rule-tester": "^1.1.0"
    },
    "devDependencies": {
       "@minecraft/server": "1.16.0",
       "@types/node": "^22.10.1",
       "@typescript-eslint/rule-tester": "^8.20.0",
-      "@vitest/coverage-istanbul": "3.0.2",
-      "@vitest/ui": "3.0.2",
+      "@vitest/coverage-istanbul": "3.0.5",
+      "@vitest/ui": "3.0.5",
       "deepmerge": "^4.3.1",
       "eslint": "^9.18.0",
       "exitzero": "^1.0.1",
@@ -58,7 +59,7 @@
       "tsx": "^4.19.2",
       "typescript": "5.7.2",
       "typescript-eslint": "^8.20.0",
-      "vitest": "^3.0.2"
+      "vitest": "^3.0.5"
    },
    "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab",
    "engines": {

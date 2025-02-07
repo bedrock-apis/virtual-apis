@@ -8,6 +8,5 @@ export default defineConfig({
          reporter: ['html', 'json'],
          include: ['src'],
       },
-      setupFiles: ['vitest-setup.config.ts'],
    },
 });
