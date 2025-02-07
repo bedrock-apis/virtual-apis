@@ -34,7 +34,8 @@ class KernelClass {
    public static __setPrototypeOf = Object.setPrototypeOf;
    public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
-   public static __descriptors = Object.getOwnPropertyDescriptors;
+   public static __getOwnDescriptor = Object.getOwnPropertyDescriptor;
+   public static __getOwnDescriptors = Object.getOwnPropertyDescriptors;
    public static __create = Object.create;
 
    public static Construct<T extends Keys, S extends Global[T]>(name: T): InstanceType<S>;
@@ -137,7 +138,7 @@ class KernelClass {
             obj,
             (isolated = KernelClass.__create(
                prototype ? this.IsolatedCopy(prototype) : prototype,
-               KernelClass.__descriptors(obj),
+               KernelClass.__getOwnDescriptors(obj),
             )),
          );
       }

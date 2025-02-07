@@ -1,7 +1,4 @@
 import { Kernel } from '../../isolation/kernel';
-import { Type } from '../../type-validators';
-import { ContextOptions } from '../context-config';
-import { ExecutionContext } from '../execution-context';
 
 export type FunctionNativeHandler = (that: unknown, params: ArrayLike<unknown>) => unknown;
 
@@ -27,11 +24,4 @@ export function finalize<T extends FunctionNativeHandler>(method: T, length = 0)
    Kernel.SetName(method, '');
 
    return method;
-}
-export function validateReturnType(executionContext: ExecutionContext, returnType: Type) {
-   const validate = executionContext.context.getConfigProperty(ContextOptions.StrictReturnTypes);
-   returnType.validate(
-      validate ? executionContext.diagnostics.errors : executionContext.diagnostics.warns,
-      executionContext.result,
-   );
 }
