@@ -1,0 +1,7 @@
+[submodule "bds-docs"]
+	path = bds-docs
+	url = https://github.com/conmaster2112/bds-docs
+[submodule "bds-docs-stable"]
+	path = bds-docs-stable
+	url = https://github.com/conmaster2112/bds-docs
+	branch = stable
