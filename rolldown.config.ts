@@ -73,6 +73,7 @@ export default [
       new ExportOption('src/loader/node/loader.ts').toFile('dist/api/loader.js').exports('./loader'),
       new ExportOption('src/loader/node/hooks.ts').toFile('dist/api/hooks.js'),
    ).toDirectory('dist/api'),
+   new ExportOption('src/test/run.ts').toFile('dist/test/run.js'),
 ] satisfies ConfigExport;
 
 await fs.mkdir('./dist/plugins', { recursive: true });

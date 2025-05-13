@@ -71,6 +71,7 @@ declare module '@helper/script-module-metadata' {
 
    export interface MetadataModuleBaseDefinition extends MetadataDefinition {
       version: string;
+      versions?: { version: string }[];
       uuid: string;
    }
    export interface MetadataModuleDefinition extends MetadataModuleBaseDefinition {

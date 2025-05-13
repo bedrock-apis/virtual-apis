@@ -17,5 +17,5 @@
       "skipLibCheck": true,
       "types": ["node", "./tools/types"]
    },
-   "include": ["./src/**/*.ts", "./tools/**/*.ts", "*.config.ts"]
+   "include": ["./src/**/*.ts", "./tools/**/*.ts", "*.config.ts", "bds-docs"]
 }

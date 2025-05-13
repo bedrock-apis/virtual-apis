@@ -4,7 +4,7 @@ import bedrock from './tools/eslint/plugin';
 
 export default tseslint.config(
    {
-      ignores: ['**/*.test.ts', 'dist/**', 'examples/**', 'modules/**'],
+      ignores: ['**/*.test.ts', 'dist/**', 'examples/**', 'modules/**', 'bds-docs/**', 'bds-docs-stable/**'],
    },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
@@ -34,7 +34,7 @@ export default tseslint.config(
    },
    {
       files: ['src/**/*.ts'],
-      ignores: ['src/loader/**'],
+      ignores: ['src/loader/**', 'src/test/**'],
       rules: {
          'custom/no-globals': 'error',
          'custom/no-default-extends': 'warn',

@@ -5,8 +5,8 @@
 import fs from 'node:fs';
 import module from 'node:module';
 import path from 'node:path';
-import url from 'node:url';
 import process from 'node:process';
+import url from 'node:url';
 
 import { API_MODULES_JSON_FILENAME, MODULES_DIR } from '../../../tools/utils/constants';
 
@@ -23,7 +23,8 @@ export function getModuleVersions(format: 'url' | 'path' = 'url') {
    for (const [name, versions] of Object.entries(apiModulesList)) {
       try {
          const pathToPackage = require.resolve(name + '/package.json');
-         const { version } = JSON.parse(fs.readFileSync(pathToPackage, 'utf-8'));
+         let { version } = JSON.parse(fs.readFileSync(pathToPackage, 'utf-8')) as { version: string };
+         version = version.replace(/\.\d+\.\d+\.\d+-(stable|preview).*/, '');
          if (!versions.includes(version)) {
             console.warn(`${name}: Version ${version} is requested, but only ${versions.join(' ')} are available.`);
          } else {

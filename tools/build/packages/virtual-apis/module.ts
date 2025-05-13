@@ -161,6 +161,11 @@ export class VirtualNativeModule {
    }
    public static GetRelativePath(module: MetadataModuleBaseDefinition) {
       const fullname = metadataModuleFullname(module);
-      return fullname.split('/').at(-1) ?? fullname;
+      const relative = fullname.split('/').at(-1) ?? fullname;
+      if (!relative || relative.includes('undefined')) {
+         console.log(fullname, relative, module);
+         throw new Error('Undefined or empty version:' + relative);
+      }
+      return relative;
    }
 }

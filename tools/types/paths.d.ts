@@ -21,6 +21,9 @@ type F =
    | 'src/plugin/core/events.ts'
    | 'src/plugin/core/inventory.ts'
    | 'src/plugin/core/modules.ts'
+   | 'src/test/compare.ts'
+   | 'src/test/enviroment.ts'
+   | 'src/test/run.ts'
    | 'src/virtual-apis/context/class-definition.ts'
    | 'src/virtual-apis/context/context-config.ts'
    | 'src/virtual-apis/context/context.ts'
@@ -117,6 +120,7 @@ type F =
    | 'tools/utils/index.ts'
    | 'tools/utils/system-io.ts'
    | '.gitignore'
+   | '.gitmodules'
    | '.prettierignore'
    | 'eslint.config.ts'
    | 'LICENSE'
@@ -128,7 +132,6 @@ type F =
    | 'TODO.md'
    | 'tsconfig.build.json'
    | 'tsconfig.json'
-   | 'vitest-setup.config.ts'
    | 'vitest.config.ts';
 
 type D = 
@@ -138,6 +141,7 @@ type D =
    | 'src/plugin'
    | 'src/plugin/apis'
    | 'src/plugin/core'
+   | 'src/test'
    | 'src/virtual-apis'
    | 'src/virtual-apis/context'
    | 'src/virtual-apis/context/execution-context'
@@ -152,6 +156,7 @@ type D =
    | 'tools/build/packages/metadata-provider'
    | 'tools/build/packages/virtual-apis'
    | 'tools/build/repo'
+   | 'tools/build/todo'
    | 'tools/eslint'
    | 'tools/eslint/rules'
    | 'tools/types'

@@ -1,5 +1,5 @@
-import ts, { factory } from 'typescript';
 import { MetadataFunctionDefinition, MetadataModuleBaseDefinition } from '@helper/script-module-metadata';
+import ts, { factory } from 'typescript';
 import { TsNode, ValueLiteral } from '../codegen/index';
 import { CONTEXT_IDENTIFIER, NULL_KEYWORD, PARAMS_DEFINITION_FROM } from './constants';
 
@@ -43,5 +43,6 @@ function rawObject<O extends object>(object: O | null) {
 }
 
 export function metadataModuleFullname(definition: MetadataModuleBaseDefinition) {
-   return definition.name + '@' + definition.version;
+   const version = definition.version || definition.versions?.at(-1)?.version;
+   return definition.name + '@' + version;
 }

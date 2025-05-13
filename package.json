@@ -5,12 +5,13 @@
    "author": "bedrock-apis",
    "type": "module",
    "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths && git submodules update --init",
       "repo:paths": "tsx tools/build/repo/paths",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
+      "e2e": "pnpm run build:src && pnpm run build:packages && node --enable-source-maps --import ./dist/api/loader.js dist/test/run.js",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run tlt && pnpm run build && pnpm run examples",
       "  ": "",
@@ -42,7 +43,9 @@
       "eslint-vitest-rule-tester": "^1.1.0"
    },
    "devDependencies": {
-      "@minecraft/server": "1.16.0",
+      "@minecraft/server": "2.0.0-beta.1.21.80-stable",
+      "@minecraft/server-net": "1.0.0-beta.1.21.90-preview.23",
+      "@minecraft/server-ui": "2.0.0-beta.1.21.80-stable",
       "@types/node": "^22.10.1",
       "@typescript-eslint/rule-tester": "^8.20.0",
       "@vitest/coverage-istanbul": "3.0.5",

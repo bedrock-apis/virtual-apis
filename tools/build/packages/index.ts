@@ -10,7 +10,7 @@ import { metadataModuleFullname } from './virtual-apis/helper';
 const API_BUILDER_FILENAME = 'dist/api/index.js';
 const API_JS_PATH = path.join(MODULES_DIR, API_JS_FILENAME);
 
-main(new SystemFileMetadataProvider('./local-docs/')).then(
+main(new SystemFileMetadataProvider('./bds-docs-stable/metadata/script_modules/')).then(
    r => (process.exitCode = r),
    e => {
       console.error(e);
