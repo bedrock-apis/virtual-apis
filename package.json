@@ -12,7 +12,7 @@
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
-      "e2e": "pnpm run build:src && pnpm run build:packages && node --enable-source-maps --import ./dist/api/loader.js dist/test/run.js",
+      "e2e": "pnpm run build:src && node --enable-source-maps --import ./dist/api/loader.js dist/test/run.js",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run tlt && pnpm run build && pnpm run examples",
       "  ": "",
