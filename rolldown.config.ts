@@ -1,15 +1,11 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import path from 'path';
 import type { ConfigExport, ExternalOption, OutputOptions, RolldownOptions } from 'rolldown';
-import { readJson } from './tools/utils';
+import packageJson, { devDependencies, dependencies } from './package.json' with { type: 'json' };
 
-const packageJson = await readJson<typeof import('./package.json')>('package.json');
-const external: ExternalOption = [
-   /^node:/,
-   /^@/,
-   ...Object.keys(packageJson?.devDependencies ?? {}),
-   ...Object.keys(packageJson?.dependencies ?? {}),
-];
+const external = new RegExp(
+   `^node:|${[...Object.getOwnPropertyNames(devDependencies), ...Object.getOwnPropertyNames(dependencies)].join('|')}`,
+);
 
 const packageExports: Record<string, { default: `./${string}`; types: `./${string}` } | string> = {
    './package.json': './package.json',
