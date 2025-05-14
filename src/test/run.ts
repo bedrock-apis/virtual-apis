@@ -11,6 +11,6 @@ import 'src/plugin/core/events';
 import 'src/plugin/core/inventory';
 import 'src/plugin/core/modules';
 
-import '../../bds-docs/script-api/test-runner/suites/all';
+import '../../bds-docs/test-runner/suites/all';
 
 import './compare';

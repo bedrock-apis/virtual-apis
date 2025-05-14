@@ -1,5 +1,5 @@
 import results from '../../bds-docs-stable/reports/api.json' with { type: 'json' };
-import { runAndCompare } from '../../bds-docs/script-api/test-runner/compare';
+import { runAndCompare } from '../../bds-docs/test-runner/compare';
 import { VirtualApiEnviroment } from './enviroment';
 
 console.log('aahhh');
