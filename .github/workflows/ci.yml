@@ -10,6 +10,8 @@ jobs:
       steps:
          - name: 🏗 Checkout repository
            uses: actions/checkout@v4
+           with:
+              submodules: true
 
          - name: 🏗 Setup Node.js
            uses: actions/setup-node@v4
@@ -30,6 +32,9 @@ jobs:
 
          - name: 🧪 Run project tests
            run: pnpm run test
+
+         - name: 🧪 Run e2e tests
+           run: pnpm run e2e
 
          - name: 🏗 Bundle generators and build Modules
            run: pnpm run build

@@ -5,8 +5,9 @@
    "author": "bedrock-apis",
    "type": "module",
    "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths && git submodules update --init",
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
       "repo:paths": "tsx tools/build/repo/paths",
+      "repo:git": "git submodule update --init",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
