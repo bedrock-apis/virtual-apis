@@ -90,8 +90,8 @@ importers:
         specifier: workspace:x.x.x
         version: link:../..
       '@minecraft/server':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 2.0.0-beta.1.21.83-stable
+        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
 
   examples/custom-bds-software-ts:
     dependencies:
@@ -99,8 +99,8 @@ importers:
         specifier: workspace:x.x.x
         version: link:../..
       '@minecraft/server':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 2.0.0-beta.1.21.83-stable
+        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -111,8 +111,8 @@ importers:
         specifier: workspace:x.x.x
         version: link:../..
       '@minecraft/server':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 2.0.0-beta.1.21.83-stable
+        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.2)(@vitest/ui@2.1.8)
@@ -582,9 +582,6 @@ packages:
   '@minecraft/server-ui@2.0.0-beta.1.21.80-stable':
     resolution: {integrity: sha512-t222gVbv6QhGr6/yUNgHRXoQbD1qC+g92E+hVGqz8ANqI9ud18+UG+hfxaF9JCrNg71pv46PIi9oV5elVtz4oA==}
 
-  '@minecraft/server@1.0.0':
-    resolution: {integrity: sha512-Qp1rPHHhk61fP7tOMIU8bHU2fOA06YyMcmje5EFJS97ZJNp6AzbClC/5W5moC/1itrLRL4Ks0QjeIYnEk3ON1Q==}
-
   '@minecraft/server@1.19.0':
     resolution: {integrity: sha512-Nq42tLYRcH8AIxpBq1F9/sXia75Vp7k7SXnV+t+yaFNKHwE7LZIfJ3TSbQ4THWTbf1VjwnbSUfJ0qVb3aTDCug==}
     peerDependencies:
@@ -592,6 +589,11 @@ packages:
 
   '@minecraft/server@2.0.0-beta.1.21.80-stable':
     resolution: {integrity: sha512-pA5vTV25etB2wywkpK0O7dU1X2DRvs6aeWZlRdlGpNDXPKBQC+3c+fnwwEZadxXqsbvUkXmU8LY0IZlc25pTkg==}
+    peerDependencies:
+      '@minecraft/vanilla-data': '>=1.20.70'
+
+  '@minecraft/server@2.0.0-beta.1.21.83-stable':
+    resolution: {integrity: sha512-OcxFao4xOL9NJ4IT6yq85ghSHDQr9cpBzFSN/8VMs6GGyI3jErTfc7eHaXP/HudLSWfs+mNeOS2sPiihkB5khw==}
     peerDependencies:
       '@minecraft/vanilla-data': '>=1.20.70'
 
@@ -2317,14 +2319,17 @@ snapshots:
     transitivePeerDependencies:
       - '@minecraft/vanilla-data'
 
-  '@minecraft/server@1.0.0': {}
-
   '@minecraft/server@1.19.0(@minecraft/vanilla-data@1.21.80)':
     dependencies:
       '@minecraft/common': 1.2.0
       '@minecraft/vanilla-data': 1.21.80
 
   '@minecraft/server@2.0.0-beta.1.21.80-stable(@minecraft/vanilla-data@1.21.80)':
+    dependencies:
+      '@minecraft/common': 1.2.0
+      '@minecraft/vanilla-data': 1.21.80
+
+  '@minecraft/server@2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)':
     dependencies:
       '@minecraft/common': 1.2.0
       '@minecraft/vanilla-data': 1.21.80

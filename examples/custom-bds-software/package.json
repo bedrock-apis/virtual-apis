@@ -11,7 +11,7 @@
    "license": "Apache-2.0",
    "dependencies": {
       "@bedrock-apis/virtual-apis": "workspace:x.x.x",
-      "@minecraft/server": "1.0.0"
+      "@minecraft/server": "2.0.0-beta.1.21.83-stable"
    },
    "type": "module"
 }
