@@ -35,7 +35,11 @@ Suite entity:
 Suite item (chained): 
   0: Results mismatch: Expected undefined, but got "minecraft:apple"
   1: Results mismatch: Expected undefined, but got 1
-  2: 
+  2: Results mismatch: Expected undefined, but got "item.apple.name"
+  3: Results mismatch: Expected undefined, but got "none"
+  4: Results mismatch: Expected undefined, but got {}
+  5: Results mismatch: Expected undefined, but got []
+  6: 
     Results mismatch: 
       
       [
@@ -49,7 +53,7 @@ Suite item (chained):
       
       undefined
       
-  3: 
+  7: 
     0: Results mismatch: Expected undefined, but got 1
     1: Results mismatch: Expected null, but got 2
 ```

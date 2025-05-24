@@ -1,11 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'path';
 import type { ConfigExport, ExternalOption, OutputOptions, RolldownOptions } from 'rolldown';
-import packageJson, { devDependencies, dependencies } from './package.json' with { type: 'json' };
+import packageJson, { devDependencies } from './package.json' with { type: 'json' };
 
-const external = new RegExp(
-   `^node:|${[...Object.getOwnPropertyNames(devDependencies), ...Object.getOwnPropertyNames(dependencies)].join('|')}`,
-);
+const external = new RegExp(`^node:|${[...Object.getOwnPropertyNames(devDependencies)].join('|')}`);
 
 const packageExports: Record<string, { default: `./${string}`; types: `./${string}` } | string> = {
    './package.json': './package.json',

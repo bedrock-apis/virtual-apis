@@ -157,6 +157,7 @@ type D =
    | 'tools/build/packages/metadata-provider'
    | 'tools/build/packages/virtual-apis'
    | 'tools/build/repo'
+   | 'tools/build/todo'
    | 'tools/eslint'
    | 'tools/eslint/rules'
    | 'tools/types'
