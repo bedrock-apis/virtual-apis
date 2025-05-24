@@ -41,6 +41,10 @@ export abstract class BaseNumberType<T extends number | bigint> extends Type {
 export class NumberType extends BaseNumberType<number> {
    public readonly type = 'number' as const;
    public readonly isFiniteCheck = true;
+   public static readonly default = new NumberType({
+      max: Kernel['Number::static'].MAX_SAFE_INTEGER,
+      min: Kernel['Number::static'].MIN_SAFE_INTEGER,
+   });
 }
 
 export class BigIntType extends BaseNumberType<bigint> {

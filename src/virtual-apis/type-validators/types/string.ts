@@ -6,4 +6,5 @@ export class StringType extends Type {
       if (typeof value !== 'string') diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       return diagnostics;
    }
+   public static readonly default = new StringType();
 }

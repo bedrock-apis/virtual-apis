@@ -6,4 +6,5 @@ export class BooleanType extends Type {
       if (typeof value !== 'boolean') return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       return diagnostics;
    }
+   public static readonly default = new BooleanType();
 }
