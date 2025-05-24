@@ -1,6 +1,5 @@
 import { KernelArray } from 'src/virtual-apis/isolation';
 import { ClassDefinition } from '../class-definition';
-import { Context } from '../context';
 import { ExecutionContext } from './general';
 
 export class ConstructionExecutionContext extends ExecutionContext {

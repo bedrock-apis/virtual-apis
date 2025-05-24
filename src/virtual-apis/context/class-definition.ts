@@ -9,6 +9,10 @@ import { ConstructionExecutionContext, ExecutionContext, InstanceExecutionContex
 import { createConstructorFor, createPropertyHandler, createMethodFor } from './factory';
 // Class for single fake api definition
 
+export type BaseExecutionParams<
+   T extends ClassDefinition<any, any, any> = ClassDefinition<any, any, any>,
+   E extends ExecutionContext = ExecutionContext,
+> = [handle: object, cache: object, T, E];
 export class ClassDefinition<
    T extends ClassDefinition | null = null,
    P = object,
@@ -18,19 +22,19 @@ export class ClassDefinition<
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
    public readonly virtualApis = Kernel.Construct('Map') as Map<string, (...args: unknown[]) => unknown>;
-   public readonly onConstruct: NativeEvent<[handle: object, cache: object, this, ConstructionExecutionContext]>;
+   public readonly onConstruct: NativeEvent<BaseExecutionParams<this, ConstructionExecutionContext>>;
    public readonly constructorId: string;
    public readonly type: Type;
    public readonly hasConstructor: boolean;
    public readonly invocable = Kernel.Construct('WeakMap') as WeakMap<
       CallableFunction,
-      NativeEvent<[handle: object, cache: object, this, ExecutionContext]>
+      NativeEvent<BaseExecutionParams<this>>
    >;
    private addInvocable(id: string, method: (...args: unknown[]) => unknown) {
       this.virtualApis.set(id, method);
       const event = new NativeEvent();
       this.invocable.set(method, event);
-      (this.context.nativeEvents as Map<unknown, unknown>).set(id, event);
+      this.context.nativeEvents.set(id, event);
    }
    /** TODO: Improve the types tho */
    public readonly api: {
@@ -62,10 +66,7 @@ export class ClassDefinition<
       if (context.nativeEvents.has(this.constructorId)) {
          throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
       }
-      (context.nativeEvents as unknown as Map<unknown, unknown>).set(
-         this.constructorId,
-         (this.onConstruct = new NativeEvent()),
-      );
+      context.nativeEvents.set(this.constructorId, (this.onConstruct = new NativeEvent()));
       this.virtualApis.set(this.constructorId, this.api as () => unknown);
       context.registerType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }

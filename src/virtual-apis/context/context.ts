@@ -1,6 +1,5 @@
 import { MetadataType } from '@helper/script-module-metadata';
 import { Diagnostics } from '../diagnostics';
-import { NativeEvent } from '../events';
 import { KernelIterator } from '../isolation';
 import { Kernel } from '../isolation/kernel';
 import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
@@ -13,9 +12,10 @@ import { OptionalType } from '../type-validators/types/optional';
 import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
-import { ClassDefinition } from './class-definition';
+import { BaseExecutionParams, ClassDefinition } from './class-definition';
 import { ContextConfig, ContextConfigKeys } from './context-config';
-export type MethodCallBack = (methodId: string, handle: object, cache: object, definition: ClassDefinition) => unknown;
+import { NativeEvent } from '../events';
+
 export class Context extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
@@ -69,6 +69,38 @@ export class Context extends Kernel.Empty {
       for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys()))
          Kernel.warn('Failed to resolve dynamic type: ' + typeName);
    }
+
+   public readonly nativeHandles = Kernel.Construct('WeakSet');
+   public readonly nativeEvents = Kernel.Construct('Map') as Map<string, NativeEvent<BaseExecutionParams>>;
+   public onInvocation(eventName: string, callBack: (...params: BaseExecutionParams) => void) {
+      const event = this.nativeEvents.get(eventName);
+      if (!event) {
+         throw new Kernel['ReferenceError::constructor'](`Unknown methodId specified: ${eventName}`);
+      }
+      event.subscribe(callBack);
+   }
+   public isHandleNative(handle: unknown) {
+      return this.nativeHandles.has(handle as object);
+   }
+   // Without first parameter!!!
+   public createClassDefinition<T extends ClassDefinition | null>(
+      name: string,
+      parent: T,
+      paramDefinition: ParamsDefinition | null,
+      newExpected = true,
+   ): ClassDefinition<T, object, object> {
+      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
+   }
+   public reportDiagnostics(diagnostics: Diagnostics) {
+      Kernel.log(
+         'TODO: ',
+         'implement: ' + this.reportDiagnostics.name,
+         diagnostics,
+         new Kernel['Error::constructor'](),
+      );
+   }
+
+   /** @internal */
    public resolveType(metadataType: MetadataType): Type {
       const { name } = metadataType;
       if (metadataType.is_bind_type) {
@@ -93,6 +125,7 @@ export class Context extends Kernel.Empty {
          case 'int64':
             return new BigIntType(metadataType.valid_range as unknown as { min: bigint; max: bigint });
          case 'boolean':
+            // TODO: Optimize -> no need for new instance when checking boolean
             return new BooleanType();
          case 'string':
             return new StringType();
@@ -118,33 +151,5 @@ export class Context extends Kernel.Empty {
             // TODO: Metadata type
             throw new Kernel['ReferenceError::constructor'](`resolveType - Unknown type: ${name}`);
       }
-   }
-
-   public readonly nativeHandles = Kernel.Construct('WeakSet');
-   public readonly nativeEvents = Kernel.Construct('Map') as ReadonlyMap<
-      string,
-      NativeEvent<Parameters<MethodCallBack>>
-   >;
-   public onInvocation<T extends MethodCallBack>(eventName: string, callBack: T) {
-      const event = this.nativeEvents.get(eventName);
-      if (!event) {
-         throw new Kernel['ReferenceError::constructor'](`Unknown methodId specified: ${eventName}`);
-      }
-      event.subscribe(callBack);
-   }
-   public isHandleNative(handle: unknown) {
-      return this.nativeHandles.has(handle as object);
-   }
-   // Without first parameter!!!
-   public createClassDefinition<T extends ClassDefinition | null>(
-      name: string,
-      parent: T,
-      paramDefinition: ParamsDefinition | null,
-      newExpected = true,
-   ): ClassDefinition<T, object, object> {
-      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
-   }
-   public reportDiagnostics(diagnostics: Diagnostics) {
-      Kernel.log('TODO: ', 'implement: ' + this.reportDiagnostics.name, diagnostics);
    }
 }
