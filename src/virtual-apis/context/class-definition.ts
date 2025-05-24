@@ -10,7 +10,7 @@ import { createConstructorFor, createPropertyHandler, createMethodFor } from './
 // Class for single fake api definition
 
 export type BaseExecutionParams<
-   T extends ClassDefinition<any, any, any> = ClassDefinition<any, any, any>,
+   T extends ClassDefinition<ClassDefinition | null, unknown> = ClassDefinition<ClassDefinition | null, unknown>,
    E extends ExecutionContext = ExecutionContext,
 > = [handle: object, cache: object, T, E];
 export class ClassDefinition<
