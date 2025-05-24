@@ -33,11 +33,11 @@ jobs:
          - name: 🧪 Run project tests
            run: pnpm run test
 
-         - name: 🧪 Run e2e tests
-           run: pnpm run e2e
-
          - name: 🏗 Bundle generators and build Modules
            run: pnpm run build
+
+         - name: 🧪 Run e2e tests
+           run: pnpm run e2e
 
          - name: 🧪 Run examples tests
            run: pnpm run examples
