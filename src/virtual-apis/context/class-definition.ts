@@ -78,6 +78,7 @@ export class ClassDefinition<
             this.getAPIMethod(this.constructorId as keyof P) as (...p: unknown[]) => unknown,
             this as ClassDefinition,
             KernelArray.Construct<unknown>(),
+            null,
          ),
       ).getIterator();
       return Kernel.__setPrototypeOf(handle, this.api.prototype);

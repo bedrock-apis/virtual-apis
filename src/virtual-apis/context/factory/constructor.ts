@@ -7,12 +7,12 @@ import { KernelArray } from 'src/virtual-apis/isolation';
 
 export function createFunctionalConstructor(
    paramsDefinition: ParamsDefinition,
-   contextFactory: (params: KernelArray<unknown>) => ConstructionExecutionContext,
+   contextFactory: (newTarget: unknown, params: KernelArray<unknown>) => ConstructionExecutionContext,
    trimStack: number = 0,
 ): new () => unknown {
    // Create function as constructor
    return function ctor(...params: unknown[]) {
-      const executionContext = contextFactory(KernelArray.From(params));
+      const executionContext = contextFactory(new.target, KernelArray.From(params));
       const { definition, diagnostics } = executionContext;
       // Constructor should be callable only with "NEW" keyword
       if (!new.target && definition.newExpected) diagnostics.errors.report(QUICK_JS_ENV_ERROR_MESSAGES.NewExpected());
@@ -53,11 +53,12 @@ export function createConstructorFor<T extends ClassDefinition<ClassDefinition |
    // Create function as constructor
    const ctor = createFunctionalConstructor(
       paramsDefinition,
-      params =>
+      (target, params) =>
          new ConstructionExecutionContext(
             ctor as unknown as (...p: unknown[]) => unknown,
             definition as ClassDefinition,
             params,
+            target as () => void,
          ),
       0,
    );

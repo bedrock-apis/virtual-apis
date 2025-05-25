@@ -171,6 +171,7 @@ Array.prototype.push = function () {
    console.log('Modified push method');
 };
 
+// TODO: Wrong! We have kernel arrays now, for easy access
 // Using the cloned prototype
 const array = [];
 Kernel['Array::prototype'].push.call(array, 1);
@@ -181,4 +182,4 @@ console.log(array); // Output: [1]
 
 The Kernel class provides a robust and secure way to interact with global objects and functions, protecting against prototype pollution and ensuring consistent behavior. It is particularly useful in security-critical applications, sandbox environments, and API compatibility layers.
 
-## Written by ChatGPT 4o
+## Written by ChatGPT 4o, prompted and checked by ConMaster
