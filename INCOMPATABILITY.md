@@ -8,52 +8,29 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block: 
-  Setup error mismatch: 
-    
-    LocationInUnloadedChunkError: Trying to access location (0.0, 1.0, 0.0) which is not in a chunk currently loaded and ticking.
-    ReferenceError: No constructor for native class 'Block'.
-    
+Suite block (chained): Unexpected setup error: ReferenceError: No constructor for native class 'Block'.
 Suite dynamic properties (chained): 
-  0: Results mismatch: Expected undefined, but got []
+  0: Results mismatch: undefined != []
   1: 
-    0: Results mismatch: Expected undefined, but got true
-    1: Results mismatch: Expected undefined, but got false
-    2: Results mismatch: Expected undefined, but got ""
-    3: Results mismatch: Expected undefined, but got "string"
-    4: Results mismatch: Expected undefined, but got 1
-    5: Results mismatch: Expected undefined, but got 0
-    6: Results mismatch: Expected undefined, but got -1
+    0: Results mismatch: undefined != true
+    1: Results mismatch: undefined != false
+    2: Results mismatch: undefined != ""
+    3: Results mismatch: undefined != "string"
+    4: Results mismatch: undefined != 1
+    5: Results mismatch: undefined != 0
+    6: Results mismatch: undefined != -1
     
   
-Suite entity: 
-  Setup error mismatch: 
-    
-    LocationInUnloadedChunkError: Trying to access location (0.0, 0.0, 2.0) which is not in a chunk currently loaded and ticking.
-    ReferenceError: No constructor for native class 'Entity'.
-    
+Suite entity (chained): Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
 Suite item (chained): 
-  0: Results mismatch: Expected undefined, but got "minecraft:apple"
-  1: Results mismatch: Expected undefined, but got 1
-  2: Results mismatch: Expected undefined, but got "item.apple.name"
-  3: Results mismatch: Expected undefined, but got "none"
-  4: Results mismatch: Expected undefined, but got {}
-  5: Results mismatch: Expected undefined, but got []
-  6: 
-    Results mismatch: 
-      
-      [
-          {
-              "typeId": "minecraft:food"
-          },
-          {
-              "typeId": "minecraft:compostable"
-          }
-      ]
-      
-      undefined
-      
+  0: Results mismatch: undefined != "minecraft:apple"
+  1: Results mismatch: undefined != 1
+  2: Results mismatch: undefined != "item.apple.name"
+  3: Results mismatch: undefined != "none"
+  4: Results mismatch: undefined != {}
+  5: Results mismatch: undefined != []
+  6: Results mismatch: undefined != [{"typeId":"minecraft:food"},{"typeId":"minecraft:compostable"}]
   7: 
-    0: Results mismatch: Expected undefined, but got 1
-    1: Results mismatch: Expected null, but got 2
+    0: Results mismatch: undefined != 1
+    1: Results mismatch: null != 2
 ```

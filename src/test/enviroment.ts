@@ -2,7 +2,7 @@ import { Block, Entity } from '@minecraft/server';
 import { TestEnviroment } from 'bds-docs/test-runner/enviroment';
 
 export class VirtualApiEnviroment extends TestEnviroment {
-   public onSetup(): void {
+   public async onSetup() {
       // Nothing
    }
 
