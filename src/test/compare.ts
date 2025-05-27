@@ -3,7 +3,7 @@ import results from '../../bds-docs-stable/reports/api.json' with { type: 'json'
 import { runAndCompare } from '../../bds-docs/test-runner/compare';
 import { VirtualApiEnviroment } from './enviroment';
 
-const result = runAndCompare(results, new VirtualApiEnviroment());
+const result = await runAndCompare(results, new VirtualApiEnviroment());
 
 console.log('\n\n');
 console.log(result);
