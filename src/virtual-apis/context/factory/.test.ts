@@ -33,6 +33,7 @@ suite('Base API', () => {
             EntityDefinition.api as () => unknown,
             EntityDefinition,
             KernelArray.Construct<unknown>(),
+            null,
          ),
       );
 
