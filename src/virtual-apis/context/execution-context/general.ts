@@ -19,9 +19,7 @@ export class ExecutionContext extends Kernel.Empty {
       this.parameters = parameters;
    }
    public dispose(): 0 | -1 {
-      if (!this.diagnostics.isEmpty) {
-         this.context.reportDiagnostics(this.diagnostics);
-      }
+      if (!this.diagnostics.isEmpty) this.context.reportDiagnostics(this.diagnostics);
       return 0;
    }
    public report(error: Report) {

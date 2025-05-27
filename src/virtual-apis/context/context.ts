@@ -72,6 +72,7 @@ export class Context extends Kernel.Empty {
 
    public readonly nativeHandles = Kernel.Construct('WeakSet');
    public readonly nativeEvents = Kernel.Construct('Map') as Map<string, NativeEvent<BaseExecutionParams>>;
+   public readonly onDiagnosticsReported = new NativeEvent<[diagnostics: Diagnostics]>();
    public onInvocation(eventName: string, callBack: (...params: BaseExecutionParams) => void) {
       const event = this.nativeEvents.get(eventName);
       if (!event) {
@@ -92,12 +93,7 @@ export class Context extends Kernel.Empty {
       return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
    }
    public reportDiagnostics(diagnostics: Diagnostics) {
-      Kernel.log(
-         'TODO: ',
-         'implement: ' + this.reportDiagnostics.name,
-         diagnostics,
-         new Kernel['Error::constructor'](),
-      );
+      this.onDiagnosticsReported.invoke(diagnostics);
    }
 
    /** @internal */

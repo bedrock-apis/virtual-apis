@@ -27,13 +27,11 @@ suite('Context Callback', () => {
    context.onInvocation('Entity::constructor', (handle, cache, def, exec) => {
       if (exec instanceof ConstructionExecutionContext) {
          (handle as any)['name'] = 'Test';
-         console.log(exec);
       }
    });
    test('Method Callback', () => {
       new (class Test extends Player {})();
       const pl = new Player();
-      console.log(pl);
       expect(pl.methodA(5)).toBe(5);
       expect(() => pl.methodB()).toThrowErrorMatchingInlineSnapshot('[ReferenceError: Message]');
    });
