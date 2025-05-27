@@ -22,7 +22,7 @@ type F =
    | 'src/plugin/core/inventory.ts'
    | 'src/plugin/core/modules.ts'
    | 'src/test/compare.ts'
-   | 'src/test/enviroment.ts'
+   | 'src/test/environment.ts'
    | 'src/test/run.ts'
    | 'src/virtual-apis/context/class-definition.ts'
    | 'src/virtual-apis/context/context-config.ts'
