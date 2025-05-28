@@ -1,6 +1,4 @@
 // This function is run only at the startup time, before any user code
-/* eslint-disable custom/no-iterators */
-/* eslint-disable custom/no-globals */
 
 import fs from 'node:fs';
 import module from 'node:module';
