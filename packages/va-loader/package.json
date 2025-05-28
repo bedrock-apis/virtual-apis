@@ -1,0 +1,8 @@
+{
+  "name": "@bedrock-apis/va-loader",
+  "version": "0.0.1-alpha",
+  "main": "./dist/main.js",
+  "type": "module",
+  "types": "./src/main.ts",
+  "packageManager": "pnpm@10.11.0"
+}

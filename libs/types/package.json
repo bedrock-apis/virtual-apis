@@ -1,0 +1,7 @@
+{
+  "name": "@bedrock-apis/types",
+  "version": "0.0.1-alpha",
+  "type": "module",
+  "types": "./src/main.ts",
+  "packageManager": "pnpm@10.11.0"
+}

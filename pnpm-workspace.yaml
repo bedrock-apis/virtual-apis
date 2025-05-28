@@ -1,4 +1,7 @@
+link-workspace-packages: true
 packages:
-  - examples/**
+   - packages/*
+   - libs/*
+   - examples/**
 onlyBuiltDependencies:
-  - esbuild
+   - esbuild

@@ -1,6 +1,6 @@
 {
    "compilerOptions": {
-      "target": "ES2020",
+      "target": "ES2024",
       "module": "ESNext",
       "moduleResolution": "bundler",
       "allowJs": true,
@@ -10,5 +10,8 @@
       "skipLibCheck": true,
       "outDir": "dist"
    },
-   "include": ["scripts", "virtual-apis"]
+   "include": [
+      "scripts",
+      "virtual-apis"
+   ]
 }

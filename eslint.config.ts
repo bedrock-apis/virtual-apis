@@ -1,15 +1,23 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import bedrock from './tools/eslint/plugin';
+import bedrock from '@bedrock-apis/internal-tool/eslint';
 
 export default tseslint.config(
    {
-      ignores: ['**/*.test.ts', 'dist/**', 'examples/**', 'modules/**', 'bds-docs/**', 'bds-docs-stable/**'],
+      ignores: [
+         '**/*.test.ts',
+         '**/dist/**',
+         'examples/**',
+         'modules/**',
+         'bds-docs/**',
+         'bds-docs-stable/**',
+         '**/*.js',
+      ],
    },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
    {
-      files: ['src/**/*.ts', 'tools/**/*.ts', '*.ts'],
+      files: ['packages/**/*.ts', 'libs/**/*.ts', 'tools/**/*.ts', '*.ts'],
       languageOptions: {
          ecmaVersion: 2024,
          sourceType: 'module',
