@@ -6,7 +6,7 @@ import { API_JS_FILENAME, API_MODULES_JSON_FILENAME, MODULES_DIR } from '@bedroc
 import { IMetadataProvider, SystemFileMetadataProvider } from './metadata-provider';
 import { printModule } from './printer';
 import { metadataModuleFullname } from './virtual-apis/helper';
-import selfPackage from '../../package.json' with { type: 'json' };
+import selfPackage from '../../tools/package.json' with { type: 'json' };
 
 const API_BUILDER_FILENAME = 'packages/virtual-apis/dist/main.js' satisfies ProjectFilePath;
 const API_JS_PATH = path.join(MODULES_DIR, API_JS_FILENAME);

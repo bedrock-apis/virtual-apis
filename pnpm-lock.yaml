@@ -14,6 +14,9 @@ importers:
       '@bedrock-apis/core-plugin':
         specifier: workspace:*
         version: link:packages/core-plugin
+      '@bedrock-apis/internal-linter-plugin':
+        specifier: workspace:*
+        version: link:libs/linter-plugin
       '@bedrock-apis/internal-tool':
         specifier: workspace:*
         version: link:libs/tools
@@ -23,6 +26,9 @@ importers:
       '@bedrock-apis/types':
         specifier: workspace:*
         version: link:libs/types
+      '@bedrock-apis/va-image-generator':
+        specifier: workspace:*
+        version: link:libs/va-image-generator
       '@bedrock-apis/va-images':
         specifier: workspace:*
         version: link:packages/va-images
@@ -152,9 +158,13 @@ importers:
 
   libs/kernel-isolation: {}
 
+  libs/linter-plugin: {}
+
   libs/tools: {}
 
   libs/types: {}
+
+  libs/va-image-generator: {}
 
   packages/core-plugin: {}
 

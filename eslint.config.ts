@@ -1,6 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import bedrock from '@bedrock-apis/internal-tool/eslint';
+import bedrock from '@bedrock-apis/internal-linter-plugin';
 
 export default tseslint.config(
    {

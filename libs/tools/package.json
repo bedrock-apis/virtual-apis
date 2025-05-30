@@ -2,12 +2,5 @@
   "name": "@bedrock-apis/internal-tool",
   "version": "0.0.1-alpha",
   "type": "module",
-  "packageManager": "pnpm@10.11.0",
-  "exports": {
-    "./eslint": {
-      "default": "./dist/eslint.js",
-      "types": "./src/eslint/plugin.ts",
-      "rolldown": true
-    }
-  }
+  "packageManager": "pnpm@10.11.0"
 }

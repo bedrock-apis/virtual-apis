@@ -32,7 +32,7 @@
   },
   "scripts": {
     "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
-    "repo:paths": "tsx libs/tools/src/repo/paths",
+    "repo:paths": "tsx libs/tools/src/paths",
     "repo:git": "git submodule update --init",
     " ": "",
     "typecheck": "tsc --pretty --noEmit",
@@ -40,10 +40,10 @@
     "test": "vitest --run",
     "e2e": "pnpm run build:src && node --enable-source-maps --import ./dist/api/loader.js dist/test/run.js",
     "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "check": "pnpm run repo:paths && pnpm run tlt && pnpm run build && pnpm run examples",
+    "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
     "  ": "",
     "build:src": "rolldown -c rolldown.config.ts",
-    "build:packages": "tsx libs/tools/src/build/index.ts",
+    "build:packages": "node --import @bedrock-apis/va-image-generator --eval=console.log('\\x1b[32mDone!')",
     "build": "pnpm run build:src && pnpm run build:packages",
     "   ": "",
     "test:coverage": "vitest --ui --coverage",
@@ -61,7 +61,9 @@
     "@bedrock-apis/va-pluggable": "workspace:*",
     "@bedrock-apis/virtual-apis": "workspace:*",
     "@bedrock-apis/core-plugin": "workspace:*",
-    "@bedrock-apis/va-images": "workspace:*"
+    "@bedrock-apis/va-images": "workspace:*",
+    "@bedrock-apis/internal-linter-plugin": "workspace:*",
+    "@bedrock-apis/va-image-generator": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
