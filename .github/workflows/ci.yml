@@ -16,10 +16,7 @@ jobs:
          - name: 🏗 Setup Node.js
            uses: actions/setup-node@v4
            with:
-              node-version: '22'
-
-         - name: 🏗 Install pnpm
-           run: npm -g i corepack@0.31 && corepack enable
+              node-version: '24'
 
          - name: 🏗 Install dependencies with pnpm
            run: pnpm run repo:init

@@ -31,14 +31,14 @@
       "tabWidth": 3
    },
    "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run build:src && pnpm run repo:paths",
       "repo:paths": "tsx libs/tools/src/paths",
       "repo:git": "git submodule update --init",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
-      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/loader  dist/test/run.js",
+      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/va-loader/node dist/test/run.js",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
       "  ": "",
