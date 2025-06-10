@@ -1,7 +1,7 @@
-packages/**
 modules/**
 node_modules/**
 dist/**
 local-docs/**
 pnpm-lock.yaml
 TODO.md
+INCOMPATABILITY.md
