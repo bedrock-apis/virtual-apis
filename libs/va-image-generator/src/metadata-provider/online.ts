@@ -36,7 +36,7 @@ export class OnlineMetadataProvider implements IMetadataProvider {
          const { name, versions } = info;
          const version = versions.sort(compareVersions).at(-1);
          if (!version) continue;
-         const file = `@minecraft/${name}_${version}.json`;
+         const file = `${name}_${version}.json`;
          if (!metadata.script_module_files.includes(file)) {
             console.warn('Failed to build right file name: ' + file, metadata.script_module_files);
             continue;
