@@ -1,10 +1,10 @@
-import { Vitest } from '@bedrock-apis/va-loader';
+import { getVitestAliases } from '@bedrock-apis/va-loader/vitest';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
    test: {
       include: ['./**/*.test.ts'],
-      alias: Vitest.getVitestAliases(),
+      alias: getVitestAliases(),
       setupFiles: ['./virtual-apis/load.ts'],
    },
 });

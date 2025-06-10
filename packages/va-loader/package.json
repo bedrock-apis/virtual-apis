@@ -1,8 +1,23 @@
 {
   "name": "@bedrock-apis/va-loader",
   "version": "0.0.1-alpha",
-  "main": "./dist/main.js",
   "type": "module",
-  "types": "./src/main.ts",
-  "packageManager": "pnpm@10.11.0"
+  "packageManager": "pnpm@10.11.0",
+  "exports": {
+    "./node": {
+      "default": "./dist/node.js",
+      "types": "./src/node/index.ts",
+      "rolldown": true
+    },
+    "./ecma": {
+      "default": "./dist/ecma.js",
+      "types": "./src/ecma/index.ts",
+      "rolldown": true
+    },
+    "./vitest": {
+      "default": "./dist/vitest.js",
+      "types": "./src/vitest.ts",
+      "rolldown": true
+    }
+  }
 }

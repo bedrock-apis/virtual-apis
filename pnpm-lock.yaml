@@ -29,6 +29,9 @@ importers:
       '@bedrock-apis/va-image-generator':
         specifier: workspace:*
         version: link:libs/va-image-generator
+      '@bedrock-apis/va-images':
+        specifier: workspace:*
+        version: link:packages/va-images
       '@bedrock-apis/va-loader':
         specifier: workspace:*
         version: link:packages/va-loader
@@ -164,6 +167,8 @@ importers:
   libs/va-image-generator: {}
 
   packages/core-plugin: {}
+
+  packages/va-images: {}
 
   packages/va-loader: {}
 
