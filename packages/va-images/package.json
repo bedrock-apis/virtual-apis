@@ -1,0 +1,8 @@
+{
+  "name": "@bedrock-apis/va-images",
+  "version": "0.0.1-alpha",
+  "type": "module",
+  "packageManager": "pnpm@10.11.0",
+  "main": "./dist/main.js",
+  "types": "./src/plugin.ts"
+}

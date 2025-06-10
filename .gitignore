@@ -1,6 +1,7 @@
 bin
 modules
-va-images
+packages/va-images/
+!packages/va-images/package.json
 **/dist/
 # Logs
 logs
