@@ -4,7 +4,7 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "start": "tsx --import @bedrock-apis/va-loader ./virtual-apis/load.ts"
+      "start": "tsx --import @bedrock-apis/va-loader/node ./virtual-apis/load.ts"
    },
    "keywords": [],
    "author": "",
