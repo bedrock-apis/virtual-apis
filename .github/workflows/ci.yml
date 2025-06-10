@@ -20,10 +20,6 @@ jobs:
               
         - name: 🏗 Install pnpm
            run: corepack enable && corepack use pnpm
-        
-
-         - name: 🏗 Install dependencies with pnpm
-           run: pnpm run repo:init
 
          - name: 🏗 Install dependencies with pnpm
            run: pnpm run repo:init
