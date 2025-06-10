@@ -8,7 +8,14 @@ export async function initialize() {}
 // Take an `import` or `require` specifier and resolve it to a URL.
 export async function resolve(
    specifier: string,
-   context: unknown,
+   context: {
+      // [ 'node', 'import', 'module-sync', 'node-addons' ]
+      conditions: string[];
+      // {}
+      importAttributes: object;
+      // 'file:///C:/absolute/path/to/file.js'
+      parentURL: string;
+   },
    nextResolve: (specifier: string, context: unknown) => unknown,
 ) {
 
