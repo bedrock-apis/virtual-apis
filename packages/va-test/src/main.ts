@@ -1,3 +1,6 @@
+// TODO Move code from bds-docs/test-runner here
+// TODO Make separate export for running code on virtual apis and writing incompatability.md
+
 import { Context } from '@bedrock-apis/virtual-apis';
 
 const CONTEXT = new Context();
@@ -7,10 +10,7 @@ CONTEXT.configure({
    StrictReturnTypes: false,
 });
 
-import 'src/plugin/core/effects';
-import 'src/plugin/core/events';
-import 'src/plugin/core/inventory';
-import 'src/plugin/core/modules';
+import '@bedrock-apis/core-plugin';
 
 import '../../../bds-docs/test-runner/suites/all';
 

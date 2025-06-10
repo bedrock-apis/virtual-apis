@@ -16,7 +16,7 @@ jobs:
            uses: actions/setup-node@v4
            with:
               node-version: '24'
-              
+
          - name: 🏗 Install pnpm
            run: corepack enable && corepack use pnpm
 
@@ -36,7 +36,7 @@ jobs:
            run: pnpm run build
 
          - name: 🧪 Run e2e tests
-           run: echo pnpm run e2e
+           run: pnpm run e2e
 
          - name: 🧪 Run examples tests
            run: pnpm run examples

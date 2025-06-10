@@ -15,7 +15,6 @@ import { EventsPlugin } from '@bedrock-apis/core-plugin';
 new EventsPlugin().configure({
    warnIfEventIsNotImplemented: true,
 });
-import "@minecraft/server";
 
 // CUSTOM PLUGINS ENTRYPOINT
 import './plugin';

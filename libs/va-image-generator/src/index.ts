@@ -1,12 +1,12 @@
+import { API_JS_FILENAME, API_MODULES_JSON_FILENAME, MODULES_DIR } from '@bedrock-apis/common';
 import chalk from 'chalk';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { API_JS_FILENAME, API_MODULES_JSON_FILENAME, MODULES_DIR } from '@bedrock-apis/common';
+import selfPackage from '../../tools/package.json' with { type: 'json' };
 import { IMetadataProvider, SystemFileMetadataProvider } from './metadata-provider';
 import { printModule } from './printer';
 import { metadataModuleFullname } from './virtual-apis/helper';
-import selfPackage from '../../tools/package.json' with { type: 'json' };
 
 const API_BUILDER_FILENAME = 'packages/virtual-apis/dist/main.js' satisfies ProjectFilePath;
 const API_JS_PATH = path.join(MODULES_DIR, API_JS_FILENAME);
@@ -38,18 +38,20 @@ async function main(provider: IMetadataProvider): Promise<number> {
    await fs.mkdir(path.join(MODULES_DIR, './@minecraft'));
    await fs.writeFile(
       MODULES_DIR + '/package.json',
-      JSON.stringify(
-         {
-            name: '@bedrock-apis/va-images',
-            version: selfPackage.version,
-            type: 'module',
-            exports: {
-               './module/*': './*',
+      (
+         JSON.stringify(
+            {
+               name: '@bedrock-apis/va-images',
+               version: selfPackage.version,
+               type: 'module',
+               exports: {
+                  './module/*': './*',
+               },
             },
-         },
-         null,
-         3,
-      ),
+            null,
+            3,
+         ) + '\n'
+      ).replaceAll('\n', '\r\n'),
    );
 
    const apiJsWriteStatus = await fs.writeFile(API_JS_PATH, 'export * from "@bedrock-apis/virtual-apis"').then(

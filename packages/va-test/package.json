@@ -1,0 +1,7 @@
+{
+   "name": "@bedrock-apis/va-test",
+   "version": "0.0.1-alpha",
+   "types": "./src/main.ts",
+   "main": "./dist/main.js",
+   "type": "module"
+}

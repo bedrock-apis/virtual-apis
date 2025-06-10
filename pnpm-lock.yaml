@@ -38,6 +38,9 @@ importers:
       '@bedrock-apis/va-pluggable':
         specifier: workspace:*
         version: link:packages/va-pluggable
+      '@bedrock-apis/va-test':
+        specifier: workspace:*
+        version: link:packages/va-test
       '@bedrock-apis/virtual-apis':
         specifier: workspace:*
         version: link:packages/virtual-apis
@@ -173,6 +176,8 @@ importers:
   packages/va-loader: {}
 
   packages/va-pluggable: {}
+
+  packages/va-test: {}
 
   packages/virtual-apis: {}
 
