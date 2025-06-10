@@ -13,7 +13,7 @@ export function getModuleVersions(format: 'url' | 'path' = 'url') {
    // otherwise they will not resolve
    //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
    const require = module.createRequire(url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
-   const modulesPath = path.dirname(require.resolve("@bedrock-apis/va-images/module/api-modules.json"));
+   const modulesPath = path.dirname(require.resolve('@bedrock-apis/va-images/module/api-modules.json'));
    const apiModulesListPath = path.join(modulesPath, API_MODULES_JSON_FILENAME);
    const apiModulesList: Record<string, string[]> = JSON.parse(fs.readFileSync(apiModulesListPath).toString('utf-8'));
    const modules: Map<string, string> = new Map();
