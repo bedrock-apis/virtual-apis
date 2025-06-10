@@ -1,7 +1,9 @@
 {
    "compilerOptions": {
-      "target": "es2022",
-      "lib": ["ES2022"],
+      "target": "ES2024",
+      "lib": [
+         "ES2024"
+      ],
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
@@ -14,8 +16,13 @@
       "forceConsistentCasingInFileNames": true,
       "strict": true,
       "noUncheckedIndexedAccess": true,
-      "skipLibCheck": true,
-      "types": ["node", "./tools/types"]
+      "skipLibCheck": true
    },
-   "include": ["./src/**/*.ts", "./tools/**/*.ts", "*.config.ts", "bds-docs"]
+   "include": [
+      "./packages/**/*.ts",
+      "./libs/**/*.ts",
+      "./tools/**/*.ts",
+      "*.config.ts",
+      "bds-docs"
+   ]
 }

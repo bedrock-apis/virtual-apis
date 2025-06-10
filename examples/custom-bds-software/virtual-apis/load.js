@@ -1,18 +1,18 @@
 // VIRTUAL APIS CONFIG
-import { configure } from '@bedrock-apis/virtual-apis';
+import { CONTEXT } from '@bedrock-apis/virtual-apis';
 
-configure({
+CONTEXT.configure({
    GetterRequireValidBound: true,
    StrictReturnTypes: false,
 });
 
 // CORE PLUGINS ENTRYPOINT
-import '@bedrock-apis/virtual-apis/plugins/all';
+import '@bedrock-apis/core-plugin';
 
 // CONFIGURE CORE PLUGIN
-import EventsPlugin from '@bedrock-apis/virtual-apis/plugins/events';
+import { EventsPlugin } from '@bedrock-apis/core-plugin';
 
-EventsPlugin.configure({
+new EventsPlugin().configure({
    warnIfEventIsNotImplemented: true,
 });
 import "@minecraft/server";

@@ -1,15 +1,23 @@
+import bedrock from '@bedrock-apis/internal-linter-plugin';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import bedrock from './tools/eslint/plugin';
 
 export default tseslint.config(
    {
-      ignores: ['**/*.test.ts', 'dist/**', 'examples/**', 'modules/**', 'bds-docs/**', 'bds-docs-stable/**'],
+      ignores: [
+         '**/*.test.ts',
+         '**/dist/**',
+         'examples/**',
+         'modules/**',
+         'bds-docs/**',
+         'bds-docs-stable/**',
+         '**/*.js',
+      ],
    },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
    {
-      files: ['src/**/*.ts', 'tools/**/*.ts', '*.ts'],
+      files: ['packages/**/*.ts', 'libs/**/*.ts', '*.ts'],
       languageOptions: {
          ecmaVersion: 2024,
          sourceType: 'module',
@@ -33,8 +41,7 @@ export default tseslint.config(
       },
    },
    {
-      files: ['src/**/*.ts'],
-      ignores: ['src/loader/**', 'src/test/**'],
+      files: ['packages/{virtual-apis,va-pluggable,core-plugin}/**/*.ts', 'libs/kernel-isolation/**/*.ts'],
       rules: {
          'custom/no-globals': 'error',
          'custom/no-default-extends': 'warn',

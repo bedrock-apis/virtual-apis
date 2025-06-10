@@ -1,5 +1,5 @@
 // TODO Plugin
-import { Kernel } from "@bedrock-apis/virtual-apis";
+import { Kernel } from "@bedrock-apis/kernel-isolation";
 import * as m from "@bedrock-apis/virtual-apis";
 
 Kernel.log('Custom plugin');

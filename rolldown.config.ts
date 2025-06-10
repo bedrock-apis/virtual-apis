@@ -1,10 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'path';
-import type { ConfigExport, ExternalOption, OutputOptions, RolldownOptions } from 'rolldown';
-import packageJson, { devDependencies } from './package.json' with { type: 'json' };
-
-const external = new RegExp(`^node:|${[...Object.getOwnPropertyNames(devDependencies)].join('|')}`);
-
+export { options as default } from './libs/tools/rolldown.helper';
+/*
 const packageExports: Record<string, { default: `./${string}`; types: `./${string}` } | string> = {
    './package.json': './package.json',
 };
@@ -58,6 +53,7 @@ class ExportDirectoryOption extends ExportOption {
    }
 }
 
+
 export default [
    new ExportOption('tools/eslint/plugin.ts').toFile('dist/eslint/eslint-plugin.js').exports('./eslint-plugin'),
    new ExportDirectoryOption(
@@ -105,3 +101,4 @@ if (packageJson) {
 
    await fs.writeFile('package.json', JSON.stringify(packageJson, null, 3).replaceAll('\n', '\r\n') + '\r\n');
 }
+*/

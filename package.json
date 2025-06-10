@@ -1,32 +1,24 @@
 {
-   "name": "@bedrock-apis/virtual-apis",
+   "name": "virtual-apis",
+   "description": "",
    "version": "1.0.0",
-   "license": "Apache-2.0",
    "author": "bedrock-apis",
+   "license": "Apache-2.0",
+   "private": true,
+   "workspaces": [
+      "packages/*",
+      "libs/*"
+   ],
    "type": "module",
-   "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
-      "repo:paths": "tsx tools/build/repo/paths",
-      "repo:git": "git submodule update --init",
-      " ": "",
-      "typecheck": "tsc --pretty --noEmit",
-      "lint": "eslint",
-      "test": "vitest --run",
-      "e2e": "pnpm run build:src && node --enable-source-maps --import ./dist/api/loader.js dist/test/run.js",
-      "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
-      "check": "pnpm run repo:paths && pnpm run tlt && pnpm run build && pnpm run examples",
-      "  ": "",
-      "build:src": "rolldown -c rolldown.config.ts",
-      "build:types": "tsc --pretty -project ./tsconfig.build.json",
-      "build:packages": "tsx tools/build/packages/index.ts",
-      "build": "pnpm run build:src && pnpm run build:types && pnpm run build:packages",
-      "   ": "",
-      "test:coverage": "vitest --ui --coverage",
-      "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
-      "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
-      "example:vitest": "cd examples/vitest && pnpm run start",
-      "examples": "pnpm run \"/^example:.*/\""
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/bedrock-apis/virtual-apis.git"
    },
+   "keywords": [],
+   "bugs": {
+      "url": "https://github.com/bedrock-apis/virtual-apis/issues"
+   },
+   "homepage": "https://github.com/bedrock-apis/virtual-apis#readme",
    "prettier": {
       "arrowParens": "avoid",
       "endOfLine": "crlf",
@@ -38,59 +30,70 @@
       "singleQuote": true,
       "tabWidth": 3
    },
+   "scripts": {
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run repo:paths",
+      "repo:paths": "tsx libs/tools/src/paths",
+      "repo:git": "git submodule update --init",
+      " ": "",
+      "typecheck": "tsc --pretty --noEmit",
+      "lint": "eslint",
+      "test": "vitest --run",
+      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/loader  dist/test/run.js",
+      "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
+      "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
+      "  ": "",
+      "build:src": "rolldown -c rolldown.config.ts",
+      "build:packages": "node --import @bedrock-apis/va-image-generator --eval=console.log('\\x1b[32mDone!')",
+      "build": "pnpm run build:src && pnpm run build:packages",
+      "   ": "",
+      "test:coverage": "vitest --ui --coverage",
+      "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
+      "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
+      "example:vitest": "cd examples/vitest && pnpm run start",
+      "examples": "pnpm run \"/^example:.*/\""
+   },
+   "dependencies": {
+      "@bedrock-apis/common": "workspace:*",
+      "@bedrock-apis/internal-tool": "workspace:*",
+      "@bedrock-apis/kernel-isolation": "workspace:*",
+      "@bedrock-apis/types": "workspace:*",
+      "@bedrock-apis/va-loader": "workspace:*",
+      "@bedrock-apis/va-pluggable": "workspace:*",
+      "@bedrock-apis/virtual-apis": "workspace:*",
+      "@bedrock-apis/core-plugin": "workspace:*",
+      "@bedrock-apis/va-images": "workspace:*",
+      "@bedrock-apis/internal-linter-plugin": "workspace:*",
+      "@bedrock-apis/va-image-generator": "workspace:*"
+   },
    "devDependencies": {
+      "@eslint/js": "^9.27.0",
       "@minecraft/server": "2.0.0-beta.1.21.80-stable",
       "@minecraft/server-net": "1.0.0-beta.1.21.90-preview.23",
       "@minecraft/server-ui": "2.0.0-beta.1.21.80-stable",
-      "@types/node": "^22.10.1",
-      "@eslint/js": "^9.27.0",
-      "@typescript-eslint/parser": "^8.32.1",
-      "@typescript-eslint/rule-tester": "^8.32.1",
-      "@typescript-eslint/utils": "^8.32.1",
-      "@vitest/coverage-istanbul": "3.0.5",
-      "@vitest/ui": "3.0.5",
+      "@types/node": "^22.15.23",
+      "@typescript-eslint/parser": "^8.33.0",
+      "@typescript-eslint/rule-tester": "^8.33.0",
+      "@typescript-eslint/utils": "^8.33.0",
+      "@vitest/coverage-istanbul": "3.1.4",
+      "@vitest/ui": "3.1.4",
       "chalk": "^5.4.1",
       "deepmerge": "^4.3.1",
-      "eslint": "^9.18.0",
+      "eslint": "^9.27.0",
       "eslint-vitest-rule-tester": "^1.1.0",
       "exitzero": "^1.0.1",
       "jiti": "^2.4.2",
       "oxc-parser": "^0.45.0",
-      "prettier": "^3.4.2",
-      "prettier-plugin-jsdoc": "^1.3.0",
-      "rolldown": "1.0.0-beta.1-commit.1d4a330",
-      "rollup": "^4.29.1",
-      "tsx": "^4.19.2",
-      "typescript": "5.7.2",
-      "typescript-eslint": "^8.20.0",
-      "vitest": "^3.0.5"
+      "prettier": "^3.5.3",
+      "prettier-plugin-jsdoc": "^1.3.2",
+      "rolldown": "1.0.0-beta.9-commit.0ec9e7d",
+      "rollup": "^4.41.1",
+      "tsx": "^4.19.4",
+      "typescript": "^5.8.3",
+      "typescript-eslint": "^8.33.0",
+      "vitest": "^3.1.4"
    },
    "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977",
    "engines": {
       "node": ">=20.x.x"
-   },
-   "exports": {
-      "./package.json": "./package.json",
-      "./eslint-plugin": {
-         "default": "./dist/eslint/eslint-plugin.js",
-         "types": "./dist/tools/eslint/plugin.d.ts"
-      },
-      ".": {
-         "default": "./dist/api/index.js",
-         "types": "./dist/src/virtual-apis/index.d.ts"
-      },
-      "./vitest": {
-         "default": "./dist/api/vitest.js",
-         "types": "./dist/src/loader/vitest.d.ts"
-      },
-      "./loader": {
-         "default": "./dist/api/loader.js",
-         "types": "./dist/src/loader/node/loader.d.ts"
-      },
-      "./plugins/*": {
-         "default": "./dist/plugins/*.js",
-         "types": "./dist/src/plugin/core/*.d.ts"
-      },
-      "./modules/*": "./modules/*"
    }
 }
