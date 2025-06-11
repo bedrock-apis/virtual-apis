@@ -6,3 +6,4 @@
     - It would prevent property collisions, but Symbols as well
 
 ### Kernel APIs robust, provided with deleted EcmaScript types, to avoid unexpected use of APIs
+ -No pretty possible bc Kernel it self relies on type that are accessible from globalThis
