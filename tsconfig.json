@@ -1,8 +1,8 @@
 {
    "compilerOptions": {
-      "target": "ES2024",
+      "target": "esnext",
       "lib": [
-         "ES2024"
+         "ESNext"
       ],
       "module": "ESNext",
       "moduleResolution": "bundler",
@@ -16,7 +16,9 @@
       "forceConsistentCasingInFileNames": true,
       "strict": true,
       "noUncheckedIndexedAccess": true,
-      "skipLibCheck": true
+      "skipLibCheck": true,
+      
+      "noImplicitOverride":true
    },
    "include": [
       "./packages/**/*.ts",
