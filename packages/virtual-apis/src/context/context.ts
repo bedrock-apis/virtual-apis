@@ -83,15 +83,17 @@ export class Context extends Kernel.Empty {
    public isHandleNative(handle: unknown) {
       return this.nativeHandles.has(handle as object);
    }
+
    // Without first parameter!!!
-   public createClassDefinition<T extends ClassDefinition | null>(
+   public createClassDefinition(
       name: string,
-      parent: T,
+      parent: ClassDefinition | null,
       paramDefinition: ParamsDefinition | null,
       newExpected = true,
-   ): ClassDefinition<T, object, object> {
-      return new ClassDefinition<T, object, object>(this, name, parent, paramDefinition, newExpected);
+   ) {
+      return new ClassDefinition(this, name, parent, paramDefinition, newExpected);
    }
+
    public reportDiagnostics(diagnostics: Diagnostics) {
       this.onDiagnosticsReported.invoke(diagnostics);
    }

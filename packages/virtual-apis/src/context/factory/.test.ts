@@ -1,6 +1,6 @@
-import { expect, expectTypeOf, suite, test, vi } from 'vitest';
-import { Context } from '..';
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
+import { expect, suite, test, vi } from 'vitest';
+import { Context } from '..';
 import { BooleanType, ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 
@@ -53,10 +53,6 @@ suite('Base API', () => {
    test('Methods', () => {
       const player = new PlayerDefinition.api();
 
-      // TS Check
-      expectTypeOf(player.methodA).toBeFunction;
-      expectTypeOf(player.methodB).toBeFunction;
-      // JS Check
       expect(player.methodA).toBeTypeOf('function');
       expect(player.methodB).toBeTypeOf('function');
 

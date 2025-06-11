@@ -1,61 +1,58 @@
+import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { ContextPanicError, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
-import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
 import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext, InstanceExecutionContext } from './execution-context';
-import { createConstructorFor, createPropertyHandler, createMethodFor } from './factory';
-// Class for single fake api definition
+import { createConstructorFor, createMethodFor, createPropertyHandler } from './factory';
+import { FunctionNativeHandler } from './factory/base';
 
-export type BaseExecutionParams<
-   T extends ClassDefinition<ClassDefinition | null, unknown> = ClassDefinition<ClassDefinition | null, unknown>,
-   E extends ExecutionContext = ExecutionContext,
-> = [handle: object, cache: object, T, E];
-export class ClassDefinition<
-   T extends ClassDefinition | null = null,
-   P = object,
-   S extends object = object,
-   NAME extends string = string,
-> extends Kernel.Empty {
+export type BaseExecutionParams<E extends ExecutionContext = ExecutionContext> = [
+   handle: object,
+   cache: object,
+   ClassDefinition | null,
+   E,
+];
+
+/** Class for single virtual api definition */
+export class ClassDefinition extends Kernel.Empty {
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
    public readonly virtualApis = Kernel.Construct('Map') as Map<string, (...args: unknown[]) => unknown>;
-   public readonly onConstruct: NativeEvent<BaseExecutionParams<this, ConstructionExecutionContext>>;
+   public readonly onConstruct: NativeEvent<BaseExecutionParams<ConstructionExecutionContext>>;
    public readonly constructorId: string;
    public readonly type: Type;
    public readonly hasConstructor: boolean;
    public readonly invocable = Kernel.Construct('WeakMap') as WeakMap<
       CallableFunction,
-      NativeEvent<BaseExecutionParams<this>>
+      NativeEvent<BaseExecutionParams>
    >;
+
    private addInvocable(id: string, method: (...args: unknown[]) => unknown) {
       this.virtualApis.set(id, method);
       const event = new NativeEvent();
       this.invocable.set(method, event);
       this.context.nativeEvents.set(id, event);
    }
-   /** TODO: Improve the types tho */
-   public readonly api: {
-      new (...any: unknown[]): P & (T extends ClassDefinition ? T['api']['prototype'] : object);
-      readonly name: NAME;
-      readonly prototype: P & (T extends ClassDefinition ? T['api']['prototype'] : object);
-   } & S &
-      (T extends ClassDefinition ? Omit<T['api'], 'prototype' | 'name'> : object);
 
-   public getAPIMethod<T extends keyof P>(name: T) {
-      return this.virtualApis.get(`${this.classId}::${name.toString()}`) as P[typeof name];
+   public readonly api: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (...any: unknown[]): Record<string, any>;
+      readonly name: string;
+      readonly prototype: Record<string, FunctionNativeHandler>;
+   } & object;
+
+   public getAPIMethod(name: string) {
+      return this.virtualApis.get(`${this.classId}::${name.toString()}`);
    }
-   /**
-    * @param classId Fake API Class Name
-    * @param parent Inject inheritance
-    */
+
    public constructor(
       public readonly context: Context,
-      /** Fake API Class Name */
+      /** Virtual API Class Name */
       public readonly classId: string,
-      public readonly parent: T,
+      /** Inject inheritance */
+      public readonly parent: ClassDefinition | null,
       public readonly constructorParams: ParamsDefinition | null,
       public readonly newExpected: boolean = true,
    ) {
@@ -75,8 +72,8 @@ export class ClassDefinition<
    public create(): this['api']['prototype'] {
       const [handle] = this.__construct(
          new ConstructionExecutionContext(
-            this.getAPIMethod(this.constructorId as keyof P) as (...p: unknown[]) => unknown,
-            this as ClassDefinition,
+            this.getAPIMethod(this.constructorId) as (...args: unknown[]) => unknown,
+            this,
             KernelArray.Construct<unknown>(),
             null,
          ),
@@ -88,23 +85,14 @@ export class ClassDefinition<
       return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
    }
 
-   public addMethod<Name extends string>(
-      name: Name,
-      params: ParamsDefinition = new ParamsDefinition(),
-      returnType: Type = new VoidType(),
-   ) {
-      const method = ((this.api.prototype as Record<Name, unknown>)[name] = createMethodFor(
-         this,
-         name,
-         params,
-         returnType,
-      ));
+   public addMethod(name: string, params = new ParamsDefinition(), returnType = new VoidType()) {
+      const method = (this.api.prototype[name] = createMethodFor(this, name, params, returnType));
       const id = `${this.classId}::${name}`;
       this.addInvocable(id, method as () => unknown);
-      return this as ClassDefinition<T, P & Record<Name, (...params: unknown[]) => unknown>, S, NAME>;
+      return this;
    }
 
-   public addProperty<Name extends string>(name: Name, type: Type, isReadonly: boolean) {
+   public addProperty(name: string, type: Type, isReadonly: boolean) {
       // TODO
 
       const getter = createPropertyHandler(this as ClassDefinition, name, type, false);
@@ -118,28 +106,23 @@ export class ClassDefinition<
 
       this.addInvocable(`${this.classId}::${name} getter`, getter as () => unknown);
       if (setter) this.addInvocable(`${this.classId}::${name} setter`, setter as () => unknown);
-      return this as ClassDefinition<T, P & Record<Name, unknown>, S>;
+      return this;
    }
 
-   public addStaticFunction<Name extends string>(
-      name: Name,
+   public addStaticFunction(
+      name: string,
       params: ParamsDefinition = new ParamsDefinition(),
       returnType: Type = new VoidType(),
    ) {
       //throw new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation);
-      return this as ClassDefinition<T, P, S & Record<Name, (...params: unknown[]) => unknown>, NAME>;
+      return this;
    }
 
-   public addStaticConstant<PropertyType, Name extends string>(
-      name: Name,
-      type: string,
-      isReadonly: boolean,
-      defaultValue: unknown,
-   ) {
+   public addStaticConstant(name: string, type: string, isReadonly: boolean, defaultValue: unknown) {
       // TODO
       // (this.api as Record<Name, unknown>)[name] = defaultValue;
       Kernel.warn(new ContextPanicError(PANIC_ERROR_MESSAGES.NoImplementation));
-      return this as ClassDefinition<T, P, S & Record<Name, PropertyType>, NAME>;
+      return this;
    }
 
    /**
