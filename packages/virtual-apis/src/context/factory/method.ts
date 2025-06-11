@@ -54,8 +54,8 @@ export function createFunctionalMethod(
       return executionContext.result;
    };
 }
-export function createMethodFor<T extends ClassDefinition<ClassDefinition | null, unknown>>(
-   definition: T,
+export function createMethodFor(
+   definition: ClassDefinition,
    name: string,
    paramsDefinition: ParamsDefinition,
    returnType: Type,

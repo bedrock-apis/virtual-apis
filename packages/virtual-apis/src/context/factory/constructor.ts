@@ -1,9 +1,8 @@
-import { Kernel } from '@bedrock-apis/kernel-isolation';
-import { ParamsDefinition } from '../../type-validators';
-import { ConstructionExecutionContext } from '../execution-context';
+import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES } from '../../diagnostics';
+import { ParamsDefinition } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
+import { ConstructionExecutionContext } from '../execution-context';
 
 export function createFunctionalConstructor(
    paramsDefinition: ParamsDefinition,
@@ -46,10 +45,10 @@ export function createFunctionalConstructor(
    } as unknown as new () => unknown;
 }
 
-export function createConstructorFor<T extends ClassDefinition<ClassDefinition | null, unknown>>(
-   definition: T,
+export function createConstructorFor(
+   definition: ClassDefinition,
    paramsDefinition: ParamsDefinition,
-): T['api'] {
+): ClassDefinition['api'] {
    // Create function as constructor
    const ctor = createFunctionalConstructor(
       paramsDefinition,
@@ -76,6 +75,5 @@ export function createConstructorFor<T extends ClassDefinition<ClassDefinition |
    // Final sealing so the class has readonly prototype
    Kernel.SetClass(ctor, definition.classId);
 
-   // return the Fake API Class
-   return ctor as T['api'];
+   return ctor as ClassDefinition['api'];
 }
