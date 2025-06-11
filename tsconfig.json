@@ -8,7 +8,6 @@
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
       "outDir": "dist",
-      "baseUrl": ".",
       "allowJs": true,
       "checkJs": true,
       "noEmit": true,
@@ -17,7 +16,7 @@
       "strict": true,
       "noUncheckedIndexedAccess": true,
       "skipLibCheck": true,
-      
+
       "noImplicitOverride":true
    },
    "include": [
