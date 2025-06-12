@@ -1,7 +1,6 @@
 /* eslint-ignore */
 // prettier-ignore
 
-
 export type F = 
    | 'libs/binary/dist/main.js'
    | 'libs/binary/package.json'
@@ -269,7 +268,7 @@ export type F =
    | 'tsconfig.json'
    | 'vitest.config.ts';
 
-export type D = 
+export type D =
    | 'libs/binary'
    | 'libs/binary/dist'
    | 'libs/binary/ref-bapi-nbt'

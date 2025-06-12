@@ -1,3 +1,3 @@
-export * from "./nbt";
-export * from "./tag";
-export * from "./base";
+export * from './nbt';
+export * from './tag';
+export * from './base';

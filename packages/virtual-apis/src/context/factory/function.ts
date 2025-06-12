@@ -12,7 +12,7 @@ function createFunctionalFunction(
 ) {
    return (that: unknown, params: ArrayLike<unknown>) => {
       const executionContext = contextFactory(that, KernelArray.From(params));
-      const { diagnostics, } = executionContext;
+      const { diagnostics } = executionContext;
 
       // Validate params
       paramsDefinition.validate(diagnostics.errors, executionContext.parameters);

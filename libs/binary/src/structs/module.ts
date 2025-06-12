@@ -1,25 +1,24 @@
-import { Range } from "@bedrock-apis/types";
-
+import { Range } from '@bedrock-apis/types';
 
 export interface ImageModule {
-    readonly strings: ArrayLike<string>;
-    readonly types: ArrayLike<ImageType>;
-    readonly symbols: ArrayLike<ImageSymbol>;
-    readonly exports: ArrayLike<number>; // Index ids of the symbols it self
+   readonly strings: ArrayLike<string>;
+   readonly types: ArrayLike<ImageType>;
+   readonly symbols: ArrayLike<ImageSymbol>;
+   readonly exports: ArrayLike<number>; // Index ids of the symbols it self
 }
 export interface ImageSymbol {
-    readonly kind: number;
-    readonly indexId?: number;
-    readonly symbolNameId?: number;
+   readonly kind: number;
+   readonly indexId?: number;
+   readonly symbolNameId?: number;
 }
 export interface ImageConstantSymbol extends ImageSymbol {
-    readonly value?: unknown;
+   readonly value?: unknown;
 }
 
 export interface ImageType {
-    readonly kindId: number;
-    readonly range?: Range<number, number>;
-    readonly length?: number;
-    readonly childId?: number;
-    readonly childrenIds?: ArrayLike<number>;
+   readonly kindId: number;
+   readonly range?: Range<number, number>;
+   readonly length?: number;
+   readonly childId?: number;
+   readonly childrenIds?: ArrayLike<number>;
 }

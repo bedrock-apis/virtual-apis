@@ -1,2 +1,2 @@
-import "./loader";
-export * from "./hooks";
+import './loader';
+export * from './hooks';

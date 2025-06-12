@@ -1,3 +1,3 @@
-export * from "./data-provider";
-export * from "./format";
-export * from "./general";
+export * from './data-provider';
+export * from './format';
+export * from './general';
