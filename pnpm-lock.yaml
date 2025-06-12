@@ -14,9 +14,9 @@ importers:
       '@bedrock-apis/core-plugin':
         specifier: workspace:*
         version: link:packages/core-plugin
-      '@bedrock-apis/internal-linter-plugin':
+      '@bedrock-apis/eslint-plugin':
         specifier: workspace:*
-        version: link:libs/linter-plugin
+        version: link:libs/eslint-plugin
       '@bedrock-apis/internal-tool':
         specifier: workspace:*
         version: link:libs/tools
@@ -161,9 +161,9 @@ importers:
 
   libs/common: {}
 
-  libs/kernel-isolation: {}
+  libs/eslint-plugin: {}
 
-  libs/linter-plugin: {}
+  libs/kernel-isolation: {}
 
   libs/tools: {}
 

@@ -55,7 +55,7 @@
    "dependencies": {
       "@bedrock-apis/common": "workspace:*",
       "@bedrock-apis/core-plugin": "workspace:*",
-      "@bedrock-apis/internal-linter-plugin": "workspace:*",
+      "@bedrock-apis/eslint-plugin": "workspace:*",
       "@bedrock-apis/internal-tool": "workspace:*",
       "@bedrock-apis/kernel-isolation": "workspace:*",
       "@bedrock-apis/types": "workspace:*",
