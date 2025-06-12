@@ -62,12 +62,8 @@ export class BaseImageModuleFormat {
       if (this.isDeprecated) throw new ReferenceError('Deprecated format, version: ' + this.version);
       if (version > this.version)
          throw new ReferenceError('Future Yet, Unsupported version, please update virtual-apis package');
-      if (version < this.version)
-         return (
-            (
-               this.GetBase() as unknown as { ReadInternal: (_: IStaticDataProvider, v: number) => ImageModuleData }
-            )?.ReadInternal(_, version) ?? null
-         );
+      if (version < this.version) return this.GetBase()?.ReadInternal(_, version) ?? null;
+
       return this.ReadModule(_);
    }
    //#region Module
@@ -100,6 +96,14 @@ export class BaseImageModuleFormat {
          yield { header, checkpoint };
       }
    }
-   public static *ReadAllModules() {}
+   public static *ReadAllModules(
+      _: IStaticDataProvider,
+   ): Generator<{ header: ImageModuleHeader; data: ImageModuleData }> {
+      for (const { header, checkpoint } of this.GetAllModuleMetadata(_)) {
+         const data = this.ReadInternal(checkpoint, header.version);
+         if (!data) throw new ReferenceError('Failed to read module');
+         yield { header, data };
+      }
+   }
 }
 FAKE_CONSTRUCTOR.prototype = BaseImageModuleFormat;
