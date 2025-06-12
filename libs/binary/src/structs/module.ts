@@ -1,6 +1,12 @@
 import { Range } from '@bedrock-apis/types';
 
 export interface ImageModule {
+   // Metadata
+   readonly uuid: string;
+   readonly name: string;
+   readonly version: string;
+
+   // Module Data
    readonly strings: ArrayLike<string>;
    readonly types: ArrayLike<ImageType>;
    readonly symbols: ArrayLike<ImageSymbol>;
