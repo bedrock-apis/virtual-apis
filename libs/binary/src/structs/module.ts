@@ -1,7 +1,7 @@
 import { Range } from '@bedrock-apis/types';
 import { ImageModuleFormatV1 } from '../image-formats';
 
-export interface ImageModule {
+export interface ImageModuleData {
    // Metadata
    readonly uuid: string;
    readonly name: string;

@@ -1,9 +1,35 @@
-import { IStaticDataProvider } from '../../ref-bapi-nbt/base';
+import { IStaticDataProvider, StaticDataProvider } from '../../ref-bapi-nbt/base';
 
 const utf8Decoder = new TextDecoder();
 
 // Use LE always
 export class BinaryReader {
+   public static GetCheckPointUint16(_: IStaticDataProvider): IStaticDataProvider {
+      const size = BinaryReader.ReadUint16(_);
+      _.pointer += size;
+      return new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer - size, size), 0);
+   }
+   public static GetCheckPointUint32(_: IStaticDataProvider): IStaticDataProvider {
+      const size = BinaryReader.ReadUint16(_);
+      _.pointer += size;
+      return new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer - size, size), 0);
+   }
+   public static ReadCheckPointUint16<T>(_: IStaticDataProvider, reader: (_: IStaticDataProvider) => T): T {
+      const size = BinaryReader.ReadUint16(_);
+
+      const provider = new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer, size), 0);
+      const v = reader(provider);
+      _.pointer += size;
+      return v;
+   }
+   public static ReadCheckPointUint32<T>(_: IStaticDataProvider, reader: (_: IStaticDataProvider) => T): T {
+      const size = BinaryReader.ReadUint32(_);
+
+      const provider = new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer, size), 0);
+      const v = reader(provider);
+      _.pointer += size;
+      return v;
+   }
    public static ReadUint8(dataProvider: IStaticDataProvider): number {
       return dataProvider.view.getUint8(dataProvider.pointer++);
    }

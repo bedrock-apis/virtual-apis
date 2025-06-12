@@ -1,9 +1,28 @@
-import { IStaticDataProvider } from '../../ref-bapi-nbt/base';
+import { IStaticDataProvider, StaticDataProvider } from '../../ref-bapi-nbt/base';
 
 const utf8Encoder = new TextEncoder();
 
 // Use LE alwayes
 export class BinaryWriter {
+   public static WriteCheckPointUint16(_: IStaticDataProvider, writer: (_: IStaticDataProvider) => void) {
+      const provider = new StaticDataProvider(
+         new DataView(_.view.buffer, _.view.byteOffset + _.pointer + 2, _.view.byteLength),
+         0,
+      );
+      writer(provider);
+
+      BinaryWriter.WriteUint16(_, provider.pointer);
+      _.pointer += provider.pointer;
+   }
+   public static WriteCheckPointUint32(_: IStaticDataProvider, writer: (_: IStaticDataProvider) => void) {
+      const provider = new StaticDataProvider(
+         new DataView(_.view.buffer, _.view.byteOffset + _.pointer + 4, _.view.byteLength),
+         0,
+      );
+      writer(provider);
+      BinaryWriter.WriteUint32(_, provider.pointer);
+      _.pointer += provider.pointer;
+   }
    public static WriteUint8(dataProvider: IStaticDataProvider, value: number): void {
       dataProvider.view.setUint8(dataProvider.pointer++, value);
    }
