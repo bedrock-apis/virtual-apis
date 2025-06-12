@@ -1,12 +1,12 @@
-import { readFile, readdir } from 'node:fs/promises';
-import type { RolldownOptions } from 'rolldown';
-import { workspaces, devDependencies, dependencies } from '../../package.json' with { type: 'json' };
 import { existsSync } from 'node:fs';
+import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import type { RolldownOptions } from 'rolldown';
+import { dependencies, devDependencies, workspaces } from '../../package.json' with { type: 'json' };
 
 export const external = [new RegExp(`^(node:|${Object.keys(devDependencies).join('|')}|@bedrock-apis)`)];
 
-export { workspaces, devDependencies, dependencies };
+export { dependencies, devDependencies, workspaces };
 export const options: RolldownOptions[] = [];
 
 for (const workspace of workspaces) {
@@ -32,14 +32,14 @@ for (const workspace of workspaces) {
             const option = {
                external,
                input: [] as string[],
-               output: { dir: path },
+               output: { dir: path + 'dist/' },
             } satisfies RolldownOptions;
             for (const name of Object.keys(exports)) {
                const obj = exports[name];
                if (typeof obj === 'object' && obj.rolldown === true && obj.default && obj.types)
                   option.input.push(resolve(path, obj.types));
             }
-            options.push(option);
+            if (option.input.length) options.push(option);
          }
       }
    }
