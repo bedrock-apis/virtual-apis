@@ -2,10 +2,10 @@ import { Range } from "@bedrock-apis/types";
 
 
 export interface ImageModule {
-    readonly strings: string[];
-    readonly types: ImageType[];
-    readonly symbols: ImageSymbol[];
-    readonly exports: number[]; // Index id of the symbols it self
+    readonly strings: ArrayLike<string>;
+    readonly types: ArrayLike<ImageType>;
+    readonly symbols: ArrayLike<ImageSymbol>;
+    readonly exports: ArrayLike<number>; // Index ids of the symbols it self
 }
 export interface ImageSymbol {
     readonly kind: number;
@@ -21,5 +21,5 @@ export interface ImageType {
     readonly range?: Range<number, number>;
     readonly length?: number;
     readonly childId?: number;
-    readonly childrenIds?: number[];
+    readonly childrenIds?: ArrayLike<number>;
 }
