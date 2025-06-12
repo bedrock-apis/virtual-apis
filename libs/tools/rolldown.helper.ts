@@ -28,18 +28,19 @@ for (const workspace of workspaces) {
                });
          }
 
-         if (exports)
+         if (exports) {
+            const option = {
+               external,
+               input: [] as string[],
+               output: { dir: path },
+            } satisfies RolldownOptions;
             for (const name of Object.keys(exports)) {
                const obj = exports[name];
                if (typeof obj === 'object' && obj.rolldown === true && obj.default && obj.types)
-                  options.push({
-                     external,
-                     input: resolve(path, obj.types),
-                     output: {
-                        file: resolve(path, obj.default),
-                     },
-                  });
+                  option.input.push(resolve(path, obj.types));
             }
+            options.push(option);
+         }
       }
    }
 }
