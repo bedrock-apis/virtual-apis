@@ -1,8 +1,8 @@
 import { IStaticDataProvider } from '../../ref-bapi-nbt/base';
 import { ImageModuleData } from '../structs';
-import { BaseImageModuleFormat } from './base-format';
+import { BaseBinaryImageSerializer } from './base-format';
 
-export class ImageModuleFormatV1 extends BaseImageModuleFormat {
+export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    public static override readonly isDeprecated = false;
    // Version should be hardcoded and don't change (super.version + 1;) is bad practice
    public static override readonly version: number = 1;

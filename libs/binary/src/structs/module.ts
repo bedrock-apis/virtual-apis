@@ -1,14 +1,6 @@
 import { Range } from '@bedrock-apis/types';
-import { ImageModuleFormatV1 } from '../image-formats';
 
 export interface ImageModuleData {
-   // Metadata
-   readonly uuid: string;
-   readonly name: string;
-   readonly version: string;
-
-   // Module Data
-   readonly strings: ArrayLike<string>;
    readonly types: ArrayLike<ImageType>;
    readonly symbols: ArrayLike<ImageSymbol>;
    readonly exports: ArrayLike<number>; // Index ids of the symbols it self
