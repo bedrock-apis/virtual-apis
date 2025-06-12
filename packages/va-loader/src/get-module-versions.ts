@@ -9,6 +9,9 @@ import url from 'node:url';
 import { API_MODULES_JSON_FILENAME } from '@bedrock-apis/common';
 
 export function getModuleVersions(format: 'url' | 'path' = 'url') {
+   // TODO Add support for manifest.json
+   // TODO Use package.json instead of iterating through node_modules
+
    // It is required to make node think we are importing all modules from the cwd, because
    // otherwise they will not resolve
    //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
