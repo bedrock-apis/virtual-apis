@@ -1,7 +1,6 @@
-import { ModuleMetadata } from './module-metadata';
+import { ModuleMetadata } from './metadata';
 
 export interface ImageModuleHeader {
-   readonly version: number;
    readonly metadata: ModuleMetadata;
    readonly size?: number;
 }

@@ -1,47 +1,38 @@
-import { IStaticDataProvider, StaticDataProvider } from '../../ref-bapi-nbt/base';
+import { StaticDataSource } from './static-data-source';
 
 const utf8Decoder = new TextDecoder();
 
 // Use LE always
 export class BinaryReader {
-   public static GetCheckPointUint16(_: IStaticDataProvider): IStaticDataProvider {
+   public static GetCheckPointUint16(_: StaticDataSource): StaticDataSource {
+      const size = BinaryReader.ReadUint16(_);
+      return _.peek(size);
+   }
+   public static GetCheckPointUint32(_: StaticDataSource): StaticDataSource {
       const size = BinaryReader.ReadUint16(_);
       _.pointer += size;
-      return new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer - size, size), 0);
+      return _.peek(size);
    }
-   public static GetCheckPointUint32(_: IStaticDataProvider): IStaticDataProvider {
+   public static ReadCheckPointUint16<T>(_: StaticDataSource, reader: (_: StaticDataSource) => T): T {
       const size = BinaryReader.ReadUint16(_);
-      _.pointer += size;
-      return new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer - size, size), 0);
+      return reader(_.peek(size));
    }
-   public static ReadCheckPointUint16<T>(_: IStaticDataProvider, reader: (_: IStaticDataProvider) => T): T {
-      const size = BinaryReader.ReadUint16(_);
-
-      const provider = new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer, size), 0);
-      const v = reader(provider);
-      _.pointer += size;
-      return v;
-   }
-   public static ReadCheckPointUint32<T>(_: IStaticDataProvider, reader: (_: IStaticDataProvider) => T): T {
+   public static ReadCheckPointUint32<T>(_: StaticDataSource, reader: (_: StaticDataSource) => T): T {
       const size = BinaryReader.ReadUint32(_);
-
-      const provider = new StaticDataProvider(new DataView(_.view.buffer, _.view.byteOffset + _.pointer, size), 0);
-      const v = reader(provider);
-      _.pointer += size;
-      return v;
+      return reader(_.peek(size));
    }
-   public static ReadUint8(dataProvider: IStaticDataProvider): number {
+   public static ReadUint8(dataProvider: StaticDataSource): number {
       return dataProvider.view.getUint8(dataProvider.pointer++);
    }
 
-   public static ReadUint16(dataProvider: IStaticDataProvider): number {
+   public static ReadUint16(dataProvider: StaticDataSource): number {
       const value = dataProvider.view.getUint16(dataProvider.pointer, true);
       dataProvider.pointer += 2;
       return value;
    }
 
    // Memory efficient but not as fast, has to be benchamarked on real-world samples
-   public static ReadVarUint32(dataProvider: IStaticDataProvider): number {
+   public static ReadVarUint32(dataProvider: StaticDataSource): number {
       let current = dataProvider.uint8Array[dataProvider.pointer++] ?? 0;
       let value = current;
       let shift = 0;
@@ -53,48 +44,48 @@ export class BinaryReader {
       return value;
    }
 
-   public static ReadUint32(dataProvider: IStaticDataProvider): number {
+   public static ReadUint32(dataProvider: StaticDataSource): number {
       const value = dataProvider.view.getUint32(dataProvider.pointer, true);
       dataProvider.pointer += 4;
       return value;
    }
 
-   public static ReadBuffer(dataProvider: IStaticDataProvider, length: number): Uint8Array {
+   public static ReadBuffer(dataProvider: StaticDataSource, length: number): Uint8Array {
       return dataProvider.uint8Array.subarray(dataProvider.pointer, (dataProvider.pointer += length));
    }
 
    public static ReadStringWith(
-      lengthReader: (d: IStaticDataProvider) => number,
+      lengthReader: (d: StaticDataSource) => number,
       decoder = utf8Decoder,
-      dataProvider: IStaticDataProvider,
+      dataProvider: StaticDataSource,
    ): string {
       const length = lengthReader(dataProvider);
       const buffer = BinaryReader.ReadBuffer(dataProvider, length);
       return decoder.decode(buffer);
    }
 
-   public static ReadStringU8: (dataProvider: IStaticDataProvider) => string = BinaryReader.ReadStringWith.bind(
-      null,
+   public static ReadStringU8: (dataProvider: StaticDataSource) => string = BinaryReader.ReadStringWith.bind(
+      BinaryReader,
       BinaryReader.ReadUint8,
       utf8Decoder,
    );
-   public static ReadStringU16: (dataProvider: IStaticDataProvider) => string = BinaryReader.ReadStringWith.bind(
-      null,
+   public static ReadStringU16: (dataProvider: StaticDataSource) => string = BinaryReader.ReadStringWith.bind(
+      BinaryReader,
       BinaryReader.ReadUint16,
       utf8Decoder,
    );
-   public static ReadStringU32: (dataProvider: IStaticDataProvider) => string = BinaryReader.ReadStringWith.bind(
-      null,
+   public static ReadStringU32: (dataProvider: StaticDataSource) => string = BinaryReader.ReadStringWith.bind(
+      BinaryReader,
       BinaryReader.ReadUint32,
       utf8Decoder,
    );
 
-   public static ReadArrayBufferU16(dataProvider: IStaticDataProvider): Uint8Array {
+   public static ReadArrayBufferU16(dataProvider: StaticDataSource): Uint8Array {
       const length = BinaryReader.ReadUint16(dataProvider);
       return BinaryReader.ReadBuffer(dataProvider, length);
    }
 
-   public static ReadArrayBufferU32(dataProvider: IStaticDataProvider): Uint8Array {
+   public static ReadArrayBufferU32(dataProvider: StaticDataSource): Uint8Array {
       const length = BinaryReader.ReadUint32(dataProvider);
       return BinaryReader.ReadBuffer(dataProvider, length);
    }

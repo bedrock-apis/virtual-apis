@@ -8,3 +8,7 @@ export interface ModuleMetadata {
    readonly uuif?: IndexId;
    readonly version?: IndexId;
 }
+
+export interface GeneralMetatada {
+   readonly engine?: IndexId;
+}

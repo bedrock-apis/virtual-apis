@@ -1,42 +1,42 @@
 //@es
 import { NBTTag } from '../tag';
-import { StaticDataProvider } from './data-provider';
+import { IStaticDataProvider } from './data-provider';
 
 export interface NBTFormatReader {
-   readType(dataProvider: StaticDataProvider): NBTTag;
-   readStringLength(dataProvider: StaticDataProvider): number;
-   readArrayLength(dataProvider: StaticDataProvider): number;
+   readType(dataProvider: IStaticDataProvider): NBTTag;
+   readStringLength(dataProvider: IStaticDataProvider): number;
+   readArrayLength(dataProvider: IStaticDataProvider): number;
 
-   [NBTTag.Byte](dataProvider: StaticDataProvider): number;
-   [NBTTag.Short](dataProvider: StaticDataProvider): number;
-   [NBTTag.Int32](dataProvider: StaticDataProvider): number;
-   [NBTTag.Long](dataProvider: StaticDataProvider): bigint;
-   [NBTTag.Float](dataProvider: StaticDataProvider): number;
-   [NBTTag.Double](dataProvider: StaticDataProvider): number;
-   [NBTTag.ByteArray](dataProvider: StaticDataProvider): Uint8Array;
+   [NBTTag.Byte](dataProvider: IStaticDataProvider): number;
+   [NBTTag.Short](dataProvider: IStaticDataProvider): number;
+   [NBTTag.Int32](dataProvider: IStaticDataProvider): number;
+   [NBTTag.Long](dataProvider: IStaticDataProvider): bigint;
+   [NBTTag.Float](dataProvider: IStaticDataProvider): number;
+   [NBTTag.Double](dataProvider: IStaticDataProvider): number;
+   [NBTTag.ByteArray](dataProvider: IStaticDataProvider): Uint8Array;
 
-   [NBTTag.String](dataProvider: StaticDataProvider): string;
-   [NBTTag.Int32Array](dataProvider: StaticDataProvider): Int32Array;
-   [NBTTag.LongArray](dataProvider: StaticDataProvider): BigInt64Array;
-   [NBTTag.List](dataProvider: StaticDataProvider): unknown[];
-   [NBTTag.Compound](dataProvider: StaticDataProvider): object;
+   [NBTTag.String](dataProvider: IStaticDataProvider): string;
+   [NBTTag.Int32Array](dataProvider: IStaticDataProvider): Int32Array;
+   [NBTTag.LongArray](dataProvider: IStaticDataProvider): BigInt64Array;
+   [NBTTag.List](dataProvider: IStaticDataProvider): unknown[];
+   [NBTTag.Compound](dataProvider: IStaticDataProvider): object;
 }
 export interface NBTFormatWriter {
-   writeType(dataProvider: StaticDataProvider, value: NBTTag): void;
-   writeStringLength(dataProvider: StaticDataProvider, length: number): void;
-   writeArrayLength(dataProvider: StaticDataProvider, length: number): void;
+   writeType(dataProvider: IStaticDataProvider, value: NBTTag): void;
+   writeStringLength(dataProvider: IStaticDataProvider, length: number): void;
+   writeArrayLength(dataProvider: IStaticDataProvider, length: number): void;
 
-   [NBTTag.Byte](dataProvider: StaticDataProvider, value: number): void;
-   [NBTTag.Short](dataProvider: StaticDataProvider, value: number): void;
-   [NBTTag.Int32](dataProvider: StaticDataProvider, value: number): void;
-   [NBTTag.Long](dataProvider: StaticDataProvider, value: bigint): void;
-   [NBTTag.Float](dataProvider: StaticDataProvider, value: number): void;
-   [NBTTag.Double](dataProvider: StaticDataProvider, value: number): void;
-   [NBTTag.ByteArray](dataProvider: StaticDataProvider, value: Uint8Array): void;
+   [NBTTag.Byte](dataProvider: IStaticDataProvider, value: number): void;
+   [NBTTag.Short](dataProvider: IStaticDataProvider, value: number): void;
+   [NBTTag.Int32](dataProvider: IStaticDataProvider, value: number): void;
+   [NBTTag.Long](dataProvider: IStaticDataProvider, value: bigint): void;
+   [NBTTag.Float](dataProvider: IStaticDataProvider, value: number): void;
+   [NBTTag.Double](dataProvider: IStaticDataProvider, value: number): void;
+   [NBTTag.ByteArray](dataProvider: IStaticDataProvider, value: Uint8Array): void;
 
-   [NBTTag.String](dataProvider: StaticDataProvider, value: string): void;
-   [NBTTag.Int32Array](dataProvider: StaticDataProvider, value: Int32Array): void;
-   [NBTTag.LongArray](dataProvider: StaticDataProvider, value: BigInt64Array): void;
-   [NBTTag.List](dataProvider: StaticDataProvider, value: unknown[]): void;
-   [NBTTag.Compound](dataProvider: StaticDataProvider, value: object): void;
+   [NBTTag.String](dataProvider: IStaticDataProvider, value: string): void;
+   [NBTTag.Int32Array](dataProvider: IStaticDataProvider, value: Int32Array): void;
+   [NBTTag.LongArray](dataProvider: IStaticDataProvider, value: BigInt64Array): void;
+   [NBTTag.List](dataProvider: IStaticDataProvider, value: unknown[]): void;
+   [NBTTag.Compound](dataProvider: IStaticDataProvider, value: object): void;
 }

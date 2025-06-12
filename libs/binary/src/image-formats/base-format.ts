@@ -1,15 +1,16 @@
 import {
    GeneralNBTFormatReader,
    GeneralNBTFormatWriter,
-   IStaticDataProvider,
    NBTFormatReader,
    NBTFormatWriter,
 } from '../../ref-bapi-nbt/base';
 import { BinaryReader, BinaryWriter } from '../binary';
 import { NBTTag } from '../../ref-bapi-nbt/tag';
 import { ImageModuleData as ImageModuleData } from '../structs';
-import { ImageModuleHeader, ModuleMetadata } from '../types';
-import { IMAGE_MODULE_HEADER_MAGIC } from '../constants';
+import { ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
+import { StaticDataSource } from '../binary/static-data-source';
+import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
+import { BinaryFieldDataType } from '../types/data-type';
 
 const FAKE_CONSTRUCTOR = function () {};
 export class BaseBinaryImageSerializer {
@@ -23,6 +24,7 @@ export class BaseBinaryImageSerializer {
       return null;
    }
    protected static readonly ReadNextMagic = BinaryReader.ReadUint32;
+   protected static readonly ReadVersion = BinaryReader.ReadUint16;
 
    //#region Public APIs
    public static GetBinaryImageSerializerFor<T extends typeof BaseBinaryImageSerializer>(
@@ -35,75 +37,83 @@ export class BaseBinaryImageSerializer {
       if (version < this.version) return this.GetBase() ?? null;
       return this;
    }
-   public static *GetAllModuleHeaders(
-      _: IStaticDataProvider,
-   ): Generator<{ header: ImageModuleHeader; checkpoint: IStaticDataProvider }> {
+   public static GetGeneralHeader(_: StaticDataSource): ImageGeneralHeaderData {
+      _.pointer = 0;
+      if (this.ReadNextMagic(_) !== IMAGE_GENERAL_DATA_MAGIC)
+         throw new TypeError("Malformed data, magic doesn't match");
+      const version = this.ReadVersion(_);
+      const self = this.GetBinaryImageSerializerFor(version);
+      if (!self) throw new ReferenceError('Unsupported format version, ' + version);
+
+      const metadata = this.ReadGeneralMetadata(_);
+      const slices = this.ReadGlobalStrings(_);
+      return { metadata, stringSlices: slices, version };
+   }
+   public static *GetAllFields(
+      _: StaticDataSource,
+   ): Generator<{ type: BinaryFieldDataType; metadata: unknown; checkpoint: StaticDataSource }> {
       while (_.pointer < _.uint8Array.length) {
-         const header = this.ReadModuleHeaderWithSize(_);
+         const magic = this.ReadNextMagic(_);
+         if (!(magic in BinaryFieldDataType)) throw new ReferenceError('Unknown magic');
+
+         const metadata = this.ReadFieldMetadata(_);
          const checkpoint = BinaryReader.GetCheckPointUint32(_);
-         yield { header, checkpoint };
+         yield { type: magic, metadata, checkpoint };
       }
    }
-   public static ReadModuleData(_: IStaticDataProvider, metadata: ModuleMetadata) {
-      throw new ReferenceError('No implementation');
-   }
    //#endregion
+   protected static ReadImageHeader(_: StaticDataSource) {}
 
    //#region Internal APIs
-   protected static ReadModuleHeaderWithSize(_: IStaticDataProvider): ImageModuleHeader {
-      if (this.ReadNextMagic(_) !== IMAGE_MODULE_HEADER_MAGIC)
-         throw new SyntaxError('Module has to start with binary magic prefix');
-
-      const version = BinaryReader.ReadUint16(_);
+   protected static ReadModuleMetadataWithSize(_: StaticDataSource): ImageModuleHeader {
       const metadata = BinaryReader.ReadCheckPointUint16(_, _ => this.ReadMetadata(_));
       const size = BinaryReader.ReadUint32(_);
       // go back to check point
       _.pointer -= 4;
-      return { version, size, metadata };
+      return { size, metadata };
    }
-   protected static WriteModuleHeader(_: IStaticDataProvider, header: ImageModuleHeader): void {
-      BinaryWriter.WriteUint8(_, IMAGE_MODULE_HEADER_MAGIC);
-      if (!isFinite(this.version)) throw new ReferenceError('Version not specified');
-      BinaryWriter.WriteUint16(_, this.version);
-      BinaryWriter.WriteCheckPointUint16(_, _ => this.WriteMetadata(_, header.metadata));
+   protected static WriteModuleHeaderMetadata(_: StaticDataSource, metadata: ModuleMetadata): void {
+      BinaryWriter.WriteCheckPointUint16(_, _ => this.WriteMetadata(_, metadata));
    }
    //#endregion
+   protected static WriteMetadata(_: StaticDataSource, metadata: ModuleMetadata): void {
+      BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[NBTTag.Compound](_, metadata));
+   }
+   protected static ReadMetadata(_: StaticDataSource): ModuleMetadata {
+      return BinaryReader.ReadCheckPointUint16(_, _ => this.nbtFormatReader[NBTTag.Compound](_));
+   }
 
+   //!! Has to be getter so the inheritance works properly !!
+   protected static get WriteGeneralMetadata() {
+      return this.WriteMetadata;
+   }
+   protected static get WriteFieldMetadata() {
+      return this.WriteMetadata;
+   }
+   protected static get ReadGeneralMetadata() {
+      return this.ReadMetadata;
+   }
+   protected static get ReadFieldMetadata() {
+      return this.ReadMetadata;
+   }
    //#region Meta
-   protected static WriteMetadata(_: IStaticDataProvider, metadata: ModuleMetadata): void {
-      this.nbtFormatWriter[NBTTag.Compound](_, metadata);
+   protected static WriteGlobalStrings(_: StaticDataSource, data: string[]) {
+      BinaryWriter.WriteUint16(_, data.length);
+      for (let i = 0; i < data.length; i++) BinaryWriter.WriteStringU8(_, data[i] as string);
    }
-   protected static ReadMetadata(_: IStaticDataProvider): ModuleMetadata {
-      return this.nbtFormatReader[NBTTag.Compound](_);
+   protected static ReadGlobalStrings(_: StaticDataSource): string[] {
+      const array: string[] = [];
+      const length = BinaryReader.ReadUint16(_);
+      for (let i = 0; i < length; i++) array.push(BinaryReader.ReadStringU8(_));
+      return array;
+   }
+
+   protected static WriteModuleField(_: StaticDataSource, module: ImageModuleData) {
+      throw new ReferenceError('No implementation error');
+   }
+   protected static ReadModuleField(_: StaticDataSource, metadata: unknown): ImageModuleData {
+      throw new ReferenceError('No implementation error');
    }
    //#endregion
-   private static ReadInternal(_: IStaticDataProvider, version: number): ImageModuleData | null {
-      if (this.isDeprecated) throw new ReferenceError('Deprecated format, version: ' + this.version);
-      if (version > this.version)
-         throw new ReferenceError('Future Yet, Unsupported version, please update virtual-apis package');
-      if (version < this.version) return this.GetBase()?.ReadInternal(_, version) ?? null;
-
-      return this.ReadModule(_);
-   }
-   //#region Module
-   protected static ReadModule(_: IStaticDataProvider): ImageModuleData {
-      throw new ReferenceError('Missing implementation, version: ' + this.version);
-   }
-   protected static WriteModule(_: IStaticDataProvider, m: ImageModuleData) {
-      throw new ReferenceError('Missing implementation, version: ' + this.version);
-   }
-   //#endregion
-
-   public static Read(_: IStaticDataProvider): ImageModuleData {
-      const header = this.ReadModuleHeaderWithSize(_);
-      const m = BinaryReader.ReadCheckPointUint32(_, _ => this.ReadInternal(_, header.version));
-      if (!m) throw new ReferenceError('Failed to read image module, version: ' + header.version);
-
-      return m;
-   }
-   public static Write(_: IStaticDataProvider, m: ImageModuleData, meta: ModuleMetadata): void {
-      this.WriteModuleHeader(_, { metadata: meta, version: this.version });
-      BinaryWriter.WriteCheckPointUint32(_, _ => this.WriteModule(_, m));
-   }
 }
 FAKE_CONSTRUCTOR.prototype = BaseBinaryImageSerializer;
