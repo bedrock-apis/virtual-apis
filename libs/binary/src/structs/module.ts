@@ -1,7 +1,8 @@
 import { Range } from "@bedrock-apis/types";
 
+
 export interface ImageModule {
-    readonly symbolNames: string[];
+    readonly strings: string[];
     readonly types: ImageType[];
     readonly symbols: ImageSymbol[];
     readonly exports: number[]; // Index id of the symbols it self

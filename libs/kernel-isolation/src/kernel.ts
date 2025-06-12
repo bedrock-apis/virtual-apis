@@ -143,8 +143,24 @@ class KernelClass {
       }
       return isolated as T;
    }
+   public static IsolatedConstructor<T extends Keys, S extends Global[T]>(name: T): S{
+      const ctor = KernelStorage[name + '::constructor'];
+      let isolated: new ()=>any = ISOLATED_CONSTRUCTORS.get(ctor) as any;
+      if(isolated) return isolated as S;
+      const prototype = KernelStorage[name + '::prototype'];
+      isolated = class {
+         constructor(...params: any[]){
+            return new (ctor as any)(...params);
+         }
+      }
+      Kernel.__setPrototypeOf(isolated, ctor);
+      Kernel.__setPrototypeOf(isolated.prototype, prototype);
+      ISOLATED_CONSTRUCTORS.set(ctor, isolated);
+      return isolated as S;
+   }
 }
 const ISOLATED_COPIES = new WeakMap<object, unknown>();
+const ISOLATED_CONSTRUCTORS = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
 KernelClass.__setPrototypeOf(KernelStorage, null);
 
@@ -176,6 +192,7 @@ export const Kernel = KernelClass as typeof KernelClass & KernelType;
 Kernel.__setPrototypeOf(Kernel.Empty, null);
 Kernel.__setPrototypeOf(Kernel.Empty.prototype, null);
 Kernel.__setPrototypeOf(ISOLATED_COPIES, Kernel['WeakMap::prototype']);
+Kernel.__setPrototypeOf(ISOLATED_CONSTRUCTORS, Kernel['WeakMap::prototype']);
 
 // Symbol is not constructor so there is no default copy created
 // Also we can't use Kernel.SymbolCopy because vitest parser crashes for some reason

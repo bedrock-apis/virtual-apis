@@ -1,3 +1,4 @@
+import { it } from 'vitest';
 import { Kernel } from './kernel';
 import { KernelIterator } from './kernel.iterators';
 
@@ -8,11 +9,17 @@ const ITERATOR = Kernel.CallBindTo(Kernel['Array::prototype'].values);
 export class KernelArray<T> extends Kernel.Empty {
    private constructor() {
       super();
+      return Kernel.__setPrototypeOf(new Kernel["Array::constructor"](), KernelArray.prototype) as KernelArray<T>;
    }
    public length = 0;
    [n: number]: T;
    public static Construct<T>(...params: T[]): KernelArray<T> {
       return KernelArray.From(params);
+   }
+   public static FromIterator<T>(iterator: KernelIterator<T>): KernelArray<T>{
+      const array = new KernelArray<T>();
+      for(const value of iterator) array[array.length++] = value;
+      return array;
    }
    public static From<T>(array: ArrayLike<T>): KernelArray<T> {
       return Kernel.__setPrototypeOf(array, KernelArray.prototype);
