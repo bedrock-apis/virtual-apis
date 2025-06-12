@@ -4,7 +4,7 @@ import { ModuleContext } from '../context';
 import { ClassDefinition } from '../context/class-definition';
 import { ParamsDefinition } from './params-definition';
 
-const context = new ModuleContext('uuid');
+const context = new ModuleContext('uuid', '0.0.0');
 
 new ClassDefinition(context, 'ItemType', null, null, true).addProperty(
    'id',

@@ -7,7 +7,7 @@ import { ModuleContext } from './module-context';
 
 const NUMBER_TYPE = new NumberType({ max: Number.MAX_SAFE_INTEGER, min: Number.MIN_SAFE_INTEGER });
 
-const context = new ModuleContext('uuid');
+const context = new ModuleContext('uuid', '0.0.0');
 const EntityDefinition = context
    .createClassDefinition('Entity', null, null)
    .addMethod('methodA', new ParamsDefinition().addType(new ParamType(NUMBER_TYPE, false, 0, undefined)), NUMBER_TYPE);

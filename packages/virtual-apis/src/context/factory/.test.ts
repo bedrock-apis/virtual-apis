@@ -4,7 +4,7 @@ import { ModuleContext } from '..';
 import { BooleanType, ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 
-const context = new ModuleContext('uuid');
+const context = new ModuleContext('uuid', '0.0.0');
 const EntityDefinition = context.createClassDefinition('Entity', null, new ParamsDefinition()).addMethod('methodA');
 const PlayerDefinition = context
    .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true)

@@ -64,6 +64,9 @@ export class BaseImageModuleFormat {
    protected static ReadModule(_: IStaticDataProvider): ImageModule {
       throw new ReferenceError('Missing implementation, version: ' + this.version);
    }
+   public static ReadAllModules(_: IStaticDataProvider): ImageModule[] {
+      throw new ReferenceError('Missing implementation, version: ' + this.version);
+   }
    protected static WriteModule(_: IStaticDataProvider, m: ImageModule) {
       throw new ReferenceError('Missing implementation, version: ' + this.version);
    }

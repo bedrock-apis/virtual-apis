@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url from 'node:url';
+import { LatestImageModuleFormat } from './image-formats';
+import { ImageModulePrepared, prepareImageModule } from './structs';
 
 const cachePath = path.join(url.fileURLToPath(import.meta.dirname), 'images');
 
@@ -31,7 +33,7 @@ async function downloadImage(version: string) {
    return image;
 }
 
-export async function getImage(mcVersion: string | 'latest'): Promise<Uint8Array<ArrayBufferLike>> {
+export async function getImage(mcVersion: string): Promise<Uint8Array<ArrayBufferLike>> {
    try {
       const installed = require.resolve('@bedrock-apis/va-images');
       return new Uint8Array(await fs.readFile(installed));
@@ -40,4 +42,15 @@ export async function getImage(mcVersion: string | 'latest'): Promise<Uint8Array
    }
 
    return getCachedImage(mcVersion) ?? downloadImage(mcVersion);
+}
+
+const PARSED_IMAGES = new Map<string, ImageModulePrepared[]>();
+
+export async function getParsedImage(mcVersion: string | 'latest') {
+   const cached = PARSED_IMAGES.get(mcVersion);
+   if (cached) return cached;
+
+   const parsed = LatestImageModuleFormat.ReadAllModules(await getImage(mcVersion)).map(e => prepareImageModule(e));
+   PARSED_IMAGES.set(mcVersion, parsed);
+   return parsed;
 }

@@ -20,7 +20,7 @@ suite('DynamicType', () => {
       );
    });
    test('Dynamic Type Registration', () => {
-      const context = new ModuleContext('uuid');
+      const context = new ModuleContext('uuid', '0.0.0');
       const ref = { is_bind_type: true, name: 'unregistered' } as unknown as MetadataType;
       const type = context.resolveType(ref);
       expect(type).toBeInstanceOf(DynamicType);

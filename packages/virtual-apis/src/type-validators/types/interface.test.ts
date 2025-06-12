@@ -10,7 +10,7 @@ suite('InterfaceType', () => {
    }
 
    test('Dependency Resolution', () => {
-      const context = new ModuleContext('uuid');
+      const context = new ModuleContext('uuid', '0.0.0');
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('b', new InterfaceBindType('b'));
       context.resolveAllDynamicTypes();
@@ -62,7 +62,7 @@ suite('InterfaceType', () => {
    });
 
    test('Complex Dependency Resolution', () => {
-      const context = new ModuleContext('uuid');
+      const context = new ModuleContext('uuid', '0.0.0');
       context.registerType('b', new InterfaceBindType('b').addProperty('c', context.resolveType(ref('c'))));
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('c', new InterfaceBindType('c').addProperty('a', context.resolveType(ref('a'))));

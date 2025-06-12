@@ -1,4 +1,6 @@
 import { Kernel } from '@bedrock-apis/kernel-isolation';
+import { getParsedImage } from '../../../../libs/binary/src/get-image';
+import { ImageModulePrepared } from '../../../../libs/binary/src/structs';
 import { ModuleContext } from './module-context';
 
 export interface ContextConfig {
@@ -38,5 +40,28 @@ export class Context extends Kernel.Empty {
       this.MODULES.set(module.uuid, module);
    }
 
-   public static GetOrCompileModule(specifier: string, version: string) {}
+   public static GetMCVersion(moduleVersion: string) {
+      // TODO Resolve version from 2.1.0-beta.1.21.80 for example
+      return 'latest';
+   }
+
+   public static async GetOrCompileModule(specifier: string, version: string) {
+      const mcVersion = this.GetMCVersion(version);
+      const modules = await getParsedImage(mcVersion);
+      const moduleDefinition = modules.find(e => e.name === specifier && e.version === version);
+      if (!moduleDefinition) throw new Kernel['globalThis::Error'](`Unknown module: ${specifier} ${version}`);
+
+      return this.MODULES.get(moduleDefinition.uuid) ?? this.CompileModule(moduleDefinition);
+   }
+
+   public static CompileModule(module: ImageModulePrepared) {
+      const ctx = new ModuleContext(module.uuid, module.version);
+      this.MODULES.set(ctx.id, ctx);
+      // todo resolve all deps
+      // todo add all types defintions etc
+
+      ctx.resolveAllDynamicTypes();
+
+      return ctx;
+   }
 }

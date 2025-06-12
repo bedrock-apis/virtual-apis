@@ -4,7 +4,7 @@ import { fromDefaultType } from '../default';
 import { OptionalType } from './optional';
 import { validateThrow } from './tests.helper';
 
-const context = new ModuleContext('uuid');
+const context = new ModuleContext('uuid', '0.0.0');
 
 suite('Optional', () => {
    test('validate', () => {

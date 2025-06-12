@@ -1,4 +1,5 @@
 import { Range } from '@bedrock-apis/types';
+import { ImageModuleFormatV1 } from '../image-formats';
 
 export interface ImageModule {
    // Metadata
@@ -28,3 +29,22 @@ export interface ImageType {
    readonly childId?: number;
    readonly childrenIds?: ArrayLike<number>;
 }
+
+export function prepareImageModule(imageModule: ImageModule) {
+   const { uuid, name, version, strings, types, symbols, exports } = imageModule;
+
+   const preparedTypes = Array.prototype.map.call(
+      types,
+      ({ kindId, range, length, childId, childrenIds }: ImageType) => ({
+         kind: strings[kindId],
+         range,
+         length,
+         childId,
+         childrenIds,
+      }),
+   );
+
+   return { uuid, name, version, types: preparedTypes };
+}
+
+export type ImageModulePrepared = ReturnType<typeof prepareImageModule>;

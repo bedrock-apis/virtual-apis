@@ -18,8 +18,15 @@ export class ModuleContext extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
 
-   public constructor(public readonly uuid: string) {
+   public constructor(
+      public readonly uuid: string,
+      public readonly version: string,
+   ) {
       super();
+   }
+
+   public get id() {
+      return `${this.uuid} ${this.version}`;
    }
 
    /**
