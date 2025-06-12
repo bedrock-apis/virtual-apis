@@ -3,7 +3,7 @@ import { Range } from '@bedrock-apis/types';
 export interface ImageModuleData {
    readonly types: ArrayLike<ImageType>;
    readonly symbols: ArrayLike<ImageSymbol>;
-   readonly exports: ArrayLike<number>; // Index ids of the symbols it self
+   readonly exports: Uint16Array; // Index ids of the symbols it self
 }
 export interface ImageSymbol {
    readonly kind: number;

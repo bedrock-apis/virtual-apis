@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { StaticDataSource } from './static-data-source';
 
 const utf8Decoder = new TextDecoder();
@@ -88,5 +89,13 @@ export class BinaryReader {
    public static ReadArrayBufferU32(dataProvider: StaticDataSource): Uint8Array {
       const length = BinaryReader.ReadUint32(dataProvider);
       return BinaryReader.ReadBuffer(dataProvider, length);
+   }
+   public static ReadUint16Array(_: StaticDataSource, length: number): Uint16Array {
+      const view = _.view;
+      const buffer = new Uint16Array(length);
+      let offsett = _.pointer;
+      for (let i = 0; i < length; i++, offsett += 2) buffer[i] = view.getUint16(offsett, true);
+      _.pointer += offsett;
+      return buffer;
    }
 }

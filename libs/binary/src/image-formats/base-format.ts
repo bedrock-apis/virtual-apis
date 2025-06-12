@@ -7,7 +7,7 @@ import {
 import { BinaryReader, BinaryWriter } from '../binary';
 import { NBTTag } from '../../ref-bapi-nbt/tag';
 import { ImageModuleData as ImageModuleData } from '../structs';
-import { ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
+import { GeneralMetatada, ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
 import { StaticDataSource } from '../binary/static-data-source';
 import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
 import { BinaryFieldDataType } from '../types/data-type';
@@ -62,24 +62,11 @@ export class BaseBinaryImageSerializer {
       }
    }
    //#endregion
-   protected static ReadImageHeader(_: StaticDataSource) {}
 
-   //#region Internal APIs
-   protected static ReadModuleMetadataWithSize(_: StaticDataSource): ImageModuleHeader {
-      const metadata = BinaryReader.ReadCheckPointUint16(_, _ => this.ReadMetadata(_));
-      const size = BinaryReader.ReadUint32(_);
-      // go back to check point
-      _.pointer -= 4;
-      return { size, metadata };
-   }
-   protected static WriteModuleHeaderMetadata(_: StaticDataSource, metadata: ModuleMetadata): void {
-      BinaryWriter.WriteCheckPointUint16(_, _ => this.WriteMetadata(_, metadata));
-   }
-   //#endregion
-   protected static WriteMetadata(_: StaticDataSource, metadata: ModuleMetadata): void {
+   protected static WriteMetadata(_: StaticDataSource, metadata: object): void {
       BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[NBTTag.Compound](_, metadata));
    }
-   protected static ReadMetadata(_: StaticDataSource): ModuleMetadata {
+   protected static ReadMetadata(_: StaticDataSource): unknown {
       return BinaryReader.ReadCheckPointUint16(_, _ => this.nbtFormatReader[NBTTag.Compound](_));
    }
 
@@ -91,12 +78,11 @@ export class BaseBinaryImageSerializer {
       return this.WriteMetadata;
    }
    protected static get ReadGeneralMetadata() {
-      return this.ReadMetadata;
+      return this.ReadMetadata as (_: StaticDataSource) => GeneralMetatada;
    }
    protected static get ReadFieldMetadata() {
       return this.ReadMetadata;
    }
-   //#region Meta
    protected static WriteGlobalStrings(_: StaticDataSource, data: string[]) {
       BinaryWriter.WriteUint16(_, data.length);
       for (let i = 0; i < data.length; i++) BinaryWriter.WriteStringU8(_, data[i] as string);
@@ -107,11 +93,11 @@ export class BaseBinaryImageSerializer {
       for (let i = 0; i < length; i++) array.push(BinaryReader.ReadStringU8(_));
       return array;
    }
-
-   protected static WriteModuleField(_: StaticDataSource, module: ImageModuleData) {
+   //#region Inheritance
+   public static WriteModuleField(_: StaticDataSource, module: ImageModuleData) {
       throw new ReferenceError('No implementation error');
    }
-   protected static ReadModuleField(_: StaticDataSource, metadata: unknown): ImageModuleData {
+   public static ReadModuleField(_: StaticDataSource, metadata: unknown): ImageModuleData {
       throw new ReferenceError('No implementation error');
    }
    //#endregion
