@@ -1,8 +1,7 @@
+import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { MetadataFunctionArgumentDefinition, Range } from '@bedrock-apis/types';
-import { Context } from '../context';
+import { ModuleContext } from '../context';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../diagnostics';
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
-import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { Type } from './type';
 import { BaseNumberType } from './types/number';
 
@@ -10,7 +9,7 @@ export class ParamsDefinition extends Type {
    public requiredParams: number = 0;
    public params: KernelArray<ParamType> = KernelArray.Construct();
 
-   public static From(context: Context, params: MetadataFunctionArgumentDefinition[]) {
+   public static From(context: ModuleContext, params: MetadataFunctionArgumentDefinition[]) {
       const def = new ParamsDefinition();
       if (context && params) {
          let i = 0;

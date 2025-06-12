@@ -1,16 +1,16 @@
 import { expect, suite, test } from 'vitest';
-import { Context } from '../context';
+import { ModuleContext } from '../context';
 import { ParamsDefinition, ParamType } from './params-definition';
 import { BooleanType } from './types/boolean';
 import { NumberType } from './types/number';
 import { OptionalType } from './types/optional';
 import { StringType } from './types/string';
-import { VariantType } from './types/variant';
 import { validateThrow } from './types/tests.helper';
+import { VariantType } from './types/variant';
 
 suite('ParamsDefinition', () => {
    test('Empty', () => {
-      const params = ParamsDefinition.From(new Context(), [])
+      const params = ParamsDefinition.From(new ModuleContext('uuid'), [])
          .addType(new ParamType(new StringType(), false, undefined, undefined))
          .addType(new ParamType(new NumberType({ max: 10, min: 0 }), true, 10, undefined));
 
@@ -23,7 +23,7 @@ suite('ParamsDefinition', () => {
    });
 
    test('Range', () => {
-      const params = ParamsDefinition.From(new Context(), [])
+      const params = ParamsDefinition.From(new ModuleContext('uuid'), [])
          .addType(new ParamType(new VariantType([new StringType(), new BooleanType()]), false, undefined, undefined))
          .addType(new ParamType(new NumberType({ max: 100000, min: 0 }), true, 1, { min: 0, max: 256 }));
 
@@ -40,7 +40,7 @@ suite('ParamsDefinition', () => {
    });
 
    test('Optional Range', () => {
-      const params = ParamsDefinition.From(new Context(), [])
+      const params = ParamsDefinition.From(new ModuleContext('uuid'), [])
          .addType(new ParamType(new VariantType([new StringType(), new BooleanType()]), false, undefined, undefined))
          .addType(
             new ParamType(new OptionalType(new NumberType({ max: 100000, min: 0 })), true, 1, { min: 0, max: 256 }),

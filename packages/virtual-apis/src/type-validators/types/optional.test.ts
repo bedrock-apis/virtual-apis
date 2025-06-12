@@ -1,10 +1,10 @@
 import { expect, suite, test } from 'vitest';
+import { ModuleContext } from '../../context';
 import { fromDefaultType } from '../default';
 import { OptionalType } from './optional';
-import { Context } from '../../context';
 import { validateThrow } from './tests.helper';
 
-const context = new Context();
+const context = new ModuleContext('uuid');
 
 suite('Optional', () => {
    test('validate', () => {

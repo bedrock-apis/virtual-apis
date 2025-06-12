@@ -1,6 +1,6 @@
-import { expect, suite, test } from 'vitest';
 import { MetadataType } from '@bedrock-apis/types';
-import { Context } from '../../context';
+import { expect, suite, test } from 'vitest';
+import { ModuleContext } from '../../context';
 import { DiagnosticsStackReport } from '../../diagnostics';
 import { DynamicType } from './dynamic';
 import { StringType } from './string';
@@ -20,7 +20,7 @@ suite('DynamicType', () => {
       );
    });
    test('Dynamic Type Registration', () => {
-      const context = new Context();
+      const context = new ModuleContext('uuid');
       const ref = { is_bind_type: true, name: 'unregistered' } as unknown as MetadataType;
       const type = context.resolveType(ref);
       expect(type).toBeInstanceOf(DynamicType);

@@ -1,10 +1,10 @@
-import { expect, suite, test } from 'vitest';
 import { MetadataFunctionArgumentDefinition, MetadataType } from '@bedrock-apis/types';
-import { Context } from '../context';
+import { suite, test } from 'vitest';
+import { ModuleContext } from '../context';
 import { ClassDefinition } from '../context/class-definition';
 import { ParamsDefinition } from './params-definition';
 
-const context = new Context();
+const context = new ModuleContext('uuid');
 
 new ClassDefinition(context, 'ItemType', null, null, true).addProperty(
    'id',

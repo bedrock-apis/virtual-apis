@@ -1,6 +1,6 @@
 import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { Type } from '../../type-validators';
-import { ContextOptions } from '../context-config';
+import { Context, ContextOptions } from '../context';
 import { ExecutionContext } from '../execution-context';
 
 export type FunctionNativeHandler = (that: unknown, params: ArrayLike<unknown>) => unknown;
@@ -29,7 +29,7 @@ export function finalize<T extends FunctionNativeHandler>(method: T, length = 0)
    return method;
 }
 export function validateReturnType(executionContext: ExecutionContext, returnType: Type) {
-   const validate = executionContext.context.getConfigProperty(ContextOptions.StrictReturnTypes);
+   const validate = Context.GetConfigProperty(ContextOptions.StrictReturnTypes);
    returnType.validate(
       validate ? executionContext.diagnostics.errors : executionContext.diagnostics.warns,
       executionContext.result,

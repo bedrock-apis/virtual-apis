@@ -1,10 +1,10 @@
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { expect, suite, test, vi } from 'vitest';
-import { Context } from '..';
+import { ModuleContext } from '..';
 import { BooleanType, ParamsDefinition } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 
-const context = new Context();
+const context = new ModuleContext('uuid');
 const EntityDefinition = context.createClassDefinition('Entity', null, new ParamsDefinition()).addMethod('methodA');
 const PlayerDefinition = context
    .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true)

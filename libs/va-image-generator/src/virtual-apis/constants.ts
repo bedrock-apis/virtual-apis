@@ -1,20 +1,24 @@
-import { factory } from 'typescript';
-import * as VA from '@bedrock-apis/virtual-apis';
-import { Context } from '@bedrock-apis/virtual-apis';
 import { API_JS_FILENAME } from '@bedrock-apis/common';
+import * as VA from '@bedrock-apis/virtual-apis';
+import { ModuleContext } from '@bedrock-apis/virtual-apis';
+import { factory } from 'typescript';
 import { ASTIdentifier, ASTNamedImport } from '../codegen/index';
 
 export const API_EXPORTS = new ASTNamedImport(`../${API_JS_FILENAME}`);
 export const TYPES_IDENTIFIER = API_EXPORTS.import(ASTIdentifier.Create('TypesValidation' satisfies keyof typeof VA));
 export const CONTEXT_IDENTIFIER = API_EXPORTS.import(ASTIdentifier.Create('CONTEXT' satisfies keyof typeof VA));
-export const CONTEXT_RESOLVE_TYPE = CONTEXT_IDENTIFIER.access(ASTIdentifier.Unique(Context.prototype.resolveType));
+export const CONTEXT_RESOLVE_TYPE = CONTEXT_IDENTIFIER.access(
+   ASTIdentifier.Unique(ModuleContext.prototype.resolveType),
+);
 export const CONTEXT_CREATE_CLASS = CONTEXT_IDENTIFIER.access(
-   ASTIdentifier.Unique(Context.prototype.createClassDefinition),
+   ASTIdentifier.Unique(ModuleContext.prototype.createClassDefinition),
 );
 export const CONTEXT_RESOLVE_ALL_EXPRESSION = CONTEXT_IDENTIFIER.methodCall(
-   ASTIdentifier.Unique(Context.prototype.resolveAllDynamicTypes),
+   ASTIdentifier.Unique(ModuleContext.prototype.resolveAllDynamicTypes),
 );
-export const CONTEXT_REGISTER_TYPE = CONTEXT_IDENTIFIER.access(ASTIdentifier.Unique(Context.prototype.registerType));
+export const CONTEXT_REGISTER_TYPE = CONTEXT_IDENTIFIER.access(
+   ASTIdentifier.Unique(ModuleContext.prototype.registerType),
+);
 // Types Features
 export const INTERFACE_BIND_TYPE_NODE = TYPES_IDENTIFIER.access(
    ASTIdentifier.Unique(VA.TypesValidation.InterfaceBindType),

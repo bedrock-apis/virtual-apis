@@ -3,9 +3,7 @@
 
 import { Context } from '@bedrock-apis/virtual-apis';
 
-const CONTEXT = new Context();
-
-CONTEXT.configure({
+Context.Configure({
    GetterRequireValidBound: true,
    StrictReturnTypes: false,
 });

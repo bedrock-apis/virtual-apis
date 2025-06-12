@@ -1,13 +1,13 @@
-import { expect, suite, test } from 'vitest';
-import { Context } from './context';
-import { BooleanType, NumberType, ParamsDefinition, ParamType } from '../type-validators';
-import { ErrorFactory, Report } from '../diagnostics';
 import { Kernel } from '@bedrock-apis/kernel-isolation';
+import { expect, suite, test } from 'vitest';
+import { ErrorFactory, Report } from '../diagnostics';
+import { BooleanType, NumberType, ParamsDefinition, ParamType } from '../type-validators';
 import { ConstructionExecutionContext } from './execution-context';
+import { ModuleContext } from './module-context';
 
 const NUMBER_TYPE = new NumberType({ max: Number.MAX_SAFE_INTEGER, min: Number.MIN_SAFE_INTEGER });
 
-const context = new Context();
+const context = new ModuleContext('uuid');
 const EntityDefinition = context
    .createClassDefinition('Entity', null, null)
    .addMethod('methodA', new ParamsDefinition().addType(new ParamType(NUMBER_TYPE, false, 0, undefined)), NUMBER_TYPE);

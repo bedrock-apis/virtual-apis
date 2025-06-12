@@ -1,6 +1,6 @@
-import { expect, suite, test } from 'vitest';
 import { MetadataType } from '@bedrock-apis/types';
-import { Context } from '../../context';
+import { expect, suite, test } from 'vitest';
+import { ModuleContext } from '../../context';
 import { InterfaceBindType } from './interface';
 import { validateThrow } from './tests.helper';
 
@@ -10,7 +10,7 @@ suite('InterfaceType', () => {
    }
 
    test('Dependency Resolution', () => {
-      const context = new Context();
+      const context = new ModuleContext('uuid');
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('b', new InterfaceBindType('b'));
       context.resolveAllDynamicTypes();
@@ -62,7 +62,7 @@ suite('InterfaceType', () => {
    });
 
    test('Complex Dependency Resolution', () => {
-      const context = new Context();
+      const context = new ModuleContext('uuid');
       context.registerType('b', new InterfaceBindType('b').addProperty('c', context.resolveType(ref('c'))));
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('c', new InterfaceBindType('c').addProperty('a', context.resolveType(ref('a'))));

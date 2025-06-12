@@ -1,9 +1,8 @@
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
+import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { API_ERRORS_MESSAGES, ErrorFactory, WARNING_ERROR_MESSAGES } from '../../diagnostics';
-import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { Type } from '../../type-validators';
 import { ClassDefinition } from '../class-definition';
-import { ContextOptions } from '../context-config';
+import { Context, ContextOptions } from '../context';
 import { InstanceExecutionContext } from '../execution-context';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 
@@ -81,7 +80,7 @@ function createFunctionalGetter(
       // Check for diagnostics and report first value
       if (!diagnostics.success) {
          executionContext.dispose();
-         if (!definition.context.getConfigProperty(ContextOptions.GetterRequireValidBound)) return undefined;
+         if (!Context.GetConfigProperty(ContextOptions.GetterRequireValidBound)) return undefined;
          throw diagnostics.throw(trimStack + 1);
       }
 

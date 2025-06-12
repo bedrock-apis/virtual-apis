@@ -3,10 +3,10 @@ import { ContextPanicError, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ClassBindType } from '../type-validators/types/class';
-import type { Context } from './context';
 import { ConstructionExecutionContext, ExecutionContext, InstanceExecutionContext } from './execution-context';
 import { createConstructorFor, createMethodFor, createPropertyHandler } from './factory';
 import { FunctionNativeHandler } from './factory/base';
+import type { ModuleContext } from './module-context';
 
 export type BaseExecutionParams<E extends ExecutionContext = ExecutionContext> = [
    handle: object,
@@ -48,7 +48,7 @@ export class ClassDefinition extends Kernel.Empty {
    }
 
    public constructor(
-      public readonly context: Context,
+      public readonly context: ModuleContext,
       /** Virtual API Class Name */
       public readonly classId: string,
       /** Inject inheritance */

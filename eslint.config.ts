@@ -19,6 +19,7 @@ export default tseslint.config(
    ...tseslint.configs.strict,
    {
       files: ['packages/**/*.ts', 'libs/**/*.ts', '*.ts'],
+      ignores: ['libs/binary/**'],
       languageOptions: {
          ecmaVersion: 2024,
          sourceType: 'module',
