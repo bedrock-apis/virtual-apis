@@ -13,13 +13,13 @@ export default tseslint.config(
          'bds-docs/**',
          'bds-docs-stable/**',
          '**/*.js',
+         'libs/binary/**',
       ],
    },
    eslint.configs.recommended,
    ...tseslint.configs.strict,
    {
       files: ['packages/**/*.ts', 'libs/**/*.ts', '*.ts'],
-      ignores: ['libs/binary/**'],
       languageOptions: {
          ecmaVersion: 2024,
          sourceType: 'module',

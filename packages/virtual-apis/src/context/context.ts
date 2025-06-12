@@ -37,4 +37,6 @@ export class Context extends Kernel.Empty {
    public static SetModule(module: ModuleContext) {
       this.MODULES.set(module.uuid, module);
    }
+
+   public static GetOrCompileModule(specifier: string, version: string) {}
 }
