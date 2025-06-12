@@ -1,3 +1,4 @@
+//@es
 import { NBTTag } from "../tag";
 import { StaticDataProvider } from "./data-provider";
 

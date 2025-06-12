@@ -13,7 +13,7 @@ export interface ImageSymbol {
     readonly symbolNameId?: number;
 }
 export interface ImageConstantSymbol extends ImageSymbol {
-    readonly value?: any;
+    readonly value?: unknown;
 }
 
 export interface ImageType {

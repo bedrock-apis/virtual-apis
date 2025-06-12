@@ -8,13 +8,13 @@ export class ImageModuleFormatV1 extends BaseImageModuleFormat {
     public static override readonly version: number = 1; 
     protected static override readModule(_: IStaticDataProvider): ImageModule {
         const meta = super.readMetadata(_);
-        return this.readContainer(_, meta as any);
+        return this.readContainer(_, meta as object);
     }
-    protected static getMetadata(m: ImageModule): any{return Object.create(null);}
+    protected static getMetadata(m: ImageModule): object{return Object.create(null);}
     protected static override writeModule(_: IStaticDataProvider, m: ImageModule): void {
         this.writeMetadata(_, this.getMetadata(m));
     }
-    protected static readContainer(_: IStaticDataProvider, metadata: Record<string, any>): ImageModule{
-        return null!;
+    protected static readContainer(_: IStaticDataProvider, metadata: object): ImageModule{
+        return null as unknown as ImageModule;
     }
 }

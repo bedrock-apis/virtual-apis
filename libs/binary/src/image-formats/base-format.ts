@@ -13,7 +13,7 @@ export class BaseImageModuleFormat {
     public static readonly NBT_FORMAT_WRITER: NBTFormatWriter = new GeneralNBTFormatWriter;
 
     protected static getBase<T>(this: T): T | null{
-        if(this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this as any) as T;
+        if(this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this) as T;
         return null;
     }
     //#region Header

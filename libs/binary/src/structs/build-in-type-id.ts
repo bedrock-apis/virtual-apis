@@ -16,7 +16,7 @@ export enum BuildInTypeId {
     Float64 = 0x8A,
 
     Undefined = 0x90,
-    Void = Undefined,
+    //Void = 0x90,
 
     Boolean = 0x91,
     String = 0x92,

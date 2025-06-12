@@ -7,6 +7,7 @@ export default tseslint.config(
       ignores: [
          '**/*.test.ts',
          '**/dist/**',
+         '**/ref-bapi-nbt/**',
          'examples/**',
          'modules/**',
          'bds-docs/**',
