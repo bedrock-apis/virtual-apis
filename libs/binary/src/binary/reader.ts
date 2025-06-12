@@ -14,6 +14,19 @@ export class BinaryReader {
         return value;
     }
 
+    // Memory efficient but not as fast, has to be benchamarked on real-world samples
+    public static readVarUint32(dataProvider: IStaticDataProvider): number {
+        let current = dataProvider.uint8Array[dataProvider.pointer++]!;
+        let value = current;
+        let shift = 0;
+        let i = 0;
+        while(value & 0x80 && i++ < 5){
+            current = dataProvider.uint8Array[dataProvider.pointer++]!;
+            value |= (current & 0x7F) << (shift+=7);
+        }
+        return value;
+    }
+
     public static readUint32(dataProvider: IStaticDataProvider): number {
         const value = dataProvider.view.getUint32(dataProvider.pointer, true);
         dataProvider.pointer += 4;

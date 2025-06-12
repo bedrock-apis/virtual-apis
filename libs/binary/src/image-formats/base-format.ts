@@ -1,6 +1,7 @@
 import { GeneralNBTFormatReader, GeneralNBTFormatWriter, IStaticDataProvider, NBTFormatReader, NBTFormatWriter } from "../../ref-bapi-nbt/base";
 import { BinaryReader, BinaryWriter } from "../binary";
 import { NBTTag } from "../../ref-bapi-nbt/tag";
+import { ImageModule } from "../structs";
 
 const FAKE_CONSTRUCTOR = function(){};
 export class BaseImageModuleFormat {
@@ -11,7 +12,7 @@ export class BaseImageModuleFormat {
     public static readonly NBT_FORMAT_READER: NBTFormatReader = new GeneralNBTFormatReader;
     public static readonly NBT_FORMAT_WRITER: NBTFormatWriter = new GeneralNBTFormatWriter;
 
-    public static getBase<T>(this: T): T | null{
+    protected static getBase<T>(this: T): T | null{
         if(this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this as any) as T;
         return null;
     }
@@ -42,21 +43,44 @@ export class BaseImageModuleFormat {
         return this.NBT_FORMAT_READER[NBTTag.Compound](_) as T;
     }
     //#endregion
-
-    
-    //#region Meta
-    public static writeContianer(_: IStaticDataProvider, metadata: object): void{
-        
+    private static readInternal(_: IStaticDataProvider, version: number): ImageModule | null{
+        if(this.isDeprecated) throw new ReferenceError("Deprecated format, version: " + this.version);
+        if(version > this.version) throw new ReferenceError("Future Yet, Unsupported version, please update virtual-apis package");
+        if(version < this.version)
+            return (this.getBase() as unknown as {readInternal: (_: IStaticDataProvider, v: number)=>ImageModule})
+                ?.readInternal(_, version)??null;
+        return this.readModule(_);
     }
-    protected static readContainer<T>(_: IStaticDataProvider): T {
-        return null!;
+    //#region Module
+    protected static readModule(_: IStaticDataProvider): ImageModule{
+        throw new ReferenceError("Missing implementation, version: " + this.version);
+    }
+    protected static writeModule(_: IStaticDataProvider, m: ImageModule){
+        throw new ReferenceError("Missing implementation, version: " + this.version);
     }
     //#endregion
-    public static read(_: IStaticDataProvider, version: number): void | null{
-        if(this.isDeprecated) throw new ReferenceError("Deprecated format, version: " + this.version);
-        if(version < this.version) return this.getBase()?.read(_, version)??null;
-        return void this.readModule(_);
+
+    public static read(_: IStaticDataProvider): ImageModule{
+        const header = this.readHeader(_);
+        const m = this.readInternal(_, header.version);
+        if(!m)
+            throw new ReferenceError("Failed to read image module, version: " + header.version);
+
+        return m;
     }
-    protected static readModule(_: IStaticDataProvider): /*IImageContainer*/ {}{ throw new ReferenceError("Unknown version: " + this.version); }
+    public static write(_: IStaticDataProvider, m: ImageModule): void {
+        _.pointer = this.HEADER_SIZE; // Skip header
+
+        // Write module
+        this.writeModule(_, m);
+
+        // Write header with righ module size
+        const size = _.pointer - this.HEADER_SIZE;
+        _.pointer = 0;
+        this.writeHeader(_, size);
+
+        // Correct full length
+        _.pointer = size + this.HEADER_SIZE;
+    }
 }
 FAKE_CONSTRUCTOR.prototype = BaseImageModuleFormat;
