@@ -24,7 +24,9 @@ export class BaseBinaryImageSerializer {
       return null;
    }
    protected static readonly ReadNextMagic = BinaryReader.ReadUint32;
+   protected static readonly WriteNextMagic = BinaryWriter.WriteUint32;
    protected static readonly ReadVersion = BinaryReader.ReadUint16;
+   protected static readonly WriteVersion = BinaryWriter.WriteUint16;
 
    //#region Public APIs
    public static GetBinaryImageSerializerFor<T extends typeof BaseBinaryImageSerializer>(
@@ -60,6 +62,17 @@ export class BaseBinaryImageSerializer {
          const checkpoint = BinaryReader.GetCheckPointUint32(_);
          yield { type: magic, metadata, checkpoint };
       }
+   }
+   public static WriteGeneralHeader(_: StaticDataSource, header: ImageGeneralHeaderData) {
+      _.pointer = 0;
+      const self = this.GetBinaryImageSerializerFor(header.version);
+      if (!self) throw new ReferenceError('Unsupported format version, ' + header.version);
+
+      self.WriteNextMagic(_, IMAGE_GENERAL_DATA_MAGIC);
+      self.WriteVersion(_, header.version);
+
+      self.WriteGeneralMetadata(_, header.metadata);
+      self.WriteGlobalStrings(_, header.stringSlices);
    }
    //#endregion
 

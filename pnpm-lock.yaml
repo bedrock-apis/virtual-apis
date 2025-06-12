@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@bedrock-apis/binary':
+        specifier: workspace:*
+        version: link:libs/binary
       '@bedrock-apis/common':
         specifier: workspace:*
         version: link:libs/common
