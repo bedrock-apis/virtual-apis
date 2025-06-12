@@ -20,7 +20,7 @@
       "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, pnpm-workspace.yaml, bun.lockb, .*"
    },
    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "vscode.typescript-language-features"
    },
    "[json]": {
       "editor.defaultFormatter": "vscode.json-language-features"

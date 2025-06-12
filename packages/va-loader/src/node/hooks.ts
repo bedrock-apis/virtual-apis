@@ -18,14 +18,16 @@ export async function resolve(
    },
    nextResolve: (specifier: string, context: unknown) => unknown,
 ) {
-
    const over = MODULES.get(specifier);
    if (over) return nextResolve(over, context);
 
    return MODULES.get(specifier) ?? nextResolve(specifier, context);
 }
 
+/*
 // Take a resolved URL and return the source code to be evaluated.
 export async function load(url: unknown, context: unknown, nextLoad: (url: unknown, context: unknown) => unknown) {
+   console.log("LOAD")
    return nextLoad(url, context);
 }
+console.log(load.toString());*/

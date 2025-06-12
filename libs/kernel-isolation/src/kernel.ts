@@ -20,7 +20,7 @@ type KernelType = {
 // eslint-disable-next-line custom/no-default-extends
 class KernelClass {
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
+   public static Empty: { new(): object } = function Empty() { } as unknown as { new(): object };
    public static __call = Function.prototype.call; // Type to Type call method
    public static Call: <T extends (...params: P) => unknown, P extends unknown[]>(
       functionToCall: T,
@@ -30,7 +30,7 @@ class KernelClass {
    public static CallBindTo: <T extends (...params: P) => unknown, P extends any[]>(
       functionToBind: T,
    ) => (thisArgument: unknown, ...params: P) => ReturnType<T> = func =>
-      Kernel.Call(Kernel['Function::prototype'].bind, Kernel.Call, null, func);
+         Kernel.Call(Kernel['Function::prototype'].bind, Kernel.Call, null, func);
    public static __setPrototypeOf = Object.setPrototypeOf;
    public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
@@ -52,7 +52,7 @@ class KernelClass {
    public static As<T extends keyof typeof globalThis>(
       object: unknown,
       name: T,
-   ): Global[T] extends { new (): infer I } | { (): infer I } ? I : never {
+   ): Global[T] extends { new(): infer I } | { (): infer I } ? I : never {
       return KernelClass.__setPrototypeOf(object, KernelStorage[name + '::prototype']);
    }
 
@@ -100,7 +100,7 @@ class KernelClass {
       if (typeof func === 'function') return NATIVE_FUNCTIONS.has(func);
       else return false;
    }
-   public static SetGlobalThis() {}
+   public static SetGlobalThis() { }
    public static log = globalThis.console.log;
    public static error = globalThis.console.error;
    public static warn = globalThis.console.warn;
@@ -143,13 +143,13 @@ class KernelClass {
       }
       return isolated as T;
    }
-   public static IsolatedConstructor<T extends Keys, S extends Global[T]>(name: T): S{
+   public static IsolatedConstructor<T extends Keys, S extends Global[T]>(name: T): S {
       const ctor = KernelStorage[name + '::constructor'];
-      let isolated: new ()=>any = ISOLATED_CONSTRUCTORS.get(ctor) as any;
-      if(isolated) return isolated as S;
+      let isolated: new () => any = ISOLATED_CONSTRUCTORS.get(ctor) as any;
+      if (isolated) return isolated as S;
       const prototype = KernelStorage[name + '::prototype'];
       isolated = class {
-         constructor(...params: any[]){
+         public constructor(...params: any[]) {
             return new (ctor as any)(...params);
          }
       }
