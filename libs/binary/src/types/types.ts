@@ -1,4 +1,11 @@
-export enum BuildInTypeId {
+export enum TypeFlags {
+   IsBindType = 0b00,
+   IsComplex = 0b01,
+}
+export enum TypeBitFlag {
+   LocalBindTypeBit = 1 << 7,
+   IsExtendedBit = 1 << 6, // Reads next byten
+
    Unknown = 0x00,
    Symbol = 0x01,
    This = 0xff,

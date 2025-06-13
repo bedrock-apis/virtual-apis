@@ -23,6 +23,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    }
 
    //#region Readers
+
    protected static ReadSymbols(_: StaticDataSource): SerializableSymbol[] {
       const size = BinaryReader.ReadUint16(_);
       const array: SerializableSymbol[] = [];
@@ -39,7 +40,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       // -------------------
       if (bitFlags === 0) return symbol;
 
-      // Strict  !!!
+      // Strict Order Do not change!!!
       if (AllOf(bitFlags, SymbolBitFlags.IsEnum)) symbol.isEnumData = this.ReadEnumData(_);
       if (AllOf(bitFlags, SymbolBitFlags.IsInterface)) symbol.isInterfaceData = this.ReadInterfaceData(_);
       if (AllOf(bitFlags, SymbolBitFlags.IsInvocable)) symbol.invocablePrivileges = this.ReadPrivileges(_);
@@ -84,8 +85,10 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       return BinaryReader.ReadUint16Array(_, BinaryReader.ReadUint16(_));
    }
    //#endregion
+   //#region Writers
    protected static WriteExportIndexes(_: StaticDataSource, value: ArrayLike<number>) {
       BinaryWriter.WriteUint16(_, value.length);
       BinaryWriter.WriteUint16Array(_, value);
    }
+   //#endregion
 }
