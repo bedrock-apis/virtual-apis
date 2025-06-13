@@ -1,12 +1,9 @@
-import Module, { createRequire, registerHooks } from 'node:module';
-import url from 'node:url';
+import Module, { registerHooks } from 'node:module';
 import { createPackageCode } from './create-package-code';
 import { getModuleVersions } from './get-module-versions';
 
 const modules = getModuleVersions();
 const moduleCache = new Map<string, Module.ResolveFnOutput>();
-const require = createRequire(import.meta.url);
-const virtualApis = url.pathToFileURL(require.resolve('@bedrock-apis/virtual-apis')).href;
 
 registerHooks({
    resolve(specifier, context, nextResolve) {
@@ -17,7 +14,7 @@ registerHooks({
       let module = moduleCache.get(id);
       if (!module) {
          module = {
-            url: `data:application/javascript;base64,${btoa(createPackageCode(specifier, version, virtualApis))}`,
+            url: `data:application/javascript;base64,${btoa(createPackageCode(specifier, version))}`,
             shortCircuit: true,
          };
          moduleCache.set(id, module);
