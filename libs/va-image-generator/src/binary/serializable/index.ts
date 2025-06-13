@@ -4,7 +4,7 @@ export interface SerializableModuleStats {
    uniqueTypes: number;
    classes: number;
    enums: number;
-   intefaces: number;
+   interfaces: number;
    constants: number;
 }
 

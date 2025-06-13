@@ -28,7 +28,7 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
          uniqueTypes: 0,
          classes: metadata.classes.length,
          enums: metadata.enums.length,
-         intefaces: metadata.interfaces.length,
+         interfaces: metadata.interfaces.length,
          constants: metadata.constants.length,
       };
 
