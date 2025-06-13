@@ -12,7 +12,7 @@ runClassic('no-global', rule, {
       {
          code: 'Object.assign({}, {})',
          errors: [{ messageId: 'useKernel', column: 1, endColumn: 7 }],
-         output: `Kernel['static::Object'].assign({}, {})`,
+         output: `Kernel['Object::static'].assign({}, {})`,
       },
    ],
 });
