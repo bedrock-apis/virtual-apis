@@ -35,7 +35,9 @@ export class BaseBinaryImageSerializer {
    ): T | null {
       if (this.isDeprecated) throw new ReferenceError('Deprecated format, version: ' + this.version);
       if (version > this.version)
-         throw new ReferenceError('Future Yet, Unsupported version, please update virtual-apis package');
+         throw new ReferenceError(
+            `Future Yet, Unsupported version (${version} vs latest supported ${this.version}), please update virtual-apis package`,
+         );
       if (version < this.version) return this.GetBase() ?? null;
       return this;
    }
