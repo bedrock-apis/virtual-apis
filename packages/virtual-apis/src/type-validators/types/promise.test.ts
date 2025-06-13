@@ -1,15 +1,14 @@
-import { expect, suite, test } from 'vitest';
 import { Kernel } from '@bedrock-apis/kernel-isolation';
-import { Type } from '../type';
+import { expect, suite, test } from 'vitest';
+import { testType } from '../../tests.helper';
 import { PromiseType } from './promise';
-import { validateThrow } from './tests.helper';
 
 suite('PromiseType', () => {
    test('Promise', () => {
       const type = new PromiseType();
-      expect(() => validateThrow(type, new Promise(() => {}))).not.toThrow();
+      expect(() => testType(type, new Promise(() => {}))).not.toThrow();
       expect(() =>
-         validateThrow(
+         testType(
             type,
             Kernel.Construct('Promise', () => {}),
          ),
@@ -18,25 +17,25 @@ suite('PromiseType', () => {
 
    test('Not A Promise', () => {
       const type = new PromiseType();
-      expect(() => validateThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, 'string')).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, 10)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, 10)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, null)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, null)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, undefined)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, undefined)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, true)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, true)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, false)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, false)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, { then() {}, catch() {}, finally() {} })).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, { then() {}, catch() {}, finally() {} })).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });

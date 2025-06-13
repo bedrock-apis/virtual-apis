@@ -1,11 +1,11 @@
 import { MetadataFunctionArgumentDefinition, MetadataType } from '@bedrock-apis/types';
 import { suite, test } from 'vitest';
-import { ModuleContext } from '../context';
 import { ClassAPISymbol } from '../context/symbols/class';
 import { GetterAPISymbol } from '../context/symbols/getter';
+import { testCreateModuleContext } from '../tests.helper';
 import { ParamsDefinition } from './params-definition';
 
-const ctx = new ModuleContext('uuid', '0.0.0');
+const ctx = testCreateModuleContext();
 const itemType = new ClassAPISymbol(ctx, 'ItemType');
 itemType.properties.push({
    getter: new GetterAPISymbol(

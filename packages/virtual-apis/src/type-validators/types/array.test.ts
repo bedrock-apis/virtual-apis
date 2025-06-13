@@ -1,29 +1,28 @@
 import { expect, suite, test } from 'vitest';
-import { Type } from '../type';
+import { testType } from '../../tests.helper';
 import { ArrayType } from './array';
 import { StringType } from './string';
-import { validateThrow } from './tests.helper';
 
 suite('ArrayType', () => {
    test('Array', () => {
       const type = new ArrayType(new StringType());
 
-      expect(() => validateThrow(type, ['string', 'string'])).not.toThrow();
-      expect(() => validateThrow(type, [])).not.toThrow();
+      expect(() => testType(type, ['string', 'string'])).not.toThrow();
+      expect(() => testType(type, [])).not.toThrow();
 
-      expect(() => validateThrow(type, 'string')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, 'string')).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
-      expect(() => validateThrow(type, [undefined])).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, [undefined])).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Array contains unsupported type.]`,
       );
-      expect(() => validateThrow(type, [null])).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, [null])).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Array contains unsupported type.]`,
       );
-      expect(() => validateThrow(type, [, , , ,])).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, [, , , ,])).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Array contains unsupported type.]`,
       );
-      expect(() => validateThrow(type, [1, 2])).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(type, [1, 2])).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Array contains unsupported type.]`,
       );
    });

@@ -1,6 +1,6 @@
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { expect, suite, test, vi } from 'vitest';
-import { ModuleContext } from '..';
+import { testCreateModuleContext } from '../../tests.helper';
 import { BooleanType, ParamsDefinition, VoidType } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
 import { ClassAPISymbol } from '../symbols/class';
@@ -8,7 +8,7 @@ import { GetterAPISymbol } from '../symbols/getter';
 import { MethodAPISymbol } from '../symbols/method';
 import { SetterAPISymbol } from '../symbols/setter';
 
-const ctx = new ModuleContext('uuid', '0.0.0');
+const ctx = testCreateModuleContext();
 const EntityDefinition = new ClassAPISymbol(ctx, 'Entity', null, new ParamsDefinition());
 EntityDefinition.methods.push(
    new MethodAPISymbol(ctx, 'methodA', EntityDefinition, new ParamsDefinition(), new VoidType()),

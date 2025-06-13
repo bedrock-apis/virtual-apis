@@ -1,9 +1,9 @@
 import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { expect, suite, test } from 'vitest';
 import { ErrorFactory, Report } from '../diagnostics';
+import { testCreateModuleContext } from '../tests.helper';
 import { BooleanType, NumberType, ParamsDefinition, ParamType, VoidType } from '../type-validators';
 import { ConstructionExecutionContext } from './execution-context';
-import { ModuleContext } from './module-context';
 import { ClassAPISymbol } from './symbols/class';
 import { GetterAPISymbol } from './symbols/getter';
 import { MethodAPISymbol } from './symbols/method';
@@ -11,7 +11,7 @@ import { SetterAPISymbol } from './symbols/setter';
 
 const NUMBER_TYPE = new NumberType({ max: Number.MAX_SAFE_INTEGER, min: Number.MIN_SAFE_INTEGER });
 
-const ctx = new ModuleContext('uuid', '0.0.0');
+const ctx = testCreateModuleContext();
 const EntityDefinition = new ClassAPISymbol(ctx, 'Entity');
 EntityDefinition.methods.push(
    new MethodAPISymbol(

@@ -12,6 +12,7 @@ import { OptionalType } from '../type-validators/types/optional';
 import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
+import { Context } from './context';
 import { BaseExecutionParams } from './symbols/class';
 import { APISymbol } from './symbols/symbol';
 
@@ -19,15 +20,14 @@ export class ModuleContext extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
 
+   public readonly exports: Record<string, unknown> = {};
+
    public constructor(
       public readonly uuid: string,
       public readonly version: string,
+      public readonly specifier: string,
    ) {
       super();
-   }
-
-   public get id() {
-      return `${this.uuid} ${this.version}`;
    }
 
    /**
@@ -73,9 +73,7 @@ export class ModuleContext extends Kernel.Empty {
    public readonly onDiagnosticsReported = new NativeEvent<[diagnostics: Diagnostics]>();
    public onInvocation(eventName: string, callback: (...params: BaseExecutionParams) => void) {
       const symbol = this.symbols.get(eventName);
-      if (!symbol) {
-         throw new Kernel['ReferenceError::constructor'](`Symbol id not registered: ${eventName}`);
-      }
+      if (!symbol) throw new Kernel['ReferenceError::constructor'](`${eventName} is not registered symbol`);
       symbol.interactionHandler = callback;
    }
    public isHandleNative(handle: unknown) {
@@ -88,7 +86,21 @@ export class ModuleContext extends Kernel.Empty {
 
    /** @internal */
    public resolveType(metadataType: MetadataType): Type {
-      const { name } = metadataType;
+      const { name, from_module } = metadataType;
+
+      if (from_module) {
+         const module = Context.GetModule(from_module.name, from_module.version);
+
+         // We expect module to be resolved because we resolve module dependencies before we call any resolveType
+         if (!module) {
+            throw Kernel['ReferenceError::constructor'](
+               `resolveType - Tried to resolve type of uncompiled module that was not in dependencies: ${from_module.name}@${from_module.version}: ${name}`,
+            );
+         }
+
+         return module.resolveType(metadataType);
+      }
+
       if (metadataType.is_bind_type) {
          const type = this.TYPES.get(name);
          if (type) return type;

@@ -1,8 +1,7 @@
 import { MetadataType } from '@bedrock-apis/types';
 import { expect, suite, test } from 'vitest';
-import { ModuleContext } from '../../context';
+import { testCreateModuleContext, testType } from '../../tests.helper';
 import { InterfaceBindType } from './interface';
-import { validateThrow } from './tests.helper';
 
 suite('InterfaceType', () => {
    function ref(name: string) {
@@ -10,7 +9,7 @@ suite('InterfaceType', () => {
    }
 
    test('Dependency Resolution', () => {
-      const context = new ModuleContext('uuid', '0.0.0');
+      const context = testCreateModuleContext();
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('b', new InterfaceBindType('b'));
       context.resolveAllDynamicTypes();
@@ -62,7 +61,7 @@ suite('InterfaceType', () => {
    });
 
    test('Complex Dependency Resolution', () => {
-      const context = new ModuleContext('uuid', '0.0.0');
+      const context = testCreateModuleContext();
       context.registerType('b', new InterfaceBindType('b').addProperty('c', context.resolveType(ref('c'))));
       context.registerType('a', new InterfaceBindType('a').addProperty('b', context.resolveType(ref('b'))));
       context.registerType('c', new InterfaceBindType('c').addProperty('a', context.resolveType(ref('a'))));
@@ -124,7 +123,7 @@ suite('InterfaceType', () => {
         ]
       `);
 
-      expect(() => validateThrow(aType, {})).toThrowErrorMatchingInlineSnapshot(
+      expect(() => testType(aType, {})).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });

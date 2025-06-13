@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { testCreateModuleContext } from '../../tests.helper';
 import { ParamsDefinition, VoidType } from '../../type-validators';
-import { ModuleContext } from '../module-context';
 import { ClassAPISymbol } from './class';
 import { EnumAPISymbol } from './enum';
 import { MethodAPISymbol } from './method';
 
 describe('ClassAPISymbol', () => {
    it('should cache compile', () => {
-      const ctx = new ModuleContext('uuid', '0.0.0');
+      const ctx = testCreateModuleContext();
       const enm = new EnumAPISymbol(ctx, 'enum', [
          ['key', 'value'],
          ['key 2', 'value 2'],
