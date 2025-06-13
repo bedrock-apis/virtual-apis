@@ -2,7 +2,7 @@ import { Kernel, KernelIterator } from '@bedrock-apis/kernel-isolation';
 import { MetadataType } from '@bedrock-apis/types';
 import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
-import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
+import { DynamicType, Type, VoidType } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';
 import { FunctionType, GeneratorType } from '../type-validators/types/function';
@@ -12,7 +12,6 @@ import { OptionalType } from '../type-validators/types/optional';
 import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
-import { ClassDefinition } from './class-definition';
 import { BaseExecutionParams } from './symbols/class';
 import { APISymbol } from './symbols/symbol';
 
@@ -81,16 +80,6 @@ export class ModuleContext extends Kernel.Empty {
    }
    public isHandleNative(handle: unknown) {
       return this.nativeHandles.has(handle as object);
-   }
-
-   // Without first parameter!!!
-   public createClassDefinition(
-      name: string,
-      parent: ClassDefinition | null,
-      paramDefinition: ParamsDefinition | null,
-      newExpected = true,
-   ) {
-      return new ClassDefinition(this, name, parent, paramDefinition, newExpected);
    }
 
    public reportDiagnostics(diagnostics: Diagnostics) {
