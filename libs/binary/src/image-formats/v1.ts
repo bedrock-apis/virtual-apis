@@ -19,7 +19,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       const length = BinaryReader.ReadUint16(_);
       return BinaryReader.ReadUint16Array(_, length);
    }
-   protected static WriteExportIndexes(_: StaticDataSource, value: Uint16Array) {
+   protected static WriteExportIndexes(_: StaticDataSource, value: ArrayLike<number>) {
       BinaryWriter.WriteUint16(_, value.length);
       BinaryWriter.WriteUint16Array(_, value);
    }

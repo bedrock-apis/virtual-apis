@@ -7,7 +7,7 @@ import {
 import { BinaryReader, BinaryWriter } from '../binary';
 import { NBTTag } from '../../ref-bapi-nbt/tag';
 import { ImageModuleData as ImageModuleData } from '../structs';
-import { GeneralMetatada, ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
+import { GeneralMetadata, ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
 import { StaticDataSource } from '../binary/static-data-source';
 import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
 import { BinaryFieldDataType } from '../types/data-type';
@@ -65,6 +65,7 @@ export class BaseBinaryImageSerializer {
    }
    public static WriteGeneralHeader(_: StaticDataSource, header: ImageGeneralHeaderData) {
       _.pointer = 0;
+      console.log(header.version, this.version);
       const self = this.GetBinaryImageSerializerFor(header.version);
       if (!self) throw new ReferenceError('Unsupported format version, ' + header.version);
 
@@ -73,6 +74,10 @@ export class BaseBinaryImageSerializer {
 
       self.WriteGeneralMetadata(_, header.metadata);
       self.WriteGlobalStrings(_, header.stringSlices);
+   }
+   public static WriteFieldHeader(_: StaticDataSource, metadata: ModuleMetadata) {
+      this.WriteNextMagic(_, IMAGE_MODULE_HEADER_MAGIC);
+      this.WriteFieldMetadata(_, metadata);
    }
    //#endregion
 
@@ -91,7 +96,7 @@ export class BaseBinaryImageSerializer {
       return this.WriteMetadata;
    }
    protected static get ReadGeneralMetadata() {
-      return this.ReadMetadata as (_: StaticDataSource) => GeneralMetatada;
+      return this.ReadMetadata as (_: StaticDataSource) => GeneralMetadata;
    }
    protected static get ReadFieldMetadata() {
       return this.ReadMetadata;

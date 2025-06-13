@@ -5,10 +5,10 @@ import { IndexId } from './general';
 // Its serialized via NBT as is
 export interface ModuleMetadata {
    readonly name?: IndexId;
-   readonly uuif?: IndexId;
+   readonly uuid?: IndexId;
    readonly version?: IndexId;
 }
 
-export interface GeneralMetatada {
+export interface GeneralMetadata {
    readonly engine?: IndexId;
 }

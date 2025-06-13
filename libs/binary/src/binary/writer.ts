@@ -60,10 +60,10 @@ export class BinaryWriter {
       dataProvider.pointer += value.length;
    }
 
-   public static WriteUint16Array(_: StaticDataSource, value: Uint16Array): void {
+   public static WriteUint16Array(_: StaticDataSource, value: ArrayLike<number>): void {
       const view = _.view;
       let offset = _.pointer;
       for (let i = 0; i < value.length; i++, offset += 2) view.setUint16(offset, value[i] as number, true);
-      _.pointer += offset;
+      _.pointer = offset;
    }
 }
