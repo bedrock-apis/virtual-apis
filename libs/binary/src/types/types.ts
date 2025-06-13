@@ -4,7 +4,7 @@ export enum TypeFlags {
 }
 export enum TypeBitFlag {
    LocalBindTypeBit = 1 << 7,
-   IsExtendedBit = 1 << 6, // Reads next byten
+   IsExtendedBit = 1 << 6, // Special Case
 
    Unknown = 0x00,
    Symbol = 0x01,

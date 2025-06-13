@@ -28,7 +28,7 @@ export class IndexedCollector<T> {
       return this.MAP.get(key) ?? null;
    }
 
-   public getArray(): readonly T[] {
+   public getArray(): T[] {
       return this.LIST;
    }
 
