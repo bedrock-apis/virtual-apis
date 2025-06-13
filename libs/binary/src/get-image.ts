@@ -46,7 +46,7 @@ export async function getImage(mcVersion: string): Promise<Uint8Array<ArrayBuffe
 
 const PARSED_IMAGES = new Map<string, ImageModulePrepared[]>();
 
-export async function getParsedImage(mcVersion: string | 'latest') {
+export async function getParsedImage(mcVersion: string | 'latest'): Promise<ImageModulePrepared[]> {
    const cached = PARSED_IMAGES.get(mcVersion);
    if (cached) return cached;
 
