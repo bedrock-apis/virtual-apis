@@ -1,5 +1,8 @@
 import { MetadataModuleDefinition } from '@bedrock-apis/types';
 
+// Strip unused properties for easier testing and better dx
+export type StrippedMetadataModuleDefinition = Omit<MetadataModuleDefinition, 'type_aliases' | 'module_type'>;
+
 export interface IMetadataProvider {
-   getMetadataModules(): AsyncIterable<MetadataModuleDefinition>;
+   getMetadataModules(): AsyncIterable<StrippedMetadataModuleDefinition>;
 }

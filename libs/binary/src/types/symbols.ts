@@ -1,25 +1,42 @@
 import { IndexId } from './general';
 
 export enum SymbolBitFlags {
-   IsClass = 1, // No Effect
-   IsEnum = 1 << 1, // Reads Up Enum Type and its values
-   IsInterface = 1 << 2, // Reads Up Keys and Types
-   IsConstant = 1 << 3, //No Effect
-   IsError = 1 << 4, //No Effect
+   /** No effect */
+   IsClass = 1,
+   /** Reads isEnumData */
+   IsEnum = 1 << 1,
+   /** Reads isInterfaceData */
+   IsInterface = 1 << 2,
+   /** No Effect */
+   IsConstant = 1 << 3,
+   /** No Effect */
+   IsError = 1 << 4,
+   /** Reads privileges */
+   IsInvocable = 1 << 5,
 
-   IsInvocable = 1 << 5, // privileges
+   /** Read Params */
+   IsFunction = 1 << 6,
+   /** Reads privileges */
+   IsProperty = 1 << 7,
+   /** Reads privileges & meta information */
+   IsConstructor = 1 << 8,
 
-   IsFunction = 1 << 6, // Read Params
-   IsProperty = 1 << 7, // Is Also Invocable
-   IsConstructor = 1 << 8, // Also Invocable & meta information
-
-   HasSetter = 1 << 9, // Reads additional Privileges for setter
+   /** Reads setterPrivileges */
+   HasSetter = 1 << 9,
    IsBakedProperty = 1 << 10,
 
+   /** Reads BindType */
    IsBindType = 1 << 11, // Reads up BindType
-   IsStatic = 1 << 12, // Only available if its BindType
-   HasValue = 1 << 13, // Reads NBT Value
-   HasType = 1 << 14, // Reads Type
+   /** Only available if its bind type */
+   IsStatic = 1 << 12,
+
+   /** Reads nbt serializable hasValue */
+   HasValue = 1 << 13,
+   /** Reads hassType */
+   HasType = 1 << 14,
+
+   /** No effect */
+   IsObject = 1 << 15,
 }
 
 export interface SerializableSymbol {
