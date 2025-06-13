@@ -1,8 +1,8 @@
 import { KernelArray } from '@bedrock-apis/kernel-isolation';
 import { API_ERRORS_MESSAGES } from '../../diagnostics';
 import { ParamsDefinition, Type } from '../../type-validators';
-import { ClassDefinition } from '../class-definition';
 import { InstanceExecutionContext } from '../execution-context';
+import { ClassAPISymbol } from '../symbols/class';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 
 export function createFunctionalMethod(
@@ -55,18 +55,18 @@ export function createFunctionalMethod(
    };
 }
 export function createMethodFor(
-   definition: ClassDefinition,
+   definition: ClassAPISymbol,
    name: string,
    paramsDefinition: ParamsDefinition,
    returnType: Type,
 ): FunctionNativeHandler {
-   const id = `${definition.classId}::${name}`;
+   const id = `${definition.name}::${name}`;
    // Build arrow function so the methods are not possible to call with new expression
    const proxyThis = proxyify(
       createFunctionalMethod(
          paramsDefinition,
          returnType,
-         (that, params) => new InstanceExecutionContext(definition as ClassDefinition, proxyThis, id, that, params),
+         (that, params) => new InstanceExecutionContext(definition, proxyThis, id, that, params),
          1,
       ),
    );

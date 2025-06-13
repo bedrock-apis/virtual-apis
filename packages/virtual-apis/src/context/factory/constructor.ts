@@ -1,8 +1,8 @@
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES } from '../../diagnostics';
 import { ParamsDefinition } from '../../type-validators';
-import { ClassDefinition } from '../class-definition';
 import { ConstructionExecutionContext } from '../execution-context';
+import { ClassAPICompiled, ClassAPISymbol } from '../symbols/class';
 
 export function createFunctionalConstructor(
    paramsDefinition: ParamsDefinition,
@@ -17,7 +17,7 @@ export function createFunctionalConstructor(
       if (!new.target && definition.newExpected) diagnostics.errors.report(QUICK_JS_ENV_ERROR_MESSAGES.NewExpected());
 
       // If constructor is present for this class
-      if (!definition.hasConstructor) diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(definition.classId));
+      if (!definition.invocableId) diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(definition.name));
 
       // Validate Errors
       paramsDefinition.validate(diagnostics.errors, executionContext.parameters);
@@ -45,17 +45,14 @@ export function createFunctionalConstructor(
    } as unknown as new () => unknown;
 }
 
-export function createConstructorFor(
-   definition: ClassDefinition,
-   paramsDefinition: ParamsDefinition,
-): ClassDefinition['api'] {
+export function createConstructorFor(definition: ClassAPISymbol, paramsDefinition: ParamsDefinition) {
    // Create function as constructor
    const ctor = createFunctionalConstructor(
       paramsDefinition,
       (target, params) =>
          new ConstructionExecutionContext(
-            ctor as unknown as (...p: unknown[]) => unknown,
-            definition as ClassDefinition,
+            ctor as unknown as ClassAPICompiled,
+            definition,
             params,
             target as () => void,
          ),
@@ -73,7 +70,7 @@ export function createConstructorFor(
    }
 
    // Final sealing so the class has readonly prototype
-   Kernel.SetClass(ctor, definition.classId);
+   Kernel.SetClass(ctor, definition.name);
 
-   return ctor as ClassDefinition['api'];
+   return ctor as ClassAPICompiled;
 }

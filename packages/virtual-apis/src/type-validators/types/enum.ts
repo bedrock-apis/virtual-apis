@@ -1,15 +1,14 @@
 import { KernelArray } from '@bedrock-apis/kernel-isolation';
-import { MetadataEnumDefinition } from '@bedrock-apis/types';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Type } from '../type';
 
 export class EnumType extends Type {
-   public constructor(public readonly definition: MetadataEnumDefinition) {
+   public constructor(public readonly constants: [key: string, value: unknown][]) {
       super();
    }
    public validate(diagnostics: DiagnosticsStackReport, object: unknown) {
-      for (const { value } of KernelArray.From(this.definition.constants).getIterator()) {
-         if (value === object) return diagnostics;
+      for (const constant of KernelArray.From(this.constants).getIterator()) {
+         if (constant[1] === object) return diagnostics;
       }
 
       // TODO: What Error it should report?

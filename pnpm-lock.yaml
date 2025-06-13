@@ -2085,7 +2085,7 @@ snapshots:
   '@minecraft/server-ui@2.0.0-beta.1.21.80-stable(@minecraft/vanilla-data@1.21.80)':
     dependencies:
       '@minecraft/common': 1.2.0
-      '@minecraft/server': 2.0.0-beta.1.21.80-stable(@minecraft/vanilla-data@1.21.80)
+      '@minecraft/server': 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
     transitivePeerDependencies:
       - '@minecraft/vanilla-data'
 

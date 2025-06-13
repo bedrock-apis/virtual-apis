@@ -1,9 +1,9 @@
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { API_ERRORS_MESSAGES, ErrorFactory, WARNING_ERROR_MESSAGES } from '../../diagnostics';
 import { Type } from '../../type-validators';
-import { ClassDefinition } from '../class-definition';
 import { Context, ContextOptions } from '../context';
 import { InstanceExecutionContext } from '../execution-context';
+import { ClassAPISymbol } from '../symbols/class';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
 
 function createFunctionalSetter(
@@ -108,8 +108,8 @@ function createFunctionalGetter(
       return executionContext.result;
    };
 }
-export function createPropertyHandler(definition: ClassDefinition, name: string, type: Type, isSetter: boolean) {
-   const id = `${definition.classId}::${name} ${isSetter ? 'setter' : 'getter'}`;
+export function createPropertyHandler(definition: ClassAPISymbol, name: string, type: Type, isSetter: boolean) {
+   const id = `${definition.name}::${name} ${isSetter ? 'setter' : 'getter'}`;
 
    const proxyThis = proxyify(
       (isSetter ? createFunctionalSetter : createFunctionalGetter)(

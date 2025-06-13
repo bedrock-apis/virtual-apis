@@ -1,22 +1,26 @@
 import { MetadataFunctionArgumentDefinition, MetadataType } from '@bedrock-apis/types';
 import { suite, test } from 'vitest';
 import { ModuleContext } from '../context';
-import { ClassDefinition } from '../context/class-definition';
+import { ClassAPISymbol } from '../context/symbols/class';
+import { GetterAPISymbol } from '../context/symbols/getter';
 import { ParamsDefinition } from './params-definition';
 
-const context = new ModuleContext('uuid', '0.0.0');
+const ctx = new ModuleContext('uuid', '0.0.0');
+const itemType = new ClassAPISymbol(ctx, 'ItemType');
+itemType.properties.push({
+   getter: new GetterAPISymbol(
+      ctx,
+      'ItemType',
+      itemType,
+      ctx.resolveType({ is_bind_type: false, is_errorable: false, name: 'string' } as unknown as MetadataType),
+   ),
+});
 
-new ClassDefinition(context, 'ItemType', null, null, true).addProperty(
-   'id',
-   context.resolveType({ is_bind_type: false, is_errorable: false, name: 'string' } as unknown as MetadataType),
-   true,
-);
-
-const ItemStack = new ClassDefinition(
-   context,
+const ItemStack = new ClassAPISymbol(
+   ctx,
    'ItemStack',
    null,
-   ParamsDefinition.From(context, [
+   ParamsDefinition.From(ctx, [
       {
          details: null,
          name: 'itemType',
@@ -41,10 +45,9 @@ const ItemStack = new ClassDefinition(
          },
       },
    ] as unknown as MetadataFunctionArgumentDefinition[]),
-   true,
 ).api;
 
-context.resolveAllDynamicTypes();
+ctx.resolveAllDynamicTypes();
 
 const TEST_DATA: [testCase: () => void, errorText: string][] = [
    [() => (ItemStack as any)(), 'TypeError: must be called with new'],

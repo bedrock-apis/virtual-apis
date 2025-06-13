@@ -1,8 +1,8 @@
 import { KernelArray } from '@bedrock-apis/kernel-isolation';
 import { ParamsDefinition, Type } from '../../type-validators';
 import { InstanceExecutionContext } from '../execution-context';
+import { ClassAPISymbol } from '../symbols/class';
 import { finalize, FunctionNativeHandler, proxyify, validateReturnType } from './base';
-import { ClassDefinition } from '../class-definition';
 
 function createFunctionalFunction(
    paramsDefinition: ParamsDefinition,
@@ -49,7 +49,7 @@ function createFunctionalFunction(
    };
 }
 export function createFunction(
-   definition: ClassDefinition,
+   definition: ClassAPISymbol,
    fullId: string,
    paramsDefinition: ParamsDefinition,
    returnType: Type,

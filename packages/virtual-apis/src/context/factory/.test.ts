@@ -1,23 +1,40 @@
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { expect, suite, test, vi } from 'vitest';
 import { ModuleContext } from '..';
-import { BooleanType, ParamsDefinition } from '../../type-validators';
+import { BooleanType, ParamsDefinition, VoidType } from '../../type-validators';
 import { ConstructionExecutionContext } from '../execution-context';
+import { ClassAPISymbol } from '../symbols/class';
+import { GetterAPISymbol } from '../symbols/getter';
+import { MethodAPISymbol } from '../symbols/method';
+import { SetterAPISymbol } from '../symbols/setter';
 
-const context = new ModuleContext('uuid', '0.0.0');
-const EntityDefinition = context.createClassDefinition('Entity', null, new ParamsDefinition()).addMethod('methodA');
-const PlayerDefinition = context
-   .createClassDefinition('Player', EntityDefinition, new ParamsDefinition(), true)
-   .addMethod('methodB')
-   .addProperty('test', new BooleanType(), false);
+const ctx = new ModuleContext('uuid', '0.0.0');
+const EntityDefinition = new ClassAPISymbol(ctx, 'Entity', null, new ParamsDefinition());
+EntityDefinition.methods.push(
+   new MethodAPISymbol(ctx, 'methodA', EntityDefinition, new ParamsDefinition(), new VoidType()),
+);
 
-const Player = PlayerDefinition.api;
+const PlayerDefinition = new ClassAPISymbol(ctx, 'Player', EntityDefinition, new ParamsDefinition());
+PlayerDefinition.methods.push(
+   new MethodAPISymbol(ctx, 'methodB', PlayerDefinition, new ParamsDefinition(), new VoidType()),
+);
+PlayerDefinition.properties.push({
+   getter: new GetterAPISymbol(ctx, 'test', PlayerDefinition, new BooleanType()),
+   setter: new SetterAPISymbol(ctx, 'test', PlayerDefinition, new BooleanType()),
+});
+
+const Player = PlayerDefinition.api as unknown as new () => {
+   methodA: (...args: unknown[]) => unknown;
+   methodB: (...args: unknown[]) => unknown;
+   test: unknown;
+};
 const Entity = EntityDefinition.api;
 
 suite('Base API', () => {
    test('Construction', () => {
       const mock = vi.fn();
-      EntityDefinition.onConstruct.subscribe(mock);
+      expect(EntityDefinition.invocableId).toBeTruthy();
+      if (EntityDefinition.invocableId) ctx.onInvocation(EntityDefinition.invocableId, mock);
 
       const player = new Player();
 
@@ -30,7 +47,7 @@ suite('Base API', () => {
    test('Native Construction', () => {
       const entity_handle = EntityDefinition.__construct(
          new ConstructionExecutionContext(
-            EntityDefinition.api as () => unknown,
+            EntityDefinition.api,
             EntityDefinition,
             KernelArray.Construct<unknown>(),
             null,
@@ -40,18 +57,16 @@ suite('Base API', () => {
       expect(entity_handle).not.toBeInstanceOf(Player);
       expect(entity_handle).not.toBeInstanceOf(Entity);
       expect(entity_handle).not.toBeInstanceOf(Object);
-      expect(() => Player.prototype.methodA.call(entity_handle));
+      expect(() => (Player as any).prototype.methodA.call(entity_handle));
    });
 
    test('Normal Constructor', () => {
-      const Player = PlayerDefinition.api;
-
       expect(new Player()).toBeInstanceOf(Player);
       expect(new Player()).toBeInstanceOf(Entity);
    });
 
    test('Methods', () => {
-      const player = new PlayerDefinition.api();
+      const player = new Player();
 
       expect(player.methodA).toBeTypeOf('function');
       expect(player.methodB).toBeTypeOf('function');
@@ -64,9 +79,9 @@ suite('Base API', () => {
    });
 
    test('Property', () => {
-      const player = new PlayerDefinition.api();
+      const player = new Player();
 
-      const { get, set } = Object.getOwnPropertyDescriptor(PlayerDefinition.api.prototype, 'test') ?? {};
+      const { get, set } = Object.getOwnPropertyDescriptor(Player.prototype, 'test') ?? {};
       expect(set).toThrowError();
       expect(get).not.toThrow();
       expect(() => (set as any)?.call(player)).toThrow();
@@ -80,7 +95,7 @@ suite('Base API', () => {
    });
 
    test('Error stack traces', () => {
-      const player = new PlayerDefinition.api();
+      const player = new Player();
 
       try {
          player.methodA.call(undefined);
@@ -94,7 +109,7 @@ suite('Base API', () => {
    });
 
    test('Invalid params', () => {
-      const player = new PlayerDefinition.api();
+      const player = new Player();
 
       expect(() => player.methodA(undefined)).toThrowError();
    });

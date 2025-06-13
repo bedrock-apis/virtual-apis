@@ -1,6 +1,6 @@
 import { Kernel } from '@bedrock-apis/kernel-isolation';
-import { getParsedImage } from '../../../../libs/binary/src/get-image';
-import { ImageModulePrepared } from '../../../../libs/binary/src/structs';
+import { getParsedImage } from '@bedrock-apis/binary/src/get-image';
+import { ImageModulePrepared } from '@bedrock-apis/binary/src/structs';
 import { ModuleContext } from './module-context';
 
 export interface ContextConfig {

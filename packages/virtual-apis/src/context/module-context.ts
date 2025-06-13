@@ -12,7 +12,9 @@ import { OptionalType } from '../type-validators/types/optional';
 import { PromiseType } from '../type-validators/types/promise';
 import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
-import { BaseExecutionParams, ClassDefinition } from './class-definition';
+import { ClassDefinition } from './class-definition';
+import { BaseExecutionParams } from './symbols/class';
+import { APISymbol } from './symbols/symbol';
 
 export class ModuleContext extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
@@ -68,14 +70,14 @@ export class ModuleContext extends Kernel.Empty {
    }
 
    public readonly nativeHandles = Kernel.Construct('WeakSet');
-   public readonly nativeEvents = Kernel.Construct('Map') as Map<string, NativeEvent<BaseExecutionParams>>;
+   public readonly symbols = Kernel.Construct('Map') as Map<string, APISymbol>;
    public readonly onDiagnosticsReported = new NativeEvent<[diagnostics: Diagnostics]>();
-   public onInvocation(eventName: string, callBack: (...params: BaseExecutionParams) => void) {
-      const event = this.nativeEvents.get(eventName);
-      if (!event) {
-         throw new Kernel['ReferenceError::constructor'](`Unknown methodId specified: ${eventName}`);
+   public onInvocation(eventName: string, callback: (...params: BaseExecutionParams) => void) {
+      const symbol = this.symbols.get(eventName);
+      if (!symbol) {
+         throw new Kernel['ReferenceError::constructor'](`Symbol id not registered: ${eventName}`);
       }
-      event.subscribe(callBack);
+      symbol.interactionHandler = callback;
    }
    public isHandleNative(handle: unknown) {
       return this.nativeHandles.has(handle as object);

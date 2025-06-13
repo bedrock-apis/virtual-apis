@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Old file, should be removed once all methods are migrated to the symbols/class
+
 import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { ContextPanicError, PANIC_ERROR_MESSAGES } from '../diagnostics';
 import { NativeEvent } from '../events';
@@ -8,32 +11,37 @@ import { createConstructorFor, createMethodFor, createPropertyHandler } from './
 import { FunctionNativeHandler } from './factory/base';
 import type { ModuleContext } from './module-context';
 
-export type BaseExecutionParams<E extends ExecutionContext = ExecutionContext> = [
+/** @deprecated */
+export type ClassBaseExecutionParams<E extends ExecutionContext = ExecutionContext> = [
    handle: object,
    cache: object,
    ClassDefinition | null,
    E,
 ];
 
-/** Class for single virtual api definition */
+/**
+ * Class for single virtual api definition
+ *
+ * @deprecated
+ */
 export class ClassDefinition extends Kernel.Empty {
    private readonly HANDLE_TO_NATIVE_CACHE = Kernel.Construct('WeakMap');
    private readonly NATIVE_TO_HANDLE_CACHE = Kernel.Construct('WeakMap');
    public readonly virtualApis = Kernel.Construct('Map') as Map<string, (...args: unknown[]) => unknown>;
-   public readonly onConstruct: NativeEvent<BaseExecutionParams<ConstructionExecutionContext>>;
+   public readonly onConstruct: NativeEvent<ClassBaseExecutionParams<ConstructionExecutionContext>>;
    public readonly constructorId: string;
    public readonly type: Type;
    public readonly hasConstructor: boolean;
    public readonly invocable = Kernel.Construct('WeakMap') as WeakMap<
       CallableFunction,
-      NativeEvent<BaseExecutionParams>
+      NativeEvent<ClassBaseExecutionParams>
    >;
 
    private addInvocable(id: string, method: (...args: unknown[]) => unknown) {
       this.virtualApis.set(id, method);
       const event = new NativeEvent();
       this.invocable.set(method, event);
-      this.context.nativeEvents.set(id, event);
+      this.context.symbols.set(id, event);
    }
 
    public readonly api: {
@@ -60,10 +68,10 @@ export class ClassDefinition extends Kernel.Empty {
       this.hasConstructor = Kernel['Boolean::constructor'](constructorParams);
       this.api = createConstructorFor(this, constructorParams ?? new ParamsDefinition());
       this.constructorId = `${classId}::constructor`;
-      if (context.nativeEvents.has(this.constructorId)) {
+      if (context.symbols.has(this.constructorId)) {
          throw new Kernel['ReferenceError::constructor'](`Class with this id already exists '${classId}'`);
       }
-      context.nativeEvents.set(this.constructorId, (this.onConstruct = new NativeEvent()));
+      context.symbols.set(this.constructorId, (this.onConstruct = new NativeEvent()));
       this.virtualApis.set(this.constructorId, this.api as () => unknown);
       context.registerType(classId, (this.type = new ClassBindType(this as ClassDefinition)));
    }
