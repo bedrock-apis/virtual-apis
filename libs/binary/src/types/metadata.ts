@@ -7,6 +7,7 @@ export interface ModuleMetadata {
    readonly name?: IndexId;
    readonly uuid?: IndexId;
    readonly version?: IndexId;
+   readonly dependencies: { versions?: IndexId[]; uuid?: IndexId }[];
 }
 
 export interface GeneralMetadata {

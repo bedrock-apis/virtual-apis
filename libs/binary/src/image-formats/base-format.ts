@@ -4,12 +4,11 @@ import {
    NBTFormatReader,
    NBTFormatWriter,
 } from '../../ref-bapi-nbt/base';
-import { BinaryReader, BinaryWriter } from '../binary';
 import { NBTTag } from '../../ref-bapi-nbt/tag';
-import { ImageModuleData as ImageModuleData } from '../structs';
-import { GeneralMetadata, ImageGeneralHeaderData, ImageModuleHeader, ModuleMetadata } from '../types';
+import { BinaryReader, BinaryWriter } from '../binary';
 import { StaticDataSource } from '../binary/static-data-source';
 import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
+import { GeneralMetadata, ImageGeneralHeaderData, ImageModuleData, ModuleMetadata } from '../types';
 import { BinaryFieldDataType } from '../types/data-type';
 
 const FAKE_CONSTRUCTOR = function () {};

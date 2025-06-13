@@ -10,7 +10,7 @@ export async function main(metadataProvider: IMetadataProvider): Promise<number>
    const modules = [];
    for await (const metadata of metadataProvider.getMetadataModules()) {
       for (const cl of metadata.classes) stringCollector.getAdd(cl.name);
-      modules.push({
+      metadata.modules.push({
          metadata: {
             name: toIndex(metadata.name),
             uuid: toIndex(metadata.uuid),
