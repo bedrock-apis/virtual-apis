@@ -1,10 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { IndexedCollector, IndexedObjectCollector } from './indexed-collector';
+import { IndexedCollector } from './indexed-collector';
+
+export class IndexedCollectorHash<T, S> {
+   public constructor(protected readonly hash: (v: T) => S) {}
+   protected readonly MAP = new Map<S, number>();
+   protected readonly LIST: T[] = [];
+
+   public toIndex(key: T): number {
+      const $ = this.hash(key);
+      let value = this.MAP.get($) ?? null;
+      if (value === null) {
+         this.MAP.set($, (value = this.LIST.length));
+         this.LIST.push(key);
+      }
+      return value;
+   }
+
+   public fromIndex(index: number): T | null {
+      return this.LIST[index] ?? null;
+   }
+
+   public getArray(): T[] {
+      return this.LIST;
+   }
+
+   public clear() {
+      this.MAP.clear();
+      this.LIST.length = 0;
+   }
+}
 
 describe('indexed collector', () => {
    it('woorks', () => {
       const stringCollector = new IndexedCollector<string>();
-      const typesCollector = new IndexedObjectCollector<{ name: string; value: string }>(stringCollector);
+      const typesCollector = new IndexedCollectorHash((_: { name: string; value: string }) => `${_.name}.${_.value}`); //;new IndexedObjectCollector<{ name: string; value: string }>(stringCollector);
 
       stringCollector.toIndex('random string');
       stringCollector.toIndex('random string 2');
