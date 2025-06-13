@@ -164,14 +164,22 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
          e: MetadataClassDefinition,
          all: MetadataClassDefinition[],
       ): SerializableSymbol[] {
+         symbolicatedClasses.add(e.name);
+
          const parent = e.base_types[0];
          if (parent && !parent.from_module && !symbolicatedClasses.has(parent.name)) {
             const definition = all.find(e => e.name === parent.name);
             if (!definition) throw new TypeError(`Missing parent class definition ${parent.name} for ${e.name}`);
-            classToSymbol(symbolicatedClasses, e, all);
+            classToSymbol(symbolicatedClasses, definition, all);
          }
          const constructor = e.functions.find(e => e.is_constructor);
-         return [];
+
+         return [
+            constructor ? functionToSymbol(constructor, 0, [], SymbolBitFlags.IsConstructor) : undefined,
+            ...e.functions
+               .filter(e => e !== constructor)
+               .map(e => functionToSymbol(e, 0, [], e.is_static ? SymbolBitFlags.IsStatic : SymbolBitFlags.IsProperty)),
+         ].filter(e => !!e);
       }
    }
 

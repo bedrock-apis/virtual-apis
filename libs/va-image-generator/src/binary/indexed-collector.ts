@@ -7,17 +7,14 @@ export class IndexedCollector<T> {
    public toIndex(key: T): number {
       let value = this.get(key);
       if (value === null) {
-         this.MAP.set(key, (value = this.LIST.length));
+         this.MAP.set(key, (value = this.getIndexFor(key)));
          this.LIST.push(key);
       }
       return value;
    }
 
    public fromIndex(index: number): T | null {
-      for (const [value, i] of this.MAP) {
-         if (index === i) return value;
-      }
-      return null;
+      return this.LIST[index] ?? null;
    }
 
    protected getIndexFor(key: T) {
@@ -43,6 +40,13 @@ export class IndexedObjectCollector<T extends { name: string }> extends IndexedC
       super();
    }
 
+   public override fromIndex(index: number): T | null {
+      for (const [value, i] of this.MAP) {
+         if (index === i) return value;
+      }
+      return null;
+   }
+
    protected override getIndexFor(key: T): number {
       // This is to prevent collissions with the objects that have same name but different params
       // it would use new key in that case and try again
@@ -52,9 +56,12 @@ export class IndexedObjectCollector<T extends { name: string }> extends IndexedC
       while (true) {
          const index = this.keys.toIndex(name);
          const object = this.fromIndex(index);
-         if (isDeepStrictEqual(object, key)) return index;
+         if (!object || isDeepStrictEqual(object, key)) {
+            key.name = name; // update it to have '$' if it was added
+            return index;
+         }
 
-         console.log('Different type:', name, object, key);
+         console.log('Different type:', index, name, object, key);
          name = '$' + name;
       }
    }
