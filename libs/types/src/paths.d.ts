@@ -1,7 +1,6 @@
 /* eslint-ignore */
 // prettier-ignore
 
-
 export type F = 
    | 'libs/binary/dist/main.js'
    | 'libs/binary/package.json'
@@ -183,13 +182,14 @@ export type F =
    | 'packages/va-images/@minecraft/server@2.0.0-beta.native.js'
    | 'packages/va-images/@minecraft/server@2.0.0-internal.js'
    | 'packages/va-images/@minecraft/server@2.0.0-internal.native.js'
+   | 'packages/va-images/@minecraft/server@2.0.0-internal.zip'
    | 'packages/va-images/@minecraft/server@3.0.0-alpha.js'
    | 'packages/va-images/@minecraft/server@3.0.0-alpha.native.js'
    | 'packages/va-images/api-modules.json'
    | 'packages/va-images/api.js'
    | 'packages/va-images/package.json'
+   | 'packages/va-loader/dist/ecma.js'
    | 'packages/va-loader/dist/get-module-versions-B8cL-R3Y.js'
-   | 'packages/va-loader/dist/get-module-versions-DeRSualz.js'
    | 'packages/va-loader/dist/index.js'
    | 'packages/va-loader/dist/node.js'
    | 'packages/va-loader/dist/vitest.js'
@@ -197,6 +197,9 @@ export type F =
    | 'packages/va-loader/src/create-package-code.ts'
    | 'packages/va-loader/src/ecma/index.ts'
    | 'packages/va-loader/src/get-module-versions.ts'
+   | 'packages/va-loader/src/node-old/hooks.ts'
+   | 'packages/va-loader/src/node-old/index.ts'
+   | 'packages/va-loader/src/node-old/loader.ts'
    | 'packages/va-loader/src/node.ts'
    | 'packages/va-loader/src/vitest.ts'
    | 'packages/va-pluggable/dist/main.js'
@@ -288,7 +291,7 @@ export type F =
    | 'tsconfig.json'
    | 'vitest.config.ts';
 
-export type D = 
+export type D =
    | 'libs/binary'
    | 'libs/binary/dist'
    | 'libs/binary/ref-bapi-nbt'
@@ -329,6 +332,7 @@ export type D =
    | 'packages/va-loader/dist'
    | 'packages/va-loader/src'
    | 'packages/va-loader/src/ecma'
+   | 'packages/va-loader/src/node-old'
    | 'packages/va-pluggable'
    | 'packages/va-pluggable/dist'
    | 'packages/va-pluggable/src'
