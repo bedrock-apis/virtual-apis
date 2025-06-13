@@ -5,10 +5,13 @@ import {
    SymbolBitFlags,
 } from '@bedrock-apis/binary';
 import {
+   MetadataClassDefinition,
    MetadataConstantDefinition,
    MetadataEnumDefinition,
    MetadataErrorClassDefinition,
+   MetadataFunctionDefinition,
    MetadataInterfaceDefinition,
+   MetadataObjectDefinition,
    MetadataType,
 } from '@bedrock-apis/types';
 import { IMetadataProvider } from '../../metadata-provider';
@@ -52,7 +55,7 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
                ...metadata.classes.map(c => toIndex(c.name)),
                ...metadata.errors.map(c => toIndex(c.name)),
                ...metadata.functions.map(c => toIndex(c.name)),
-               ...metadata.objects.map(c => toIndex(c.name)), // do we really have objects?
+               ...metadata.objects.map(c => toIndex(c.name)),
                ...metadata.constants.map(c => toIndex(c.name)),
             ],
          },
@@ -66,7 +69,10 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
          ...metadata.enums.map(enumToSymbol),
          ...metadata.interfaces.map(interfaceToSymbol),
          ...metadata.errors.map(errorToSymbol),
+         ...metadata.functions.map(functionToSymbol),
+         ...metadata.objects.map(objectToSymbol),
          ...metadata.constants.map(constantToSymbol),
+         ...classesToSymbol(metadata.classes),
       );
 
       // Insert types at the start
@@ -75,6 +81,7 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
       stats.uniqueTypes = typesCollector.getArray().length;
 
       function typeToSymbol(e: MetadataType): SerializableSymbol {
+         // TODO Complete
          return {
             bitFlags: SymbolBitFlags.HasType,
             name: toIndex(e.name),
@@ -95,6 +102,7 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
       }
 
       function errorToSymbol(e: MetadataErrorClassDefinition): SerializableSymbol {
+         // TODO Complete
          return {
             bitFlags: SymbolBitFlags.IsError,
             name: toIndex(e.name),
@@ -112,6 +120,29 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
          };
       }
 
+      function objectToSymbol(e: MetadataObjectDefinition): SerializableSymbol {
+         return {
+            bitFlags: SymbolBitFlags.IsObject | SymbolBitFlags.HasType,
+            name: toIndex(e.name),
+            hasType: typeToIndex(e.type),
+         };
+      }
+
+      function functionToSymbol(
+         e: MetadataFunctionDefinition,
+         _: number,
+         __: unknown[],
+         extraFlags = 0,
+      ): SerializableSymbol {
+         return {
+            bitFlags: SymbolBitFlags.IsFunction,
+            name: toIndex(e.name),
+
+            // TODO Somehow store e.type.details
+            functionArguments: e.arguments.map(e => typeToIndex(e.type)),
+         };
+      }
+
       function constantToSymbol(e: MetadataConstantDefinition): SerializableSymbol {
          let bitFlags = SymbolBitFlags.IsConstant;
          if (typeof e.value !== 'undefined') bitFlags |= SymbolBitFlags.HasValue;
@@ -120,6 +151,27 @@ export async function toSerializable(metadataProvider: IMetadataProvider) {
             name: toIndex(e.name),
             hasValue: e.value,
          };
+      }
+
+      function classesToSymbol(e: MetadataClassDefinition[]): SerializableSymbol[] {
+         const symbolicatedClasses = new Set<string>();
+
+         return e.map(c => classToSymbol(symbolicatedClasses, c, e)).flat();
+      }
+
+      function classToSymbol(
+         symbolicatedClasses: Set<string>,
+         e: MetadataClassDefinition,
+         all: MetadataClassDefinition[],
+      ): SerializableSymbol[] {
+         const parent = e.base_types[0];
+         if (parent && !parent.from_module && !symbolicatedClasses.has(parent.name)) {
+            const definition = all.find(e => e.name === parent.name);
+            if (!definition) throw new TypeError(`Missing parent class definition ${parent.name} for ${e.name}`);
+            classToSymbol(symbolicatedClasses, e, all);
+         }
+         const constructor = e.functions.find(e => e.is_constructor);
+         return [];
       }
    }
 
