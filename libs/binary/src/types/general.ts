@@ -1,4 +1,4 @@
-import { BuildInTypeId } from './types';
+import { TypeBitFlag } from './types';
 
 export type IndexId = number;
-export type TypeIndexId = number | BuildInTypeId;
+export type TypeIndexId = number | TypeBitFlag;
