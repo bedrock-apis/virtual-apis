@@ -20,6 +20,7 @@ export function getModuleVersions(cwd = process.cwd()) {
    if (packageJson) {
       const deps = { ...packageJson.devDependencies, ...packageJson.dependencies };
       for (const [depName, depVersion] of Object.entries(deps)) {
+         console.log(depName, depVersion);
          if (!depName.startsWith('@minecraft')) continue;
 
          modules.set(depName, depVersion);
@@ -45,5 +46,7 @@ export function getModuleVersions(cwd = process.cwd()) {
       return modules;
    }
 
-   throw new Error('Unable to resolve module versions');
+   throw new Error(
+      `Unable to resolve module versions from cwd ${cwd}, package.json: ${!!packageJson}, manifest.json: ${!!manifestJson}`,
+   );
 }

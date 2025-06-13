@@ -32,7 +32,8 @@
    },
    "scripts": {
       "repo:init": "pnpm install --frozen-lockfile && pnpm run build:src && pnpm run repo:paths",
-      "repo:paths": "tsx libs/tools/src/paths",
+      "repo:paths": "node --enable-source-map libs/tools/src/paths",
+      "repo:todo": "node --enable-source-map libs/tools/src/todo",
       "repo:git": "git submodule update --init",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
@@ -43,7 +44,7 @@
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
       "  ": "",
       "build:src": "rolldown -c rolldown.config.ts",
-      "build:packages": "node --import @bedrock-apis/va-image-generator \"--eval=console.log('\\x1b[32mDone!')\"",
+      "build:packages": "node --enable-source-maps --import @bedrock-apis/va-image-generator \"--eval=console.log('\\x1b[32mDone!')\"",
       "build": "pnpm run build:src && pnpm run build:packages",
       "   ": "",
       "test:coverage": "vitest --ui --coverage",
@@ -89,7 +90,6 @@
       "prettier-plugin-jsdoc": "^1.3.2",
       "rolldown": "1.0.0-beta.15",
       "rollup": "^4.41.1",
-      "tsx": "^4.19.4",
       "typescript": "^5.8.3",
       "typescript-eslint": "^8.33.0",
       "vitest": "^3.1.4"

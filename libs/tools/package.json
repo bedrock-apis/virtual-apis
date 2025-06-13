@@ -2,5 +2,17 @@
    "name": "@bedrock-apis/internal-tool",
    "version": "0.0.1-alpha",
    "type": "module",
-   "packageManager": "pnpm@10.11.0"
+   "packageManager": "pnpm@10.11.0",
+   "exports": {
+      "./paths": {
+         "default": "./dist/paths.js",
+         "types": "./src/paths.ts",
+         "rolldown": null
+      },
+      "./todo": {
+         "default": "./dist/todo.js",
+         "types": "./src/todo.ts",
+         "rolldown": null
+      }
+   }
 }

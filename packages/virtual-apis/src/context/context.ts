@@ -1,5 +1,4 @@
-import { getParsedImage } from '@bedrock-apis/binary/src/get-image';
-import { ImageModulePrepared } from '@bedrock-apis/binary/src/structs';
+import { getParsedImage, ImageModulePrepared } from '@bedrock-apis/binary';
 import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { ModuleContext } from './module-context';
 

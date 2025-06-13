@@ -164,7 +164,9 @@ const ISOLATED_CONSTRUCTORS = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
 KernelClass.__setPrototypeOf(KernelStorage, null);
 
-const GLOBAL_NAMES = Object.getOwnPropertyNames(globalThis);
+// eslint-disable-next-line custom/no-array-expression
+const IGNORED_GLOBALS = ['sys', 'wasi', 'punycode'];
+const GLOBAL_NAMES = Object.getOwnPropertyNames(globalThis).filter(k => !IGNORED_GLOBALS.includes(k));
 
 // eslint-disable-next-line custom/no-iterators
 for (const constructor of GLOBAL_NAMES.map(k => (globalThis as typeof KernelStorage)[k]).filter(

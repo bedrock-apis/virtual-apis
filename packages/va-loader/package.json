@@ -7,17 +7,17 @@
       "./node": {
          "default": "./dist/node.js",
          "types": "./src/node.ts",
-         "rolldown": true
+         "rolldown": null
       },
       "./ecma": {
          "default": "./dist/ecma.js",
          "types": "./src/ecma/index.ts",
-         "rolldown": true
+         "rolldown": null
       },
       "./vitest": {
          "default": "./dist/vitest.js",
          "types": "./src/vitest.ts",
-         "rolldown": true
+         "rolldown": null
       }
    }
 }

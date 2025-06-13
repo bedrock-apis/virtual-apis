@@ -1,6 +1,4 @@
 import ts from 'typescript';
-// Just for sake of test
-import * as prettier from 'prettier';
 
 import { MetadataModuleDefinition } from '@bedrock-apis/types';
 import { VirtualNativeModule } from './virtual-apis';
@@ -21,8 +19,7 @@ export async function printModule(source: MetadataModuleDefinition, format = fal
          ts.createSourceFile('file.js', '', ts.ScriptTarget.ES2020, false, ts.ScriptKind.JS),
       );
 
-      // Prettify code
-      return format ? await prettier.format(resultCode, { parser: 'acorn', printWidth: 120 }) : resultCode;
+      return resultCode;
    }
 
    const definitionsCode = await writeCode([...virtualModule.emit()]);

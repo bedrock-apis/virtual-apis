@@ -1,10 +1,6 @@
 import { createPackageCode } from './create-package-code';
 import { getModuleVersions } from './get-module-versions';
 
-export function getVitestAliases() {
-   return Object.fromEntries(getModuleVersions('path').entries());
-}
-
 export function virtualApi(): import('vitest/node').Vite.Plugin {
    const versions = getModuleVersions();
 
