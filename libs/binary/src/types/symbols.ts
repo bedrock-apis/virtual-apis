@@ -1,6 +1,6 @@
 import { IndexId } from './general';
 
-export enum SymbolKindFlags {
+export enum SymbolBitFlags {
    IsClass = 1, // No Effect
    IsEnum = 1 << 1, // Reads Up Enum Type and its values
    IsInterface = 1 << 2, // Reads Up Keys and Types
@@ -29,6 +29,7 @@ export interface SerializableSymbol {
    isInterfaceData?: { keys: IndexId[]; types: IndexId[] };
    hasValue?: unknown;
    hasType?: IndexId;
+   bindType?: IndexId;
    invocablePrivileges?: IndexId[];
    functionArguments?: IndexId[];
    setterPrivileges?: IndexId[];
