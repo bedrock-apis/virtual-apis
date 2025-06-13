@@ -9,7 +9,7 @@ const CIS = CurrentBinaryImageSerializer;
 export async function main(metadataProvider: IMetadataProvider): Promise<number> {
    const { modules, metadata } = await toSerializable(metadataProvider);
 
-   const buffer = StaticDataSource.Alloc(2 ** 16); // 65536 bytes -> 64 mb
+   const buffer = StaticDataSource.Alloc(2 ** 16 * 3); // 65536 bytes -> 64 kb
    console.log(CIS.version);
    CIS.WriteGeneralHeader(buffer, metadata);
    for (const { metadata, id, data, stats } of modules) {
