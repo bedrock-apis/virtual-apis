@@ -1,7 +1,7 @@
 // VIRTUAL APIS CONFIG
-import { CONTEXT } from '@bedrock-apis/virtual-apis';
+import { Context } from '@bedrock-apis/virtual-apis';
 
-CONTEXT.configure({
+Context.Configure({
    GetterRequireValidBound: true,
    StrictReturnTypes: false,
 });
