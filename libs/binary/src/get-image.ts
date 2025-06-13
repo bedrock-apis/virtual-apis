@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url from 'node:url';
+import { ImageModulePrepared } from './binary';
 import { CurrentBinaryImageSerializer } from './image-formats';
-import { ImageModulePrepared, prepareImageModule } from './structs';
 import { ModuleMetadata } from './types';
 
 const cachePath = path.join(url.fileURLToPath(path.dirname(import.meta.url)), 'images');
@@ -51,8 +51,8 @@ export async function getParsedImage(mcVersion: string | 'latest'): Promise<Modu
    const cached = PARSED_IMAGES.get(mcVersion);
    if (cached) return cached;
 
-   const parsed = CurrentBinaryImageSerializer.ReadAllModules(await getImage(mcVersion)).map(e =>
-      prepareImageModule(e),
+   const parsed = CurrentBinaryImageSerializer.ReadAllModules(await getImage(mcVersion)).map(
+      e => e, // prepareImageModule(e),e
    );
    PARSED_IMAGES.set(mcVersion, parsed);
    return parsed;

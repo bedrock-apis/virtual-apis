@@ -1,1 +1,1 @@
-import './index';
+import './binary/main';

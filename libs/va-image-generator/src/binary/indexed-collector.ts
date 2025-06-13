@@ -1,24 +1,68 @@
-export class IndexedCollector<T> {
-   private readonly MAP = new Map<T, number>();
-   private readonly LIST: T[] = [];
+import { isDeepStrictEqual } from 'node:util';
 
-   public getAdd(str: T): number {
-      let value = this.MAP.get(str);
-      if (value === undefined) {
-         this.MAP.set(str, (value = this.LIST.length));
-         this.LIST.push(str);
+export class IndexedCollector<T> {
+   protected readonly MAP = new Map<T, number>();
+   protected readonly LIST: T[] = [];
+
+   public toIndex(key: T): number {
+      let value = this.get(key);
+      if (value === null) {
+         this.MAP.set(key, (value = this.LIST.length));
+         this.LIST.push(key);
       }
       return value;
    }
 
-   public get(str: T): number | null {
-      return this.MAP.get(str) ?? null;
+   public fromIndex(index: number): T | null {
+      for (const [value, i] of this.MAP) {
+         if (index === i) return value;
+      }
+      return null;
    }
-   public getArray(): T[] {
+
+   protected getIndexFor(key: T) {
+      return this.LIST.length;
+   }
+
+   protected get(key: T): number | null {
+      return this.MAP.get(key) ?? null;
+   }
+
+   public getArray(): readonly T[] {
       return this.LIST;
    }
+
    public clear() {
       this.MAP.clear();
       this.LIST.length = 0;
+   }
+}
+
+export class IndexedObjectCollector<T extends { name: string }> extends IndexedCollector<T> {
+   public constructor(protected keys: IndexedCollector<string>) {
+      super();
+   }
+
+   protected override getIndexFor(key: T): number {
+      // This is to prevent collissions with the objects that have same name but different params
+      // it would use new key in that case and try again
+
+      let name = key.name;
+
+      while (true) {
+         const index = this.keys.toIndex(name);
+         const object = this.fromIndex(index);
+         if (isDeepStrictEqual(object, key)) return index;
+
+         console.log('Different type:', name, object, key);
+         name = '$' + name;
+      }
+   }
+
+   public override get(key: T): number | null {
+      for (const [t, index] of this.MAP) {
+         if (isDeepStrictEqual(t, key)) return index;
+      }
+      return null;
    }
 }
