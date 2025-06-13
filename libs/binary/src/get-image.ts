@@ -4,7 +4,7 @@ import url from 'node:url';
 import { CurrentBinaryImageSerializer } from './image-formats';
 import { ImageModulePrepared, prepareImageModule } from './structs';
 
-const cachePath = path.join(url.fileURLToPath(import.meta.dirname), 'images');
+const cachePath = path.join(url.fileURLToPath(path.dirname(import.meta.url)), 'images');
 
 function getImageCachePath(version: string) {
    return path.join(cachePath, version);
