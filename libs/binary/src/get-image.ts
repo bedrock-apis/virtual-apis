@@ -3,6 +3,7 @@ import path from 'node:path';
 import url from 'node:url';
 import { CurrentBinaryImageSerializer } from './image-formats';
 import { ImageModulePrepared, prepareImageModule } from './structs';
+import { ModuleMetadata } from './types';
 
 const cachePath = path.join(url.fileURLToPath(path.dirname(import.meta.url)), 'images');
 
@@ -46,7 +47,7 @@ export async function getImage(mcVersion: string): Promise<Uint8Array<ArrayBuffe
 
 const PARSED_IMAGES = new Map<string, ImageModulePrepared[]>();
 
-export async function getParsedImage(mcVersion: string | 'latest'): Promise<ImageModulePrepared[]> {
+export async function getParsedImage(mcVersion: string | 'latest'): Promise<ModuleMetadata[]> {
    const cached = PARSED_IMAGES.get(mcVersion);
    if (cached) return cached;
 

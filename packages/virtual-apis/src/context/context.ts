@@ -1,4 +1,4 @@
-import { getParsedImage, ImageModulePrepared } from '@bedrock-apis/binary';
+import { getParsedImage, ModuleMetadata } from '@bedrock-apis/binary';
 import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { ModuleContext } from './module-context';
 
@@ -55,8 +55,8 @@ export class Context extends Kernel.Empty {
       return this.CompileModule(module);
    }
 
-   protected static CompileModule(module: ImageModulePrepared) {
-      const ctx = new ModuleContext(module.uuid, module.version, module.name);
+   protected static CompileModule(module: ModuleMetadata) {
+      const ctx = new ModuleContext(module.uuid!, module.version, module.name);
       this.MODULES.set(this.GetModuleId(ctx.specifier, ctx.version), ctx);
       // todo resolve all deps
       // todo add all types defintions etc
