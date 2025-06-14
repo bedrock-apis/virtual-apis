@@ -42,6 +42,7 @@ export class ClassAPISymbol extends APISymbol<ClassAPICompiled, ClassBindType> {
    public constructor(
       context: ModuleContext,
       name: string,
+      // todo replace parent with string id
       public readonly parent: ClassAPISymbol | null = null,
       public readonly constructorParams = new ParamsDefinition(),
       public readonly methods: KernelArray<MethodAPISymbol> = KernelArray.Construct(),
@@ -59,6 +60,7 @@ export class ClassAPISymbol extends APISymbol<ClassAPICompiled, ClassBindType> {
    }
 
    protected override compile(): ClassAPICompiled {
+      // todo iterate over all module context symbols to find and set parent and to add all symbols that are this.name == symbol.type.name
       const api = createConstructorFor(this, this.constructorParams);
       if (this.methods) {
          for (const method of this.methods.getIterator()) api.prototype[method.name] = method.api;

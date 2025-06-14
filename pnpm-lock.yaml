@@ -111,9 +111,6 @@ importers:
       rollup:
         specifier: ^4.41.1
         version: 4.41.1
-      tsx:
-        specifier: ^4.19.4
-        version: 4.19.4
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

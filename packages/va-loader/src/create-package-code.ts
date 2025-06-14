@@ -15,7 +15,7 @@ const virtualApis = pathToFileURL(require.resolve('@bedrock-apis/virtual-apis'))
  */
 export function createPackageCode(specifier: string, version: string, virtualApiPath = virtualApis, parentUrl = '') {
    return `import { Context } from '${virtualApiPath}';
-const moduleContext = await Context.GetOrCompileModule('${specifier}', '${version}')
-export const { ...exportNames } = moduleContext.exports
+const moduleContext = Context.GetModule('${specifier}', '${version}')
+export const { ...exportNames } = moduleContext.Export()
 // parentUrl: ${parentUrl}`;
 }

@@ -1,9 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url from 'node:url';
-import { ImageModulePrepared } from './binary';
+import { IndexedCollector } from '../../va-image-generator/src/binary/indexed-collector';
 import { CurrentBinaryImageSerializer } from './image-formats';
-import { ModuleMetadata } from './types';
+import { ImageModuleData, ModuleMetadata } from './types';
+
+// TODO Rewrite to be static class BinaryImageLoader
 
 const cachePath = path.join(url.fileURLToPath(path.dirname(import.meta.url)), 'images');
 
@@ -45,15 +47,20 @@ export async function getImage(mcVersion: string): Promise<Uint8Array<ArrayBuffe
    return getCachedImage(mcVersion) ?? downloadImage(mcVersion);
 }
 
-const PARSED_IMAGES = new Map<string, ImageModulePrepared[]>();
+const PARSED_IMAGES = new Map<string, PreparedImage>();
 
-export async function getParsedImage(mcVersion: string | 'latest'): Promise<ModuleMetadata[]> {
+export interface PreparedImage {
+   stringCollector: IndexedCollector<string>;
+   typesCollector: IndexedCollector<{ name: number }>;
+   modules: { metadata: Required<ModuleMetadata>; read: () => Promise<ImageModuleData> }[];
+}
+
+export async function getParsedImage(mcVersion: string | 'latest'): Promise<PreparedImage> {
    const cached = PARSED_IMAGES.get(mcVersion);
    if (cached) return cached;
 
-   const parsed = CurrentBinaryImageSerializer.ReadAllModules(await getImage(mcVersion)).map(
-      e => e, // prepareImageModule(e),e
-   );
+   // @ts-expect-error Implement pls
+   const parsed = CurrentBinaryImageSerializer.ReadAllModules(await getImage(mcVersion)) as PreparedImage;
    PARSED_IMAGES.set(mcVersion, parsed);
    return parsed;
 }

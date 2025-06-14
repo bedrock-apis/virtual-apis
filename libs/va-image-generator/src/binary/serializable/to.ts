@@ -18,6 +18,9 @@ import { IMetadataProvider } from '../../metadata-provider';
 import { IndexedCollector, IndexedObjectCollector } from '../indexed-collector';
 import { SerializableModule, SerializableModuleStats } from './index';
 
+// TODO Rewrite to be static class MetadataToSerializable
+// TODO USe IndexedCollector(hash)
+
 export async function toSerializable(metadataProvider: IMetadataProvider) {
    const stringCollector = new IndexedCollector<string>();
    const toIndex = stringCollector.toIndex.bind(stringCollector);

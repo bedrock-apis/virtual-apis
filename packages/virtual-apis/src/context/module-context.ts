@@ -1,5 +1,7 @@
-import { Kernel, KernelIterator } from '@bedrock-apis/kernel-isolation';
+import { SerializableSymbol } from '@bedrock-apis/binary';
+import { Kernel, KernelArray, KernelIterator } from '@bedrock-apis/kernel-isolation';
 import { MetadataType } from '@bedrock-apis/types';
+import { IndexedCollector } from '../../../../libs/va-image-generator/src/binary/indexed-collector';
 import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { DynamicType, Type, VoidType } from '../type-validators';
@@ -19,8 +21,8 @@ import { APISymbol } from './symbols/symbol';
 export class ModuleContext extends Kernel.Empty {
    private readonly TYPES = Kernel.Construct('Map') as Map<string, Type>;
    private readonly UNRESOLVED_TYPES = Kernel.Construct('Map') as Map<string, DynamicType>;
-
-   public readonly exports: Record<string, unknown> = {};
+   private EXPORTS?: Record<string, unknown>;
+   public readonly symbols = Kernel.Construct('Map') as Map<string, APISymbol>;
 
    public constructor(
       public readonly uuid: string,
@@ -28,6 +30,56 @@ export class ModuleContext extends Kernel.Empty {
       public readonly specifier: string,
    ) {
       super();
+   }
+
+   private exportsList = KernelArray.Construct<string>();
+
+   public loadSymbols(
+      // indexed uncollector? idk
+      stringCollector: IndexedCollector<string>,
+      typesCollector: IndexedCollector<{ name: number }>,
+      deps: { specifier: number; uuid: number }[],
+      symbols: SerializableSymbol[],
+      exports: number[],
+   ) {
+      const fromIndex = stringCollector.fromIndex.bind(stringCollector);
+      for (const dep of KernelArray.From(deps).getIterator())
+         Context.LoadModule(fromIndex(dep.specifier), fromIndex(dep.uuid));
+
+      function resolveTypeName(index: number) {
+         return fromIndex(typesCollector.fromIndex(index).name);
+      }
+
+      // for const type of typesCollector.getList()
+      //   if BinaryFlags.allOf(TypeKind.Number)
+      //     this.registerType(fromIndex(type.name), new NumberType(type.range))
+      //   if BinaryFlags.allOf(TypeKind.String)
+      //     this.registerType(fromIndex(type.name), StringType)
+      // ...
+
+      // for const symbol of symbols
+      //   if BinaryFlags.AllOf(symbolKind.IsClass)
+      //     this.symbols.set(fromIndex(symbol.name), new ClassAPISymbol(resolveTypeName(symbol.type)))
+      //   if BinaryFlags.AllOf(symbolKind.IsFunction)
+      //     this.symbols.set(fromIndex(symbol.name), new FunctionApiSymbol(resolveTypeName(symbol.returnType)))
+      // ...
+      //
+
+      this.exportsList = KernelArray.From(exports).map(e => fromIndex(e));
+
+      this.resolveAllDynamicTypes();
+   }
+
+   public compileExports() {
+      if (this.EXPORTS) return this.EXPORTS;
+
+      this.EXPORTS = {};
+
+      for (const exportedSymbol of this.exportsList.getIterator()) {
+         this.EXPORTS[exportedSymbol] = this.symbols.get(exportedSymbol)?.api;
+      }
+
+      return this.EXPORTS;
    }
 
    /**
@@ -69,7 +121,6 @@ export class ModuleContext extends Kernel.Empty {
    }
 
    public readonly nativeHandles = Kernel.Construct('WeakSet');
-   public readonly symbols = Kernel.Construct('Map') as Map<string, APISymbol>;
    public readonly onDiagnosticsReported = new NativeEvent<[diagnostics: Diagnostics]>();
    public onInvocation(eventName: string, callback: (...params: BaseExecutionParams) => void) {
       const symbol = this.symbols.get(eventName);
