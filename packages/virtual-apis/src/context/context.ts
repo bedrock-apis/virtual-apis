@@ -1,5 +1,5 @@
-import { getParsedImage } from '@bedrock-apis/binary';
-import { Kernel } from '@bedrock-apis/kernel-isolation';
+import { BinaryImageLoader } from '@bedrock-apis/binary';
+import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { ModuleContext } from './module-context';
 
 export interface ContextConfig {
@@ -39,34 +39,32 @@ export class Context extends Kernel.Empty {
       return this.MODULES.get(this.GetModuleId(specifier, version));
    }
 
-   protected static GetMinecraftVersionFromModuleVersion(moduleVersion: string) {
-      // TODO Resolve version from 2.1.0-beta.1.21.80 for example
-      return 'latest';
+   /** @internal */
+   public static ResolveMinecraftVersionFromModuleVersion(moduleVersion: string) {
+      const match = /-\w+\.(\d+\.\d+\.\d+)/gm.exec(moduleVersion);
+      return match?.[1] ?? 'latest';
    }
 
    public static async LoadModule(specifier: string, version: string) {
       const cached = this.MODULES.get(this.GetModuleId(specifier, version));
       if (cached) return cached;
 
-      const image = await getParsedImage(this.GetMinecraftVersionFromModuleVersion(version));
-      const { stringCollector, modules } = image;
-      const fromIndex = stringCollector.fromIndex.bind(stringCollector);
-
-      // todo maybe use specifier index and version index idk
-      const imageModule = modules.find(
-         e => fromIndex(e.metadata.name) === specifier && fromIndex(e.metadata.version) === version,
-      );
+      const image = await BinaryImageLoader.GetParsedImage(this.ResolveMinecraftVersionFromModuleVersion(version));
+      const { stringSlice, modules } = image;
+      const { fromIndex: str } = stringSlice;
+      const imageModule = modules.find(e => str(e.metadata.name) === specifier && str(e.metadata.version) === version);
 
       if (!imageModule) throw new Kernel['globalThis::Error'](`Unknown module: ${specifier} ${version}`);
-      const { metadata } = imageModule;
 
-      const moduleContext = new ModuleContext(
-         fromIndex(metadata.uuid),
-         fromIndex(metadata.version),
-         fromIndex(metadata.name),
-      );
+      const { metadata } = imageModule;
+      for (const dep of KernelArray.From(metadata.dependencies).getIterator()) {
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         Context.LoadModule(str(dep.uuid!), str(dep.versions![dep.versions!.length - 1]!));
+      }
+
+      const moduleContext = new ModuleContext(str(metadata.uuid), str(metadata.version), str(metadata.name));
       this.MODULES.set(this.GetModuleId(moduleContext.specifier, moduleContext.version), moduleContext);
-      const { symbols, exports } = await imageModule.read();
-      moduleContext.loadSymbols(stringCollector, image.typesCollector, metadata.dependencies, symbols, exports);
+
+      moduleContext.loadSymbols(stringSlice, image.typeSlice, await imageModule.read());
    }
 }

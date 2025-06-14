@@ -44,7 +44,7 @@
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
       "  ": "",
       "build:src": "rolldown -c rolldown.config.ts",
-      "build:packages": "node --enable-source-maps --import @bedrock-apis/va-image-generator \"--eval=console.log('\\x1b[32mDone!')\"",
+      "build:packages": "node --enable-source-maps --import @bedrock-apis/va-image-generator \"--eval=console.log('Loading...')\"",
       "build": "pnpm run build:src && pnpm run build:packages",
       "   ": "",
       "test:coverage": "vitest --ui --coverage",

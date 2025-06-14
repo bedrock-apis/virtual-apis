@@ -32,7 +32,7 @@ export enum SymbolBitFlags {
 
    /** Reads nbt serializable hasValue */
    HasValue = 1 << 13,
-   /** Reads hassType */
+   /** Reads hasType */
    HasType = 1 << 14,
 
    /** No effect */

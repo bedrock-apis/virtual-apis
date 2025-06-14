@@ -3,11 +3,11 @@ import { MODULES_DIR } from '@bedrock-apis/common';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { IMetadataProvider } from '../metadata-provider';
-import { toSerializable } from './serializable/to';
+import { MetadataToSerializable } from './metadata-to-serializable';
 
 const CIS = CurrentBinaryImageSerializer;
 export async function main(metadataProvider: IMetadataProvider): Promise<number> {
-   const { modules, metadata } = await toSerializable(metadataProvider);
+   const { modules, metadata } = await new MetadataToSerializable().serialize(metadataProvider);
 
    const buffer = StaticDataSource.Alloc(2 ** 16 * 3); // 65536 bytes -> 64 kb
    console.log(CIS.version);

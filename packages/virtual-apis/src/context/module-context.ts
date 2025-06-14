@@ -1,7 +1,8 @@
-import { SerializableSymbol } from '@bedrock-apis/binary';
+import { ImageModuleData } from '@bedrock-apis/binary';
 import { Kernel, KernelArray, KernelIterator } from '@bedrock-apis/kernel-isolation';
 import { MetadataType } from '@bedrock-apis/types';
-import { IndexedCollector } from '../../../../libs/va-image-generator/src/binary/indexed-collector';
+import { IndexedAccessor } from '../../../../libs/va-image-generator/src/binary/indexed-collector';
+import { createPackageCode } from '../../../va-loader/src/create-package-code';
 import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
 import { DynamicType, Type, VoidType } from '../type-validators';
@@ -36,18 +37,14 @@ export class ModuleContext extends Kernel.Empty {
 
    public loadSymbols(
       // indexed uncollector? idk
-      stringCollector: IndexedCollector<string>,
-      typesCollector: IndexedCollector<{ name: number }>,
-      deps: { specifier: number; uuid: number }[],
-      symbols: SerializableSymbol[],
-      exports: number[],
+      strings: IndexedAccessor<string>,
+      types: IndexedAccessor<{ name: number }>,
+      { exports, symbols }: ImageModuleData,
    ) {
-      const fromIndex = stringCollector.fromIndex.bind(stringCollector);
-      for (const dep of KernelArray.From(deps).getIterator())
-         Context.LoadModule(fromIndex(dep.specifier), fromIndex(dep.uuid));
+      const { fromIndex } = strings;
 
       function resolveTypeName(index: number) {
-         return fromIndex(typesCollector.fromIndex(index).name);
+         return fromIndex(types.fromIndex(index).name);
       }
 
       // for const type of typesCollector.getList()
@@ -70,33 +67,23 @@ export class ModuleContext extends Kernel.Empty {
       this.resolveAllDynamicTypes();
    }
 
+   /** Used in {@link createPackageCode} */
    public compileExports() {
       if (this.EXPORTS) return this.EXPORTS;
 
       this.EXPORTS = {};
-
       for (const exportedSymbol of this.exportsList.getIterator()) {
          this.EXPORTS[exportedSymbol] = this.symbols.get(exportedSymbol)?.api;
       }
-
       return this.EXPORTS;
    }
 
-   /**
-    * Register new type
-    *
-    * @param name
-    * @param type
-    */
+   /** Register new type */
    public registerType(name: string, type: Type) {
       this.TYPES.set(name, type);
    }
-   /**
-    * Get dynamic type that will resolve once this.resolveAll is called
-    *
-    * @param name
-    * @returns
-    */
+
+   /** Get dynamic type that will resolve once {@link resolveAllDynamicTypes} is called */
    public getDynamicType(name: string) {
       let dynamicType = this.UNRESOLVED_TYPES.get(name);
       if (!dynamicType) {
@@ -104,7 +91,7 @@ export class ModuleContext extends Kernel.Empty {
       }
       return dynamicType;
    }
-   /** Tries to resolve all unresolved types */
+   /** Tries to resolve all unresolved types @internal */
    public resolveAllDynamicTypes() {
       for (const typeName of KernelIterator.FromMapIterator(this.UNRESOLVED_TYPES.keys())) {
          const resolvedType = this.TYPES.get(typeName);

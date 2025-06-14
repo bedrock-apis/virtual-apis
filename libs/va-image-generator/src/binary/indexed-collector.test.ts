@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { IndexedCollector } from './indexed-collector';
+import { IndexedAccessor, IndexedCollector } from './indexed-collector';
 
 describe('indexed collector', () => {
    it('woorks', () => {
@@ -29,17 +29,19 @@ describe('indexed collector', () => {
       expect(type2Index).toEqual(1);
 
       // to binary
-      const types = typesCollector
+      const stringSlices = stringCollector.getArray();
+      const typeSlices = typesCollector
          .getArray()
          .map(e => ({ name: stringCollector.toIndex(e.name), value: stringCollector.toIndex(e.value) }));
 
       // from binary
+      const stringAccess = new IndexedAccessor(stringSlices);
+      const typesAccess = new IndexedAccessor(typeSlices);
       function resolveType(index: number) {
-         const type = types[index];
-         if (!type) throw new Error('Unknown index ' + index);
+         const type = typesAccess.fromIndex(index);
          return {
-            name: stringCollector.fromIndex(type.name),
-            value: stringCollector.fromIndex(type.value),
+            name: stringAccess.fromIndex(type.name),
+            value: stringAccess.fromIndex(type.value),
          };
       }
 
