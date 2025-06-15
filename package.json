@@ -32,8 +32,8 @@
    },
    "scripts": {
       "repo:init": "pnpm install --frozen-lockfile && pnpm run build:src && pnpm run repo:paths",
-      "repo:paths": "node --enable-source-map libs/tools/src/paths",
-      "repo:todo": "node --enable-source-map libs/tools/src/todo",
+      "repo:paths": "node --enable-source-maps libs/tools/src/paths",
+      "repo:todo": "node --enable-source-maps libs/tools/src/todo",
       "repo:git": "git submodule update --init",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
