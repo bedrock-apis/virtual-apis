@@ -16,9 +16,9 @@ export enum SymbolBitFlags {
 
    /** Read Params */
    IsFunction = 1 << 6,
-   /** Reads privileges */
+   /** Does non */
    IsProperty = 1 << 7,
-   /** Reads privileges & meta information */
+   /** Does non */
    IsConstructor = 1 << 8,
 
    /** Reads setterPrivileges */

@@ -4,7 +4,7 @@ export class IndexedCollector<T> {
 
    public constructor(protected hash?: (key: T) => unknown) {}
 
-   public toIndex(key: T): number {
+   public getIndexFor(key: T): number {
       const $ = this.hash?.(key) ?? key;
       let value = this.MAP.get($);
       if (value === undefined) {
