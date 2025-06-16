@@ -29,6 +29,10 @@ export class BinaryWriter {
       dataProvider.view.setUint32(dataProvider.pointer, value, true);
       dataProvider.pointer += 2;
    }
+   public static WriteFloat64(dataProvider: StaticDataSource, value: number): void {
+      dataProvider.view.setFloat64(dataProvider.pointer, value, true);
+      dataProvider.pointer += 8;
+   }
    public static WriteBuffer(dataProvider: StaticDataSource, value: Uint8Array): void {
       dataProvider.uint8Array.set(value, dataProvider.pointer);
       dataProvider.pointer += value.length;

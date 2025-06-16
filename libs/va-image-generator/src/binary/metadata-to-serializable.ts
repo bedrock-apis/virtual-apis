@@ -1,9 +1,9 @@
 import {
+   BinarySymbolStruct,
    CurrentBinaryImageSerializer,
    ImageGeneralHeaderData,
    ImageModuleData,
    ModuleMetadata,
-   SerializableSymbol,
    SymbolBitFlags,
 } from '@bedrock-apis/binary';
 import {
@@ -53,7 +53,7 @@ export class MetadataToSerializable {
       for await (const metadata of metadataProvider.getMetadataModules()) {
          metadata.enums ||= [];
 
-         const symbols: SerializableSymbol[] = [];
+         const symbols: BinarySymbolStruct[] = [];
          const stats: SerializableModuleStats = {
             uniqueTypes: this.typesCollector.getArray().length,
             classes: metadata.classes.length,
@@ -112,7 +112,7 @@ export class MetadataToSerializable {
       return { metadata, modules };
    }
 
-   protected typeToSymbol(e: MetadataType): SerializableSymbol {
+   protected typeToSymbol(e: MetadataType): BinarySymbolStruct {
       // TODO Complete
       return {
          bitFlags: SymbolBitFlags.HasType,
@@ -120,7 +120,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected enumToSymbol(e: MetadataEnumDefinition): SerializableSymbol {
+   protected enumToSymbol(e: MetadataEnumDefinition): BinarySymbolStruct {
       const hasNumericalValues = e.constants.some(e => typeof e.value === 'number');
       return {
          bitFlags: SymbolBitFlags.IsEnum,
@@ -133,7 +133,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected errorToSymbol(e: MetadataErrorClassDefinition): SerializableSymbol {
+   protected errorToSymbol(e: MetadataErrorClassDefinition): BinarySymbolStruct {
       // TODO Complete
       return {
          bitFlags: SymbolBitFlags.IsError,
@@ -141,7 +141,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected interfaceToSymbol(e: MetadataInterfaceDefinition): SerializableSymbol {
+   protected interfaceToSymbol(e: MetadataInterfaceDefinition): BinarySymbolStruct {
       return {
          bitFlags: SymbolBitFlags.IsInterface,
          name: this.toIndex(e.name),
@@ -152,7 +152,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected objectToSymbol(e: MetadataObjectDefinition): SerializableSymbol {
+   protected objectToSymbol(e: MetadataObjectDefinition): BinarySymbolStruct {
       return {
          bitFlags: SymbolBitFlags.IsObject | SymbolBitFlags.HasType,
          name: this.toIndex(e.name),
@@ -163,8 +163,8 @@ export class MetadataToSerializable {
    protected functionToSymbol(
       e: MetadataFunctionDefinition,
       addFlags = 0,
-      overrideSymbol: Partial<SerializableSymbol> = {},
-   ): SerializableSymbol {
+      overrideSymbol: Partial<BinarySymbolStruct> = {},
+   ): BinarySymbolStruct {
       let bitFlags = SymbolBitFlags.IsFunction | addFlags;
       if (e.is_static) bitFlags |= SymbolBitFlags.IsStatic | SymbolBitFlags.IsBindType;
 
@@ -180,7 +180,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected constantToSymbol(e: MetadataConstantDefinition): SerializableSymbol {
+   protected constantToSymbol(e: MetadataConstantDefinition): BinarySymbolStruct {
       let bitFlags = SymbolBitFlags.IsConstant;
       if (typeof e.value !== 'undefined') bitFlags |= SymbolBitFlags.HasValue;
       return {
@@ -190,7 +190,7 @@ export class MetadataToSerializable {
       };
    }
 
-   protected classesToSymbol(e: MetadataClassDefinition[]): SerializableSymbol[] {
+   protected classesToSymbol(e: MetadataClassDefinition[]): BinarySymbolStruct[] {
       const symbolicatedClasses = new Set<string>();
 
       return e.map(c => this.classToSymbol(symbolicatedClasses, c, e)).flat();
@@ -200,7 +200,7 @@ export class MetadataToSerializable {
       symbolicatedClasses: Set<string>,
       c: MetadataClassDefinition,
       all: MetadataClassDefinition[],
-   ): SerializableSymbol[] {
+   ): BinarySymbolStruct[] {
       symbolicatedClasses.add(c.name);
 
       const parent = c.base_types[0];
@@ -210,7 +210,7 @@ export class MetadataToSerializable {
          this.classToSymbol(symbolicatedClasses, definition, all);
       }
       const constructor = c.functions.find(e => e.is_constructor);
-      const symbols: SerializableSymbol[] = [];
+      const symbols: BinarySymbolStruct[] = [];
       const bindType = this.typeToIndex(c.type);
 
       if (constructor) {

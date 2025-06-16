@@ -49,6 +49,11 @@ export class BinaryReader {
       dataProvider.pointer += 4;
       return value;
    }
+   public static ReadFloat64(dataProvider: StaticDataSource): number {
+      const value = dataProvider.view.getFloat64(dataProvider.pointer, true);
+      dataProvider.pointer += 8;
+      return value;
+   }
 
    public static ReadBuffer(dataProvider: StaticDataSource, length: number): Uint8Array {
       return dataProvider.uint8Array.subarray(dataProvider.pointer, (dataProvider.pointer += length));

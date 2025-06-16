@@ -1,40 +1,49 @@
-export enum TypeFlags {
-   IsBindType = 0b00,
-   IsComplex = 0b01,
-}
-export enum TypeBitFlag {
-   LocalBindTypeBit = 1 << 7,
-   IsExtendedBit = 1 << 6, // Special Case
+import { IndexId } from './general';
+
+export enum TypeBitFlags {
+   // Reads Up Next 2 bytes as string ref
+   IsBindRef = 1 << 7,
+   // - Reads Up Next 2 bytes or more as type ref for Promise or Array
+   // - Reads Up Next 4 Bytes as module name and version name for bind type
+   IsExtended = 1 << 6, // Special Case
+   IsNumber = 1 << 5,
+   IsComplex = 1 << 4, // Used for Non Number Types
+   IsUnsigned = 1 << 4, // Used for Number Types
+
+   Uint8 = IsNumber | IsUnsigned | 1,
+   Uint16 = IsNumber | IsUnsigned | 2,
+   Uint32 = IsNumber | IsUnsigned | 3,
+   BigUint64 = IsNumber | IsUnsigned | 4,
+
+   Int8 = IsNumber | 1,
+   Int16 = IsNumber | 2,
+   Int32 = IsNumber | 3,
+   BigInt64 = IsNumber | 4,
+   Float32 = IsNumber | 5,
+   Float64 = IsNumber | 6,
 
    Unknown = 0x00,
-   Symbol = 0x01,
-   This = 0xff,
+   Undefined = 0x01,
+   This = 0x02,
+   Boolean = 0x03,
+   String = 0x04,
+   CallBack = 0x05, //Function, but keep in mind its not type of function but function type, so its better to name it callback
 
-   Number = 0x80,
-   Int8 = 0x81,
-   Uint8 = 0x82,
-   Int16 = 0x83,
-   Uint16 = 0x84,
-   Int32 = 0x85,
-   Uint32 = 0x86,
-   BigInt64 = 0x87,
-   BigUint64 = 0x88,
-   Float32 = 0x89,
-   Float64 = 0x8a,
+   Optional = IsExtended | 1,
+   Array = IsExtended | 2,
+   Promise = IsExtended | 3,
 
-   Undefined = 0x90,
-   //Void = 0x90,
+   Variant = IsExtended | IsComplex | 1,
+   Map = IsExtended | IsComplex | 2,
+   Closure = IsExtended | IsComplex | 3, // No Closure type in need and it would be needed in general
+   Generator = IsExtended | IsComplex | 4, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
+   Iterator = IsExtended | IsComplex | 5, // Native Iterator pattern not sure how it works yet but needs to be tested well
+}
 
-   Boolean = 0x91,
-   String = 0x92,
-
-   Optional = 0xa0,
-   Variant = 0xa1,
-   Array = 0xa2,
-   Map = 0xa3,
-
-   Promise = 0xa4,
-   Function = 0xa5, // No Closure type in need and it would be needed in general
-   Generator = 0xa6, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
-   Iterator = 0xa7, // Native Iterator pattern not sure how it works yet but needs to be tested well
+export interface BinaryTypeStruct {
+   bitType: number;
+   extendedRefs?: IndexId[];
+   bindTypeNameId?: IndexId;
+   fromModuleInfo?: { nameId?: IndexId; version?: IndexId };
+   numberRange?: { max: number; min: number };
 }

@@ -156,7 +156,10 @@ export class GeneralNBTFormatWriter implements NBTFormatWriter {
    }
 
    public [NBTTag.List](dataProvider: IStaticDataProvider, value: unknown[], typeHint?: NBTTag): void {
-      this.writeType(dataProvider, (typeHint ??= this.determineType(value[0] ?? 0)));
+      this.writeType(
+         dataProvider,
+         (typeHint ??= GeneralNBTFormatWriter.determineType(value[0] ?? 0, this.NUMBER_FORMAT)),
+      );
       this.writeArrayLength(dataProvider, value.length);
       if (!(typeHint in this)) throw new SyntaxError(`Unexpected NBT token type: ${typeHint}`);
 
@@ -167,7 +170,7 @@ export class GeneralNBTFormatWriter implements NBTFormatWriter {
       // We don't use getOwnPropertyNames bc it would return methods from prototype abused like objects "in theory"
       for (const key of Object.keys(value)) {
          const v = value[key];
-         const type = this.determineType(v);
+         const type = GeneralNBTFormatWriter.determineType(v, this.NUMBER_FORMAT);
          if (type === NBTTag.EndOfCompound) return;
          this.writeType(dataProvider, type);
          this[NBTTag.String](dataProvider, key);
@@ -178,8 +181,8 @@ export class GeneralNBTFormatWriter implements NBTFormatWriter {
    }
 
    public NUMBER_FORMAT = NBTTag.Float;
-   private determineType(value: unknown): NBTTag {
-      if (typeof value === 'number') return this.NUMBER_FORMAT;
+   public static determineType(value: unknown, numberFormat: NBTTag): NBTTag {
+      if (typeof value === 'number') return numberFormat;
       if (typeof value === 'bigint') return NBTTag.Long;
       if (typeof value === 'string') return NBTTag.String;
       if (Array.isArray(value)) return NBTTag.List;

@@ -1,7 +1,7 @@
 import { IndexId } from './general';
-import { SerializableSymbol } from './symbols';
+import { BinarySymbolStruct } from './symbols';
 
 export interface ImageModuleData {
-   symbols: SerializableSymbol[];
+   symbols: BinarySymbolStruct[];
    exports: IndexId[];
 }

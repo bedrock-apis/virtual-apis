@@ -39,7 +39,7 @@ export enum SymbolBitFlags {
    IsObject = 1 << 15,
 }
 
-export interface SerializableSymbol {
+export interface BinarySymbolStruct {
    bitFlags: number;
    name: IndexId;
    isEnumData?: { hasNumericalValues: boolean; keys: IndexId[]; values?: number[] };
