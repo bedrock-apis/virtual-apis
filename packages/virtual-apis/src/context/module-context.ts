@@ -1,11 +1,12 @@
-import { ImageModuleData } from '@bedrock-apis/binary';
+import { ImageModuleData, SymbolBitFlags } from '@bedrock-apis/binary';
+import { BitFlags } from '@bedrock-apis/common';
 import { Kernel, KernelArray, KernelIterator } from '@bedrock-apis/kernel-isolation';
 import { MetadataType } from '@bedrock-apis/types';
 import { IndexedAccessor } from '../../../../libs/va-image-generator/src/binary/indexed-collector';
 import { createPackageCode } from '../../../va-loader/src/create-package-code';
 import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';
-import { DynamicType, Type, VoidType } from '../type-validators';
+import { DynamicType, ParamsDefinition, Type, VoidType } from '../type-validators';
 import { ArrayType } from '../type-validators/types/array';
 import { BooleanType } from '../type-validators/types/boolean';
 import { FunctionType, GeneratorType } from '../type-validators/types/function';
@@ -17,6 +18,8 @@ import { StringType } from '../type-validators/types/string';
 import { VariantType } from '../type-validators/types/variant';
 import { Context } from './context';
 import { BaseExecutionParams } from './symbols/class';
+import { FunctionAPISymbol } from './symbols/function';
+import { ObjectAPISymbol } from './symbols/object';
 import { APISymbol } from './symbols/symbol';
 
 export class ModuleContext extends Kernel.Empty {
@@ -43,9 +46,10 @@ export class ModuleContext extends Kernel.Empty {
    ) {
       const { fromIndex } = strings;
 
-      function resolveTypeName(index: number) {
-         return fromIndex(types.fromIndex(index).name);
-      }
+      const resolveType = (index: number) => {
+         // @ts-expect-error make resolveType accept serializedtype
+         return this.resolveType(types.fromIndex(index));
+      };
 
       // for const type of typesCollector.getList()
       //   if BinaryFlags.allOf(TypeKind.Number)
@@ -54,16 +58,28 @@ export class ModuleContext extends Kernel.Empty {
       //     this.registerType(fromIndex(type.name), StringType)
       // ...
 
-      // for const symbol of symbols
-      //   if BinaryFlags.AllOf(symbolKind.IsClass)
-      //     this.symbols.set(fromIndex(symbol.name), new ClassAPISymbol(resolveTypeName(symbol.type)))
-      //   if BinaryFlags.AllOf(symbolKind.IsFunction)
-      //     this.symbols.set(fromIndex(symbol.name), new FunctionApiSymbol(resolveTypeName(symbol.returnType)))
-      // ...
-      //
+      for (const symbol of KernelArray.From(symbols).getIterator()) {
+         const name = strings.fromIndex(symbol.name);
+
+         if (BitFlags.AllOf(symbol.bitFlags, SymbolBitFlags.IsObject) && symbol.hasType) {
+            this.symbols.set(name, new ObjectAPISymbol(this, name, fromIndex(types.fromIndex(symbol.hasType).name)));
+         } else if (
+            BitFlags.AllOf(symbol.bitFlags, SymbolBitFlags.IsFunction) &&
+            symbol.hasType &&
+            symbol.invocablePrivileges
+         ) {
+            const params = new ParamsDefinition();
+
+            this.symbols.set(
+               name,
+               new FunctionAPISymbol(this, name, params, resolveType(symbol.hasType), symbol.invocablePrivileges),
+            );
+         }
+
+         // all other symbol types
+      }
 
       this.exportsList = KernelArray.From(exports).map(e => fromIndex(e));
-
       this.resolveAllDynamicTypes();
    }
 

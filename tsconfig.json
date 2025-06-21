@@ -1,9 +1,7 @@
 {
    "compilerOptions": {
       "target": "esnext",
-      "lib": [
-         "ESNext"
-      ],
+      "lib": ["ESNext"],
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
@@ -17,13 +15,8 @@
       "noUncheckedIndexedAccess": true,
       "skipLibCheck": true,
 
-      "noImplicitOverride":true
+      "noImplicitOverride": true
    },
-   "include": [
-      "./packages/**/*.ts",
-      "./libs/**/*.ts",
-      "./tools/**/*.ts",
-      "*.config.ts",
-      "bds-docs"
-   ]
+   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts", "bds-docs"],
+   "exclude": ["bds-docs/src/old_reference"]
 }

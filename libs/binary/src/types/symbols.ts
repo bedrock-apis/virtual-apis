@@ -37,6 +37,8 @@ export enum SymbolBitFlags {
 
    /** No effect */
    IsObject = 1 << 15,
+   /** Read functionArgumentsDetails */
+   IsDetailedFunction = 1 << 16,
 }
 
 export interface BinarySymbolStruct {
@@ -49,5 +51,6 @@ export interface BinarySymbolStruct {
    bindType?: IndexId;
    invocablePrivileges?: IndexId[];
    functionArguments?: IndexId[];
+   functionArgumentsDetails?: IndexId[];
    setterPrivileges?: IndexId[];
 }

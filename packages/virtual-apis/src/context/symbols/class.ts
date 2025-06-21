@@ -39,11 +39,13 @@ export class ClassAPISymbol extends APISymbol<ClassAPICompiled, ClassBindType> {
       return this.HANDLE_TO_NATIVE_CACHE.has(handle as object);
    }
 
+   public readonly parent: ClassAPISymbol | null = null;
+
    public constructor(
       context: ModuleContext,
       name: string,
       // todo replace parent with string id
-      public readonly parent: ClassAPISymbol | null = null,
+      public readonly parentId: string | null = null,
       public readonly constructorParams = new ParamsDefinition(),
       public readonly methods: KernelArray<MethodAPISymbol> = KernelArray.Construct(),
       public readonly properties: KernelArray<{
@@ -60,6 +62,8 @@ export class ClassAPISymbol extends APISymbol<ClassAPICompiled, ClassBindType> {
    }
 
    protected override compile(): ClassAPICompiled {
+      const constructorSymbol = this.context.symbols.get(this.name + '::constructor'); // assuming we have dedicated symbol for constructor;
+
       // todo iterate over all module context symbols to find and set parent and to add all symbols that are this.name == symbol.type.name
       const api = createConstructorFor(this, this.constructorParams);
       if (this.methods) {
