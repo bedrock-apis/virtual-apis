@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BitFlags } from '@bedrock-apis/common';
-import { GeneralNBTFormatWriter } from '../../ref-bapi-nbt/base';
-import { NBTTag } from '../../ref-bapi-nbt/tag';
+import { TagType } from '@bedrock-apis/nbt-core';
 import { BinaryReader, BinaryWriter } from '../binary';
-import { StaticDataSource } from '../binary/static-data-source';
+import { DataCursorView } from '../binary/data-cursor-view';
 import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '../types';
 import { BinaryTypeStruct, TypeBitFlags } from '../types/types';
 import { BaseBinaryImageSerializer } from './base-format';
@@ -18,23 +17,23 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    public static readonly ReadIndexRef = BinaryReader.ReadUint16;
    // eslint-disable-next-line @typescript-eslint/naming-convention
    public static readonly WriteIndexRef = BinaryWriter.WriteUint16;
-   public static override ReadModuleField(_: StaticDataSource): ImageModuleData {
+   public static override ReadModuleField(_: DataCursorView): ImageModuleData {
       const symbols = this.ReadSymbols(_);
       const exports = this.ReadExportIndexes(_);
       return { exports, symbols };
    }
-   public static override WriteModuleField(_: StaticDataSource, m: ImageModuleData): void {
+   public static override WriteModuleField(_: DataCursorView, m: ImageModuleData): void {
       this.WriteExportIndexes(_, m.exports);
    }
 
    //#region Readers
-   protected static ReadTypes(_: StaticDataSource): BinaryTypeStruct[] {
+   protected static ReadTypes(_: DataCursorView): BinaryTypeStruct[] {
       const size = BinaryReader.ReadUint16(_);
       const array: BinaryTypeStruct[] = [];
       for (let i = 0; i < size; i++) array[array.length] = this.ReadType(_);
       return array;
    }
-   protected static ReadType(_: StaticDataSource): BinaryTypeStruct {
+   protected static ReadType(_: DataCursorView): BinaryTypeStruct {
       const bitKind = BinaryReader.ReadUint8(_);
       const type: BinaryTypeStruct = { bitType: bitKind };
       // Keep Strict Order of the Binary Reader methods
@@ -69,13 +68,13 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
       return type;
    }
-   protected static ReadSymbols(_: StaticDataSource): BinarySymbolStruct[] {
+   protected static ReadSymbols(_: DataCursorView): BinarySymbolStruct[] {
       const size = BinaryReader.ReadUint16(_);
       const array: BinarySymbolStruct[] = [];
       for (let i = 0; i < size; i++) array[array.length] = this.ReadSymbol(_);
       return array;
    }
-   protected static ReadSymbol(_: StaticDataSource): BinarySymbolStruct {
+   protected static ReadSymbol(_: DataCursorView): BinarySymbolStruct {
       const bitFlags = BinaryReader.ReadUint16(_);
       const name = this.ReadIndexRef(_);
       const symbol: BinarySymbolStruct = { name, bitFlags };
@@ -97,11 +96,11 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
       return symbol;
    }
-   protected static ReadDynamicValue(_: StaticDataSource): unknown {
+   protected static ReadDynamicValue(_: DataCursorView): unknown {
       const type = this.nbtFormatReader.readType(_);
-      return this.nbtFormatReader[type as NBTTag.Byte](_);
+      return this.nbtFormatReader[type as TagType.Byte](_);
    }
-   protected static ReadInterfaceData(_: StaticDataSource): BinarySymbolStruct['isInterfaceData'] {
+   protected static ReadInterfaceData(_: DataCursorView): BinarySymbolStruct['isInterfaceData'] {
       const size = BinaryReader.ReadUint8(_);
       const keys: IndexId[] = [];
       const values: IndexId[] = [];
@@ -111,7 +110,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
       return { keys, types: values };
    }
-   protected static ReadEnumData(_: StaticDataSource): BinarySymbolStruct['isEnumData'] {
+   protected static ReadEnumData(_: DataCursorView): BinarySymbolStruct['isEnumData'] {
       const flags = BinaryReader.ReadUint8(_);
       const length = flags & 0x7f;
       const isNumerical = BitFlags.AllOf(flags, 0x80);
@@ -123,21 +122,21 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
       return { hasNumericalValues: isNumerical, keys, values };
    }
-   protected static ReadExportIndexes(_: StaticDataSource): number[] {
+   protected static ReadExportIndexes(_: DataCursorView): number[] {
       return BinaryReader.ReadUint16Array(_, BinaryReader.ReadUint16(_));
    }
-   protected static ReadMinimalReferences(_: StaticDataSource): IndexId[] {
+   protected static ReadMinimalReferences(_: DataCursorView): IndexId[] {
       return BinaryReader.ReadUint16Array(_, BinaryReader.ReadUint8(_));
    }
    protected static readonly ReadPrivileges = this.ReadMinimalReferences;
    //#endregion
    //#region Writers
-   protected static WriteTypes(_: StaticDataSource, types: BinaryTypeStruct[]): void {
+   protected static WriteTypes(_: DataCursorView, types: BinaryTypeStruct[]): void {
       BinaryWriter.WriteUint16(_, types.length);
       for (const type of types) this.WriteType(_, type);
    }
 
-   protected static WriteType(_: StaticDataSource, type: BinaryTypeStruct): void {
+   protected static WriteType(_: DataCursorView, type: BinaryTypeStruct): void {
       BinaryWriter.WriteUint8(_, type.bitType);
 
       // Keep Strict Order of the Binary Writer methods
@@ -170,12 +169,12 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
    }
 
-   protected static WriteSymbols(_: StaticDataSource, symbols: BinarySymbolStruct[]): void {
+   protected static WriteSymbols(_: DataCursorView, symbols: BinarySymbolStruct[]): void {
       BinaryWriter.WriteUint16(_, symbols.length);
       for (const symbol of symbols) this.WriteSymbol(_, symbol);
    }
 
-   protected static WriteSymbol(_: StaticDataSource, symbol: BinarySymbolStruct): void {
+   protected static WriteSymbol(_: DataCursorView, symbol: BinarySymbolStruct): void {
       BinaryWriter.WriteUint16(_, symbol.bitFlags);
       this.WriteIndexRef(_, symbol.name);
 
@@ -192,13 +191,13 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       if (AllOf(symbol.bitFlags, SymbolBitFlags.IsFunction)) throw new ReferenceError('Params has to be implemented');
    }
 
-   protected static WriteDynamicValue(_: StaticDataSource, value: unknown): void {
-      const type = GeneralNBTFormatWriter.determineType(value, NBTTag.Double);
+   protected static WriteDynamicValue(_: DataCursorView, value: unknown): void {
+      const type = this.nbtFormatWriter.determinateType(value);
       this.nbtFormatWriter.writeType(_, type);
-      this.nbtFormatWriter[type as NBTTag.Byte](_, value as number);
+      this.nbtFormatWriter[type as TagType.Byte](_, value as number);
    }
 
-   protected static WriteInterfaceData(_: StaticDataSource, data: BinarySymbolStruct['isInterfaceData']): void {
+   protected static WriteInterfaceData(_: DataCursorView, data: BinarySymbolStruct['isInterfaceData']): void {
       BinaryWriter.WriteUint8(_, data!.keys.length);
       for (let i = 0; i < data!.keys.length; i++) {
          this.WriteIndexRef(_, data!.keys[i]!);
@@ -206,7 +205,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
    }
 
-   protected static WriteEnumData(_: StaticDataSource, data: BinarySymbolStruct['isEnumData']): void {
+   protected static WriteEnumData(_: DataCursorView, data: BinarySymbolStruct['isEnumData']): void {
       const flags = (data!.hasNumericalValues ? 0x80 : 0x00) | data!.keys.length;
       BinaryWriter.WriteUint8(_, flags);
       for (let i = 0; i < data!.keys.length; i++) {
@@ -214,14 +213,14 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
          if (data!.hasNumericalValues) BinaryWriter.WriteUint16(_, data!.values![i]!);
       }
    }
-   protected static WriteMinimalReferences(_: StaticDataSource, refs: IndexId[]): void {
+   protected static WriteMinimalReferences(_: DataCursorView, refs: IndexId[]): void {
       BinaryWriter.WriteUint8(_, refs.length);
       BinaryWriter.WriteUint16Array(_, refs);
    }
 
    protected static readonly WritePrivileges = this.WriteMinimalReferences;
 
-   protected static WriteExportIndexes(_: StaticDataSource, value: ArrayLike<number>) {
+   protected static WriteExportIndexes(_: DataCursorView, value: ArrayLike<number>) {
       BinaryWriter.WriteUint16(_, value.length);
       BinaryWriter.WriteUint16Array(_, value);
    }

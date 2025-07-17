@@ -6,24 +6,24 @@ describe('indexed collector', () => {
       const stringCollector = new IndexedCollector<string>();
       const typesCollector = new IndexedCollector((v: { name: string; value: string }) => `${v.name}.${v.value}`);
 
-      stringCollector.toIndex('random string');
-      stringCollector.toIndex('random string 2');
-      stringCollector.toIndex('random string 3');
-      stringCollector.toIndex('random string 4');
+      stringCollector.getIndexFor('random string');
+      stringCollector.getIndexFor('random string 2');
+      stringCollector.getIndexFor('random string 3');
+      stringCollector.getIndexFor('random string 4');
 
       const type1 = { name: 'type 1', value: 'aaaa' };
-      const type1Index = typesCollector.toIndex(type1);
+      const type1Index = typesCollector.getIndexFor(type1);
 
       expect(typesCollector.getArray().length).toBe(1);
       expect(type1Index).toEqual(0);
 
       // Another type creation, but before we got bunch of random other calls
       // to show that creating new strings does not affect type indexes
-      stringCollector.toIndex('random string 5');
-      stringCollector.toIndex('random string 6');
+      stringCollector.getIndexFor('random string 5');
+      stringCollector.getIndexFor('random string 6');
 
       const type2 = { name: 'type 1', value: 'aaaa bbb' };
-      const type2Index = typesCollector.toIndex(type2);
+      const type2Index = typesCollector.getIndexFor(type2);
 
       expect(typesCollector.getArray().length).toBe(2);
       expect(type2Index).toEqual(1);
@@ -32,7 +32,7 @@ describe('indexed collector', () => {
       const stringSlices = stringCollector.getArray();
       const typeSlices = typesCollector
          .getArray()
-         .map(e => ({ name: stringCollector.toIndex(e.name), value: stringCollector.toIndex(e.value) }));
+         .map(e => ({ name: stringCollector.getIndexFor(e.name), value: stringCollector.getIndexFor(e.value) }));
 
       // from binary
       const stringAccess = new IndexedAccessor(stringSlices);

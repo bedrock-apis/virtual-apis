@@ -1,12 +1,7 @@
-import {
-   GeneralNBTFormatReader,
-   GeneralNBTFormatWriter,
-   NBTFormatReader,
-   NBTFormatWriter,
-} from '../../ref-bapi-nbt/base';
-import { NBTTag } from '../../ref-bapi-nbt/tag';
+import { NBT_FORMAT_READER, NBT_FORMAT_WRITER, ReaderLike, WriterLike } from "@bedrock-apis/nbt";
+import { TagType } from "@bedrock-apis/nbt-core";
 import { BinaryReader, BinaryWriter } from '../binary';
-import { StaticDataSource } from '../binary/static-data-source';
+import { DataCursorView } from '../binary/data-cursor-view';
 import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
 import { GeneralMetadata, ImageGeneralHeaderData, ImageModuleData, ModuleMetadata } from '../types';
 import { BinaryFieldDataType } from '../types/data-type';
@@ -16,8 +11,8 @@ export class BaseBinaryImageSerializer {
    protected constructor() {}
    public static readonly version: number = 0;
    public static readonly isDeprecated: boolean = true;
-   public static readonly nbtFormatReader: NBTFormatReader = new GeneralNBTFormatReader();
-   public static readonly nbtFormatWriter: NBTFormatWriter = new GeneralNBTFormatWriter();
+   public static readonly nbtFormatReader: ReaderLike = NBT_FORMAT_READER;
+   public static readonly nbtFormatWriter: WriterLike = NBT_FORMAT_WRITER;
    protected static GetBase<T>(this: T): T | null {
       if (this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this) as T;
       return null;
@@ -40,7 +35,7 @@ export class BaseBinaryImageSerializer {
       if (version < this.version) return this.GetBase() ?? null;
       return this;
    }
-   public static GetGeneralHeader(_: StaticDataSource): ImageGeneralHeaderData {
+   public static GetGeneralHeader(_: DataCursorView): ImageGeneralHeaderData {
       _.pointer = 0;
       if (this.ReadNextMagic(_) !== IMAGE_GENERAL_DATA_MAGIC)
          throw new TypeError("Malformed data, magic doesn't match");
@@ -53,9 +48,9 @@ export class BaseBinaryImageSerializer {
       return { metadata, stringSlices: slices, version };
    }
    public static *GetAllFields(
-      _: StaticDataSource,
-   ): Generator<{ type: BinaryFieldDataType; metadata: unknown; checkpoint: StaticDataSource }> {
-      while (_.pointer < _.uint8Array.length) {
+      _: DataCursorView,
+   ): Generator<{ type: BinaryFieldDataType; metadata: unknown; checkpoint: DataCursorView }> {
+      while (_.pointer < _.buffer.length) {
          const magic = this.ReadNextMagic(_);
          if (!(magic in BinaryFieldDataType)) throw new ReferenceError('Unknown magic');
 
@@ -64,7 +59,7 @@ export class BaseBinaryImageSerializer {
          yield { type: magic, metadata, checkpoint };
       }
    }
-   public static WriteGeneralHeader(_: StaticDataSource, header: ImageGeneralHeaderData) {
+   public static WriteGeneralHeader(_: DataCursorView, header: ImageGeneralHeaderData) {
       _.pointer = 0;
       console.log(header.version, this.version);
       const self = this.GetBinaryImageSerializerFor(header.version);
@@ -76,17 +71,17 @@ export class BaseBinaryImageSerializer {
       self.WriteGeneralMetadata(_, header.metadata);
       self.WriteGlobalStrings(_, header.stringSlices);
    }
-   public static WriteFieldHeader(_: StaticDataSource, metadata: ModuleMetadata) {
+   public static WriteFieldHeader(_: DataCursorView, metadata: ModuleMetadata) {
       this.WriteNextMagic(_, IMAGE_MODULE_HEADER_MAGIC);
       this.WriteFieldMetadata(_, metadata);
    }
    //#endregion
 
-   protected static WriteMetadata(_: StaticDataSource, metadata: object): void {
-      BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[NBTTag.Compound](_, metadata));
+   protected static WriteMetadata(_: DataCursorView, metadata: object): void {
+      BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[TagType.Compound](_, metadata));
    }
-   protected static ReadMetadata(_: StaticDataSource): unknown {
-      return BinaryReader.ReadCheckPointUint16(_, _ => this.nbtFormatReader[NBTTag.Compound](_));
+   protected static ReadMetadata(_: DataCursorView): unknown {
+      return BinaryReader.ReadCheckPointUint16(_, _ => this.nbtFormatReader[TagType.Compound](_));
    }
 
    //!! Has to be getter so the inheritance works properly !!
@@ -97,26 +92,26 @@ export class BaseBinaryImageSerializer {
       return this.WriteMetadata;
    }
    protected static get ReadGeneralMetadata() {
-      return this.ReadMetadata as (_: StaticDataSource) => GeneralMetadata;
+      return this.ReadMetadata as (_: DataCursorView) => GeneralMetadata;
    }
    protected static get ReadFieldMetadata() {
       return this.ReadMetadata;
    }
-   protected static WriteGlobalStrings(_: StaticDataSource, data: string[]) {
+   protected static WriteGlobalStrings(_: DataCursorView, data: string[]) {
       BinaryWriter.WriteUint16(_, data.length);
       for (let i = 0; i < data.length; i++) BinaryWriter.WriteStringU8(_, data[i] as string);
    }
-   protected static ReadGlobalStrings(_: StaticDataSource): string[] {
+   protected static ReadGlobalStrings(_: DataCursorView): string[] {
       const array: string[] = [];
       const length = BinaryReader.ReadUint16(_);
       for (let i = 0; i < length; i++) array.push(BinaryReader.ReadStringU8(_));
       return array;
    }
    //#region Inheritance
-   public static WriteModuleField(_: StaticDataSource, module: ImageModuleData) {
+   public static WriteModuleField(_: DataCursorView, module: ImageModuleData) {
       throw new ReferenceError('No implementation error');
    }
-   public static ReadModuleField(_: StaticDataSource, metadata: unknown): ImageModuleData {
+   public static ReadModuleField(_: DataCursorView, metadata: unknown): ImageModuleData {
       throw new ReferenceError('No implementation error');
    }
    //#endregion

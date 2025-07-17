@@ -26,6 +26,9 @@ importers:
       '@bedrock-apis/kernel-isolation':
         specifier: workspace:*
         version: link:libs/kernel-isolation
+      '@bedrock-apis/nbt-core':
+        specifier: 0.0.1-alpha.2
+        version: 0.0.1-alpha.2
       '@bedrock-apis/types':
         specifier: workspace:*
         version: link:libs/types
@@ -48,6 +51,9 @@ importers:
         specifier: workspace:*
         version: link:packages/virtual-apis
     devDependencies:
+      '@bedrock-apis/nbt':
+        specifier: 0.0.1-alpha.2
+        version: 0.0.1-alpha.2
       '@eslint/js':
         specifier: ^9.27.0
         version: 9.27.0
@@ -157,11 +163,7 @@ importers:
         specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@24.0.0)(@vitest/ui@3.1.4)(jiti@2.4.2)(tsx@4.19.4)
 
-  libs/binary:
-    dependencies:
-      '@bedrock-apis/nbt':
-        specifier: 0.0.1-alpha.1
-        version: 0.0.1-alpha.1
+  libs/binary: {}
 
   libs/common: {}
 
@@ -262,8 +264,8 @@ packages:
   '@bedrock-apis/nbt-core@0.0.1-alpha.2':
     resolution: {integrity: sha512-OY67JRWFC5956qSIVbzyQi7nPLpPso9qaMc1yyYoi0peGV+wzHGrpXUmomEt+Mxim6mnQBBVTGvQFkHbQsivtQ==}
 
-  '@bedrock-apis/nbt@0.0.1-alpha.1':
-    resolution: {integrity: sha512-RVDylKB7NDOgp/T/HfiD7ReLaU0rV+eAormcca2WTI7PY63/fzHX8bqYiJ+zPIV8uN8dKkpWswcCPmObJ+view==}
+  '@bedrock-apis/nbt@0.0.1-alpha.2':
+    resolution: {integrity: sha512-gAepHbvZhl6HFxT7ItQECy+PfjfX+eiRm2RICApnWJhcgqxqc9902tu0vraB3AURMeBoCKVl0XMB07Q4u5EILg==}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -1903,7 +1905,7 @@ snapshots:
 
   '@bedrock-apis/nbt-core@0.0.1-alpha.2': {}
 
-  '@bedrock-apis/nbt@0.0.1-alpha.1':
+  '@bedrock-apis/nbt@0.0.1-alpha.2':
     dependencies:
       '@bedrock-apis/nbt-core': 0.0.1-alpha.2
 
