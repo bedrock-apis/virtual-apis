@@ -157,7 +157,11 @@ importers:
         specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@24.0.0)(@vitest/ui@3.1.4)(jiti@2.4.2)(tsx@4.19.4)
 
-  libs/binary: {}
+  libs/binary:
+    dependencies:
+      '@bedrock-apis/nbt':
+        specifier: 0.0.1-alpha.1
+        version: 0.0.1-alpha.1
 
   libs/common: {}
 
@@ -254,6 +258,12 @@ packages:
   '@babel/types@7.27.3':
     resolution: {integrity: sha512-Y1GkI4ktrtvmawoSq+4FCVHNryea6uR+qUQy0AGxLSsjCX0nVmkYQMBLHDkXZuo5hGx7eYdnIaslsdBFm7zbUw==}
     engines: {node: '>=6.9.0'}
+
+  '@bedrock-apis/nbt-core@0.0.1-alpha.2':
+    resolution: {integrity: sha512-OY67JRWFC5956qSIVbzyQi7nPLpPso9qaMc1yyYoi0peGV+wzHGrpXUmomEt+Mxim6mnQBBVTGvQFkHbQsivtQ==}
+
+  '@bedrock-apis/nbt@0.0.1-alpha.1':
+    resolution: {integrity: sha512-RVDylKB7NDOgp/T/HfiD7ReLaU0rV+eAormcca2WTI7PY63/fzHX8bqYiJ+zPIV8uN8dKkpWswcCPmObJ+view==}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -1890,6 +1900,12 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
+
+  '@bedrock-apis/nbt-core@0.0.1-alpha.2': {}
+
+  '@bedrock-apis/nbt@0.0.1-alpha.1':
+    dependencies:
+      '@bedrock-apis/nbt-core': 0.0.1-alpha.2
 
   '@emnapi/core@1.4.3':
     dependencies:
