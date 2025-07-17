@@ -70,7 +70,7 @@
       "@bedrock-apis/virtual-apis": "workspace:*"
    },
    "devDependencies": {
-      "@bedrock-apis/nbt": "0.0.1-alpha.2",
+      "@bedrock-apis/nbt": "0.0.1-alpha.3",
       "@eslint/js": "^9.27.0",
       "@minecraft/server": "2.0.0-beta.1.21.80-stable",
       "@minecraft/server-net": "1.0.0-beta.1.21.90-preview.23",

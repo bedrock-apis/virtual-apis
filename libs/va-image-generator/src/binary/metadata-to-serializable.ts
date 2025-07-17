@@ -7,6 +7,7 @@ import {
    ModuleMetadata,
    SymbolBitFlags,
 } from '@bedrock-apis/binary';
+import { Short } from '@bedrock-apis/nbt-core';
 import {
    MetadataClassDefinition,
    MetadataConstantDefinition,
@@ -106,7 +107,7 @@ export class MetadataToSerializableTransformer {
       }
 
       const metadata: ImageGeneralHeaderData = {
-         metadata: { engine: stringRef('1.21.80.0') },
+         metadata: { engine: new Short(stringRef('1.21.80.0')) },
          stringSlices: this.stringCollector.getArray(),
          version: CurrentBinaryImageSerializer.version,
       };

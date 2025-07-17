@@ -1,5 +1,6 @@
 // Critical Field, do not change or remove property names if not necessary
 
+import { Short } from '@bedrock-apis/nbt-core';
 import { IndexId } from './general';
 
 // Its serialized via NBT as is
@@ -11,5 +12,5 @@ export interface ModuleMetadata {
 }
 
 export interface GeneralMetadata {
-   readonly engine?: IndexId;
+   readonly engine?: Short;
 }

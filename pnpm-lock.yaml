@@ -52,8 +52,8 @@ importers:
         version: link:packages/virtual-apis
     devDependencies:
       '@bedrock-apis/nbt':
-        specifier: 0.0.1-alpha.2
-        version: 0.0.1-alpha.2
+        specifier: 0.0.1-alpha.3
+        version: 0.0.1-alpha.3
       '@eslint/js':
         specifier: ^9.27.0
         version: 9.27.0
@@ -264,8 +264,8 @@ packages:
   '@bedrock-apis/nbt-core@0.0.1-alpha.2':
     resolution: {integrity: sha512-OY67JRWFC5956qSIVbzyQi7nPLpPso9qaMc1yyYoi0peGV+wzHGrpXUmomEt+Mxim6mnQBBVTGvQFkHbQsivtQ==}
 
-  '@bedrock-apis/nbt@0.0.1-alpha.2':
-    resolution: {integrity: sha512-gAepHbvZhl6HFxT7ItQECy+PfjfX+eiRm2RICApnWJhcgqxqc9902tu0vraB3AURMeBoCKVl0XMB07Q4u5EILg==}
+  '@bedrock-apis/nbt@0.0.1-alpha.3':
+    resolution: {integrity: sha512-llywef6iDAYidtTZofqkF74yzmJHpOFgWEAbH/SodhDBAnYz44eSPU7s8TSYTYNrDapeDzZN83cYaSMi0uR7pA==}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -1905,7 +1905,7 @@ snapshots:
 
   '@bedrock-apis/nbt-core@0.0.1-alpha.2': {}
 
-  '@bedrock-apis/nbt@0.0.1-alpha.2':
+  '@bedrock-apis/nbt@0.0.1-alpha.3':
     dependencies:
       '@bedrock-apis/nbt-core': 0.0.1-alpha.2
 

@@ -68,6 +68,7 @@ export class BaseBinaryImageSerializer {
       self.WriteNextMagic(_, IMAGE_GENERAL_DATA_MAGIC);
       self.WriteVersion(_, header.version);
 
+      console.log(header.metadata);
       self.WriteGeneralMetadata(_, header.metadata);
       self.WriteGlobalStrings(_, header.stringSlices);
    }
@@ -78,6 +79,7 @@ export class BaseBinaryImageSerializer {
    //#endregion
 
    protected static WriteMetadata(_: DataCursorView, metadata: object): void {
+      console.log("META", metadata)
       BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[TagType.Compound](_, metadata));
    }
    protected static ReadMetadata(_: DataCursorView): unknown {
