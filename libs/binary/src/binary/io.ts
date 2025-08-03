@@ -1,29 +1,42 @@
 import { DataCursorView } from './data-cursor-view';
 
-type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
+export type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
+
+export type PickMatchNoNull<T extends object, Filter> = {
+   [K in keyof T as NonNullable<T[K]> extends Filter ? K : never]: NonNullable<T[K]>;
+};
 
 export abstract class BinaryIO<T extends object> {
    public constructor(
-      protected data: DataCursorView,
+      public readonly data: DataCursorView,
       public readonly storage: T,
    ) {}
 
-   public sub<K extends keyof PickMatch<T, Record<string, unknown>>>(
+   public sub<K extends keyof PickMatchNoNull<T, Record<string, unknown>>>(
       key: K,
-   ): K extends keyof T ? (T[K] extends object ? BinaryIO<T[K]> : never) : never {
+   ): K extends keyof T ? (NonNullable<T[K]> extends object ? BinaryIO<NonNullable<T[K]>> : never) : never {
       // @ts-expect-error yeaah i love breaking ts
       return new (this.constructor as typeof BinaryIO)(this.data, (this.storage[key] ??= {}));
+   }
+
+   protected arraySub(data: object) {
+      // @ts-expect-error yeaah i love breaking ts
+      return new (this.constructor as typeof BinaryIO)(this.data, data);
    }
 
    protected abstract getLengthUint8(key: keyof T): number;
    protected abstract getLengthUint16(key: keyof T): number;
    protected abstract getLengthUint32(key: keyof T): number;
 
-   public abstract uint8(key: keyof PickMatch<T, number>): this;
-   public abstract uint16(key: keyof PickMatch<T, number>): this;
-   public abstract uint32(key: keyof PickMatch<T, number>): this;
+   public abstract bool(key: keyof PickMatchNoNull<T, boolean>): this;
+
+   public abstract uint8(key: keyof PickMatchNoNull<T, number>): this;
+   public abstract uint16(key: keyof PickMatchNoNull<T, number>): this;
+   public abstract uint32(key: keyof PickMatchNoNull<T, number>): this;
    public abstract varuint32(key: keyof PickMatch<T, number>): this;
-   public abstract float64(key: keyof PickMatch<T, number>): this;
+   public abstract float64(key: keyof PickMatchNoNull<T, number>): this;
+
+   public index = this.uint16;
 
    protected abstract string(key: keyof PickMatch<T, string>, length: number): this;
 
@@ -39,13 +52,32 @@ export abstract class BinaryIO<T extends object> {
 
    protected abstract uint16Array(key: keyof PickMatch<T, number[]>, length: number): this;
 
-   public uint16Array8(key: keyof PickMatch<T, number[]>): this {
+   public uint16Array8(key: keyof PickMatchNoNull<T, number[]>): this {
+      (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint8(key));
    }
-   public uint16Array16(key: keyof PickMatch<T, number[]>): this {
+   public uint16Array16(key: keyof PickMatchNoNull<T, number[]>): this {
+      (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint16(key));
    }
-   public uint16Array32(key: keyof PickMatch<T, number[]>): this {
+   public uint16Array32(key: keyof PickMatchNoNull<T, number[]>): this {
+      (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint32(key));
+   }
+
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   protected abstract array(key: keyof T, length: number, io: (io: BinaryIO<any>) => void): this;
+
+   public array8<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+      (this.storage[key] as []) ??= [];
+      return this.array(key, this.getLengthUint8(key), io);
+   }
+   public array16<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+      (this.storage[key] as []) ??= [];
+      return this.array(key, this.getLengthUint16(key), io);
+   }
+   public array32<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+      (this.storage[key] as []) ??= [];
+      return this.array(key, this.getLengthUint32(key), io);
    }
 }

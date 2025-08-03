@@ -107,7 +107,7 @@ export class BinaryReader {
 
 type ReaderKey = string;
 
-export class BinaryIOReader extends BinaryIO<object & Partial<Record<ReaderKey, unknown>>> {
+export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    // Get length methods here act as read too
 
    protected override getLengthUint8(_: ReaderKey): number {
@@ -124,6 +124,11 @@ export class BinaryIOReader extends BinaryIO<object & Partial<Record<ReaderKey, 
       const value = this.data.view.getUint32(this.data.pointer, true);
       this.data.pointer += 4;
       return value;
+   }
+
+   public override bool(key: ReaderKey): this {
+      this.storage[key] = this.getLengthUint8(key) === 1;
+      return this;
    }
 
    public uint8(key: ReaderKey) {
@@ -186,6 +191,13 @@ export class BinaryIOReader extends BinaryIO<object & Partial<Record<ReaderKey, 
       let offset = this.data.pointer;
       for (let i = 0; i < length; i++, offset += 2) buffer[i] = view.getUint16(offset, true);
       this.data.pointer = offset;
+      this.storage[key] = buffer;
+      return this;
+   }
+
+   protected override array(key: string, length: number, io: (io: BinaryIO<object>) => void): this {
+      const buffer = [];
+      for (let i = 0; i < length; i++) io(this.arraySub((buffer[buffer.length] = {})));
       this.storage[key] = buffer;
       return this;
    }

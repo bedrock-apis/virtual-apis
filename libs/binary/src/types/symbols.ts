@@ -44,7 +44,7 @@ export enum SymbolBitFlags {
 export interface BinarySymbolStruct {
    bitFlags: number;
    name: IndexId;
-   isEnumData?: { hasNumericalValues: boolean; keys: IndexId[]; values?: number[] };
+   isEnumData?: { hasNumericalValues: boolean; keys: IndexId[]; values: number[] };
    isInterfaceData?: { keys: IndexId[]; types: IndexId[] };
    hasValue?: unknown;
    hasType?: IndexId;

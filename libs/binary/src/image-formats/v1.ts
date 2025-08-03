@@ -3,6 +3,7 @@ import { BitFlags } from '@bedrock-apis/common';
 import { TagType } from '@bedrock-apis/nbt-core';
 import { BinaryReader, BinaryWriter } from '../binary';
 import { DataCursorView } from '../binary/data-cursor-view';
+import { BinaryIO, PickMatch } from '../binary/io';
 import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '../types';
 import { BinaryTypeStruct, TypeBitFlags } from '../types/types';
 import { BaseBinaryImageSerializer } from './base-format';
@@ -175,6 +176,28 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       for (const symbol of symbols) this.WriteSymbol(_, symbol);
    }
 
+   protected indexRef<T extends object>(io: BinaryIO<T>, key: keyof PickMatch<T, number>) {
+      io.uint16(key);
+   }
+
+   protected static Symbol(io: BinaryIO<BinarySymbolStruct>): void {
+      io.uint16('bitFlags');
+      io.index('name');
+
+      if (io.storage.bitFlags === 0) return;
+
+      // Strict Order Do not change!!!
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsEnum)) this.EnumData(io.sub('isEnumData'));
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsInterface)) this.InterfaceData(io.sub('isInterfaceData'));
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsInvocable)) io.uint16Array8('invocablePrivileges');
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasSetter)) io.uint16Array8('setterPrivileges');
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasType)) io.index('hasType');
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsBindType)) io.index('bindType');
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasValue)) this.WriteDynamicValue(io.data, io.storage.hasValue);
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsFunction))
+         throw new ReferenceError('Params has to be implemented');
+   }
+
    protected static WriteSymbol(_: DataCursorView, symbol: BinarySymbolStruct): void {
       BinaryWriter.WriteUint16(_, symbol.bitFlags);
       this.WriteIndexRef(_, symbol.name);
@@ -204,6 +227,17 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
          this.WriteIndexRef(_, data!.keys[i]!);
          this.WriteIndexRef(_, data!.types[i]!);
       }
+   }
+
+   protected static InterfaceData(io: BinaryIO<NonNullable<BinarySymbolStruct['isInterfaceData']>>): void {
+      io.uint16Array8('keys');
+      io.uint16Array8('types');
+   }
+
+   protected static EnumData(io: BinaryIO<NonNullable<BinarySymbolStruct['isEnumData']>>): void {
+      io.bool('hasNumericalValues');
+      io.uint16Array16('keys');
+      io.uint16Array16('values');
    }
 
    protected static WriteEnumData(_: DataCursorView, data: BinarySymbolStruct['isEnumData']): void {
