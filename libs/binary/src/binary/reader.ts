@@ -1,4 +1,5 @@
 import { DataCursorView } from './data-cursor-view';
+import { BinaryIO } from './io';
 
 const utf8Decoder = new TextDecoder();
 
@@ -101,5 +102,91 @@ export class BinaryReader {
       for (let i = 0; i < length; i++, offset += 2) buffer[i] = view.getUint16(offset, true);
       _.pointer += offset;
       return buffer;
+   }
+}
+
+type ReaderKey = string;
+
+export class BinaryIOReader extends BinaryIO<object & Partial<Record<ReaderKey, unknown>>> {
+   // Get length methods here act as read too
+
+   protected override getLengthUint8(_: ReaderKey): number {
+      return this.data.view.getUint8(this.data.pointer++);
+   }
+
+   public override getLengthUint16(_: ReaderKey): number {
+      const value = this.data.view.getUint16(this.data.pointer, true);
+      this.data.pointer += 2;
+      return value;
+   }
+
+   protected override getLengthUint32(_: ReaderKey): number {
+      const value = this.data.view.getUint32(this.data.pointer, true);
+      this.data.pointer += 4;
+      return value;
+   }
+
+   public uint8(key: ReaderKey) {
+      this.storage[key] = this.getLengthUint8(key);
+      return this;
+   }
+
+   public uint16(key: ReaderKey) {
+      this.storage[key] = this.getLengthUint16(key);
+      return this;
+   }
+
+   public uint32(key: ReaderKey) {
+      this.storage[key] = this.getLengthUint32(key);
+      return this;
+   }
+
+   // Memory efficient but not as fast, has to be benchamarked on real-world samples
+   public varuint32(key: string) {
+      let current = this.data.buffer[this.data.pointer++] ?? 0;
+      let value = current;
+      let shift = 0;
+      let i = 0;
+      while (value & 0x80 && i++ < 5) {
+         current = this.data.buffer[this.data.pointer++] ?? 0;
+         value |= (current & 0x7f) << (shift += 7);
+      }
+      this.storage[key] = value;
+      return this;
+   }
+
+   public float64(key: string) {
+      this.storage[key] = this.data.view.getFloat64(this.data.pointer, true);
+      this.data.pointer += 8;
+      return this;
+   }
+
+   protected readBuffer(length: number): Uint8Array {
+      return this.data.buffer.subarray(this.data.pointer, (this.data.pointer += length));
+   }
+
+   protected string(key: string, length: number, decoder = utf8Decoder): this {
+      this.storage[key] = decoder.decode(this.readBuffer(length));
+      return this;
+   }
+
+   // public ReadArrayBufferU16(key: string): Uint8Array {
+   //    const length = BinaryReader.ReadUint16(this.data);
+   //    return BinaryReader.ReadBuffer(this.data, length);
+   // }
+
+   // public ReadArrayBufferU32(key: string): Uint8Array {
+   //    const length = BinaryReader.ReadUint32(this.data);
+   //    return BinaryReader.ReadBuffer(this.data, length);
+   // }
+
+   protected uint16Array(key: string, length: number): this {
+      const view = this.data.view;
+      const buffer = [];
+      let offset = this.data.pointer;
+      for (let i = 0; i < length; i++, offset += 2) buffer[i] = view.getUint16(offset, true);
+      this.data.pointer = offset;
+      this.storage[key] = buffer;
+      return this;
    }
 }

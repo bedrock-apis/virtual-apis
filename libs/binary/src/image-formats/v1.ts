@@ -33,6 +33,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       for (let i = 0; i < size; i++) array[array.length] = this.ReadType(_);
       return array;
    }
+
    protected static ReadType(_: DataCursorView): BinaryTypeStruct {
       const bitKind = BinaryReader.ReadUint8(_);
       const type: BinaryTypeStruct = { bitType: bitKind };

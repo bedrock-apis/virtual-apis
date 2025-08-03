@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vitest';
+import { DataCursorView } from './data-cursor-view';
+import { BinaryIO } from './io';
+import { BinaryIOReader } from './reader';
+import { BinaryIOWriter } from './writer';
+
+describe('marshalling test', () => {
+   interface SomeData {
+      data: number;
+      array: number[];
+      string: string;
+      otherData: {
+         longString: string;
+         bigNumber: number;
+         float: number;
+      };
+   }
+   function marshal(io: BinaryIO<SomeData>) {
+      io.uint8('data');
+      io.uint16Array8('array');
+      io.string8('string');
+
+      const otherDataio = io.sub('otherData');
+      otherDataio.string32('longString');
+      otherDataio.uint32('bigNumber');
+      otherDataio.float64('float');
+
+      console.log('finish');
+   }
+
+   function read(source: DataCursorView): SomeData {
+      const reader = new BinaryIOReader(source, {}) as unknown as BinaryIO<SomeData>;
+      marshal(reader);
+      return reader.storage;
+   }
+
+   function write(data: SomeData): DataCursorView {
+      const cursor = DataCursorView.Alloc(1024 * 1024);
+      const writer = new BinaryIOWriter(cursor, data as object);
+      marshal(writer as unknown as BinaryIO<SomeData>);
+      return cursor;
+   }
+
+   it('should conver them without chaning', () => {
+      const data: SomeData = {
+         data: 30,
+         array: [123, 54, 12],
+         string: 'something',
+         otherData: {
+            longString: 'something'.repeat(4),
+            bigNumber: 2 ^ (32 - 10),
+            float: 44132.452,
+         },
+      };
+
+      const cursor = write(data);
+      cursor.pointer = 0;
+
+      expect(read(cursor)).toEqual(data);
+   });
+});
+
