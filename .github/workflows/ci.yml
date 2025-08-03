@@ -35,6 +35,9 @@ jobs:
          - name: 🏗 Bundle generators and build Modules
            run: pnpm run build
 
+         - name: Dump BDS Docs
+           run: pnpm run dump:run
+
          - name: 🧪 Run e2e tests
            run: pnpm run e2e
 

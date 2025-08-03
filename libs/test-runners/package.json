@@ -1,0 +1,7 @@
+{
+  "name": "@bedrock-apis/test-runner",
+  "version": "0.0.1-alpha",
+  "main": "./dist/main.js",
+  "type": "module",
+  "types": "./src/main.ts"
+}

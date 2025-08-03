@@ -1,7 +1,7 @@
 import { Block, Entity } from '@minecraft/server';
-import { TestEnviroment } from '../../../bds-docs/test-runner/enviroment';
+import { TestEnvironment } from '../../../libs/test-runners/src/environment';
 
-export class VirtualApiEnvironment extends TestEnviroment {
+export class VirtualApiEnvironment extends TestEnvironment {
    public async onSetup() {
       // Nothing
    }

@@ -17,6 +17,6 @@
 
       "noImplicitOverride": true
    },
-   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts", "bds-docs"],
+   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts", "bds-docs", "libs/bds-dumps/src/test-runner"],
    "exclude": ["bds-docs/src/old_reference"]
 }

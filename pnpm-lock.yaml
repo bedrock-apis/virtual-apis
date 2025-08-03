@@ -123,6 +123,9 @@ importers:
       typescript-eslint:
         specifier: ^8.33.0
         version: 8.33.0(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
+      unzip-web-stream:
+        specifier: 0.0.0-alpha.1
+        version: 0.0.0-alpha.1
       vitest:
         specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@24.0.0)(@vitest/ui@3.1.4)(jiti@2.4.2)(tsx@4.19.4)
@@ -163,6 +166,8 @@ importers:
         specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@24.0.0)(@vitest/ui@3.1.4)(jiti@2.4.2)(tsx@4.19.4)
 
+  libs/bds-dumps: {}
+
   libs/binary: {}
 
   libs/common: {}
@@ -170,6 +175,8 @@ importers:
   libs/eslint-plugin: {}
 
   libs/kernel-isolation: {}
+
+  libs/test-runners: {}
 
   libs/tools: {}
 
@@ -1684,6 +1691,9 @@ packages:
 
   unist-util-stringify-position@4.0.0:
     resolution: {integrity: sha512-0ASV06AAoKCDkS2+xw5RXJywruurpbC4JZSm7nr7MOt1ojAzvyyaO+UxZf18j8FCF6kmzCZKcAgN/yu2gm2XgQ==}
+
+  unzip-web-stream@0.0.0-alpha.1:
+    resolution: {integrity: sha512-F5TMIUds4LjT1+HXulzqkLCnAseYT5HTqndxA4Ts0gd/XkQwiOSgUhHzCxNZ4Em5Dg7isU4ZSG92RY0QKDIAnA==}
 
   update-browserslist-db@1.1.3:
     resolution: {integrity: sha512-UxhIZQ+QInVdunkDAaiazvvT/+fXL5Osr0JZlJulepYu6Jd7qJtDZjlur0emRlT71EN3ScPoE7gvsuIKKNavKw==}
@@ -3353,6 +3363,8 @@ snapshots:
   unist-util-stringify-position@4.0.0:
     dependencies:
       '@types/unist': 3.0.3
+
+  unzip-web-stream@0.0.0-alpha.1: {}
 
   update-browserslist-db@1.1.3(browserslist@4.24.5):
     dependencies:

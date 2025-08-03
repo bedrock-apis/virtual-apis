@@ -1,0 +1,7 @@
+{
+  "name": "@bedrock-apis/bds-dumps",
+  "version": "0.0.1-alpha",
+  "type": "module",
+  "main": "./dist/local.js",
+  "types": "./src/local/main.ts"
+}

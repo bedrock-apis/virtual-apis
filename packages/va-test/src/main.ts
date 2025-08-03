@@ -10,6 +10,7 @@ Context.Configure({
 
 import '@bedrock-apis/core-plugin';
 
-import '../../../bds-docs/test-runner/suites/all';
+import '../../../libs/test-runners/src/suites/all';
 
 import './compare';
+

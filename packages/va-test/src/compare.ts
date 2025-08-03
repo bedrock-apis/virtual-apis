@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import results from '../../../bds-docs-stable/reports/api.json' with { type: 'json' };
-import { runAndCompare } from '../../../bds-docs/test-runner/compare';
+import { runAndCompare } from '../../../libs/test-runners/src/compare';
 import { VirtualApiEnvironment } from './environment';
 
 const result = await runAndCompare(results, new VirtualApiEnvironment());
