@@ -3,25 +3,25 @@ import { setEnvironment, TestEnvironment } from './environment';
 import { TestReport } from './types';
 
 export class TestSuite<T> {
-   static stringify(object: unknown): string {
+   public static Stringify(object: unknown): string {
       if (object === undefined) return 'undefined';
       // TODO Better stringify
       return JSON.stringify(object);
    }
 
-   static withSetup<T>(id: string, setupFn: () => T) {
+   public static WithSetup<T>(id: string, setupFn: () => T) {
       return new TestSuite(id, setupFn);
    }
 
-   static simple(id: string) {
+   public static Simple(id: string) {
       return new TestSuite(id, () => {});
    }
 
-   static r(Environment: TestEnvironment, runner: ThreadRunner = defaultThreadRunner) {
-      return RunThreadAsync(this.run(Environment), runner);
+   public static RunThread(Environment: TestEnvironment, runner: ThreadRunner = defaultThreadRunner) {
+      return RunThreadAsync(this.Run(Environment), runner);
    }
 
-   static *run(Environment: TestEnvironment): Generator<Promise<void> | unknown, TestReport.Run, unknown> {
+   public static *Run(Environment: TestEnvironment): Generator<Promise<void> | unknown, TestReport.Run, unknown> {
       try {
          setEnvironment(Environment);
 
@@ -39,6 +39,7 @@ export class TestSuite<T> {
       return suites;
    }
 
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    protected static suites = new Map<string, TestSuite<any>>();
 
    protected constructor(
@@ -48,7 +49,7 @@ export class TestSuite<T> {
       TestSuite.suites.set(id, this);
    }
 
-   *run(): Generator<unknown, TestReport.Suite, unknown> {
+   public *run(): Generator<unknown, TestReport.Suite, unknown> {
       let setup;
       try {
          setup = this.setupFn();
@@ -69,12 +70,12 @@ export class TestSuite<T> {
 
    protected tests: ((setupData: T) => TestReport.Chained | TestReport.Primitive)[] = [];
 
-   test(testFn: (setupData: T) => unknown): this {
+   public test(testFn: (setupData: T) => unknown): this {
       this.tests.push(setupData => {
          try {
             const result = testFn(setupData);
             console.log(testFn.toString(), result);
-            return TestSuite.stringify(result);
+            return TestSuite.Stringify(result);
          } catch (error) {
             return this.createErrorReport(error);
          }
@@ -86,12 +87,12 @@ export class TestSuite<T> {
       return { error: String(error) };
    }
 
-   testChain(testFn: (setupData: T) => Generator<unknown, void, unknown>) {
+   public testChain(testFn: (setupData: T) => Generator<unknown, void, unknown>) {
       this.tests.push(setupData => {
-         let results: string[] = [];
+         const results: string[] = [];
          try {
             for (const iteration of testFn(setupData)) {
-               results.push(TestSuite.stringify(iteration));
+               results.push(TestSuite.Stringify(iteration));
             }
 
             return results;

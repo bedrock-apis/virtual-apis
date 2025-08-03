@@ -1,4 +1,5 @@
-export namespace TestReport {
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export declare namespace TestReport {
    export interface Error {
       error: string;
    }

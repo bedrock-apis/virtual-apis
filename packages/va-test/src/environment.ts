@@ -1,18 +1,47 @@
-import { Block, Entity } from '@minecraft/server';
-import { TestEnvironment } from '../../../libs/test-runners/src/environment';
+import { Block, Entity, Vector3 } from '@minecraft/server';
 
-export class VirtualApiEnvironment extends TestEnvironment {
-   public async onSetup() {
-      // Nothing
-   }
+export abstract class TestEnvironment {
+   public abstract onSetup(): Promise<void>;
+   public abstract spawnEntity(typeId: string): Entity;
+   public abstract placeBlock(typeId: string): Block;
 
-   public spawnEntity(typeId: string): Entity {
-      // @ts-expect-error types mismatch
-      return new Entity();
-   }
+   private nextLocations = new Map<string, Vector3>();
 
-   public placeBlock(typeId: string): Block {
-      // @ts-expect-error types mismatch
-      return new Block();
+   protected getNextLocation(
+      targetType: string,
+      baseLocation: Vector3,
+      offsetCoordinate: keyof Vector3 = 'x',
+      offsetNumber: number = 1,
+   ): Vector3 {
+      let previousOffset = this.nextLocations.get(targetType);
+      if (!previousOffset) {
+         previousOffset = baseLocation;
+         this.nextLocations.set(targetType, previousOffset);
+      }
+
+      previousOffset[offsetCoordinate] += offsetNumber;
+      return {
+         x: previousOffset.x,
+         y: previousOffset.y,
+         z: previousOffset.z,
+      };
    }
+}
+
+let globalEnvironment: TestEnvironment | null = null;
+
+export function getEnvironment(): TestEnvironment {
+   if (!globalEnvironment) throw new Error('You should setup test Environment first');
+
+   return globalEnvironment;
+}
+
+export function setEnvironment(Environment: TestEnvironment) {
+   globalEnvironment = Environment;
+}
+export function spawnEntity(typeId: string): Entity {
+   return getEnvironment().spawnEntity(typeId);
+}
+export function placeBlock(typeId: string): Block {
+   return getEnvironment().placeBlock(typeId);
 }

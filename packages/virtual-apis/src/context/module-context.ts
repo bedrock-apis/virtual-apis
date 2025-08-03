@@ -2,7 +2,7 @@ import { ImageModuleData, SymbolBitFlags } from '@bedrock-apis/binary';
 import { BitFlags } from '@bedrock-apis/common';
 import { Kernel, KernelArray, KernelIterator } from '@bedrock-apis/kernel-isolation';
 import { MetadataType } from '@bedrock-apis/types';
-import { IndexedAccessor } from '../../../../libs/va-image-generator/src/binary/indexed-collector';
+import { IndexedAccessor } from '@bedrock-apis/va-image-generator/src/binary/indexed-collector';
 import { createPackageCode } from '../../../va-loader/src/create-package-code';
 import { Diagnostics } from '../diagnostics';
 import { NativeEvent } from '../events';

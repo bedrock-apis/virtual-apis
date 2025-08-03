@@ -1,7 +1,9 @@
-//@ts-nocheck
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck AAAAAAAAAAAAAAA
 import { ItemStack, Player, world } from '@minecraft/server';
 import { ErrorMessagesDataPacketData } from '../net';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function* ErrorMessages(): Generator<void, ErrorMessagesDataPacketData> {
    for (const testCase of ERROR_DOCUMENTATIONS) {
       testCase.run();
@@ -14,19 +16,19 @@ export class ErrorDocumentation {
    public readonly id;
    public message?: string;
    public type?: new () => Error;
-   constructor(id: number, code: () => unknown) {
+   public constructor(id: number, code: () => unknown) {
       this.method = code;
       this.id = id;
    }
-   run() {
+   public run() {
       try {
          this.method();
-      } catch (error: any) {
+      } catch (error) {
          this.message = error.message;
          this.type = error.constructor;
       }
    }
-   toJSON(): ErrorMessagesDataPacketData['general'][number] {
+   protected toJSON(): ErrorMessagesDataPacketData['general'][number] {
       return {
          code: this.method.toString(),
          message: this.message ?? null,

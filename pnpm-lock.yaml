@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@bedrock-apis/bds-dumps':
+        specifier: workspace:*
+        version: link:libs/bds-dumps
       '@bedrock-apis/binary':
         specifier: workspace:*
         version: link:libs/binary

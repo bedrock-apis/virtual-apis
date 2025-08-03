@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url from 'node:url';
-import { IndexedAccessor } from '../../va-image-generator/src/binary/indexed-collector';
+import { IndexedAccessor } from '@bedrock-apis/va-image-generator/src/binary/indexed-collector';
 import { CurrentBinaryImageSerializer } from './image-formats';
 import { ImageModuleData, ModuleMetadata } from './types';
 

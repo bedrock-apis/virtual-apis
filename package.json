@@ -69,7 +69,8 @@
       "@bedrock-apis/va-loader": "workspace:*",
       "@bedrock-apis/va-pluggable": "workspace:*",
       "@bedrock-apis/va-test": "workspace:*",
-      "@bedrock-apis/virtual-apis": "workspace:*"
+      "@bedrock-apis/virtual-apis": "workspace:*",
+      "@bedrock-apis/bds-dumps": "workspace:*"
    },
    "devDependencies": {
       "@bedrock-apis/nbt": "0.0.1-alpha.3",
