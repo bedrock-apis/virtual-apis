@@ -23,6 +23,7 @@ import {
 } from '@bedrock-apis/types';
 import { IMetadataProvider, StrippedMetadataModuleDefinition } from '../metadata-provider';
 import { IndexedCollector } from './indexed-collector';
+import { BinaryTypeStruct } from '@bedrock-apis/binary/src/types/types';
 
 export interface SerializableModuleStats {
    uniqueTypes: number;
@@ -65,6 +66,7 @@ export class MetadataToSerializableTransformer {
          metadata.enums ??= [];
 
          const symbols: BinarySymbolStruct[] = [];
+         const types: BinaryTypeStruct[] = [];
 
          // stats are used mostly for debugging, so we may remove them later
          const stats: SerializableModuleStats = {
@@ -114,7 +116,7 @@ export class MetadataToSerializableTransformer {
 
       console.log(this.detailsCollector.getArray());
 
-      return { metadata, modules, details: this.detailsCollector.getArray() };
+      return { metadata, modules, details: this.detailsCollector.getArray(), types: this.typesCollector.getArray() };
    }
    protected *transformModule(metadata: StrippedMetadataModuleDefinition): Generator<BinarySymbolStruct> {
       for (const e of metadata.enums || []) yield this.transformEnum(e);

@@ -1,3 +1,5 @@
+import { TagType } from '@bedrock-apis/nbt-core';
+import { TextDecoder } from 'util';
 import { DataCursorView } from './data-cursor-view';
 import { BinaryIO } from './io';
 
@@ -131,6 +133,21 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return this;
    }
 
+   public override dynamic(key: string): this {
+      this.storage[key] = this.nbtFormatReader[this.nbtFormatReader.readType(this.data) as TagType.Byte](this.data);
+      return this;
+   }
+
+   public override checkPoint16(_: (_: DataCursorView) => void, reader: (_: DataCursorView) => void) {
+      reader(this.data.peek(this.getLengthUint16('')));
+      return this;
+   }
+
+   public override checkPoint32(_: (_: DataCursorView) => void, reader: (_: DataCursorView) => void) {
+      reader(this.data.peek(this.getLengthUint32('')));
+      return this;
+   }
+
    public uint8(key: ReaderKey) {
       this.storage[key] = this.getLengthUint8(key);
       return this;
@@ -170,9 +187,13 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return this.data.buffer.subarray(this.data.pointer, (this.data.pointer += length));
    }
 
-   protected string(key: string, length: number, decoder = utf8Decoder): this {
-      this.storage[key] = decoder.decode(this.readBuffer(length));
+   protected string(key: string, length: number): this {
+      this.storage[key] = this.readString(length);
       return this;
+   }
+
+   private readString(length: number, decoder = utf8Decoder): unknown {
+      return decoder.decode(this.readBuffer(length));
    }
 
    // public ReadArrayBufferU16(key: string): Uint8Array {
@@ -195,9 +216,16 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return this;
    }
 
+   protected string8Array(key: string, length: number): this {
+      const buffer = [];
+      for (let i = 0; i < length; i++) buffer[i] = this.readString(this.getLengthUint8(''));
+      this.storage[key] = buffer;
+      return this;
+   }
+
    protected override array(key: string, length: number, io: (io: BinaryIO<object>) => void): this {
       const buffer = [];
-      for (let i = 0; i < length; i++) io(this.arraySub((buffer[buffer.length] = {})));
+      for (let i = 0; i < length; i++) io(this.external((buffer[buffer.length] = {})));
       this.storage[key] = buffer;
       return this;
    }

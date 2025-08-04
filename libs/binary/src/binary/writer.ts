@@ -1,3 +1,5 @@
+import { TagType } from '@bedrock-apis/nbt-core';
+import { TextEncoder } from 'util';
 import { DataCursorView } from './data-cursor-view';
 import { BinaryIO } from './io';
 
@@ -76,6 +78,8 @@ export class BinaryWriter {
 type WriteKey = string;
 
 export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, unknown>>> {
+   public override write = true;
+
    protected override getLengthUint8(key: string): number {
       return this.writeUint8((this.storage[key] as ArrayLike<unknown>).length);
    }
@@ -91,6 +95,47 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
 
    public override bool(key: never): this {
       return this.writeUint8(this.storage[key] ? 1 : 0), this;
+   }
+
+   public static WriteCheckPointUint16(_: DataCursorView, writer: (_: DataCursorView) => void) {
+      const rented = _.rent(2);
+      writer(rented);
+
+      BinaryWriter.WriteUint16(_, rented.pointer);
+      _.pointer += rented.pointer;
+   }
+   public static WriteCheckPointUint32(_: DataCursorView, writer: (_: DataCursorView) => void) {
+      const rented = _.rent(2);
+      writer(rented);
+
+      BinaryWriter.WriteUint32(_, rented.pointer);
+      _.pointer += rented.pointer;
+   }
+
+   public override checkPoint16(writer: (_: DataCursorView) => void, _: (_: DataCursorView) => void) {
+      const rented = this.data.rent(2);
+      writer(rented);
+
+      this.writeUint16(rented.pointer);
+      this.data.pointer += rented.pointer;
+      return this;
+   }
+
+   public override checkPoint32(writer: (_: DataCursorView) => void, _: (_: DataCursorView) => void) {
+      const rented = this.data.rent(2);
+      writer(rented);
+
+      this.writeUint32(rented.pointer);
+      this.data.pointer += rented.pointer;
+      return this;
+   }
+
+   public override dynamic(key: string): this {
+      const value = this.storage[key];
+      const type = this.nbtFormatWriter.determinateType(value);
+      this.nbtFormatWriter.writeType(this.data, type);
+      this.nbtFormatWriter[type as TagType.Byte](this.data, value as number);
+      return this;
    }
 
    public uint8(key: WriteKey) {
@@ -126,8 +171,12 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
       return this;
    }
 
-   protected string(key: string, _: number, encoder = utf8Encoder) {
-      return this.writeBuffer(encoder.encode(this.storage[key] as string));
+   protected string(key: string, _: number) {
+      return this.writeString(this.storage[key] as string);
+   }
+
+   private writeString(value: string, encoder = utf8Encoder) {
+      return this.writeBuffer(encoder.encode(value));
    }
 
    // public WriteArrayBufferU16(dataProvider: DataCursorView, value: Uint8Array): void {
@@ -150,10 +199,21 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
       return this;
    }
 
-   protected override array(key: string, length: number, io: (io: BinaryIOWriter) => void): this {
+   protected override string8Array(key: never): this {
+      const value = this.storage[key] as ArrayLike<string>;
+      for (let i = 0; i < value.length; i++) {
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         this.writeUint8(value[i]!.length);
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         this.writeString(value[i]!);
+      }
+      return this;
+   }
+
+   protected override array(key: string, length: number, io: (io: BinaryIO<object>) => void): this {
       const value = this.storage[key] as ArrayLike<object>;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      for (let i = 0; i < value.length; i++) io(this.arraySub(value[i]!));
+      for (let i = 0; i < value.length; i++) io(this.external(value[i]! as Record<string, unknown>));
       return this;
    }
 }

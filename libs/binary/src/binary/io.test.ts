@@ -25,6 +25,8 @@ describe('marshalling test', () => {
       otherDataio.uint32('bigNumber');
       otherDataio.float64('float');
 
+      io.external({ nbt: io.storage.otherData }).dynamic('nbt');
+
       console.log('finish');
    }
 
