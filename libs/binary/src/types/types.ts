@@ -5,9 +5,9 @@ export enum TypeBitFlags {
    IsBindRef = 1 << 7,
    // - Reads Up Next 2 bytes or more as type ref for Promise or Array
    // - Reads Up Next 4 Bytes as module name and version name for bind type
-   IsExtended = 1 << 6, // Special Case
+   IsExtended = 1 << 6, // Special Case, reads ref if not complex
    IsNumber = 1 << 5,
-   IsComplex = 1 << 4, // Used for Non Number Types
+   IsComplex = 1 << 4, // Used for Non Number Types, reads extendedRefs
    IsUnsigned = 1 << 4, // Used for Number Types
 
    Uint8 = IsNumber | IsUnsigned | 1,
@@ -32,17 +32,30 @@ export enum TypeBitFlags {
    Optional = IsExtended | 1,
    Array = IsExtended | 2,
    Promise = IsExtended | 3,
+   Errorable = 1 << 9, // Used as flag only
+   ErrorableTypes = Errorable | 4, // Reads errorTypes
+   IsExternal = Errorable | 6, // Reads fromModule
 
    Variant = IsExtended | IsComplex | 1,
    Map = IsExtended | IsComplex | 2,
    Closure = IsExtended | IsComplex | 3, // No Closure type in need and it would be needed in general
    Generator = IsExtended | IsComplex | 4, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
-   Iterator = IsExtended | IsComplex | 5, // Native Iterator pattern not sure how it works yet but needs to be tested well
+   Iterator = IsExtended | IsComplex | 5, // Native Iterator pattern not sure how it works yet but needs to be tested well,
 }
+
+// console.log(
+//    Object.entries(TypeBitFlags)
+//       .filter(([k]) => isNaN(Number(k)))
+//       .map(e => [e[0], Number(e[1])])
+//       .sort((a, b) => b[1] - a[1])
+//       .join('\n'),
+// );
 
 export interface BinaryTypeStruct {
    bitType: number;
+   extendedRef?: IndexId;
    extendedRefs?: IndexId[];
+   errorTypes?: IndexId[];
    bindTypeNameId?: IndexId;
    fromModuleInfo?: { nameId?: IndexId; version?: IndexId };
    numberRange?: { max: number; min: number };

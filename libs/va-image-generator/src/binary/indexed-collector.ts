@@ -1,10 +1,18 @@
 export class IndexedCollector<T> {
+   public static UnlockedGetIndexFor<T>(t: IndexedCollector<T>, key: T) {
+      t.locked = false;
+      const value = t.getIndexFor(key);
+      t.locked = true;
+      return value;
+   }
+
    protected readonly MAP = new Map<unknown, number>();
    protected readonly LIST: T[] = [];
 
    public constructor(protected hash?: (key: T) => unknown) {}
 
    public getIndexFor(key: T): number {
+      if (this.locked) throw new Error('Collector is locked');
       const $ = this.hash?.(key) ?? key;
       let value = this.MAP.get($);
       if (value === undefined) {
@@ -15,6 +23,14 @@ export class IndexedCollector<T> {
    }
 
    public getArray(): T[] {
+      return this.LIST;
+   }
+
+   protected locked = false;
+
+   public getArrayAndLock() {
+      if (this.locked) throw new Error('Is already locked');
+      this.locked = true;
       return this.LIST;
    }
 

@@ -1,5 +1,5 @@
 import { TagType } from '@bedrock-apis/nbt-core';
-import { TextEncoder } from 'util';
+import { TextEncoder } from 'node:util';
 import { DataCursorView } from './data-cursor-view';
 import { BinaryIO } from './io';
 
@@ -97,36 +97,19 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
       return this.writeUint8(this.storage[key] ? 1 : 0), this;
    }
 
-   public static WriteCheckPointUint16(_: DataCursorView, writer: (_: DataCursorView) => void) {
-      const rented = _.rent(2);
-      writer(rented);
-
-      BinaryWriter.WriteUint16(_, rented.pointer);
-      _.pointer += rented.pointer;
-   }
-   public static WriteCheckPointUint32(_: DataCursorView, writer: (_: DataCursorView) => void) {
-      const rented = _.rent(2);
-      writer(rented);
-
-      BinaryWriter.WriteUint32(_, rented.pointer);
-      _.pointer += rented.pointer;
+   public override magic(magic: number): this {
+      return this.writeUint32(magic), this;
    }
 
-   public override checkPoint16(writer: (_: DataCursorView) => void, _: (_: DataCursorView) => void) {
-      const rented = this.data.rent(2);
-      writer(rented);
-
-      this.writeUint16(rented.pointer);
-      this.data.pointer += rented.pointer;
-      return this;
-   }
-
-   public override checkPoint32(writer: (_: DataCursorView) => void, _: (_: DataCursorView) => void) {
-      const rented = this.data.rent(2);
-      writer(rented);
-
-      this.writeUint32(rented.pointer);
-      this.data.pointer += rented.pointer;
+   public override encapsulate16(io: () => void): this {
+      const start = this.data.pointer;
+      this.writeUint16(0); // just so we don't increment pointer by hand
+      const dStart = this.data.pointer;
+      io();
+      const dEnd = this.data.pointer;
+      this.data.pointer = start;
+      this.writeUint16(dEnd - dStart);
+      this.data.pointer = dEnd;
       return this;
    }
 
@@ -220,15 +203,18 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
 
 export class SafeBinaryIOWriter extends BinaryIOWriter {
    protected override writeUint8(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 8) throw new RangeError(`Used uint8 for ${value}`);
+      if ((value !== 0 && !value) || value < 0 || value > 2 ** 8)
+         throw new RangeError(`Used uint8 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
       return super.writeUint8(value);
    }
    protected override writeUint16(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 16) throw new RangeError(`Used uint16 for ${value}`);
+      if ((value !== 0 && !value) || value < 0 || value > 2 ** 16)
+         throw new RangeError(`Used uint16 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
       return super.writeUint16(value);
    }
    protected override writeUint32(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 32) throw new RangeError(`Used uint32 for ${value}`);
+      if ((value !== 0 && !value) || value < 0 || value > 2 ** 32)
+         throw new RangeError(`Used uint32 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
       return super.writeUint32(value);
    }
 }

@@ -1,4 +1,10 @@
-import { CurrentBinaryImageSerializer, DataCursorView } from '@bedrock-apis/binary';
+import {
+   BaseBinaryIOImageSerializer,
+   BinaryImageSerializerIOV1,
+   BinaryIOReader,
+   CurrentBinaryImageSerializer,
+   DataCursorView,
+} from '@bedrock-apis/binary';
 import { MODULES_DIR } from '@bedrock-apis/common';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -6,13 +12,13 @@ import { IMetadataProvider } from '../metadata-provider';
 import { MetadataToSerializableTransformer } from './metadata-to-serializable';
 
 const CIS = CurrentBinaryImageSerializer;
-export async function main(metadataProvider: IMetadataProvider): Promise<number> {
+export async function mainOld(metadataProvider: IMetadataProvider): Promise<number> {
    const startupTime = performance.now();
    const { modules, metadata } = await new MetadataToSerializableTransformer().transform(metadataProvider);
 
    const buffer = DataCursorView.Alloc(2 ** 16 * 3); // 196608 bytes -> 192 kb
    console.log(CIS.version);
-   CIS.WriteGeneralHeader(buffer, metadata);
+   CIS.WriteGeneralHeader(buffer, { ...metadata, version: 1 });
    for (const { metadata, id, data, stats } of modules) {
       const size = buffer.pointer;
       console.log(`Write Module ${id}`, stats.uniqueTypes);
@@ -33,26 +39,26 @@ export async function main(metadataProvider: IMetadataProvider): Promise<number>
    return 0;
 }
 
-export async function mainNew(metadataProvider: IMetadataProvider): Promise<number> {
+export async function main(metadataProvider: IMetadataProvider): Promise<number> {
    const startupTime = performance.now();
-   const { modules, metadata } = await new MetadataToSerializableTransformer().transform(metadataProvider);
+   const data = await new MetadataToSerializableTransformer().transform(metadataProvider);
 
-   const buffer = DataCursorView.Alloc(2 ** 16 * 3); // 196608 bytes -> 192 kb
-   console.log(CIS.version);
-   CIS.WriteGeneralHeader(buffer, metadata);
-   for (const { metadata, id, data, stats } of modules) {
-      const size = buffer.pointer;
-      console.log(`Write Module ${id}`, stats.uniqueTypes);
-      CIS.WriteFieldHeader(buffer, metadata);
-      CIS.WriteModuleField(buffer, data);
-      console.log(`Module '${id}', size: ${buffer.pointer - size}`);
-   }
+   data.modules = [data.modules[0]];
 
-   const fileBuffer = buffer.getBuffer();
-   writeFileSync(path.join(MODULES_DIR, 'image.bin'), fileBuffer);
+   writeFileSync('original.json', JSON.stringify(data, null, 2));
+
+   const buffer = BaseBinaryIOImageSerializer.Write(data);
+
+   writeFileSync(path.join(MODULES_DIR, 'image.bin'), buffer);
+
+   const read = BinaryImageSerializerIOV1.Read(buffer);
+   read.modules.forEach(e => BinaryIOReader.ReadEncapsulatedData(e));
+
+   writeFileSync('write.json', JSON.stringify(read, null, 2));
+
    console.log(
       '✅ Done...\n📦 Size: ->',
-      Number((fileBuffer.length / 1024).toFixed(2)),
+      Number((buffer.length / 1024).toFixed(2)),
       'kb',
       '\n⌚ Time:',
       performance.now() - startupTime,

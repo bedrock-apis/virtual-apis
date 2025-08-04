@@ -1,11 +1,25 @@
 import { NBT_FORMAT_READER, NBT_FORMAT_WRITER, ReaderLike, WriterLike } from '@bedrock-apis/nbt';
 import { DataCursorView } from './data-cursor-view';
 
+/** Describes types that can be narrowed */
+type Narrowable = string | number | bigint | boolean;
+
+/** Narrows type. source: ts-toolbelt npm package */
+type Narrow<T> =
+   | (T extends [] ? [] : never)
+   | (T extends Narrowable ? T : never)
+   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+   | { [K in keyof T]: T[K] extends Function ? T[K] : Narrow<T[K]> };
+
 export type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
 
-export type PickMatchNoNull<T extends object, Filter> = {
+export type Filter<T extends object, Filter> = {
    [K in keyof T as NonNullable<T[K]> extends Filter ? K : never]-?: NonNullable<T[K]>;
 };
+
+type ArrayIO<T, K> = K extends keyof T ? (T[K] extends object[] ? (io: BinaryIO<T[K][number]>) => void : never) : never;
+
+export const readEncapsulatedDataSymbol = Symbol();
 
 export abstract class BinaryIO<T extends object> {
    public constructor(
@@ -13,14 +27,22 @@ export abstract class BinaryIO<T extends object> {
       public readonly storage: T,
    ) {}
 
+   public static ReadEncapsulatedData<T extends object>(storage: object): T {
+      const read = (storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol];
+      if (typeof read !== 'function') throw new Error('Reader does not have encapsulated data');
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete (storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol];
+      return read() as T;
+   }
+
    protected readonly nbtFormatReader: ReaderLike = NBT_FORMAT_READER;
    protected readonly nbtFormatWriter: WriterLike = NBT_FORMAT_WRITER;
 
    public readonly write: boolean = false;
 
-   public sub<K extends keyof PickMatchNoNull<T, Record<string, unknown>>>(
+   public sub<K extends keyof Filter<Narrow<T>, Record<string, unknown>>>(
       key: K,
-   ): BinaryIO<PickMatchNoNull<T, Record<string, unknown>>[K]> {
+   ): BinaryIO<Filter<Narrow<T>, Record<string, unknown>>[K]> {
       // @ts-expect-error yeaah i love breaking ts
       return this.external((this.storage[key] ??= {}));
    }
@@ -30,18 +52,17 @@ export abstract class BinaryIO<T extends object> {
       return new (this.constructor as typeof BinaryIO)(this.data, data);
    }
 
-   public abstract checkPoint16(writer: (_: DataCursorView) => void, reader: (_: DataCursorView) => void): this;
-   public abstract checkPoint32(writer: (_: DataCursorView) => void, reader: (_: DataCursorView) => void): this;
-
-   public abstract bool(key: keyof PickMatchNoNull<T, boolean>): this;
+   public abstract bool(key: keyof Filter<T, boolean>): this;
 
    public abstract dynamic(key: keyof T): this;
 
-   public abstract uint8(key: keyof PickMatchNoNull<T, number>): this;
-   public abstract uint16(key: keyof PickMatchNoNull<T, number>): this;
-   public abstract uint32(key: keyof PickMatchNoNull<T, number>): this;
+   public abstract magic(magic: number): this;
+
+   public abstract uint8(key: keyof Filter<T, number>): this;
+   public abstract uint16(key: keyof Filter<T, number>): this;
+   public abstract uint32(key: keyof Filter<T, number>): this;
    public abstract varuint32(key: keyof PickMatch<T, number>): this;
-   public abstract float64(key: keyof PickMatchNoNull<T, number>): this;
+   public abstract float64(key: keyof Filter<T, number>): this;
 
    public index = this.uint16;
 
@@ -63,15 +84,15 @@ export abstract class BinaryIO<T extends object> {
 
    protected abstract uint16Array(key: keyof PickMatch<T, number[]>, length: number): this;
 
-   public uint16Array8(key: keyof PickMatchNoNull<T, number[]>): this {
+   public uint16Array8(key: keyof Filter<T, number[]>): this {
       (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint8(key));
    }
-   public uint16Array16(key: keyof PickMatchNoNull<T, number[]>): this {
+   public uint16Array16(key: keyof Filter<T, number[]>): this {
       (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint16(key));
    }
-   public uint16Array32(key: keyof PickMatchNoNull<T, number[]>): this {
+   public uint16Array32(key: keyof Filter<T, number[]>): this {
       (this.storage[key] as []) ??= [];
       return this.uint16Array(key, this.getLengthUint32(key));
    }
@@ -79,31 +100,33 @@ export abstract class BinaryIO<T extends object> {
    // eslint-disable-next-line @typescript-eslint/no-explicit-any
    protected abstract array(key: keyof T, length: number, io: (io: BinaryIO<any>) => void): this;
 
-   public array8<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+   public array8<Key extends keyof Filter<T, unknown[]>>(key: Key, io: ArrayIO<T, Key>): this {
       (this.storage[key] as []) ??= [];
       return this.array(key, this.getLengthUint8(key), io);
    }
-   public array16<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+   public array16<Key extends keyof Filter<T, unknown[]>>(key: Key, io: ArrayIO<T, Key>): this {
       (this.storage[key] as []) ??= [];
       return this.array(key, this.getLengthUint16(key), io);
    }
-   public array32<A extends object>(key: keyof PickMatchNoNull<T, A[]>, io: (io: BinaryIO<A>) => void): this {
+   public array32<Key extends keyof Filter<T, unknown[]>>(key: Key, io: ArrayIO<T, Key>): this {
       (this.storage[key] as []) ??= [];
       return this.array(key, this.getLengthUint32(key), io);
    }
 
    protected abstract string8Array(key: keyof PickMatch<T, number[]>, length: number): this;
 
-   public string8Array8(key: keyof PickMatchNoNull<T, string[]>): this {
+   public string8Array8(key: keyof Filter<T, string[]>): this {
       (this.storage[key] as []) ??= [];
       return this.string8Array(key, this.getLengthUint8(key));
    }
-   public string8Array16(key: keyof PickMatchNoNull<T, string[]>): this {
+   public string8Array16(key: keyof Filter<T, string[]>): this {
       (this.storage[key] as []) ??= [];
       return this.string8Array(key, this.getLengthUint16(key));
    }
-   public string8Array32(key: keyof PickMatchNoNull<T, string[]>): this {
+   public string8Array32(key: keyof Filter<T, string[]>): this {
       (this.storage[key] as []) ??= [];
       return this.string8Array(key, this.getLengthUint32(key));
    }
+
+   public abstract encapsulate16(io: () => void): this;
 }

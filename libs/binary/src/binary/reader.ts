@@ -1,7 +1,7 @@
 import { TagType } from '@bedrock-apis/nbt-core';
-import { TextDecoder } from 'util';
+import { TextDecoder } from 'node:util';
 import { DataCursorView } from './data-cursor-view';
-import { BinaryIO } from './io';
+import { BinaryIO, readEncapsulatedDataSymbol } from './io';
 
 const utf8Decoder = new TextDecoder();
 
@@ -112,24 +112,27 @@ type ReaderKey = string;
 export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    // Get length methods here act as read too
 
-   protected override getLengthUint8(_: ReaderKey): number {
+   protected override getLengthUint8 = this.readUint8;
+   private readUint8(): number {
       return this.data.view.getUint8(this.data.pointer++);
    }
 
-   public override getLengthUint16(_: ReaderKey): number {
+   public override getLengthUint16 = this.readUint16;
+   private readUint16() {
       const value = this.data.view.getUint16(this.data.pointer, true);
       this.data.pointer += 2;
       return value;
    }
 
-   protected override getLengthUint32(_: ReaderKey): number {
+   protected override getLengthUint32 = this.readUint32;
+   private readUint32() {
       const value = this.data.view.getUint32(this.data.pointer, true);
       this.data.pointer += 4;
       return value;
    }
 
    public override bool(key: ReaderKey): this {
-      this.storage[key] = this.getLengthUint8(key) === 1;
+      this.storage[key] = this.readUint8() === 1;
       return this;
    }
 
@@ -138,29 +141,36 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return this;
    }
 
-   public override checkPoint16(_: (_: DataCursorView) => void, reader: (_: DataCursorView) => void) {
-      reader(this.data.peek(this.getLengthUint16('')));
+   public override magic(magic: number): this {
+      const read = this.readUint32();
+      if (read !== magic) throw new TypeError(`Malformed data, magic doesn't match ${read} != ${magic}`);
       return this;
    }
 
-   public override checkPoint32(_: (_: DataCursorView) => void, reader: (_: DataCursorView) => void) {
-      reader(this.data.peek(this.getLengthUint32('')));
+   public override encapsulate16(io: () => void): this {
+      const length = this.readUint16();
+      const start = this.data.pointer;
+      this.data.pointer += length; // skip data for now
+      (this.storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol] = () => {
+         const prev = this.data.pointer;
+         this.data.pointer = start;
+         io();
+         this.data.pointer = prev;
+         return this.storage;
+      };
       return this;
    }
 
    public uint8(key: ReaderKey) {
-      this.storage[key] = this.getLengthUint8(key);
-      return this;
+      return (this.storage[key] = this.readUint8()), this;
    }
 
    public uint16(key: ReaderKey) {
-      this.storage[key] = this.getLengthUint16(key);
-      return this;
+      return (this.storage[key] = this.readUint16()), this;
    }
 
    public uint32(key: ReaderKey) {
-      this.storage[key] = this.getLengthUint32(key);
-      return this;
+      return (this.storage[key] = this.readUint32()), this;
    }
 
    // Memory efficient but not as fast, has to be benchamarked on real-world samples
@@ -187,24 +197,13 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return this.data.buffer.subarray(this.data.pointer, (this.data.pointer += length));
    }
 
-   protected string(key: string, length: number): this {
-      this.storage[key] = this.readString(length);
-      return this;
-   }
-
    private readString(length: number, decoder = utf8Decoder): unknown {
       return decoder.decode(this.readBuffer(length));
    }
 
-   // public ReadArrayBufferU16(key: string): Uint8Array {
-   //    const length = BinaryReader.ReadUint16(this.data);
-   //    return BinaryReader.ReadBuffer(this.data, length);
-   // }
-
-   // public ReadArrayBufferU32(key: string): Uint8Array {
-   //    const length = BinaryReader.ReadUint32(this.data);
-   //    return BinaryReader.ReadBuffer(this.data, length);
-   // }
+   protected string(key: string, length: number): this {
+      return (this.storage[key] = this.readString(length)), this;
+   }
 
    protected uint16Array(key: string, length: number): this {
       const view = this.data.view;
@@ -218,7 +217,7 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
 
    protected string8Array(key: string, length: number): this {
       const buffer = [];
-      for (let i = 0; i < length; i++) buffer[i] = this.readString(this.getLengthUint8(''));
+      for (let i = 0; i < length; i++) buffer[i] = this.readString(this.readUint8());
       this.storage[key] = buffer;
       return this;
    }
