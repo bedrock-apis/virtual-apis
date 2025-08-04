@@ -8,6 +8,7 @@ import {
    SymbolBitFlags,
    TypeBitFlags,
 } from '@bedrock-apis/binary';
+import { BitFlags } from '@bedrock-apis/common';
 import { Short } from '@bedrock-apis/nbt-core';
 import {
    MetadataClassDefinition,
@@ -154,9 +155,14 @@ export class MetadataToSerializableTransformer {
 
       if (e.is_errorable) {
          type.bitType |= TypeBitFlags.Errorable;
-         if (e.error_types && e.error_types.length) {
+         if (e.error_types) {
             type.bitType |= TypeBitFlags.ErrorableTypes;
             type.errorTypes = e.error_types.map(typeRef);
+         }
+
+         if (type.errorTypes && !BitFlags.AllOf(type.bitType, TypeBitFlags.ErrorableTypes)) {
+            console.log(type, e);
+            throw new Error('e');
          }
       }
 

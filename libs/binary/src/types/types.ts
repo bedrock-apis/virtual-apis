@@ -3,6 +3,7 @@ import { IndexId } from './general';
 export enum TypeBitFlags {
    // Reads Up Next 2 bytes as string ref
    IsBindRef = 1 << 7,
+   IsExternal = IsBindRef | 1, // Reads fromModule
    // - Reads Up Next 2 bytes or more as type ref for Promise or Array
    // - Reads Up Next 4 Bytes as module name and version name for bind type
    IsExtended = 1 << 6, // Special Case, reads ref if not complex
@@ -33,8 +34,7 @@ export enum TypeBitFlags {
    Array = IsExtended | 2,
    Promise = IsExtended | 3,
    Errorable = 1 << 9, // Used as flag only
-   ErrorableTypes = Errorable | 4, // Reads errorTypes
-   IsExternal = Errorable | 6, // Reads fromModule
+   ErrorableTypes = Errorable | 6, // Reads errorTypes
 
    Variant = IsExtended | IsComplex | 1,
    Map = IsExtended | IsComplex | 2,
