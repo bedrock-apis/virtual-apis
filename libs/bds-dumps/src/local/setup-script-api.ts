@@ -1,27 +1,61 @@
 import { existsSync } from "node:fs";
-import { appendFile, readFile, writeFile } from "node:fs/promises";
+import { appendFile, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build } from "rolldown";
 import { CACHE_DUMP_DIR, SOURCE_DIR } from "./constants";
 
-export async function setupScriptAPI(): Promise<void>{
+export async function setupScriptAPI(): Promise<void> {
+    let worlds = resolve(CACHE_DUMP_DIR, "./worlds");
+    if (existsSync(worlds)) await rm(worlds, { recursive: true, force: true });
+    await allowAllModules();
     let temporal = resolve(CACHE_DUMP_DIR, "./behavior_packs/editor/scripts/_temporal.js");
 
     const editorFile = resolve(CACHE_DUMP_DIR, "./behavior_packs/editor/scripts/Main.js");
-    if(!existsSync(editorFile))
+    if (!existsSync(editorFile))
         throw new ReferenceError("Corrupted installation, please reinstall bds and make sure editor file exists! file: " + editorFile);
 
-    if(existsSync(temporal)) await writeFile(editorFile, await readFile(temporal));
+    await prepareManifest();
+
+    if (existsSync(temporal)) await writeFile(editorFile, await readFile(temporal));
     else await writeFile(temporal, await readFile(editorFile));
 
 
     const addonEntry = resolve(SOURCE_DIR, "./client/main.ts");
-    if(!existsSync(addonEntry))
+    if (!existsSync(addonEntry))
         throw new ReferenceError("Failed to found addon entry");
-    
-    const output = await build({input:addonEntry});
+
+    const output = await build({ input: addonEntry });
 
     await appendFile(editorFile, "\r\n" + output.output[0].code);
 
     console.log('⚙️\t Script API injected . . .');
+}
+export async function allowAllModules(): Promise<void> {
+    await writeFile(resolve(CACHE_DUMP_DIR, "./config/default/permissions.json"), JSON.stringify({
+        allowed_modules: [
+            "@minecraft/diagnostics",
+            "@minecraft/common",
+            "@minecraft/server-net",
+            "@minecraft/server",
+            "@minecraft/server-ui",
+            "@minecraft/server-admin",
+            "@minecraft/server-editor",
+            "@minecraft/server-gametest",
+        ]
+    }));
+}
+export async function prepareManifest(): Promise<void> {
+    const filename = resolve(CACHE_DUMP_DIR, "./behavior_packs/editor/manifest.json");
+    if (!existsSync(filename)) throw new ReferenceError("Corrupted installation or outdated information!!!");
+
+    const data = await readFile(filename);
+    const manifest = JSON.parse(data.toString());
+    if (manifest.dependencies.find((_: any) => _.module_name === "@minecraft/server-net")) return;
+
+    manifest.dependencies.push({
+        module_name: "@minecraft/server-net",
+        version: "1.0.0-beta"
+    });
+
+    await writeFile(filename, JSON.stringify(manifest));
 }
