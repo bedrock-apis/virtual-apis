@@ -28,5 +28,8 @@
    },
    "[json]": {
       "editor.defaultFormatter": "vscode.json-language-features"
-   }
+   },
+   "cSpell.words": [
+      "Errorable"
+   ]
 }

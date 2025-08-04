@@ -1,5 +1,20 @@
 import { IndexId } from './general';
 
+/*
+byte[ 000 0 0000 ]
+first top 3 bytes are used for special flags
+ - IsBindRef
+ - IsExtended
+ - IsNumber
+
+last lower 4 bytes are used as 4bit value (max is 16 permutations including zero value)
+
+ with this combination we have 7 different combination what we can achieve,
+ - IsBindRef -> Reads just next two bytes as string ref of the same module
+ - IsBindRef & IsExtended -> Also reads 2bytes but also reads another ones for module name and version,
+         so 6 bytes after the flag it self
+      
+*/
 export enum TypeBitFlags {
    // Reads Up Next 2 bytes as string ref
    IsBindRef = 1 << 7,
@@ -8,6 +23,7 @@ export enum TypeBitFlags {
    // - Reads Up Next 4 Bytes as module name and version name for bind type
    IsExtended = 1 << 6, // Special Case, reads ref if not complex
    IsNumber = 1 << 5,
+   BindRefHasErrorable = 1 << 5,
    IsComplex = 1 << 4, // Used for Non Number Types, reads extendedRefs
    IsUnsigned = 1 << 4, // Used for Number Types
 

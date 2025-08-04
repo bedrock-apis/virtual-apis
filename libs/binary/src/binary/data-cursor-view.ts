@@ -15,7 +15,7 @@ export class DataCursorView implements IDataCursor {
       return new DataCursorView(this.buffer.subarray(this.pointer + offset, this.pointer + offset + length));
    }
    /*
-   Similar to slice but incremets pointer to the end of the rented field
+   Similar to slice but increments pointer to the end of the rented field
    */
    public peek(length: number): DataCursorView {
       return new DataCursorView(this.buffer.subarray(this.pointer, (this.pointer += length)));
