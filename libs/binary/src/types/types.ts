@@ -1,62 +1,72 @@
 import { IndexId } from './general';
 
 /*
-byte[ 000 0 0000 ]
-first top 3 bytes are used for special flags
- - IsBindRef
- - IsExtended
- - IsNumber
-
-last lower 4 bytes are used as 4bit value (max is 16 permutations including zero value)
-
- with this combination we have 7 different combination what we can achieve,
- - IsBindRef -> Reads just next two bytes as string ref of the same module
- - IsBindRef & IsExtended -> Also reads 2bytes but also reads another ones for module name and version,
-         so 6 bytes after the flag it self
-      
+3 bits - Type Determination
 */
-export enum TypeBitFlags {
-   // Reads Up Next 2 bytes as string ref
-   IsBindRef = 1 << 7,
-   IsExternal = IsBindRef | 1, // Reads fromModule
-   // - Reads Up Next 2 bytes or more as type ref for Promise or Array
-   // - Reads Up Next 4 Bytes as module name and version name for bind type
-   IsExtended = 1 << 6, // Special Case, reads ref if not complex
-   IsNumber = 1 << 5,
-   BindRefHasErrorable = 1 << 5,
-   IsComplex = 1 << 4, // Used for Non Number Types, reads extendedRefs
-   IsUnsigned = 1 << 4, // Used for Number Types
+export enum TypeBitFlagsU16 {
+   // Determination Bits
+   // are branching code to different program threads and changes how other bits are interpreted
+   IsBindType = 1 << 15,
+   IsNumberType = 1 << 14,
+   // 1 << 13, Preserved as Determination Bit
+   DeterminationBits = IsBindType | IsNumberType | 1 << 13,
 
-   Uint8 = IsNumber | IsUnsigned | 1,
-   Uint16 = IsNumber | IsUnsigned | 2,
-   Uint32 = IsNumber | IsUnsigned | 3,
-   BigUint64 = IsNumber | IsUnsigned | 4,
 
-   Int8 = IsNumber | 1,
-   Int16 = IsNumber | 2,
-   Int32 = IsNumber | 3,
-   BigInt64 = IsNumber | 4,
-   Float32 = IsNumber | 5,
-   Float64 = IsNumber | 6,
+   // Informative Bits
+   // Just bits with not effect only informative
+   IsErrorable = 1 << 12,
+   // 1 << 11 Reserved Informative Bit
+   // 1 << 10 Reserved Informative Bit
 
-   Unknown = 0x00,
-   Undefined = 0x01,
-   This = 0x02,
-   Boolean = 0x03,
-   String = 0x04,
-   CallBack = 0x05, //Function, but keep in mind its not type of function but function type, so its better to name it callback
 
-   Optional = IsExtended | 1,
-   Array = IsExtended | 2,
-   Promise = IsExtended | 3,
-   Errorable = 1 << 9, // Used as flag only
-   ErrorableTypes = Errorable | 6, // Reads errorTypes
+   // Extending Bits
+   // Triggers Additional code to be read, but how the data is read is still determined by determination bits
+   HasDetails = 1 << 9,
+   HasExtraData = 1 << 8,
+   HasErrorableExtraData = 1 << 7,
+   // 1 << 6, Preserved as Extending Bit
 
-   Variant = IsExtended | IsComplex | 1,
-   Map = IsExtended | IsComplex | 2,
-   Closure = IsExtended | IsComplex | 3, // No Closure type in need and it would be needed in general
-   Generator = IsExtended | IsComplex | 4, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
-   Iterator = IsExtended | IsComplex | 5, // Native Iterator pattern not sure how it works yet but needs to be tested well,
+   // Direct Enum Values
+   // Determined Bind Types
+   IsExternalBit = HasDetails,
+   IsExternalBindType = IsBindType | IsExternalBit,
+
+   // Determined Number Types
+   IsUnsignedBit = HasDetails,
+   
+   Uint8 = IsNumberType | IsUnsignedBit | 1,
+   Uint16 = IsNumberType | IsUnsignedBit | 2,
+   Uint32 = IsNumberType | IsUnsignedBit | 3,
+   BigUint64 = IsNumberType | IsUnsignedBit | 4,
+
+   Int8 = IsNumberType | 1,
+   Int16 = IsNumberType | 2,
+   Int32 = IsNumberType | 3,
+   BigInt64 = IsNumberType | 4,
+   Float32 = IsNumberType | 5,
+   Float64 = IsNumberType | 6,
+   
+   // Determined Not Number & Not Bind Type
+   HasSingleParamBit = HasDetails,
+   HasMultiParamsBit = HasExtraData,
+
+   Unknown = 0,
+   Undefined = 1,
+   This = 2,
+   Boolean = 3,
+   String = 4,
+   CallBack = 5,
+
+   Optional = HasSingleParamBit | Undefined,
+   Array = HasSingleParamBit | 2,
+   Promise = HasSingleParamBit | 3,
+
+
+   Variant = HasMultiParamsBit | 1,
+   Map = HasMultiParamsBit | 2,
+   Closure = HasMultiParamsBit | 3,        // No Closure type in need and it would be needed in general
+   Generator = HasMultiParamsBit | 4, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
+   Iterator = HasMultiParamsBit | 5,  // Native Iterator pattern not sure how it works yet but needs to be tested well,
 }
 
 // console.log(
@@ -68,7 +78,7 @@ export enum TypeBitFlags {
 // );
 
 export interface BinaryTypeStruct {
-   bitType: number;
+   flags: number;
    extendedRef?: IndexId;
    extendedRefs?: IndexId[];
    errorTypes?: IndexId[];

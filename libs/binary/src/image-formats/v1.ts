@@ -5,7 +5,7 @@ import { BinaryReader, BinaryWriter } from '../binary';
 import { DataCursorView } from '../binary/data-cursor-view';
 import { BinaryIO, PickMatch } from '../binary/io';
 import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '../types';
-import { BinaryTypeStruct, TypeBitFlags } from '../types/types';
+import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
 import { BaseBinaryImageSerializer } from './base-format';
 
 const { AllOf } = BitFlags;
@@ -37,13 +37,13 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
    protected static ReadType(_: DataCursorView): BinaryTypeStruct {
       const bitKind = BinaryReader.ReadUint8(_);
-      const type: BinaryTypeStruct = { bitType: bitKind };
+      const type: BinaryTypeStruct = { flags: bitKind };
       // Keep Strict Order of the Binary Reader methods
 
       // If Bind Type Ref
-      if (BitFlags.AnyOf(bitKind, TypeBitFlags.IsBindRef)) {
+      if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.IsBindType)) {
          type.bindTypeNameId = this.ReadIndexRef(_);
-         if (BitFlags.AnyOf(bitKind, TypeBitFlags.IsExtended))
+         if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.IsExternalBit))
             type.fromModuleInfo = {
                nameId: this.ReadIndexRef(_),
                version: this.ReadIndexRef(_),
@@ -52,7 +52,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
 
       // Reading Numbers
-      if (AllOf(bitKind, TypeBitFlags.IsNumber | TypeBitFlags.IsExtended)) {
+      if (AllOf(bitKind, TypeBitFlagsU16.IsNumberType)) {
          type.numberRange = {
             max: BinaryReader.ReadFloat64(_),
             min: BinaryReader.ReadFloat64(_),
@@ -61,8 +61,8 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
 
       // Type with types
-      if (BitFlags.AnyOf(bitKind, TypeBitFlags.IsExtended)) {
-         type.extendedRefs = BitFlags.AnyOf(bitKind, TypeBitFlags.IsComplex)
+      if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
+         type.extendedRefs = BitFlags.AnyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit)
             ? [this.ReadIndexRef(_)]
             : this.ReadMinimalReferences(_);
          return type;
@@ -139,14 +139,14 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    }
 
    protected static WriteType(_: DataCursorView, type: BinaryTypeStruct): void {
-      BinaryWriter.WriteUint8(_, type.bitType);
+      BinaryWriter.WriteUint8(_, type.flags);
 
       // Keep Strict Order of the Binary Writer methods
 
       // If Bind Type Ref
-      if (BitFlags.AnyOf(type.bitType, TypeBitFlags.IsBindRef)) {
+      if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.IsBindType)) {
          this.WriteIndexRef(_, type.bindTypeNameId!);
-         if (BitFlags.AnyOf(type.bitType, TypeBitFlags.IsExtended)) {
+         if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.IsExternalBit)) {
             this.WriteIndexRef(_, type.fromModuleInfo!.nameId!);
             this.WriteIndexRef(_, type.fromModuleInfo!.version!);
          }
@@ -154,15 +154,15 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       }
 
       // Writing Numbers
-      if (AllOf(type.bitType, TypeBitFlags.IsNumber | TypeBitFlags.IsExtended)) {
+      if (AllOf(type.flags, TypeBitFlagsU16.IsNumberType)) {
          BinaryWriter.WriteFloat64(_, type.numberRange!.max);
          BinaryWriter.WriteFloat64(_, type.numberRange!.min);
          return;
       }
 
       // Type with types
-      if (BitFlags.AnyOf(type.bitType, TypeBitFlags.IsExtended)) {
-         if (BitFlags.AnyOf(type.bitType, TypeBitFlags.IsComplex)) {
+      if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
+         if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit)) {
             this.WriteIndexRef(_, type.extendedRefs![0]!);
          } else {
             this.WriteMinimalReferences(_, type.extendedRefs!);

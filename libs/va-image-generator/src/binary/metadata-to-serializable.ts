@@ -6,7 +6,7 @@ import {
    IndexId,
    ModuleMetadata,
    SymbolBitFlags,
-   TypeBitFlags,
+   TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
 import { BitFlags } from '@bedrock-apis/common';
 import { Short } from '@bedrock-apis/nbt-core';
@@ -151,82 +151,55 @@ export class MetadataToSerializableTransformer {
    }
 
    protected transformType(e: MetadataType, typeRef: (m: MetadataType) => number): BinaryTypeStruct {
-      const type: BinaryTypeStruct = { bitType: 0 };
+      const type: BinaryTypeStruct = { flags: 0 };
 
+      // Information Bits thats shared for all determination permutations
       if (e.is_errorable) {
-         type.bitType |= TypeBitFlags.Errorable;
+         type.flags |= TypeBitFlagsU16.IsErrorable;
          if (e.error_types) {
-            type.bitType |= TypeBitFlags.ErrorableTypes;
+            type.flags |= TypeBitFlagsU16.HasErrorableExtraData;
             type.errorTypes = e.error_types.map(typeRef);
-         }
-
-         if (type.errorTypes && !BitFlags.AllOf(type.bitType, TypeBitFlags.ErrorableTypes)) {
-            console.log(type, e);
-            throw new Error('e');
          }
       }
 
-      // shorter this way
-      if (e.name === 'int8') type.bitType |= TypeBitFlags.Int8;
-      if (e.name === 'int16') type.bitType |= TypeBitFlags.Int16;
-      if (e.name === 'int32') type.bitType |= TypeBitFlags.Int32;
-      if (e.name === 'int64') type.bitType |= TypeBitFlags.BigInt64;
-      if (e.name === 'uint8') type.bitType |= TypeBitFlags.Uint8;
-      if (e.name === 'uint16') type.bitType |= TypeBitFlags.Uint16;
-      if (e.name === 'uint32') type.bitType |= TypeBitFlags.Uint32;
-      if (e.name === 'uint64') type.bitType |= TypeBitFlags.BigUint64;
-      if (e.name === 'float') type.bitType |= TypeBitFlags.Float32;
-      if (e.name === 'double') type.bitType |= TypeBitFlags.Float64;
+      // Determination
+      if(e.is_bind_type){
+         type.flags |= TypeBitFlagsU16.IsBindType;
+         type.bindTypeNameId = this.stringRef(e.name);
+         if (e.from_module) {
+            type.flags |= TypeBitFlagsU16.IsExternalBit;
+            type.fromModuleInfo = {
+               nameId: this.stringRef(e.from_module.name),
+               version: this.stringRef(e.from_module.version),
+            };
+         }
+         return type;
+      }
 
-      switch (e.name) {
-         case 'int8':
-         case 'uint8':
-         case 'int16':
-         case 'uint16':
-         case 'int32':
-         case 'uint32':
-         case 'int64':
-         case 'uint64':
-         case 'float':
-         case 'double':
-            type.numberRange = { min: e.valid_range.min, max: e.valid_range.max };
-            break;
+      { // Assign type
+         const TYPE_BIT = STRING_TYPE_TO_BITS_MAP[e.name]??null;
+         if(TYPE_BIT === null) 
+            throw new ReferenceError("Unknown value type: " + e.name);
 
-         case 'string':
-            type.bitType |= TypeBitFlags.String;
-            break;
-         case 'boolean':
-            type.bitType |= TypeBitFlags.Boolean;
-            break;
-         case 'undefined':
-            type.bitType |= TypeBitFlags.Undefined;
-            break;
+         type.flags |= TYPE_BIT
+      }
 
-         // Extendned single ref
-         case 'optional':
-            type.bitType |= TypeBitFlags.Optional;
-            type.extendedRef = typeRef(e.optional_type);
-            break;
-         case 'array':
-            type.bitType |= TypeBitFlags.Array;
-            type.extendedRef = typeRef(e.element_type);
-            break;
-         case 'promise':
-            type.bitType |= TypeBitFlags.Promise;
-            type.extendedRef = typeRef(e.promise_type);
-            break;
+      // Determination if number
+      if(BitFlags.AllOf(type.flags, TypeBitFlagsU16.IsNumberType)){
+         type.numberRange = { min: e.valid_range.min, max: e.valid_range.max };
+         return type;
+      }
 
-         // Extended | complex, multiple refs
-         case 'variant':
-            type.bitType |= TypeBitFlags.Variant;
-            type.extendedRefs = e.variant_types.map(typeRef);
-            break;
-         case 'closure':
-            type.bitType |= TypeBitFlags.Closure;
-            type.extendedRefs = [typeRef(e.closure_type.return_type), ...e.closure_type.argument_types.map(typeRef)];
-            break;
+      if(BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasMultiParamsBit | TypeBitFlagsU16.HasSingleParamBit)) switch (e.name) {
+         // Extended single ref
+         case 'optional': type.extendedRef = typeRef(e.optional_type); break;
+         case 'array': type.extendedRef = typeRef(e.element_type); break;
+         case 'promise': type.extendedRef = typeRef(e.promise_type); break;
+
+         // multiple refs
+         case 'variant': type.extendedRefs = e.variant_types.map(typeRef); break;
+         case 'closure': type.extendedRefs = [typeRef(e.closure_type.return_type), ...e.closure_type.argument_types.map(typeRef)]; break;
          case 'generator':
-            type.bitType |= TypeBitFlags.Generator;
             type.extendedRefs = [
                // same order as ts type params for Generator
                typeRef(e.generator_type.yield_type),
@@ -234,39 +207,10 @@ export class MetadataToSerializableTransformer {
                typeRef(e.generator_type.next_type),
             ];
             break;
-
          case 'map':
-            type.bitType |= TypeBitFlags.Map;
+            type.flags |= TypeBitFlagsU16.Map;
             type.extendedRefs = [typeRef(e.key_type), typeRef(e.value_type)];
             break;
-         case 'this':
-            type.bitType |= TypeBitFlags.This;
-            break;
-         case 'iterator':
-            type.bitType |= TypeBitFlags.Iterator;
-            break;
-         case 'unknown':
-            type.bitType |= TypeBitFlags.Unknown;
-            break;
-         default:
-            if (e.is_bind_type || e.name === 'Error') {
-               type.bitType |= TypeBitFlags.IsBindRef;
-               type.bindTypeNameId = this.stringRef(e.name);
-               if (e.from_module) {
-                  type.bitType |= TypeBitFlags.IsExternal;
-                  type.fromModuleInfo = {
-                     nameId: this.stringRef(e.from_module.name),
-                     version: this.stringRef(e.from_module.version),
-                  };
-               }
-            } else {
-               throw new TypeError('Unknown non bindable metadata type name: ' + e.name);
-            }
-      }
-
-      if (type.bitType === 69 && !type.extendedRef) {
-         console.log(type, e);
-         throw new Error('A');
       }
 
       return type;
@@ -450,4 +394,31 @@ export class SymbolBuilder implements BinarySymbolStruct {
       this.bitFlags &= ~bits;
       return this;
    }
+}
+
+export const STRING_TYPE_TO_BITS_MAP = {
+   'uint8': TypeBitFlagsU16.Uint8,
+   'uint16': TypeBitFlagsU16.Uint16,
+   'uint32': TypeBitFlagsU16.Uint32,
+   'uint64': TypeBitFlagsU16.BigUint64,
+   'int8': TypeBitFlagsU16.Int8,
+   'int16': TypeBitFlagsU16.Int16,
+   'int32': TypeBitFlagsU16.Int32,
+   'int64': TypeBitFlagsU16.BigInt64,
+   'float': TypeBitFlagsU16.Float32,
+   'double': TypeBitFlagsU16.Float64,
+   
+    'variant': TypeBitFlagsU16.Variant,
+    'optional': TypeBitFlagsU16.Optional,
+    'array': TypeBitFlagsU16.Array,
+    'closure': TypeBitFlagsU16.Closure,
+    'promise': TypeBitFlagsU16.Promise,
+    'generator': TypeBitFlagsU16.Generator,
+    'map': TypeBitFlagsU16.Map,
+    'boolean': TypeBitFlagsU16.Boolean,
+    'string': TypeBitFlagsU16.String,
+    'undefined': TypeBitFlagsU16.Undefined,
+    'this': TypeBitFlagsU16.This,
+    'iterator': TypeBitFlagsU16.Iterator,
+    'unknown': TypeBitFlagsU16.Unknown,
 }

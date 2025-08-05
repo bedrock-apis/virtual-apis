@@ -1,4 +1,4 @@
-import { TypeBitFlags } from './types';
+import { TypeBitFlagsU16 } from './types';
 
 export type IndexId = number;
-export type TypeIndexId = number | TypeBitFlags;
+export type TypeIndexId = number | TypeBitFlagsU16;

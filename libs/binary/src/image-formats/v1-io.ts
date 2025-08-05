@@ -5,7 +5,7 @@ import {
 } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
 import { BinaryIO } from '../binary/io';
 import { BinarySymbolStruct, ImageHeader, ImageModuleData, SymbolBitFlags } from '../types';
-import { BinaryTypeStruct, TypeBitFlags } from '../types/types';
+import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
 import { BaseBinaryIOImageSerializer } from './base-format-io';
 
 const { AllOf, AnyOf } = BitFlags;
@@ -55,35 +55,33 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
    }
 
    protected static Type(io: BinaryIO<BinaryTypeStruct>): void {
-      io.uint16('bitType');
+      io.uint16('flags');
 
       // If Bind Type Ref
-      if (AllOf(io.storage.bitType, TypeBitFlags.IsBindRef)) {
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsBindType)) {
          io.index('bindTypeNameId');
-         if (AllOf(io.storage.bitType, TypeBitFlags.IsExternal)) {
+         if (AllOf(io.storage.flags, TypeBitFlagsU16.IsExternalBindType)) {
             io.sub('fromModuleInfo').index('nameId').index('version');
          }
          return;
       }
 
-      if (AllOf(io.storage.bitType, TypeBitFlags.IsNumber)) {
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsNumberType)) {
          io.sub('numberRange').float64('min').float64('max');
          return;
       }
 
       // No return because combines with other extended refs
-      if (AllOf(io.storage.bitType, TypeBitFlags.ErrorableTypes)) io.uint16Array8('errorTypes');
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsErrorable)) io.uint16Array8('errorTypes');
 
       // Type with types
-      if (AllOf(io.storage.bitType, TypeBitFlags.IsExtended)) {
-         if (AllOf(io.storage.bitType, TypeBitFlags.IsComplex)) {
-            io.uint16Array8('extendedRefs');
-         } else {
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.HasSingleParamBit)) {
             if (!io.storage.extendedRef) console.log();
             io.uint16('extendedRef');
-         }
          return;
-      }
+      }else if (AllOf(io.storage.flags, TypeBitFlagsU16.HasMultiParamsBit)) {
+            io.uint16Array8('extendedRefs');
+         }
    }
 
    protected static Symbol(io: BinaryIO<BinarySymbolStruct>): void {
