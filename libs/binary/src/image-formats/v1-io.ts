@@ -76,12 +76,12 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
 
       // Type with types
       if (AllOf(io.storage.flags, TypeBitFlagsU16.HasSingleParamBit)) {
-            if (!io.storage.extendedRef) console.log();
-            io.uint16('extendedRef');
+         if (!io.storage.extendedRef) console.log();
+         io.uint16('extendedRef');
          return;
-      }else if (AllOf(io.storage.flags, TypeBitFlagsU16.HasMultiParamsBit)) {
-            io.uint16Array8('extendedRefs');
-         }
+      } else if (AllOf(io.storage.flags, TypeBitFlagsU16.HasMultiParamsBit)) {
+         io.uint16Array8('extendedRefs');
+      }
    }
 
    protected static Symbol(io: BinaryIO<BinarySymbolStruct>): void {

@@ -9,15 +9,13 @@ export enum TypeBitFlagsU16 {
    IsBindType = 1 << 15,
    IsNumberType = 1 << 14,
    // 1 << 13, Preserved as Determination Bit
-   DeterminationBits = IsBindType | IsNumberType | 1 << 13,
-
+   DeterminationBits = IsBindType | IsNumberType | (1 << 13),
 
    // Informative Bits
    // Just bits with not effect only informative
    IsErrorable = 1 << 12,
    // 1 << 11 Reserved Informative Bit
    // 1 << 10 Reserved Informative Bit
-
 
    // Extending Bits
    // Triggers Additional code to be read, but how the data is read is still determined by determination bits
@@ -33,7 +31,7 @@ export enum TypeBitFlagsU16 {
 
    // Determined Number Types
    IsUnsignedBit = HasDetails,
-   
+
    Uint8 = IsNumberType | IsUnsignedBit | 1,
    Uint16 = IsNumberType | IsUnsignedBit | 2,
    Uint32 = IsNumberType | IsUnsignedBit | 3,
@@ -45,7 +43,7 @@ export enum TypeBitFlagsU16 {
    BigInt64 = IsNumberType | 4,
    Float32 = IsNumberType | 5,
    Float64 = IsNumberType | 6,
-   
+
    // Determined Not Number & Not Bind Type
    HasSingleParamBit = HasDetails,
    HasMultiParamsBit = HasExtraData,
@@ -61,12 +59,11 @@ export enum TypeBitFlagsU16 {
    Array = HasSingleParamBit | 2,
    Promise = HasSingleParamBit | 3,
 
-
    Variant = HasMultiParamsBit | 1,
    Map = HasMultiParamsBit | 2,
-   Closure = HasMultiParamsBit | 3,        // No Closure type in need and it would be needed in general
+   Closure = HasMultiParamsBit | 3, // No Closure type in need and it would be needed in general
    Generator = HasMultiParamsBit | 4, // Not really possible to cover type system, but we need to fully serialize it with <T, TNext, TReturn>
-   Iterator = HasMultiParamsBit | 5,  // Native Iterator pattern not sure how it works yet but needs to be tested well,
+   Iterator = HasMultiParamsBit | 5, // Native Iterator pattern not sure how it works yet but needs to be tested well,
 }
 
 // console.log(

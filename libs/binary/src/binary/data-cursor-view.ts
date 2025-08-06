@@ -1,4 +1,4 @@
-import { IDataCursor } from "@bedrock-apis/nbt-core";
+import { IDataCursor } from '@bedrock-apis/nbt-core';
 
 export class DataCursorView implements IDataCursor {
    public static Alloc(size: number): DataCursorView {

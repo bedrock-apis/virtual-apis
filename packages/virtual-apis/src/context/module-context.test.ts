@@ -52,4 +52,3 @@ suite('Context Callback', () => {
       expect(() => (pl as any).methodB()).toThrowErrorMatchingInlineSnapshot('[ReferenceError: Message]');
    });
 });
-

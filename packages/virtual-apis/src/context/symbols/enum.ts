@@ -15,6 +15,7 @@ export class EnumAPISymbol extends APISymbol {
    }
 
    protected override compile(): object {
+      // This is not safe!
       return Kernel['Object::static'].fromEntries(this.constants);
    }
 }

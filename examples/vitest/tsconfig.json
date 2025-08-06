@@ -10,8 +10,5 @@
       "skipLibCheck": true,
       "outDir": "dist"
    },
-   "include": [
-      "scripts",
-      "virtual-apis"
-   ]
+   "include": ["scripts", "virtual-apis"]
 }

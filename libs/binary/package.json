@@ -1,7 +1,7 @@
 {
-  "name": "@bedrock-apis/binary",
-  "version": "0.0.1-alpha",
-  "main": "./dist/main.js",
-  "type": "module",
-  "types": "./src/main.ts"
+   "name": "@bedrock-apis/binary",
+   "version": "0.0.1-alpha",
+   "main": "./dist/main.js",
+   "type": "module",
+   "types": "./src/main.ts"
 }

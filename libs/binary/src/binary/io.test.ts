@@ -140,4 +140,3 @@ describe('checkpoint test', () => {
       expect(rrr).toEqual(data);
    });
 });
-
