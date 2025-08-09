@@ -35,6 +35,7 @@ class KernelClass {
    public static __getPrototypeOf = Object.getPrototypeOf;
    public static __defineProperty = Object.defineProperty;
    public static __descriptors = Object.getOwnPropertyDescriptors;
+   public static __getProperty = Object.getOwnPropertyDescriptor;
    public static __create = Object.create;
 
    public static Construct<T extends Keys, S extends Global[T]>(name: T): InstanceType<S>;
