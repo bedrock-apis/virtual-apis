@@ -1,6 +1,6 @@
 import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
-import { CompileTimeError } from '../diagnostics';
+import { CompileTimeError } from '../errorable';
 import { RuntimeType } from '../runtime-types';
 import type { ParamsValidator } from '../runtime-types/params-validator';
 import { CompilableSymbol } from './general';

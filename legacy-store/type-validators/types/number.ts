@@ -1,5 +1,5 @@
-import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Kernel } from '@bedrock-apis/kernel-isolation';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../diagnostics';
 import { Type } from '../type';
 
 export abstract class BaseNumberType<T extends number | bigint> extends Type {
@@ -42,8 +42,8 @@ export class NumberType extends BaseNumberType<number> {
    public readonly type = 'number' as const;
    public readonly isFiniteCheck = true;
    public static readonly default = new NumberType({
-      max: Kernel['Number::static'].MAX_SAFE_INTEGER,
-      min: Kernel['Number::static'].MIN_SAFE_INTEGER,
+      max: Number.MAX_SAFE_INTEGER,
+      min: Number.MIN_SAFE_INTEGER,
    });
 }
 

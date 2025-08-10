@@ -1,4 +1,4 @@
-import type { DiagnosticsStackReport } from '../diagnostics';
+import type { DiagnosticsStackReport } from '../errorable';
 export interface RuntimeType {
    isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean;
 }

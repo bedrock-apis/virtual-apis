@@ -1,4 +1,4 @@
-import { Diagnostics, type Report } from '../diagnostics';
+import { Diagnostics, type Report } from '../errorable';
 import { type InvocableSymbol } from '../symbols/invocable';
 import { type Context } from './base';
 /**

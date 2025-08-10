@@ -3,7 +3,7 @@ import { InvocableSymbol } from './invocable';
 
 import type { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
-import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../diagnostics';
+import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
 import { RuntimeType } from '../runtime-types';
 import { IBindableSymbol } from './bindable';
 

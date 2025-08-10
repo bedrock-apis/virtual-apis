@@ -13,9 +13,7 @@ export class FunctionSymbol extends InvocableSymbol<(...params: unknown[]) => un
          const info = new InvocationInfo(context, symbol, params);
          info.setThisObject(this);
          const { diagnostics } = info;
-
          symbol.params.isValidValue(diagnostics.errors, info.params);
-
          return symbol.runtimeGetResult(info);
       }
       const executable = proxyifyFunction(runnable);

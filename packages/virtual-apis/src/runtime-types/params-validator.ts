@@ -1,4 +1,4 @@
-import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../diagnostics';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../errorable';
 import { RuntimeType, Type } from './type';
 
 export class ParamsValidator extends Type {

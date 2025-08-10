@@ -1,7 +1,7 @@
 import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
-import { API_ERRORS_MESSAGES, CompileTimeError } from '../diagnostics';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
+import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
 import { IBindableSymbol } from './bindable';
 import { ConstructableSymbol } from './constructable';
 import { InvocableSymbol } from './invocable';
