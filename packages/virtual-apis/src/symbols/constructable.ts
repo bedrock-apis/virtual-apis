@@ -1,9 +1,8 @@
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
 import { finalizeAsConstructable } from '../ecma-utils';
 import { InvocableSymbol } from './invocable';
 
 import type { Context } from '../context/base';
-import { ConstructionInvocationInfo, InvocationInfo } from '../context/invocation-info';
+import { InvocationInfo } from '../context/invocation-info';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../diagnostics';
 import { RuntimeType } from '../runtime-types';
 import { IBindableSymbol } from './bindable';
@@ -28,11 +27,11 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       super.invoke(info);
    }
    public override compile(context: Context): new (...params: unknown[]) => unknown {
-      // oxlint-disable-next-line no-this-alias
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function constructor(this: unknown, ...params: unknown[]): unknown {
          // new invocation info
-         const info = new ConstructionInvocationInfo(context, symbol, KernelArray.From(params));
+         const info = new InvocationInfo(context, symbol, params);
          info.setThisObject(this);
          info.setNewTargetObject(new.target ?? null);
          const { diagnostics } = info;
@@ -47,7 +46,7 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
 
          return setPrototypeOf(
             symbol.runtimeGetResult(info),
-            (new.target as Function)?.prototype ?? constructor.prototype,
+            (new.target as () => unknown)?.prototype ?? constructor.prototype,
          );
       }
       constructor.prototype = { constructor };
@@ -67,9 +66,9 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       return constructor as unknown as new (...params: unknown[]) => unknown;
    }
    public isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
-      let _ = this.handles.has(value as any);
-      if (!_) diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
-      return _;
+      const $ = this.handles.has(value as object);
+      if (!$) diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
+      return $;
    }
    //#region  setMethods
    public setRequireNew(isExpected: boolean): this {

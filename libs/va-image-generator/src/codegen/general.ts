@@ -32,18 +32,18 @@ export class ValueLiteral extends NodeConstructor {
       }
       super(node);
    }
-   public static GetValue<T extends number | string | boolean | null | undefined>(v: T | ValueLiteral): ValueLiteral {
+   public static getValue<T extends number | string | boolean | null | undefined>(v: T | ValueLiteral): ValueLiteral {
       return v instanceof ValueLiteral ? v : new ValueLiteral(v);
    }
 }
 export const IDENTIFIERS = new WeakMap<object, ASTIdentifier>();
 export class ASTIdentifier extends NodeConstructor {
-   public static Unique(constructor: { name: string }) {
+   public static unique(constructor: { name: string }) {
       let unique = IDENTIFIERS.get(constructor);
       if (!unique) IDENTIFIERS.set(constructor, (unique = new ASTIdentifier(constructor.name)));
       return unique;
    }
-   public static Create(name: string) {
+   public static create(name: string) {
       return new ASTIdentifier(name);
    }
 

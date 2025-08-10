@@ -2,7 +2,7 @@ import type { Context } from '../context/base';
 
 export abstract class CompilableSymbol<T> {
    // Do not expose this property yet, maybe it will be an map of (Context -> ApiValue)
-   private readonly runtime: T | null = null;
+   private readonly RUNTIME: T | null = null;
    public readonly name!: string;
    protected abstract compile(context: Context): T;
    protected precompileChecks(_: Context): void {}
@@ -12,6 +12,6 @@ export abstract class CompilableSymbol<T> {
    }
    public getRuntimeValue(context: Context): T {
       //@ts-expect-error We expect that this throws as runtime property is not assignable
-      return this.runtime === null ? (this.runtime = this.compile(context)) : this.runtime;
+      return this.RUNTIME === null ? (this.RUNTIME = this.compile(context)) : this.RUNTIME;
    }
 }

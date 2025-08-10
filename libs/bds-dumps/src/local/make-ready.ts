@@ -20,8 +20,8 @@ export async function makeReady(): Promise<void> {
    const promises: Promise<void>[] = [];
 
    let filesExtracted = 0;
-   let lastUpdate = performance.now(),
-      startTime = lastUpdate;
+   let lastUpdate = performance.now();
+   const startTime = lastUpdate;
    await (
       await getSource()
    ).pipeTo(

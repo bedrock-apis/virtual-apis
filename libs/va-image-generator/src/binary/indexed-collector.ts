@@ -1,5 +1,5 @@
 export class IndexedCollector<T> {
-   public static UnlockedGetIndexFor<T>(t: IndexedCollector<T>, key: T) {
+   public static unlockedGetIndexFor<T>(t: IndexedCollector<T>, key: T) {
       t.locked = false;
       const value = t.getIndexFor(key);
       t.locked = true;

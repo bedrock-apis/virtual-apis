@@ -1,7 +1,7 @@
 import { world } from '@minecraft/server';
 import { TestSuite } from '../suite';
 
-TestSuite.Simple('dynamic properties')
+TestSuite.simple('dynamic properties')
    .test(() => world.getDynamicPropertyIds())
    .testChain(function* () {
       const id = 'id1';

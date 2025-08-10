@@ -1,12 +1,13 @@
-import bedrock from '@bedrock-apis/eslint-plugin';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
    {
       ignores: [
+         'legacy-store/**/*.ts',
          '**/*.test.ts',
          '**/dist/**',
+         '**/bin/**',
          'examples/**',
          'modules/**',
          'bds-docs/**',
@@ -26,13 +27,12 @@ export default tseslint.config(
             project: './tsconfig.json',
          },
       },
-      plugins: {
-         custom: bedrock.plugin,
-      },
+      plugins: {},
       linterOptions: { reportUnusedDisableDirectives: true },
       rules: {
          '@typescript-eslint/no-extraneous-class': 'off',
          '@typescript-eslint/no-unused-vars': 'off',
+         '@typescript-eslint/no-non-null-assertion': 'off',
          '@typescript-eslint/prefer-literal-enum-member': 'off',
          '@typescript-eslint/explicit-member-accessibility': ['warn', { accessibility: 'explicit' }],
          '@typescript-eslint/naming-convention': ['warn', ...namingConvention()],
@@ -40,15 +40,6 @@ export default tseslint.config(
          'no-dupe-class-members': 'off',
          'no-undef': 'off',
          'no-unused-vars': 'off',
-      },
-   },
-   {
-      files: ['packages/{virtual-apis,va-pluggable,core-plugin}/**/*.ts', 'libs/kernel-isolation/**/*.ts'],
-      rules: {
-         'custom/no-globals': 'error',
-         'custom/no-default-extends': 'warn',
-         'custom/no-iterators': 'error',
-         'custom/no-array-expression': 'error',
       },
    },
 );
@@ -73,9 +64,8 @@ function namingConvention() {
       },
       { selector: 'variable', format: ['camelCase'] },
       { selector: 'function', format: ['camelCase'] },
-      { selector: 'classMethod', modifiers: ['static'], format: ['PascalCase'] },
+      { selector: 'classMethod', modifiers: ['static'], format: ['camelCase'] },
       { selector: 'classMethod', format: ['camelCase'], leadingUnderscore: 'allowDouble' },
-      { selector: 'classProperty', modifiers: ['readonly', 'private'], format: ['UPPER_CASE'] },
       { selector: 'classProperty', modifiers: ['readonly', 'public'], format: ['camelCase'] },
       { selector: 'import', format: ['camelCase', 'PascalCase'] },
       { selector: 'typeLike', format: ['PascalCase'] },

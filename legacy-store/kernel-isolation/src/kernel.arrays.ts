@@ -1,4 +1,3 @@
-import { it } from 'vitest';
 import { Kernel } from './kernel';
 import { KernelIterator } from './kernel.iterators';
 

@@ -27,7 +27,7 @@ export abstract class BinaryIO<T extends object> {
       public readonly storage: T,
    ) {}
 
-   public static ReadEncapsulatedData<T extends object>(storage: object): T {
+   public static readEncapsulatedData<T extends object>(storage: object): T {
       const read = (storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol];
       if (typeof read !== 'function') throw new Error('Reader does not have encapsulated data');
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete

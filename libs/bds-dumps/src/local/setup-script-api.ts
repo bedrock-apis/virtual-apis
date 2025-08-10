@@ -5,10 +5,10 @@ import { build } from 'rolldown';
 import { CACHE_DUMP_DIR, SOURCE_DIR } from './constants';
 
 export async function setupScriptAPI(): Promise<void> {
-   let worlds = resolve(CACHE_DUMP_DIR, './worlds');
+   const worlds = resolve(CACHE_DUMP_DIR, './worlds');
    if (existsSync(worlds)) await rm(worlds, { recursive: true, force: true });
    await allowAllModules();
-   let temporal = resolve(CACHE_DUMP_DIR, './behavior_packs/editor/scripts/_temporal.js');
+   const temporal = resolve(CACHE_DUMP_DIR, './behavior_packs/editor/scripts/_temporal.js');
 
    const editorFile = resolve(CACHE_DUMP_DIR, './behavior_packs/editor/scripts/Main.js');
    if (!existsSync(editorFile))
@@ -53,7 +53,7 @@ export async function prepareManifest(): Promise<void> {
 
    const data = await readFile(filename);
    const manifest = JSON.parse(data.toString());
-   if (manifest.dependencies.find((_: any) => _.module_name === '@minecraft/server-net')) return;
+   if (manifest.dependencies.find((_: { module_name?: string }) => _.module_name === '@minecraft/server-net')) return;
 
    manifest.dependencies.push({
       module_name: '@minecraft/server-net',

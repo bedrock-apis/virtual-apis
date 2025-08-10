@@ -1,4 +1,3 @@
-import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { ContextPanicError, ErrorFactory, PANIC_ERROR_MESSAGES } from './errors';
 
 export abstract class BaseReport {
@@ -32,7 +31,7 @@ export class DiagnosticsStackReport extends BaseReport {
    public get isEmpty() {
       return this.length === 0;
    }
-   public readonly stack = KernelArray.Construct<Report>();
+   public readonly stack: Report[] = [];
    public report(...params: [report: Report] | [report: ErrorFactory, child?: BaseReport]): this {
       const report = params[0];
       if (report instanceof Report) this.stack.push(report);
@@ -46,16 +45,16 @@ export class DiagnosticsStackReport extends BaseReport {
       );
    }
    public clear() {
-      (this as Mutable<this>).stack = KernelArray.Construct<Report>();
+      (this as Mutable<this>).stack.length = 0;
    }
    public follow(diagnostics: DiagnosticsStackReport) {
-      for (const item of diagnostics.stack.getIterator()) {
+      for (const item of diagnostics.stack.values()) {
          this.stack.push(item);
       }
       return this;
    }
 }
-export class Diagnostics extends Kernel.Empty {
+export class Diagnostics {
    public get success() {
       return this.errors.length === 0;
    }

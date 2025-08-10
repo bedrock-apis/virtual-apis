@@ -37,7 +37,7 @@ describe('marshalling test', () => {
    }
 
    function write(data: SomeData): DataCursorView {
-      const cursor = DataCursorView.Alloc(1024 * 1024);
+      const cursor = DataCursorView.alloc(1024 * 1024);
       const writer = new BinaryIOWriter(cursor, data as object);
       marshal(writer as unknown as BinaryIO<SomeData>);
       return cursor;
@@ -104,7 +104,7 @@ describe('checkpoint test', () => {
    }
 
    function write(data: SomeData): DataCursorView {
-      const cursor = DataCursorView.Alloc(1024 * 1024);
+      const cursor = DataCursorView.alloc(1024 * 1024);
       const writer = new BinaryIOWriter(cursor, data as object);
       marshal(writer as unknown as BinaryIO<SomeData>);
       return cursor;
@@ -135,7 +135,7 @@ describe('checkpoint test', () => {
 
       const rrr = read(cursor);
       rrr.data.forEach(e => {
-         BinaryIO.ReadEncapsulatedData(e);
+         BinaryIO.readEncapsulatedData(e);
       });
       expect(rrr).toEqual(data);
    });

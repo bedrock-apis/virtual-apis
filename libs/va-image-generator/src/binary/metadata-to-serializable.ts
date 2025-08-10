@@ -59,7 +59,7 @@ export class MetadataToSerializableTransformer {
    );
    protected readonly detailsRef = this.detailsCollector.getIndexFor.bind(this.detailsCollector);
 
-   protected readonly createSymbol = SymbolBuilder.CreateSymbolFactory({
+   protected readonly createSymbol = SymbolBuilder.createSymbolFactory({
       stringRef: this.stringRef,
       typeRef: this.typeRef,
       detailsRef: this.detailsRef,
@@ -138,7 +138,7 @@ export class MetadataToSerializableTransformer {
 
    protected transformTypes() {
       const typeRef = (t: MetadataType) => {
-         const index = IndexedCollector.UnlockedGetIndexFor(this.typesCollector, t);
+         const index = IndexedCollector.unlockedGetIndexFor(this.typesCollector, t);
          const transformed = this.transformType(t, typeRef);
          types.push(transformed);
          return index;
@@ -178,19 +178,19 @@ export class MetadataToSerializableTransformer {
 
       {
          // Assign type
-         const TYPE_BIT = STRING_TYPE_TO_BITS_MAP[e.name] ?? null;
-         if (TYPE_BIT === null) throw new ReferenceError('Unknown value type: ' + e.name);
+         const typeBit = STRING_TYPE_TO_BITS_MAP[e.name] ?? null;
+         if (typeBit === null) throw new ReferenceError('Unknown value type: ' + e.name);
 
-         type.flags |= TYPE_BIT;
+         type.flags |= typeBit;
       }
 
       // Determination if number
-      if (BitFlags.AllOf(type.flags, TypeBitFlagsU16.IsNumberType)) {
+      if (BitFlags.allOf(type.flags, TypeBitFlagsU16.IsNumberType)) {
          type.numberRange = { min: e.valid_range.min, max: e.valid_range.max };
          return type;
       }
 
-      if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasMultiParamsBit | TypeBitFlagsU16.HasSingleParamBit))
+      if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.HasMultiParamsBit | TypeBitFlagsU16.HasSingleParamBit))
          switch (e.name) {
             // Extended single ref
             case 'optional':
@@ -219,7 +219,6 @@ export class MetadataToSerializableTransformer {
                ];
                break;
             case 'map':
-               type.flags |= TypeBitFlagsU16.Map;
                type.extendedRefs = [typeRef(e.key_type), typeRef(e.value_type)];
                break;
          }
@@ -346,7 +345,7 @@ type ContextSymbolBuilder = {
 };
 
 export class SymbolBuilder implements BinarySymbolStruct {
-   public static CreateSymbolFactory(context: ContextSymbolBuilder): () => SymbolBuilder {
+   public static createSymbolFactory(context: ContextSymbolBuilder): () => SymbolBuilder {
       return () => new SymbolBuilder(context);
    }
    public constructor(protected readonly context: ContextSymbolBuilder) {}

@@ -2,7 +2,7 @@ import { BlockPermutation } from '@minecraft/server';
 import { placeBlock } from '../environment';
 import { TestSuite } from '../suite';
 
-TestSuite.WithSetup('block', () => placeBlock('minecraft:stone'))
+TestSuite.withSetup('block', () => placeBlock('minecraft:stone'))
    .test(block => block.typeId)
    .test(block => block.type)
    .test(block => block.location)

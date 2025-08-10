@@ -1,7 +1,7 @@
 import { ItemStack } from '@minecraft/server';
 import { TestSuite } from '../suite';
 
-TestSuite.WithSetup('item', () => new ItemStack('minecraft:apple'))
+TestSuite.withSetup('item', () => new ItemStack('minecraft:apple'))
    .test(item => item.typeId)
    .test(item => item.amount)
    .test(item => item.localizationKey)

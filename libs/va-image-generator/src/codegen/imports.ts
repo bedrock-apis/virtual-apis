@@ -9,7 +9,7 @@ export abstract class ASTImport extends NodeConstructor {
          factory.createImportDeclaration(
             undefined,
             factory.createImportClause(false, undefined, type),
-            ValueLiteral.GetValue(moduleSpecifier) as unknown as ts.StringLiteral,
+            ValueLiteral.getValue(moduleSpecifier) as unknown as ts.StringLiteral,
             undefined,
          ),
       );

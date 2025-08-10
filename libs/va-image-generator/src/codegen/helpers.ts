@@ -3,7 +3,7 @@ import { NodeConstructor, NodeType, TsNode } from './base';
 import { ASTIdentifier } from './general';
 
 export class ASTHelper {
-   public static VariableExport(identifier: ASTIdentifier, node: TsNode): NodeType {
+   public static variableExport(identifier: ASTIdentifier, node: TsNode): NodeType {
       return new NodeConstructor(
          factory.createVariableStatement(
             [factory.createToken(ts.SyntaxKind.ExportKeyword)],

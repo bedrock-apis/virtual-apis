@@ -19,7 +19,7 @@ export function rawASTFor(object: unknown): TsNode {
       case 'number':
       case 'string':
       case 'undefined':
-         return ValueLiteral.GetValue(object);
+         return ValueLiteral.getValue(object);
       case 'object':
          return rawObject(object);
       default:

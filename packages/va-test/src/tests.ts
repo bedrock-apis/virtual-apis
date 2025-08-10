@@ -3,8 +3,10 @@ import { TestEnvironment } from './environment';
 import { TestSuite } from './suite';
 
 // TODO Replace with import to relative script api generator helper or just move whole file to the script api generator
-import { loadChunk } from '../../../bds-docs/script-api/helper';
+//import { loadChunk } from '../../../bds-docs/script-api/helper';
 import './suites/all';
+
+const loadChunk = Object.create(null);
 
 class BedrockDedicatedServerEnvironment extends TestEnvironment {
    public async onSetup(): Promise<void> {
@@ -31,5 +33,5 @@ class BedrockDedicatedServerEnvironment extends TestEnvironment {
 }
 
 export function testsResolver() {
-   return TestSuite.RunThread(new BedrockDedicatedServerEnvironment(), system.runJob.bind(system));
+   return TestSuite.runThread(new BedrockDedicatedServerEnvironment(), system.runJob.bind(system));
 }

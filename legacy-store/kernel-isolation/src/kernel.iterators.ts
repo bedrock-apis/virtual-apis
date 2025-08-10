@@ -1,7 +1,5 @@
 import { isGeneratorObject, isMapIterator, isSetIterator } from 'node:util/types';
 import { Kernel, KernelSymbolCopy } from './kernel';
-import { KernelArray } from './kernel.arrays';
-/* eslint-disable custom/no-globals */
 
 export const GENERATOR_SOURCE = Kernel.IsolatedCopy(
    Object.getPrototypeOf(function* () {}.prototype),

@@ -1,4 +1,3 @@
-import { type KernelArray } from '@bedrock-apis/kernel-isolation';
 import { Diagnostics, type Report } from '../diagnostics';
 import { type InvocableSymbol } from '../symbols/invocable';
 import { type Context } from './base';
@@ -28,10 +27,11 @@ export class InvocationInfo {
    public readonly diagnostics: Diagnostics = new Diagnostics();
    public result: unknown;
    public readonly thisObject: unknown | null = null;
+   public readonly newTargetObject: unknown | null = null;
    public constructor(
       public readonly context: Context,
       public readonly symbol: InvocableSymbol<unknown>,
-      public readonly params: KernelArray<unknown>,
+      public readonly params: unknown[],
    ) {}
 
    public get isSuccessful() {
@@ -48,14 +48,10 @@ export class InvocationInfo {
       (this as Mutable<this>).thisObject = object;
       return this;
    }
-   public setParams(params: KernelArray<unknown>): this {
+   public setParams(params: unknown[]): this {
       (this as Mutable<this>).params = params;
       return this;
    }
-}
-
-export class ConstructionInvocationInfo extends InvocationInfo {
-   public readonly newTargetObject: unknown | null = null;
    public setNewTargetObject(newTarget: unknown): this {
       (this as Mutable<this>).newTargetObject = newTarget;
       return this;

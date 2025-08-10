@@ -3,25 +3,25 @@ import { setEnvironment, TestEnvironment } from './environment';
 import { TestReport } from './types';
 
 export class TestSuite<T> {
-   public static Stringify(object: unknown): string {
+   public static stringify(object: unknown): string {
       if (object === undefined) return 'undefined';
       // TODO Better stringify
       return JSON.stringify(object);
    }
 
-   public static WithSetup<T>(id: string, setupFn: () => T) {
+   public static withSetup<T>(id: string, setupFn: () => T) {
       return new TestSuite(id, setupFn);
    }
 
-   public static Simple(id: string) {
+   public static simple(id: string) {
       return new TestSuite(id, () => {});
    }
 
-   public static RunThread(Environment: TestEnvironment, runner: ThreadRunner = defaultThreadRunner) {
-      return RunThreadAsync(this.Run(Environment), runner);
+   public static runThread(Environment: TestEnvironment, runner: ThreadRunner = defaultThreadRunner) {
+      return RunThreadAsync(this.run(Environment), runner);
    }
 
-   public static *Run(Environment: TestEnvironment): Generator<Promise<void> | unknown, TestReport.Run, unknown> {
+   public static *run(Environment: TestEnvironment): Generator<Promise<void> | unknown, TestReport.Run, unknown> {
       try {
          setEnvironment(Environment);
 
@@ -75,7 +75,7 @@ export class TestSuite<T> {
          try {
             const result = testFn(setupData);
             console.log(testFn.toString(), result);
-            return TestSuite.Stringify(result);
+            return TestSuite.stringify(result);
          } catch (error) {
             return this.createErrorReport(error);
          }
@@ -92,7 +92,7 @@ export class TestSuite<T> {
          const results: string[] = [];
          try {
             for (const iteration of testFn(setupData)) {
-               results.push(TestSuite.Stringify(iteration));
+               results.push(TestSuite.stringify(iteration));
             }
 
             return results;

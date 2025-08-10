@@ -42,7 +42,6 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       throw new ReferenceError('Implementation missing depends on context implementation');
    }
    //#region  SetMethods
-
    public setReturnType(type: RuntimeType): this {
       (this as Mutable<this>).returnType = type;
       return this;

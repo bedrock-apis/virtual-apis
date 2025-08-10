@@ -1,10 +1,10 @@
+import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary/src/binary';
+import { DataCursorView } from '@bedrock-apis/binary/src/binary/data-cursor-view';
+import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '@bedrock-apis/binary/src/constants';
+import { GeneralMetadata, ImageHeader, ImageModuleData, ModuleMetadata } from '@bedrock-apis/binary/src/types';
+import { BinaryFieldDataType } from '@bedrock-apis/binary/src/types/data-type';
 import { NBT_FORMAT_READER, NBT_FORMAT_WRITER, ReaderLike, WriterLike } from '@bedrock-apis/nbt';
 import { TagType } from '@bedrock-apis/nbt-core';
-import { BinaryReader, BinaryWriter } from '../binary';
-import { DataCursorView } from '../binary/data-cursor-view';
-import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '../constants';
-import { GeneralMetadata, ImageHeader, ImageModuleData, ModuleMetadata } from '../types';
-import { BinaryFieldDataType } from '../types/data-type';
 
 const FAKE_CONSTRUCTOR = function () {};
 export class BaseBinaryImageSerializer {
@@ -17,10 +17,10 @@ export class BaseBinaryImageSerializer {
       if (this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this) as T;
       return null;
    }
-   protected static readonly ReadNextMagic = BinaryReader.ReadUint32;
-   protected static readonly WriteNextMagic = BinaryWriter.WriteUint32;
-   protected static readonly ReadVersion = BinaryReader.ReadUint16;
-   protected static readonly WriteVersion = BinaryWriter.WriteUint16;
+   protected static readonly ReadNextMagic = BinaryReader.readUint32;
+   protected static readonly WriteNextMagic = BinaryWriter.writeUint32;
+   protected static readonly ReadVersion = BinaryReader.readUint16;
+   protected static readonly WriteVersion = BinaryWriter.writeUint16;
 
    //#region Public APIs
    public static GetBinaryImageSerializerFor<T extends typeof BaseBinaryImageSerializer>(
@@ -61,7 +61,7 @@ export class BaseBinaryImageSerializer {
          if (!(magic in BinaryFieldDataType)) throw new ReferenceError('Unknown magic');
 
          const metadata = this.ReadFieldMetadata(_);
-         const checkpoint = BinaryReader.GetCheckPointUint32(_);
+         const checkpoint = BinaryReader.getCheckPointUint32(_);
          yield { type: magic, metadata, checkpoint };
       }
    }
@@ -86,10 +86,10 @@ export class BaseBinaryImageSerializer {
 
    protected static WriteMetadata(_: DataCursorView, metadata: object): void {
       console.log('META', metadata);
-      BinaryWriter.WriteCheckPointUint16(_, _ => this.nbtFormatWriter[TagType.Compound](_, metadata));
+      BinaryWriter.writeCheckPointUint16(_, _ => this.nbtFormatWriter[TagType.Compound](_, metadata));
    }
    protected static ReadMetadata(_: DataCursorView): unknown {
-      return BinaryReader.ReadCheckPointUint16(_, _ => this.nbtFormatReader[TagType.Compound](_));
+      return BinaryReader.readCheckPointUint16(_, _ => this.nbtFormatReader[TagType.Compound](_));
    }
 
    //!! Has to be getter so the inheritance works properly !!
@@ -106,13 +106,13 @@ export class BaseBinaryImageSerializer {
       return this.ReadMetadata;
    }
    protected static WriteGlobalStrings(_: DataCursorView, data: string[]) {
-      BinaryWriter.WriteUint16(_, data.length);
-      for (let i = 0; i < data.length; i++) BinaryWriter.WriteStringU8(_, data[i] as string);
+      BinaryWriter.writeUint16(_, data.length);
+      for (let i = 0; i < data.length; i++) BinaryWriter.writeStringU8(_, data[i] as string);
    }
    protected static ReadGlobalStrings(_: DataCursorView): string[] {
       const array: string[] = [];
-      const length = BinaryReader.ReadUint16(_);
-      for (let i = 0; i < length; i++) array.push(BinaryReader.ReadStringU8(_));
+      const length = BinaryReader.readUint16(_);
+      for (let i = 0; i < length; i++) array.push(BinaryReader.readStringU8(_));
       return array;
    }
    //#region Inheritance

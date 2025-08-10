@@ -5,7 +5,9 @@ export class HTTPServer {
    public constructor() {
       this.server = createServer(async (req, resp) => {
          console.log(req.url, req.headers);
-         const response = new Response(ReadableStream.from(req.iterator()), { headers: req.headers as any });
+         const response = new Response(ReadableStream.from(req.iterator()), {
+            headers: req.headers as unknown as Headers,
+         });
          const realResponse = await this.handle(response, req.url ?? '/');
          resp.statusCode = realResponse.status;
          resp.statusMessage = realResponse.statusText;
@@ -14,7 +16,7 @@ export class HTTPServer {
             realResponse.statusText,
             Object.fromEntries(realResponse.headers.entries()),
          );
-         let body = realResponse.body;
+         const body = realResponse.body;
          if (!body) return void resp.end();
          for await (const chunk of body) req.push(chunk);
          resp.end();

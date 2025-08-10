@@ -16,7 +16,7 @@ export async function mainOld(metadataProvider: IMetadataProvider): Promise<numb
    const startupTime = performance.now();
    const { modules, metadata } = await new MetadataToSerializableTransformer().transform(metadataProvider);
 
-   const buffer = DataCursorView.Alloc(2 ** 16 * 3); // 196608 bytes -> 192 kb
+   const buffer = DataCursorView.alloc(2 ** 16 * 3); // 196608 bytes -> 192 kb
    console.log(CIS.version);
    CIS.WriteGeneralHeader(buffer, { ...metadata, version: 1 });
    for (const { metadata, id, data, stats } of modules) {
@@ -48,12 +48,12 @@ export async function main(metadataProvider: IMetadataProvider): Promise<number>
 
    writeFileSync('original.json', JSON.stringify(data, null, 2));
 
-   const buffer = BaseBinaryIOImageSerializer.Write(data);
+   const buffer = BaseBinaryIOImageSerializer.write(data);
 
    writeFileSync(path.join(MODULES_DIR, 'image.bin'), buffer);
 
-   const read = BinaryImageSerializerIOV1.Read(buffer);
-   read.modules.forEach(e => BinaryIOReader.ReadEncapsulatedData(e));
+   const read = BinaryImageSerializerIOV1.read(buffer);
+   read.modules.forEach(e => BinaryIOReader.readEncapsulatedData(e));
 
    writeFileSync('write.json', JSON.stringify(read, null, 2));
 

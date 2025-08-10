@@ -8,7 +8,7 @@ export async function runAndCompare(
    Environment: TestEnvironment,
    runner?: ThreadRunner,
 ) {
-   const result = await TestSuite.RunThread(Environment, runner);
+   const result = await TestSuite.runThread(Environment, runner);
 
    if (!Array.isArray(bdsDocsResults)) {
       return 'Bds docs Environment setup failed, skipping...';

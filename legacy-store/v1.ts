@@ -1,23 +1,23 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+//@ts-nocheck
+import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary/src/binary';
+import { DataCursorView } from '@bedrock-apis/binary/src/binary/data-cursor-view';
+import { BinaryIO, PickMatch } from '@bedrock-apis/binary/src/binary/io';
+import { BaseBinaryImageSerializer } from '@bedrock-apis/binary/src/image-formats/base-format';
+import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '@bedrock-apis/binary/src/types';
+import { BinaryTypeStruct, TypeBitFlagsU16 } from '@bedrock-apis/binary/src/types/types';
 import { BitFlags } from '@bedrock-apis/common';
 import { TagType } from '@bedrock-apis/nbt-core';
-import { BinaryReader, BinaryWriter } from '../binary';
-import { DataCursorView } from '../binary/data-cursor-view';
-import { BinaryIO, PickMatch } from '../binary/io';
-import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '../types';
-import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
-import { BaseBinaryImageSerializer } from './base-format';
 
-const { AllOf } = BitFlags;
+const { allOf: AllOf } = BitFlags;
 
 export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    public static override readonly isDeprecated = false;
    // Version should be hardcoded and don't change (super.version + 1;) is bad practice
    public static override readonly version: number = 1;
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public static readonly ReadIndexRef = BinaryReader.ReadUint16;
+   public static readonly ReadIndexRef = BinaryReader.readUint16;
    // eslint-disable-next-line @typescript-eslint/naming-convention
-   public static readonly WriteIndexRef = BinaryWriter.WriteUint16;
+   public static readonly WriteIndexRef = BinaryWriter.writeUint16;
    public static override ReadModuleField(_: DataCursorView): ImageModuleData {
       const symbols = this.ReadSymbols(_);
       const exports = this.ReadExportIndexes(_);
@@ -29,21 +29,21 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
    //#region Readers
    protected static ReadTypes(_: DataCursorView): BinaryTypeStruct[] {
-      const size = BinaryReader.ReadUint16(_);
+      const size = BinaryReader.readUint16(_);
       const array: BinaryTypeStruct[] = [];
       for (let i = 0; i < size; i++) array[array.length] = this.ReadType(_);
       return array;
    }
 
    protected static ReadType(_: DataCursorView): BinaryTypeStruct {
-      const bitKind = BinaryReader.ReadUint8(_);
+      const bitKind = BinaryReader.readUint8(_);
       const type: BinaryTypeStruct = { flags: bitKind };
       // Keep Strict Order of the Binary Reader methods
 
       // If Bind Type Ref
-      if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.IsBindType)) {
+      if (BitFlags.anyOf(bitKind, TypeBitFlagsU16.IsBindType)) {
          type.bindTypeNameId = this.ReadIndexRef(_);
-         if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.IsExternalBit))
+         if (BitFlags.anyOf(bitKind, TypeBitFlagsU16.IsExternalBit))
             type.fromModuleInfo = {
                nameId: this.ReadIndexRef(_),
                version: this.ReadIndexRef(_),
@@ -54,15 +54,15 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       // Reading Numbers
       if (AllOf(bitKind, TypeBitFlagsU16.IsNumberType)) {
          type.numberRange = {
-            max: BinaryReader.ReadFloat64(_),
-            min: BinaryReader.ReadFloat64(_),
+            max: BinaryReader.readFloat64(_),
+            min: BinaryReader.readFloat64(_),
          };
          return type;
       }
 
       // Type with types
-      if (BitFlags.AnyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
-         type.extendedRefs = BitFlags.AnyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit)
+      if (BitFlags.anyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
+         type.extendedRefs = BitFlags.anyOf(bitKind, TypeBitFlagsU16.HasSingleParamBit)
             ? [this.ReadIndexRef(_)]
             : this.ReadMinimalReferences(_);
          return type;
@@ -71,13 +71,13 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       return type;
    }
    protected static ReadSymbols(_: DataCursorView): BinarySymbolStruct[] {
-      const size = BinaryReader.ReadUint16(_);
+      const size = BinaryReader.readUint16(_);
       const array: BinarySymbolStruct[] = [];
       for (let i = 0; i < size; i++) array[array.length] = this.ReadSymbol(_);
       return array;
    }
    protected static ReadSymbol(_: DataCursorView): BinarySymbolStruct {
-      const bitFlags = BinaryReader.ReadUint16(_);
+      const bitFlags = BinaryReader.readUint16(_);
       const name = this.ReadIndexRef(_);
       const symbol: BinarySymbolStruct = { name, bitFlags };
 
@@ -103,7 +103,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       return this.nbtFormatReader[type as TagType.Byte](_);
    }
    protected static ReadInterfaceData(_: DataCursorView): BinarySymbolStruct['isInterfaceData'] {
-      const size = BinaryReader.ReadUint8(_);
+      const size = BinaryReader.readUint8(_);
       const keys: IndexId[] = [];
       const values: IndexId[] = [];
       for (let i = 0; i < size; i++) {
@@ -113,40 +113,40 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
       return { keys, types: values };
    }
    protected static ReadEnumData(_: DataCursorView): BinarySymbolStruct['isEnumData'] {
-      const flags = BinaryReader.ReadUint8(_);
+      const flags = BinaryReader.readUint8(_);
       const length = flags & 0x7f;
-      const isNumerical = BitFlags.AllOf(flags, 0x80);
+      const isNumerical = BitFlags.allOf(flags, 0x80);
       const keys: IndexId[] = [];
       const values: number[] = [];
       for (let i = 0; i < length; i++) {
          keys.push(this.ReadIndexRef(_));
-         if (isNumerical) values.push(BinaryReader.ReadUint16(_));
+         if (isNumerical) values.push(BinaryReader.readUint16(_));
       }
       return { hasNumericalValues: isNumerical, keys, values };
    }
    protected static ReadExportIndexes(_: DataCursorView): number[] {
-      return BinaryReader.ReadUint16Array(_, BinaryReader.ReadUint16(_));
+      return BinaryReader.readUint16Array(_, BinaryReader.readUint16(_));
    }
    protected static ReadMinimalReferences(_: DataCursorView): IndexId[] {
-      return BinaryReader.ReadUint16Array(_, BinaryReader.ReadUint8(_));
+      return BinaryReader.readUint16Array(_, BinaryReader.readUint8(_));
    }
    protected static readonly ReadPrivileges = this.ReadMinimalReferences;
    //#endregion
    //#region Writers
    protected static WriteTypes(_: DataCursorView, types: BinaryTypeStruct[]): void {
-      BinaryWriter.WriteUint16(_, types.length);
+      BinaryWriter.writeUint16(_, types.length);
       for (const type of types) this.WriteType(_, type);
    }
 
    protected static WriteType(_: DataCursorView, type: BinaryTypeStruct): void {
-      BinaryWriter.WriteUint8(_, type.flags);
+      BinaryWriter.writeUint8(_, type.flags);
 
       // Keep Strict Order of the Binary Writer methods
 
       // If Bind Type Ref
-      if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.IsBindType)) {
+      if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.IsBindType)) {
          this.WriteIndexRef(_, type.bindTypeNameId!);
-         if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.IsExternalBit)) {
+         if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.IsExternalBit)) {
             this.WriteIndexRef(_, type.fromModuleInfo!.nameId!);
             this.WriteIndexRef(_, type.fromModuleInfo!.version!);
          }
@@ -155,14 +155,14 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
       // Writing Numbers
       if (AllOf(type.flags, TypeBitFlagsU16.IsNumberType)) {
-         BinaryWriter.WriteFloat64(_, type.numberRange!.max);
-         BinaryWriter.WriteFloat64(_, type.numberRange!.min);
+         BinaryWriter.writeFloat64(_, type.numberRange!.max);
+         BinaryWriter.writeFloat64(_, type.numberRange!.min);
          return;
       }
 
       // Type with types
-      if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
-         if (BitFlags.AnyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit)) {
+      if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit | TypeBitFlagsU16.HasMultiParamsBit)) {
+         if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.HasSingleParamBit)) {
             this.WriteIndexRef(_, type.extendedRefs![0]!);
          } else {
             this.WriteMinimalReferences(_, type.extendedRefs!);
@@ -172,7 +172,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    }
 
    protected static WriteSymbols(_: DataCursorView, symbols: BinarySymbolStruct[]): void {
-      BinaryWriter.WriteUint16(_, symbols.length);
+      BinaryWriter.writeUint16(_, symbols.length);
       for (const symbol of symbols) this.WriteSymbol(_, symbol);
    }
 
@@ -199,7 +199,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    }
 
    protected static WriteSymbol(_: DataCursorView, symbol: BinarySymbolStruct): void {
-      BinaryWriter.WriteUint16(_, symbol.bitFlags);
+      BinaryWriter.writeUint16(_, symbol.bitFlags);
       this.WriteIndexRef(_, symbol.name);
 
       if (symbol.bitFlags === 0) return;
@@ -222,7 +222,7 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
    }
 
    protected static WriteInterfaceData(_: DataCursorView, data: BinarySymbolStruct['isInterfaceData']): void {
-      BinaryWriter.WriteUint8(_, data!.keys.length);
+      BinaryWriter.writeUint8(_, data!.keys.length);
       for (let i = 0; i < data!.keys.length; i++) {
          this.WriteIndexRef(_, data!.keys[i]!);
          this.WriteIndexRef(_, data!.types[i]!);
@@ -242,22 +242,22 @@ export class BinaryImageSerializerV1 extends BaseBinaryImageSerializer {
 
    protected static WriteEnumData(_: DataCursorView, data: BinarySymbolStruct['isEnumData']): void {
       const flags = (data!.hasNumericalValues ? 0x80 : 0x00) | data!.keys.length;
-      BinaryWriter.WriteUint8(_, flags);
+      BinaryWriter.writeUint8(_, flags);
       for (let i = 0; i < data!.keys.length; i++) {
          this.WriteIndexRef(_, data!.keys[i]!);
-         if (data!.hasNumericalValues) BinaryWriter.WriteUint16(_, data!.values![i]!);
+         if (data!.hasNumericalValues) BinaryWriter.writeUint16(_, data!.values![i]!);
       }
    }
    protected static WriteMinimalReferences(_: DataCursorView, refs: IndexId[]): void {
-      BinaryWriter.WriteUint8(_, refs.length);
-      BinaryWriter.WriteUint16Array(_, refs);
+      BinaryWriter.writeUint8(_, refs.length);
+      BinaryWriter.writeUint16Array(_, refs);
    }
 
    protected static readonly WritePrivileges = this.WriteMinimalReferences;
 
    protected static WriteExportIndexes(_: DataCursorView, value: ArrayLike<number>) {
-      BinaryWriter.WriteUint16(_, value.length);
-      BinaryWriter.WriteUint16Array(_, value);
+      BinaryWriter.writeUint16(_, value.length);
+      BinaryWriter.writeUint16Array(_, value);
    }
    //#endregion
 }

@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-extraneous-class */
 /* eslint-disable @typescript-eslint/unified-signatures */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable custom/no-globals */
 
 type Global = typeof globalThis;
 type Keys = {
@@ -17,9 +17,7 @@ type KernelType = {
    [K in keyof Global as `globalThis::${K}`]: Global[K];
 };
 
-// eslint-disable-next-line custom/no-default-extends
 class KernelClass {
-   // eslint-disable-next-line @typescript-eslint/naming-convention
    public static Empty: { new (): object } = function Empty() {} as unknown as { new (): object };
    public static __call = Function.prototype.call; // Type to Type call method
    public static Call: <T extends (...params: P) => unknown, P extends unknown[]>(
@@ -165,11 +163,9 @@ const ISOLATED_CONSTRUCTORS = new WeakMap<object, unknown>();
 const KernelStorage = KernelClass as unknown as Record<string, any>;
 KernelClass.__setPrototypeOf(KernelStorage, null);
 
-// eslint-disable-next-line custom/no-array-expression
 const IGNORED_GLOBALS = ['sys', 'wasi', 'punycode'];
 const GLOBAL_NAMES = Object.getOwnPropertyNames(globalThis).filter(k => !IGNORED_GLOBALS.includes(k));
 
-// eslint-disable-next-line custom/no-iterators
 for (const constructor of GLOBAL_NAMES.map(k => (globalThis as typeof KernelStorage)[k]).filter(
    v => typeof v === 'function' && v.prototype,
 )) {
@@ -177,7 +173,7 @@ for (const constructor of GLOBAL_NAMES.map(k => (globalThis as typeof KernelStor
    KernelStorage[constructor.name + '::prototype'] = KernelClass.IsolatedCopy(constructor.prototype);
    KernelStorage[constructor.name + '::static'] = KernelClass.IsolatedCopy(constructor);
 }
-// eslint-disable-next-line custom/no-iterators
+
 for (const globalName of GLOBAL_NAMES) {
    KernelStorage[`globalThis::${globalName}`] = globalThis[globalName as keyof typeof globalThis];
 }

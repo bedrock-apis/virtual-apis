@@ -10,32 +10,32 @@ export class BaseBinaryIOImageSerializer {
    public static current = BaseBinaryIOImageSerializer;
    public static readonly version: number = 0;
    public static readonly isDeprecated: boolean = true;
-   protected static GetBase<T>(this: T): T | null {
+   protected static getBase<T>(this: T): T | null {
       if (this instanceof FAKE_CONSTRUCTOR) return Reflect.getPrototypeOf(this) as T;
       return null;
    }
 
-   public static Write(data: SerializableMetadata) {
-      const buffer = DataCursorView.Alloc(2 ** 16 * 10); // 196608 bytes -> 192 kb
+   public static write(data: SerializableMetadata) {
+      const buffer = DataCursorView.alloc(2 ** 16 * 10); // 196608 bytes -> 192 kb
       const format = BaseBinaryIOImageSerializer.current;
       data.version = format.version;
 
       const io = new SafeBinaryIOWriter(buffer, data as object) as unknown as BinaryIO<SerializableMetadata>;
-      format.BaseMarshal(io);
+      format.baseMarshal(io);
 
       return io.data.getBuffer();
    }
 
-   public static Read(source: Uint8Array<ArrayBufferLike>) {
+   public static read(source: Uint8Array<ArrayBufferLike>) {
       const buffer = new DataCursorView(source);
       buffer.pointer = 0;
       const format = BaseBinaryIOImageSerializer.current;
       const io = new BinaryIOReader(buffer, {}) as unknown as BinaryIO<SerializableMetadata>;
-      format.BaseMarshal(io);
+      format.baseMarshal(io);
       return io.storage;
    }
 
-   private static GetBinaryImageSerializerFor<T extends typeof BaseBinaryIOImageSerializer>(
+   private static getBinaryImageSerializerFor<T extends typeof BaseBinaryIOImageSerializer>(
       this: T,
       version: number,
    ): T | null {
@@ -44,23 +44,23 @@ export class BaseBinaryIOImageSerializer {
          throw new ReferenceError(
             `Future Yet, Unsupported version (${version} vs latest supported ${this.version}), please update virtual-apis package`,
          );
-      if (version < this.version) return this.GetBase() ?? null;
+      if (version < this.version) return this.getBase() ?? null;
       return this;
    }
 
-   private static BaseMarshal(io: BinaryIO<SerializableMetadata>) {
+   private static baseMarshal(io: BinaryIO<SerializableMetadata>) {
       io.magic(IMAGE_GENERAL_DATA_MAGIC);
       io.uint32('version');
 
-      const format = this.GetBinaryImageSerializerFor(io.storage.version ?? -1);
+      const format = this.getBinaryImageSerializerFor(io.storage.version ?? -1);
       if (!format) {
          throw new ReferenceError(`Unsupported format version ${io.storage.version}. Latest ${this.current.version}`);
       }
 
-      format.Marshal(io);
+      format.marshal(io);
    }
 
-   protected static Marshal(io: BinaryIO<SerializableMetadata>) {
+   protected static marshal(io: BinaryIO<SerializableMetadata>) {
       throw new Error('Not implemented, use base class');
    }
 }

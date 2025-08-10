@@ -34,7 +34,7 @@ export class VirtualNativeModule {
    private _emitted = false;
    public constructor(metadata: MetadataModuleDefinition) {
       this.metadata = metadata;
-      this.relativePath = VirtualNativeModule.GetRelativePath(metadata);
+      this.relativePath = VirtualNativeModule.getRelativePath(metadata);
       for (const dependency of metadata.dependencies) this.openDependency(dependency);
       this.classes = mapToRecord(metadata.classes);
       this.interfaces = mapToRecord(metadata.interfaces);
@@ -46,26 +46,26 @@ export class VirtualNativeModule {
          this.dependencies.set(
             fullname,
             (exports = new ASTNamespaceImport(
-               ASTIdentifier.Create('__' + (this.dependencyIndex++).toString(16)),
-               `./${VirtualNativeModule.GetRelativePath(dependency)}.native.js`,
+               ASTIdentifier.create('__' + (this.dependencyIndex++).toString(16)),
+               `./${VirtualNativeModule.getRelativePath(dependency)}.native.js`,
             )),
          );
       return exports;
    }
    public *emitClass(meta: MetadataClassDefinition): Generator<TsNode> {
-      const id = ASTIdentifier.Unique(meta);
+      const id = ASTIdentifier.unique(meta);
       if (this.exports.has(id)) return;
       this.export(id, VirtualNativeExportType.Class);
       let baseType: TsNode = NULL_KEYWORD;
       if (meta.base_types[0]) {
          if (meta.base_types[0].from_module) {
             const exports = this.openDependency(meta.base_types[0].from_module);
-            baseType = exports.import(ASTIdentifier.Unique(meta.base_types[0]));
+            baseType = exports.import(ASTIdentifier.unique(meta.base_types[0]));
          } else {
             const baseMeta = this.classes[meta.base_types[0].name];
             if (baseMeta) {
                yield* this.emitClass(baseMeta);
-               baseType = ASTIdentifier.Unique(baseMeta);
+               baseType = ASTIdentifier.unique(baseMeta);
             } else {
                console.warn(`Base type ${meta.base_types[0].name} not found`);
             }
@@ -75,61 +75,61 @@ export class VirtualNativeModule {
       const constructor = meta.functions.find(e => e.name === 'constructor');
 
       let builderPattern = CONTEXT_CREATE_CLASS.invoke([
-         ValueLiteral.GetValue(id._text),
+         ValueLiteral.getValue(id._text),
          baseType,
          // Null means that constructor is not public
          constructor ? constructParams(constructor.arguments) : NULL_KEYWORD,
-         ValueLiteral.GetValue(true),
+         ValueLiteral.getValue(true),
       ]);
 
       for (const func of meta.functions) {
          if (func.name === 'constructor') continue;
          const params = constructParams(func.arguments);
-         builderPattern = builderPattern.methodCall(ADD_METHOD_IDENTIFIER, [ValueLiteral.GetValue(func.name), params]);
+         builderPattern = builderPattern.methodCall(ADD_METHOD_IDENTIFIER, [ValueLiteral.getValue(func.name), params]);
       }
 
       // Emit Export declaration
-      yield ASTHelper.VariableExport(id, builderPattern);
+      yield ASTHelper.variableExport(id, builderPattern);
    }
    public *emitInterface(meta: MetadataInterfaceDefinition): Generator<TsNode> {
-      const id = ASTIdentifier.Unique(meta);
+      const id = ASTIdentifier.unique(meta);
       if (this.exports.has(id)) return;
       this.export(id, VirtualNativeExportType.Interface);
       let baseType: TsNode = NULL_KEYWORD;
       if (meta.base_types[0]) {
          if (meta.base_types[0].from_module) {
             const exports = this.openDependency(meta.base_types[0].from_module);
-            baseType = exports.import(ASTIdentifier.Unique(meta.base_types[0]));
+            baseType = exports.import(ASTIdentifier.unique(meta.base_types[0]));
          } else {
             const baseMeta = this.interfaces[meta.base_types[0].name];
             if (baseMeta) {
                yield* this.emitInterface(baseMeta);
-               baseType = ASTIdentifier.Unique(baseMeta);
+               baseType = ASTIdentifier.unique(baseMeta);
             } else {
                console.warn(`Base type ${meta.base_types[0].name} not found`);
             }
          }
       }
 
-      let builderPattern = INTERFACE_BIND_TYPE_NODE.construct([ValueLiteral.GetValue(id._text), baseType]);
+      let builderPattern = INTERFACE_BIND_TYPE_NODE.construct([ValueLiteral.getValue(id._text), baseType]);
 
       for (const func of meta.properties) {
-         builderPattern = builderPattern.methodCall(ADD_PROPERTY_IDENTIFIER, [ValueLiteral.GetValue(func.name)]);
+         builderPattern = builderPattern.methodCall(ADD_PROPERTY_IDENTIFIER, [ValueLiteral.getValue(func.name)]);
       }
-      builderPattern = CONTEXT_REGISTER_TYPE.invoke([ValueLiteral.GetValue(id._text), builderPattern]);
+      builderPattern = CONTEXT_REGISTER_TYPE.invoke([ValueLiteral.getValue(id._text), builderPattern]);
       // Emit Export declaration
-      yield ASTHelper.VariableExport(id, builderPattern);
+      yield ASTHelper.variableExport(id, builderPattern);
    }
    public *emitObject(meta: MetadataObjectDefinition): Generator<TsNode> {
       const type = meta.type;
       const cl = this.classes[type.name];
-      const id = ASTIdentifier.Unique(meta);
+      const id = ASTIdentifier.unique(meta);
       if (type.from_module || cl === undefined)
          throw new Error('Object instances from other modules are not supported');
 
-      const targetDefinition = ASTIdentifier.Unique(cl);
+      const targetDefinition = ASTIdentifier.unique(cl);
       this.export(id, VirtualNativeExportType.Object);
-      yield ASTHelper.VariableExport(id, targetDefinition.access(ASTIdentifier.Create('create')).invoke());
+      yield ASTHelper.variableExport(id, targetDefinition.access(ASTIdentifier.create('create')).invoke());
    }
    public *emit(): Generator<TsNode> {
       yield API_EXPORTS;
@@ -146,20 +146,20 @@ export class VirtualNativeModule {
    }
    public *emitVirtualAPIs(): Generator<TsNode> {
       if (!this._emitted) throw new Error('Module has not been emitted yet');
-      const apiInstance = ASTIdentifier.Create('api');
-      const native = new ASTNamespaceImport(ASTIdentifier.Create('__'), `./${this.relativePath}.native.js`);
+      const apiInstance = ASTIdentifier.create('api');
+      const native = new ASTNamespaceImport(ASTIdentifier.create('__'), `./${this.relativePath}.native.js`);
       yield native;
       for (const [identifier, type] of this.exports) {
          let node = native.import(identifier);
          if (type === VirtualNativeExportType.Interface) continue;
          if (type === VirtualNativeExportType.Class) node = node.access(apiInstance);
-         yield ASTHelper.VariableExport(identifier, node);
+         yield ASTHelper.variableExport(identifier, node);
       }
    }
    public export(identifier: ASTIdentifier, type: VirtualNativeExportType): void {
       this.exports.set(identifier, type);
    }
-   public static GetRelativePath(module: MetadataModuleBaseDefinition) {
+   public static getRelativePath(module: MetadataModuleBaseDefinition) {
       const fullname = metadataModuleFullname(module);
       const relative = fullname.split('/').at(-1) ?? fullname;
       if (!relative || relative.includes('undefined')) {

@@ -5,17 +5,15 @@
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
-      "outDir": "dist",
-      "allowJs": true,
-      "checkJs": true,
+      "allowJs": false,
       "noEmit": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       "strict": true,
       "noUncheckedIndexedAccess": true,
       "skipLibCheck": true,
-
       "noImplicitOverride": true
    },
-   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts"]
+   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts"],
+   "exclude": ["**/bin/**/*", "**/dist/**/*"]
 }

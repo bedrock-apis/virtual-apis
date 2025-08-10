@@ -1,7 +1,7 @@
 import { IDataCursor } from '@bedrock-apis/nbt-core';
 
 export class DataCursorView implements IDataCursor {
-   public static Alloc(size: number): DataCursorView {
+   public static alloc(size: number): DataCursorView {
       return new this(new Uint8Array(size));
    }
    public readonly view: DataView;

@@ -1,5 +1,3 @@
-import { Kernel } from '@bedrock-apis/kernel-isolation';
-import { KernelArray } from '@bedrock-apis/kernel-isolation';
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 
 const TARGETS = ['Entity', 'Block', 'ItemStack'] as const;
@@ -28,17 +26,16 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
          target,
          'components',
          () => {
-            const storage = new Kernel['globalThis::Map']<string, unknown>();
+            const storage = new Map<string, unknown>();
             const metadata = this.config.componentsMetadata[target];
-            // eslint-disable-next-line custom/no-iterators
-            for (const component of Kernel['globalThis::Object'].entries(metadata)) {
+            for (const component of Object.entries(metadata)) {
                storage.set(component[0], component[1]); // TODO A way to resolve component type from its id and create it using metadata?
             }
             return storage;
          },
          {
             getComponents() {
-               return KernelArray.From(this.STORAGE.values()) as unknown as [];
+               return Array.from(this.STORAGE.values()) as unknown as [];
             },
             getComponent(componentId) {
                // eslint-disable-next-line @typescript-eslint/no-explicit-any

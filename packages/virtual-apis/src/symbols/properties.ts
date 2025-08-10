@@ -1,4 +1,3 @@
-import { Kernel, KernelArray } from '@bedrock-apis/kernel-isolation';
 import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../diagnostics';
@@ -13,11 +12,11 @@ export class PropertySetterSymbol
 {
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
-      // oxlint-disable-next-line no-this-alias
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(this: unknown, ...params: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, KernelArray.Construct(params[0]));
+         const info = new InvocationInfo(context, symbol, [params[0]]);
          info.setThisObject(this);
          const { diagnostics } = info;
 
@@ -40,13 +39,13 @@ export class PropertySetterSymbol
       return executable;
    }
    public compileAssignment(context: Context, runtime: unknown): void {
-      const descriptor = Kernel.__getProperty(runtime, this.name) ?? {
+      const descriptor = Reflect.getOwnPropertyDescriptor(runtime as object, this.name) ?? {
          configurable: true,
          enumerable: false,
          writable: true,
       };
       descriptor.set = this.getRuntimeValue(context);
-      Kernel.__defineProperty(runtime, this.name, descriptor);
+      Reflect.defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {
       return super.setIdentifier(`${this.thisType.identifier}::${identifier} setter`);
@@ -68,10 +67,11 @@ export class PropertyGetterSymbol
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // oxlint-disable-next-line no-this-alias
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(this: unknown, ..._: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, KernelArray.Construct());
+         const info = new InvocationInfo(context, symbol, []);
          info.setThisObject(this);
          const { diagnostics } = info;
 
@@ -90,13 +90,13 @@ export class PropertyGetterSymbol
       return executable;
    }
    public compileAssignment(context: Context, runtime: unknown): void {
-      const descriptor = Kernel.__getProperty(runtime, this.name) ?? {
+      const descriptor = Reflect.getOwnPropertyDescriptor(runtime as object, this.name) ?? {
          configurable: true,
          enumerable: false,
          writable: true,
       };
       descriptor.get = this.getRuntimeValue(context);
-      Kernel.__defineProperty(runtime, this.name, descriptor);
+      Reflect.defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {
       return super.setIdentifier(`${this.thisType.identifier}::${identifier} getter`);
