@@ -6,21 +6,20 @@ suite('Create Context', () => {
    const context = new Context();
    const moduleSymbol = new ModuleSymbol().setName('@minecraft/server');
    test('Add class Symbol', () => {
-      const constructable = new ConstructableSymbol();
-      constructable
-         .setName('Entity')
+      const EntitySymbol = new ConstructableSymbol();
+      EntitySymbol.setName('Entity')
          .setIsConstructable(false)
          .setParams(new ParamsValidator([]))
-         .prototypeFields.add(new MethodSymbol().setThisType(constructable).setName('getComponent'));
-      const playerConstructable = new ConstructableSymbol();
-      playerConstructable
-         .setName('Player')
+         .prototypeFields.add(new MethodSymbol().setThisType(EntitySymbol).setName('getComponent'));
+
+      const PlayerSymbol = new ConstructableSymbol();
+      PlayerSymbol.setName('Player')
          .setIsConstructable(true)
          .setParams(new ParamsValidator([]))
-         .setParent(constructable);
+         .setParent(EntitySymbol);
 
-      moduleSymbol.addSymbol(constructable, true);
-      moduleSymbol.addSymbol(playerConstructable, true);
+      moduleSymbol.addSymbol(EntitySymbol, true);
+      moduleSymbol.addSymbol(PlayerSymbol, true);
    });
 
    test('Compile module', () => {
