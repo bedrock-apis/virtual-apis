@@ -14,6 +14,6 @@
       "skipLibCheck": true,
       "noImplicitOverride": true
    },
-   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts"],
+   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts", "packages/va-image-loader"],
    "exclude": ["**/bin/**/*", "**/dist/**/*"]
 }

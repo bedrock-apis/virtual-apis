@@ -1,4 +1,3 @@
-import { MetadataFunctionArgumentDetailsDefinition } from '@bedrock-apis/types';
 import { GeneralMetadata } from './metadata';
 import { BinaryTypeStruct } from './types';
 

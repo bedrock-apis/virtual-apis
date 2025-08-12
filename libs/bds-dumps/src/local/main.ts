@@ -9,6 +9,8 @@ import { setupScriptAPI } from './setup-script-api';
 
 await makeReady();
 await setupScriptAPI();
+
+// This part should be also moved to separated method to avoid additional main.ts complexity, basically be more deterministic
 const server = new HTTPServer(() => {
    if (child.exitCode === null) child.stdin.write('stop\n');
    setTimeout(() => child.kill(), 5_000).unref();

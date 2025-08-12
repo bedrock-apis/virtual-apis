@@ -3,4 +3,4 @@ import { BinaryImageSerializerIOV1 } from './v1-io';
 export * from './base-format-io';
 export * from './v1-io';
 
-BaseBinaryIOImageSerializer.current = BinaryImageSerializerIOV1;
+export const CurrentImageSerializer = (BaseBinaryIOImageSerializer.current = BinaryImageSerializerIOV1);

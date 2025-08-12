@@ -7,7 +7,7 @@ import { IMAGE_GENERAL_DATA_MAGIC } from '../constants';
 const FAKE_CONSTRUCTOR = function () {};
 export class BaseBinaryIOImageSerializer {
    protected constructor() {}
-   public static current = BaseBinaryIOImageSerializer;
+   public static current: typeof BaseBinaryIOImageSerializer = BaseBinaryIOImageSerializer;
    public static readonly version: number = 0;
    public static readonly isDeprecated: boolean = true;
    protected static getBase<T>(this: T): T | null {
@@ -17,11 +17,10 @@ export class BaseBinaryIOImageSerializer {
 
    public static write(data: SerializableMetadata) {
       const buffer = DataCursorView.alloc(2 ** 16 * 10); // 196608 bytes -> 192 kb
-      const format = BaseBinaryIOImageSerializer.current;
-      data.version = format.version;
+      data.version = this.version;
 
       const io = new SafeBinaryIOWriter(buffer, data as object) as unknown as BinaryIO<SerializableMetadata>;
-      format.baseMarshal(io);
+      this.baseMarshal(io);
 
       return io.data.getBuffer();
    }
@@ -29,9 +28,8 @@ export class BaseBinaryIOImageSerializer {
    public static read(source: Uint8Array<ArrayBufferLike>) {
       const buffer = new DataCursorView(source);
       buffer.pointer = 0;
-      const format = BaseBinaryIOImageSerializer.current;
       const io = new BinaryIOReader(buffer, {}) as unknown as BinaryIO<SerializableMetadata>;
-      format.baseMarshal(io);
+      this.baseMarshal(io);
       return io.storage;
    }
 
@@ -54,7 +52,7 @@ export class BaseBinaryIOImageSerializer {
 
       const format = this.getBinaryImageSerializerFor(io.storage.version ?? -1);
       if (!format) {
-         throw new ReferenceError(`Unsupported format version ${io.storage.version}. Latest ${this.current.version}`);
+         throw new ReferenceError(`Unsupported format version ${io.storage.version}.`);
       }
 
       format.marshal(io);

@@ -1,4 +1,4 @@
-import { BaseBinaryIOImageSerializer, BinaryIOReader } from '@bedrock-apis/binary';
+import { BinaryIOReader, CurrentImageSerializer } from '@bedrock-apis/binary';
 import { MODULES_DIR } from '@bedrock-apis/common';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -14,11 +14,11 @@ export async function main(metadataProvider: IMetadataProvider): Promise<number>
 
    writeFileSync('original.json', JSON.stringify(data, null, 2));
 
-   const buffer = BaseBinaryIOImageSerializer.write(data);
+   const buffer = CurrentImageSerializer.write(data);
 
    writeFileSync(path.join(MODULES_DIR, 'image.bin'), buffer);
 
-   const read = BaseBinaryIOImageSerializer.read(buffer);
+   const read = CurrentImageSerializer.read(buffer);
    read.modules.forEach(e => BinaryIOReader.readEncapsulatedData(e));
 
    writeFileSync('write.json', JSON.stringify(read, null, 2));
