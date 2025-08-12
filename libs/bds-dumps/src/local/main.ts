@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { chmod } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { platform, stdout } from 'node:process';
+import { exit, platform, stdout } from 'node:process';
 import { EXPECTED_SOURCE } from './constants';
 import { makeReady } from './make-ready';
 import { HTTPServer } from './serve';
@@ -18,9 +18,13 @@ if (platform !== 'win32') {
    await chmod(EXPECTED_SOURCE, 0o755);
 }
 const child = spawn(EXPECTED_SOURCE, ['Editor=true'], {
-   timeout: 100_000,
+   timeout: 60_000 * 3, //3mins in total
    detached: false,
    cwd: dirname(EXPECTED_SOURCE),
 });
 child.on('exit', () => console.log('END'));
+setTimeout(() => {
+   console.error('Fatal Timeout: process keep running, leak');
+   exit(-1);
+}, 60_000 * 5); //hard limit - 5mins
 child.stdout.pipe(stdout);

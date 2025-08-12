@@ -5,12 +5,13 @@ import { dirname, resolve } from 'node:path';
 import { env, platform } from 'node:process';
 import { Readable } from 'node:stream';
 import { UnzipStreamConsumer } from 'unzip-web-stream';
-import { CACHE_DUMP_DIR, CACHE_EXECUTABLE_DIR, EXPECTED_SOURCE } from './constants';
+import { CACHE_DUMP_DIR, CACHE_EXECUTABLE_DIR, CACHE_OUTPUT_DIR, EXPECTED_SOURCE } from './constants';
 
 export async function makeReady(): Promise<void> {
    if (env.REMOVE_CACHE) {
       if (existsSync(CACHE_DUMP_DIR)) await rm(CACHE_DUMP_DIR, { recursive: true, force: true });
    }
+   if (existsSync(CACHE_OUTPUT_DIR)) await rm(CACHE_OUTPUT_DIR, { recursive: true, force: true });
 
    // Ensure
    if (!existsSync(CACHE_EXECUTABLE_DIR)) await mkdir(CACHE_EXECUTABLE_DIR, { recursive: true });
