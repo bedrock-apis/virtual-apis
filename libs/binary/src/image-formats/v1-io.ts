@@ -85,8 +85,8 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
    }
 
    protected static symbol(io: BinaryIO<BinarySymbolStruct>): void {
-      io.index('name');
       io.uint32('bitFlags');
+      io.index('name');
 
       if (io.storage.bitFlags === 0) return;
 

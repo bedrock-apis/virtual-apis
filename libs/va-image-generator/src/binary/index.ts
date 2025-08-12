@@ -9,8 +9,8 @@ export async function main(metadataProvider: IMetadataProvider): Promise<number>
    const startupTime = performance.now();
    const data = await new MetadataToSerializableTransformer().transform(metadataProvider);
 
-   // @ts-expect-error for testing
-   data.modules = [data.modules[0]];
+   // // @ts-expect-error for testing
+   // data.modules = [data.modules[0]];
 
    writeFileSync('original.json', JSON.stringify(data, null, 2));
 
