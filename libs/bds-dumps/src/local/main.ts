@@ -12,6 +12,7 @@ await setupScriptAPI();
 const server = new HTTPServer(() => {
    if (child.exitCode === null) child.stdin.write('stop\n');
    setTimeout(() => child.kill(), 5_000).unref();
+   server.server.close();
 });
 server.server.unref();
 if (platform !== 'win32') {
@@ -26,5 +27,5 @@ child.on('exit', () => console.log('END'));
 setTimeout(() => {
    console.error('Fatal Timeout: process keep running, leak');
    exit(-1);
-}, 60_000 * 5); //hard limit - 5mins
+}, 60_000 * 5).unref(); //hard limit - 5mins
 child.stdout.pipe(stdout);
