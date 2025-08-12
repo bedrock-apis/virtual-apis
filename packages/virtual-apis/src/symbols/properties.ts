@@ -44,7 +44,7 @@ export class PropertySetterSymbol
          enumerable: false,
          writable: true,
       };
-      descriptor.set = this.getRuntimeValue(context);
+      descriptor.set = this.getRuntimeValue(context)!;
       Reflect.defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {
@@ -95,7 +95,7 @@ export class PropertyGetterSymbol
          enumerable: false,
          writable: true,
       };
-      descriptor.get = this.getRuntimeValue(context);
+      descriptor.get = this.getRuntimeValue(context)!;
       Reflect.defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {

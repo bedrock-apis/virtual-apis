@@ -60,7 +60,7 @@ export class BaseBinaryIOImageSerializer {
       format.marshal(io);
    }
 
-   protected static marshal(io: BinaryIO<SerializableMetadata>) {
+   protected static marshal(_: BinaryIO<SerializableMetadata>) {
       throw new Error('Not implemented, use base class');
    }
 }

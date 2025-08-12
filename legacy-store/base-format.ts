@@ -1,8 +1,9 @@
-import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary/src/binary';
-import { DataCursorView } from '@bedrock-apis/binary/src/binary/data-cursor-view';
-import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '@bedrock-apis/binary/src/constants';
-import { GeneralMetadata, ImageHeader, ImageModuleData, ModuleMetadata } from '@bedrock-apis/binary/src/types';
-import { BinaryFieldDataType } from '@bedrock-apis/binary/src/types/data-type';
+// @ts-nocheck
+import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary';
+import { DataCursorView } from '@bedrock-apis/binary';
+import { IMAGE_GENERAL_DATA_MAGIC, IMAGE_MODULE_HEADER_MAGIC } from '@bedrock-apis/binary';
+import { GeneralMetadata, ImageHeader, ImageModuleData, ModuleMetadata } from '@bedrock-apis/binary';
+import { BinaryFieldDataType } from '@bedrock-apis/binary';
 import { NBT_FORMAT_READER, NBT_FORMAT_WRITER, ReaderLike, WriterLike } from '@bedrock-apis/nbt';
 import { TagType } from '@bedrock-apis/nbt-core';
 

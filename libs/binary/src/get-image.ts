@@ -2,7 +2,7 @@ import { IndexedAccessor } from '@bedrock-apis/va-image-generator/src/binary/ind
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url from 'node:url';
-import { CurrentBinaryImageSerializer } from './image-formats';
+import { BaseBinaryIOImageSerializer } from './image-formats';
 import { ImageModuleData, ModuleMetadata } from './types';
 
 export class BinaryImageLoader {
@@ -51,8 +51,7 @@ export class BinaryImageLoader {
       const cached = this.PARSED_IMAGES.get(mcVersion);
       if (cached) return cached;
 
-      // @ts-expect-error Need to implement
-      const parsed = CurrentBinaryImageSerializer.SomehowRead(await this.getImage(mcVersion)) as PreparedImage;
+      const parsed = BaseBinaryIOImageSerializer.read(await this.getImage(mcVersion)) as unknown as PreparedImage;
       this.PARSED_IMAGES.set(mcVersion, parsed);
       return parsed;
    }

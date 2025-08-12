@@ -1,4 +1,3 @@
-import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { ModuleTypeMap, Plugin } from '@bedrock-apis/va-pluggable';
 
 class InventoryPlugin extends Plugin {
@@ -24,7 +23,7 @@ class InventoryPlugin extends Plugin {
    public container = this.implementWithStorage(
       'Container',
       'container',
-      () => new Kernel['globalThis::Map']<number, InstanceType<ModuleTypeMap['ItemStack']>>(),
+      () => new Map<number, InstanceType<ModuleTypeMap['ItemStack']>>(),
       {
          getItem(slot) {
             return this.STORAGE.get(slot);

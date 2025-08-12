@@ -1,4 +1,3 @@
-import { Kernel } from '@bedrock-apis/kernel-isolation';
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 
 interface Config {
@@ -12,7 +11,7 @@ export class EventsPlugin extends PluginWithConfig<Config> {
       warnIfEventIsNotImplemented: true,
    };
 
-   public events = new Kernel['globalThis::Map']<string, (...args: unknown[]) => unknown>();
+   public events = new Map<string, (...args: unknown[]) => unknown>();
 
    public trigger(event: string, ...args: unknown[]) {}
 }

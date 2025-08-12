@@ -431,4 +431,5 @@ export const STRING_TYPE_TO_BITS_MAP = {
    this: TypeBitFlagsU16.This,
    iterator: TypeBitFlagsU16.Iterator,
    unknown: TypeBitFlagsU16.Unknown,
+   Error: TypeBitFlagsU16.Error
 };

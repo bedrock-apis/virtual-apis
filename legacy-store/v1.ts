@@ -1,10 +1,10 @@
 //@ts-nocheck
-import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary/src/binary';
-import { DataCursorView } from '@bedrock-apis/binary/src/binary/data-cursor-view';
-import { BinaryIO, PickMatch } from '@bedrock-apis/binary/src/binary/io';
-import { BaseBinaryImageSerializer } from '@bedrock-apis/binary/src/image-formats/base-format';
-import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '@bedrock-apis/binary/src/types';
-import { BinaryTypeStruct, TypeBitFlagsU16 } from '@bedrock-apis/binary/src/types/types';
+import { BinaryReader, BinaryWriter } from '@bedrock-apis/binary';
+import { DataCursorView } from '@bedrock-apis/binary';
+import { BinaryIO, PickMatch } from '@bedrock-apis/binary';
+import { BaseBinaryImageSerializer } from '@bedrock-apis/binary';
+import { BinarySymbolStruct, ImageModuleData, IndexId, SymbolBitFlags } from '@bedrock-apis/binary';
+import { BinaryTypeStruct, TypeBitFlagsU16 } from '@bedrock-apis/binary';
 import { BitFlags } from '@bedrock-apis/common';
 import { TagType } from '@bedrock-apis/nbt-core';
 

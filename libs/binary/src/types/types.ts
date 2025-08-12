@@ -54,6 +54,7 @@ export enum TypeBitFlagsU16 {
    Boolean = 3,
    String = 4,
    CallBack = 5,
+   Error = 6,
 
    Optional = HasSingleParamBit | Undefined,
    Array = HasSingleParamBit | 2,

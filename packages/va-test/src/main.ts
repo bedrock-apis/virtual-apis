@@ -2,10 +2,10 @@
 
 import { Context } from '@bedrock-apis/virtual-apis';
 
-Context.configure({
-   GetterRequireValidBound: true,
-   StrictReturnTypes: false,
-});
+// Context.configure({
+//   GetterRequireValidBound: true,
+//   StrictReturnTypes: false,
+//});
 
 import '@bedrock-apis/core-plugin';
 
