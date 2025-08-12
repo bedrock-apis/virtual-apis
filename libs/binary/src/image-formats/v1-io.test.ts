@@ -1,10 +1,9 @@
-import { MetadataType } from '@bedrock-apis/types';
+import { MetadataType, MetadataTypeName } from '@bedrock-apis/types';
 import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
 import { describe, expect, it } from 'vitest';
 import {
    BinaryImageSerializerIOV1,
    BinaryIOReader,
-   BinaryIOWriter,
    BinaryTypeStruct,
    DataCursorView,
    SafeBinaryIOWriter,
@@ -20,7 +19,14 @@ describe('io test', () => {
       static testType = this.type;
    }
 
-   type DeepPartial<T> = T extends Record<string, unknown> ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
+   type DeepPartial<T> =
+      T extends Record<string, unknown>
+         ? { [K in keyof T]?: DeepPartial<T[K]> }
+         : T extends (infer A)[]
+           ? DeepPartial<A>[]
+           : T extends MetadataTypeName
+             ? string
+             : T;
 
    function testType(m: DeepPartial<MetadataType>) {
       const s = new TestSerializer().testTransformType(m as unknown as MetadataType);
@@ -30,7 +36,7 @@ describe('io test', () => {
       ) as unknown as BinaryIO<BinaryTypeStruct>;
       TestIOSerializer.testType(write);
 
-    write.data.pointer = 0
+      write.data.pointer = 0;
       const read = new BinaryIOReader(write.data, {}) as unknown as BinaryIO<BinaryTypeStruct>;
       TestIOSerializer.testType(read);
 
@@ -59,6 +65,59 @@ describe('io test', () => {
             },
          },
       });
+
+      expect(a.actual).toEqual(a.expected);
+   });
+
+   it('should serialize error', () => {
+      const a = testType({
+         is_bind_type: false,
+         is_errorable: false,
+         name: 'Error',
+      });
+
+      expect(a.actual).toEqual(a.expected);
+   });
+
+   it('should serialize error types', () => {
+      const a = testType({
+         error_types: [
+            {
+               from_module: {
+                  name: '@minecraft/common',
+                  uuid: '77ec12b4-1b2b-4c98-8d34-d1cd63f849d5',
+                  version: '1.1.0',
+               },
+               is_bind_type: true,
+               is_errorable: false,
+               name: 'EngineError',
+            },
+            {
+               is_bind_type: false,
+               is_errorable: false,
+               name: 'Error',
+            },
+            {
+               from_module: {
+                  name: '@minecraft/common',
+                  uuid: '77ec12b4-1b2b-4c98-8d34-d1cd63f849d5',
+                  version: '1.1.0',
+               },
+               is_bind_type: true,
+               is_errorable: false,
+               name: 'InvalidArgumentError',
+            },
+            {
+               is_bind_type: true,
+               is_errorable: false,
+               name: 'NamespaceNameError',
+            },
+         ],
+         is_bind_type: true,
+         is_errorable: true,
+         name: 'AimAssistPreset',
+      });
+
       expect(a.actual).toEqual(a.expected);
    });
 });

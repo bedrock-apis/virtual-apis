@@ -34,7 +34,7 @@ export type MetadataTypeName =
    | 'undefined'
    | 'this'
    | 'iterator'
-   | 'unknown';
+   | 'unknown' | "Error";
 export type MetadataTypeErrorable = { error_types: MetadataType[] };
 export type MetadataTypeBindable = { from_module: MetadataModuleBaseDefinition };
 export type MetadataTypeNumber = { valid_range: Range<number, number> };
