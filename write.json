@@ -3654,6 +3654,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1219
+        ],
         "bindTypeNameId": 169
       },
       {
@@ -3691,10 +3694,12 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 169
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1452,
         "fromModuleInfo": {
           "nameId": 73,
@@ -3774,6 +3779,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 2838,
         "fromModuleInfo": {
           "nameId": 73,
@@ -3798,6 +3804,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 2289,
         "fromModuleInfo": {
           "nameId": 73,
@@ -3874,6 +3881,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 180
       },
       {
@@ -3979,6 +3987,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 141
       },
       {
@@ -4041,6 +4050,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -4053,10 +4063,12 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 435
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 443
       },
       {
@@ -4065,6 +4077,7 @@
       },
       {
         "flags": 20993,
+        "errorTypes": [],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -4228,6 +4241,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 453
       },
       {
@@ -4498,6 +4512,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 172
       },
       {
@@ -4510,6 +4525,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1956,
         "fromModuleInfo": {
           "nameId": 73,
@@ -4518,6 +4534,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 171
       },
       {
@@ -4577,6 +4594,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 122
       },
       {
@@ -4737,6 +4755,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 2792,
         "fromModuleInfo": {
           "nameId": 73,
@@ -4884,6 +4903,7 @@
       },
       {
         "flags": 20483,
+        "errorTypes": [],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -4905,6 +4925,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 195
       },
       {
@@ -4929,6 +4950,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 198
       },
       {
@@ -4953,6 +4975,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 200
       },
       {
@@ -4965,6 +4988,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 201
       },
       {
@@ -4977,6 +5001,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 202
       },
       {
@@ -4989,6 +5014,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 204
       },
       {
@@ -5026,6 +5052,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 205
       },
       {
@@ -5038,6 +5065,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 211
       },
       {
@@ -5050,6 +5078,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 212
       },
       {
@@ -5085,6 +5114,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 213
       },
       {
@@ -5103,6 +5133,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 197
       },
       {
@@ -5136,6 +5167,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1249
+        ],
         "bindTypeNameId": 214
       },
       {
@@ -5168,6 +5202,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1250
+        ],
         "bindTypeNameId": 131
       },
       {
@@ -5176,6 +5213,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1250
+        ],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5198,6 +5238,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1250
+        ],
         "bindTypeNameId": 196
       },
       {
@@ -5230,6 +5273,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1250
+        ],
         "bindTypeNameId": 2671,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5297,6 +5343,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1250,
+          1249
+        ],
         "bindTypeNameId": 123
       },
       {
@@ -5455,6 +5505,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 196
       },
       {
@@ -5477,6 +5528,9 @@
       },
       {
         "flags": 20611,
+        "errorTypes": [
+          1253
+        ],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -5492,6 +5546,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 214
       },
       {
@@ -5622,6 +5677,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1258
+        ],
         "bindTypeNameId": 876
       },
       {
@@ -5662,6 +5721,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 875
       },
       {
@@ -5679,6 +5739,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1980,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5783,6 +5844,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 243,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5795,6 +5859,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1345,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5807,6 +5874,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 873
       },
       {
@@ -5837,6 +5907,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5849,6 +5922,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1423,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5877,6 +5953,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 397,
         "fromModuleInfo": {
           "nameId": 73,
@@ -5897,6 +5976,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 870
       },
       {
@@ -5958,6 +6040,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6023,6 +6106,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1980,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6109,6 +6193,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 243,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6121,6 +6208,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1345,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6133,6 +6223,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6145,6 +6238,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1423,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6173,6 +6269,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 397,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6231,6 +6330,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6296,6 +6396,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 1980,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6382,6 +6483,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 243,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6394,6 +6498,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1345,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6406,6 +6513,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1399,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6418,6 +6528,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 1423,
         "fromModuleInfo": {
           "nameId": 73,
@@ -6446,6 +6559,9 @@
       },
       {
         "flags": 37504,
+        "errorTypes": [
+          1260
+        ],
         "bindTypeNameId": 397,
         "fromModuleInfo": {
           "nameId": 73,
@@ -7631,6 +7747,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1345
       },
       {
@@ -7740,6 +7857,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1399
       },
       {
@@ -7752,6 +7870,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1306,
+          1307
+        ],
         "bindTypeNameId": 1363
       },
       {
@@ -7791,6 +7913,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1363
       },
       {
@@ -8229,6 +8352,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1422
       },
       {
@@ -8424,6 +8548,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1458
       },
       {
@@ -8505,6 +8630,9 @@
       },
       {
         "flags": 20611,
+        "errorTypes": [
+          1330
+        ],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -8605,6 +8733,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1330
+        ],
         "bindTypeNameId": 1564
       },
       {
@@ -8704,6 +8836,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1340
+        ],
         "bindTypeNameId": 1344
       },
       {
@@ -8723,6 +8858,11 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1251,
+          1306,
+          1307
+        ],
         "bindTypeNameId": 397
       },
       {
@@ -8735,6 +8875,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1306,
+          1307
+        ],
         "bindTypeNameId": 397
       },
       {
@@ -8747,6 +8891,7 @@
       },
       {
         "flags": 37376,
+        "errorTypes": [],
         "bindTypeNameId": 7,
         "fromModuleInfo": {
           "nameId": 0,
@@ -9001,6 +9146,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1980
       },
       {
@@ -9061,6 +9207,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1340,
+          1310
+        ],
         "bindTypeNameId": 1344
       },
       {
@@ -9110,6 +9260,7 @@
       },
       {
         "flags": 20485,
+        "errorTypes": [],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -9369,6 +9520,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1555
       },
       {
@@ -10045,6 +10197,7 @@
       },
       {
         "flags": 20995,
+        "errorTypes": [],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -10099,10 +10252,12 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1455
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1614
       },
       {
@@ -10434,6 +10589,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1612
       },
       {
@@ -10705,6 +10861,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1354
+        ],
         "bindTypeNameId": 1399
       },
       {
@@ -10729,6 +10888,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1258
+        ],
         "bindTypeNameId": 1617
       },
       {
@@ -11004,6 +11167,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1306,
+          1307
+        ],
         "bindTypeNameId": 1452
       },
       {
@@ -11051,6 +11218,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2271
       },
       {
@@ -11075,6 +11243,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2268
       },
       {
@@ -11124,6 +11293,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 397
       },
       {
@@ -11318,6 +11488,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1362
       },
       {
@@ -11451,6 +11622,11 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1258,
+          1354
+        ],
         "bindTypeNameId": 1617
       },
       {
@@ -11508,6 +11684,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1258
+        ],
         "bindTypeNameId": 1617
       },
       {
@@ -11971,6 +12150,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2527
       },
       {
@@ -12418,6 +12598,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1431
       },
       {
@@ -12498,6 +12679,11 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1251,
+          1405
+        ],
         "bindTypeNameId": 2289
       },
       {
@@ -12509,6 +12695,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1251,
+          1405
+        ],
         "bindTypeNameId": 2289
       },
       {
@@ -12517,6 +12707,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2705
       },
       {
@@ -12541,6 +12732,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1310
+        ],
         "bindTypeNameId": 2736
       },
       {
@@ -12549,6 +12744,7 @@
       },
       {
         "flags": 20481,
+        "errorTypes": [],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -12642,6 +12838,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1310
+        ],
         "bindTypeNameId": 2767
       },
       {
@@ -12650,6 +12850,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1310
+        ],
         "bindTypeNameId": 1980
       },
       {
@@ -12771,6 +12974,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1411
+        ],
         "bindTypeNameId": 2792
       },
       {
@@ -13421,6 +13627,12 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1251,
+          1258,
+          1409
+        ],
         "bindTypeNameId": 2823
       },
       {
@@ -13452,6 +13664,12 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1257,
+          1251,
+          1258,
+          1409
+        ],
         "bindTypeNameId": 2825
       },
       {
@@ -13528,6 +13746,10 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1306,
+          1307
+        ],
         "bindTypeNameId": 1956
       },
       {
@@ -13596,6 +13818,7 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2821
       },
       {
@@ -13618,10 +13841,12 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 1956
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2792
       },
       {
@@ -13729,6 +13954,9 @@
       },
       {
         "flags": 20611,
+        "errorTypes": [
+          1438
+        ],
         "numberRange": {
           "min": -2147483648,
           "max": 2147483647
@@ -13942,6 +14170,12 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1251,
+          1258,
+          1306,
+          1307
+        ],
         "bindTypeNameId": 397
       },
       {
@@ -13997,6 +14231,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1310
+        ],
         "bindTypeNameId": 397
       },
       {
@@ -14005,6 +14242,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1310
+        ],
         "bindTypeNameId": 1457
       },
       {
@@ -14074,14 +14314,17 @@
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2854
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2855
       },
       {
         "flags": 36864,
+        "errorTypes": [],
         "bindTypeNameId": 2856
       },
       {
@@ -14116,6 +14359,9 @@
       },
       {
         "flags": 36992,
+        "errorTypes": [
+          1310
+        ],
         "bindTypeNameId": 2820
       },
       {

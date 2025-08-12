@@ -69,18 +69,18 @@ describe('io test', () => {
       expect(a.actual).toEqual(a.expected);
    });
 
-   it('should serialize error', () => {
-      const a = testType({
+   it.each([
+      {
          is_bind_type: false,
          is_errorable: false,
          name: 'Error',
-      });
-
-      expect(a.actual).toEqual(a.expected);
-   });
-
-   it('should serialize error types', () => {
-      const a = testType({
+      },
+      {
+         is_bind_type: false,
+         is_errorable: true,
+         name: 'undefined',
+      },
+      {
          error_types: [
             {
                from_module: {
@@ -116,8 +116,9 @@ describe('io test', () => {
          is_bind_type: true,
          is_errorable: true,
          name: 'AimAssistPreset',
-      });
-
+      },
+   ])('aaaa', e => {
+      const a = testType(e);
       expect(a.actual).toEqual(a.expected);
    });
 });

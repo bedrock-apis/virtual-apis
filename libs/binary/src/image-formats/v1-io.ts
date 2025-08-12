@@ -57,6 +57,9 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
    protected static type(io: BinaryIO<BinaryTypeStruct>): void {
       io.uint16('flags');
 
+      // No return because combines with other extended refs
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsErrorable)) io.uint16Array8('errorTypes');
+
       // If Bind Type Ref
       if (AllOf(io.storage.flags, TypeBitFlagsU16.IsBindType)) {
          io.index('bindTypeNameId');
@@ -71,8 +74,6 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
          return;
       }
 
-      // No return because combines with other extended refs
-      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsErrorable)) io.uint16Array8('errorTypes');
 
       // Type with types
       if (AllOf(io.storage.flags, TypeBitFlagsU16.HasSingleParamBit)) {
