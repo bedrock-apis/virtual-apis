@@ -1,10 +1,13 @@
+import { existsSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createServer, Server } from 'node:http';
+import { dirname, resolve } from 'node:path';
+import { CACHE_OUTPUT_DIR } from './constants';
 
 export class HTTPServer {
    public readonly server: Server;
-   public constructor() {
+   public constructor(public readonly onStop: () => void) {
       this.server = createServer(async (req, resp) => {
-         console.log(req.url, req.headers);
          const response = new Response(ReadableStream.from(req.iterator()), {
             headers: req.headers as unknown as Headers,
          });
@@ -25,9 +28,24 @@ export class HTTPServer {
       this.server.listen(29132);
    }
    public async handle(response: Response, url: string): Promise<Response> {
-      console.log(await response.json());
-      if (url.match(/\/report\/[^/]/)) {
-         console.log('File name: ' + url);
+      console.log(url);
+      const mainSwitch: string = url.match(/\/([^/]+)\//)?.[1] ?? '';
+      console.log(url, 'switch: ' + mainSwitch);
+      switch (mainSwitch) {
+         case 'report': {
+            const filePath = resolve(CACHE_OUTPUT_DIR, '.' + url);
+            const dirName = dirname(filePath);
+            if (!existsSync(dirName)) await mkdir(dirName, { recursive: true });
+            await writeFile(filePath, await response.text());
+            break;
+         }
+         case 'exit':
+            console.log('Exited');
+            this.onStop();
+            break;
+         default:
+            console.log(await response.text());
+            return Response.json({ ok: false }, { status: 400 });
       }
 
       return Response.json({ ok: true });

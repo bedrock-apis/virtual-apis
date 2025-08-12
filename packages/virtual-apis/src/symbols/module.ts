@@ -7,7 +7,8 @@ export class ModuleSymbol extends CompilableSymbol<object> {
    public readonly symbols: Set<CompilableSymbol<unknown>> = new Set();
    public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();
    protected override compile(context: Context): object {
-      //Pre compile, for correct order
+      // Pre compile, for correct order
+      // For example interface is not exported value so its not considered as public symbol
       for (const symbol of this.symbols.values()) symbol.getRuntimeValue(context);
 
       const moduleObject = create(null);
