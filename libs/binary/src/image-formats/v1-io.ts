@@ -58,7 +58,7 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
       io.uint16('flags');
 
       // No return because combines with other extended refs
-      if (AllOf(io.storage.flags, TypeBitFlagsU16.IsErrorable)) io.uint16Array8('errorTypes');
+      if (AllOf(io.storage.flags, TypeBitFlagsU16.HasErrorableExtraData)) io.uint16Array8('errorTypes');
 
       // If Bind Type Ref
       if (AllOf(io.storage.flags, TypeBitFlagsU16.IsBindType)) {
