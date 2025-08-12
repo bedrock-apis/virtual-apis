@@ -12,7 +12,7 @@ export function resolveDependencies<T>(dependables: Dependable<T>[]): T[] {
       if (resolvedDependables.has(dependable)) return;
       if (visitedDependables.has(dependable)) {
          throw new Error(
-            `Circulal dependency detected! ${parents
+            `Circular dependency detected! ${parents
                .map(e => e.id)
                .concat(dependable.id)
                .join(' -> ')}`,

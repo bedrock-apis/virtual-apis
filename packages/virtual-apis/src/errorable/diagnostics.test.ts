@@ -43,20 +43,20 @@ describe('Report', () => {
 
       expect(getAndNormalizeStack(() => report.throw())).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/packages/virtual-apis/src/diagnostics/diagnostics.test
-            at getAndNormalizeStack (cwd/packages/virtual-apis/src/diagnostics/diagnostics.test)
-            at cwd/packages/virtual-apis/src/diagnostics/diagnostics.test
+            at cwd/packages/virtual-apis/src/errorable/diagnostics.test
+            at getAndNormalizeStack (cwd/packages/virtual-apis/src/errorable/diagnostics.test)
+            at cwd/packages/virtual-apis/src/errorable/diagnostics.test
             at new Promise (<anonymous>)"
       `);
       expect(getAndNormalizeStack(() => report.throw(1))).toMatchInlineSnapshot(`
         "Error: Message
-            at getAndNormalizeStack (cwd/packages/virtual-apis/src/diagnostics/diagnostics.test)
-            at cwd/packages/virtual-apis/src/diagnostics/diagnostics.test
+            at getAndNormalizeStack (cwd/packages/virtual-apis/src/errorable/diagnostics.test)
+            at cwd/packages/virtual-apis/src/errorable/diagnostics.test
             at new Promise (<anonymous>)"
       `);
       expect(getAndNormalizeStack(() => report.throw(2))).toMatchInlineSnapshot(`
         "Error: Message
-            at cwd/packages/virtual-apis/src/diagnostics/diagnostics.test
+            at cwd/packages/virtual-apis/src/errorable/diagnostics.test
             at new Promise (<anonymous>)"
       `);
    });
