@@ -20,6 +20,12 @@ export type Filter<T extends object, Filter> = {
 type ArrayIO<T, K> = K extends keyof T ? (T[K] extends object[] ? (io: BinaryIO<T[K][number]>) => void : never) : never;
 
 export const readEncapsulatedDataSymbol = Symbol();
+export interface MarshalSerializable<T extends object> {
+   marshal(io: BinaryIO<T>): T;
+}
+export interface MarshalSerializableType<T extends MarshalSerializable<T>> {
+   create(): T;
+}
 
 export abstract class BinaryIO<T extends object> {
    public constructor(
@@ -127,6 +133,9 @@ export abstract class BinaryIO<T extends object> {
       (this.storage[key] as []) ??= [];
       return this.string8Array(key, this.getLengthUint32(key));
    }
-
+   public abstract marshal<S extends MarshalSerializable<S>>(
+      key: keyof Filter<T, S>,
+      type: MarshalSerializableType<S>,
+   ): this;
    public abstract encapsulate16(io: () => void): this;
 }

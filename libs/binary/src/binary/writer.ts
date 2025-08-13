@@ -1,7 +1,7 @@
 import { TagType } from '@bedrock-apis/nbt-core';
 import { TextEncoder } from 'node:util';
 import { DataCursorView } from './data-cursor-view';
-import { BinaryIO } from './io';
+import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType } from './io';
 
 const utf8Encoder = new TextEncoder();
 
@@ -78,6 +78,14 @@ export class BinaryWriter {
 type WriteKey = string;
 
 export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, unknown>>> {
+   public override marshal<S extends MarshalSerializable<S>>(
+      key: keyof Filter<object & Partial<Record<string, unknown>>, S>,
+      type: MarshalSerializableType<S>,
+   ): this {
+      const marshallable = this.storage[key] as S;
+      marshallable.marshal(new BinaryIOWriter(this.data, marshallable as object) as unknown as BinaryIO<S>);
+      return this;
+   }
    public override write = true;
 
    protected override getLengthUint8(key: string): number {

@@ -1,7 +1,7 @@
 import { TagType } from '@bedrock-apis/nbt-core';
 import { TextDecoder } from 'node:util';
 import { DataCursorView } from './data-cursor-view';
-import { BinaryIO, readEncapsulatedDataSymbol } from './io';
+import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType, readEncapsulatedDataSymbol } from './io';
 
 const utf8Decoder = new TextDecoder();
 
@@ -110,6 +110,14 @@ export class BinaryReader {
 type ReaderKey = string;
 
 export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
+   public override marshal<S extends MarshalSerializable<S>>(
+      key: keyof Filter<object & Partial<Record<string, unknown>>, S>,
+      type: MarshalSerializableType<S>,
+   ): this {
+      const v = (this.storage[key] = type.create());
+      v.marshal(new BinaryIOReader(this.data, v as Record<ReaderKey, unknown>) as unknown as BinaryIO<S>);
+      return this;
+   }
    // Get length methods here act as read too
 
    protected override getLengthUint8 = this.readUint8;
