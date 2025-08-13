@@ -1,4 +1,4 @@
-import { Block, Entity, Vector3 } from '@minecraft/server';
+import type { Block, Entity, Vector3 } from '@minecraft/server';
 
 export abstract class TestEnvironment {
    public abstract onSetup(): Promise<void>;
