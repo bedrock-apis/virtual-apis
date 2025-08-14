@@ -25,10 +25,10 @@ export class BinaryImageLoader {
          stringSlices: new IndexedAccessor(stringSlices),
          typeSlices: new IndexedAccessor(types),
          modules: modules.map(_ => ({
-            metadata: _.metadata,
+            metadata: _.metadata as Required<ModuleMetadata>,
             read: () => BinaryIO.readEncapsulatedData(_),
          })),
-      };
+      } satisfies PreparedImage;
    }
 }
 export class BinaryLoaderContext {
