@@ -17,13 +17,13 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public readonly parent: ConstructableSymbol | null = null;
    public readonly requireNew: boolean = true;
    public readonly isConstructable: boolean = false;
-   protected createHandle(info: InvocationInfo): object {
-      const handle = this.parent?.createHandle(info) ?? info.context.createNativeHandle();
+   public createHandleInternal(context: Context): object {
+      const handle = this.parent?.createHandleInternal(context) ?? context.createNativeHandle();
       this.handles.add(handle);
       return handle;
    }
    public override invoke(info: InvocationInfo): void {
-      info.result = this.createHandle(info);
+      info.result = this.createHandleInternal(info.context);
       super.invoke(info);
    }
    public override compile(context: Context): new (...params: unknown[]) => unknown {
