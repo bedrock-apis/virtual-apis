@@ -8,7 +8,6 @@ import {
 } from '@bedrock-apis/binary';
 import { IndexedAccessor } from '@bedrock-apis/common';
 import { ModuleSymbol } from '@bedrock-apis/virtual-apis';
-import { writeFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import { BinarySymbolLoader } from './symbol-loader';
 
@@ -53,7 +52,7 @@ export class BinaryImageLoader {
       const stringSlice = new IndexedAccessor(parsed.metadata.stringSlices);
       const typeSlice = new IndexedAccessor(parsed.metadata.types);
       const modules: PreparedImage['modules'] = parsed.modules.map(e => ({
-         metadata: e.metadata,
+         metadata: e.metadata as Required<ModuleMetadata>,
          read: () => BinaryIO.readEncapsulatedData(e),
       }));
 
