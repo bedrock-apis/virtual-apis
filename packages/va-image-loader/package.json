@@ -2,13 +2,6 @@
    "name": "@bedrock-apis/va-image-loader",
    "version": "0.0.1-alpha",
    "main": "./dist/main.js",
-   "type": "module",
    "types": "./src/main.ts",
-   "exports": [
-      {
-         "types": "./src/main.ts",
-         "default": "./dist/main.js",
-         "rolldown": null
-      }
-   ]
+   "type": "module"
 }

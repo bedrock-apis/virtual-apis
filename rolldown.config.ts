@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import type { RolldownOptions } from 'rolldown';
 import { devDependencies, workspaces } from './package.json' with { type: 'json' };
 
-const external = [new RegExp(`^(node:|${Object.keys(devDependencies).join('|')}|@bedrock-apis)`)];
+const external = [new RegExp(`^(node:|${Object.keys(devDependencies).join('|')}|@bedrock-apis|@minecraft)`)];
 const options: RolldownOptions[] = [];
 
 for (const workspace of workspaces) {

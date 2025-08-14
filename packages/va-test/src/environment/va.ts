@@ -1,5 +1,5 @@
 import { Block, Entity } from '@minecraft/server';
-import { TestEnvironment } from '../environment';
+import { TestEnvironment } from './environment';
 
 export class VirtualApiEnvironment extends TestEnvironment {
    public async onSetup() {
@@ -7,12 +7,12 @@ export class VirtualApiEnvironment extends TestEnvironment {
    }
 
    public spawnEntity(typeId: string): Entity {
-      // @ts-expect-error types mismatch
+      // @ts-expect-error types bypass
       return new Entity();
    }
 
    public placeBlock(typeId: string): Block {
-      // @ts-expect-error types mismatch
+      // @ts-expect-error types bypass
       return new Block();
    }
 }

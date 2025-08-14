@@ -1,5 +1,5 @@
 import { BlockPermutation } from '@minecraft/server';
-import { placeBlock } from '../environment';
+import { placeBlock } from '../environment/environment';
 import { TestSuite } from '../suite';
 
 TestSuite.withSetup('block', () => placeBlock('minecraft:stone'))

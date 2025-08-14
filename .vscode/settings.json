@@ -29,6 +29,6 @@
    "[json]": {
       "editor.defaultFormatter": "vscode.json-language-features"
    },
-   "cSpell.words": ["Errorable", "Rolldown", "toolbelt", "varuint"],
+   "cSpell.words": ["Errorable", "gametest", "overworld", "Rolldown", "tickingarea", "toolbelt", "varuint"],
    "editor.tabSize": 3
 }
