@@ -18,9 +18,7 @@ export interface SerializableModuleStats {
 }
 
 export interface SerializableModule extends WithEncapsulatedData {
-   id: string;
-   stats: SerializableModuleStats;
-   metadata: Required<ModuleMetadata>;
+   metadata: ModuleMetadata;
    data: ImageModuleData;
 }
 

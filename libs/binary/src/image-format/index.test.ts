@@ -1,46 +1,82 @@
-import { MetadataType, MetadataTypeName } from '@bedrock-apis/types';
+import { IndexedCollector } from '@bedrock-apis/common';
+import { MetadataType } from '@bedrock-apis/types';
 import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
+import { SystemFileMetadataProvider } from '@bedrock-apis/va-image-generator/src/metadata-provider';
 import { describe, expect, it } from 'vitest';
 import { BinaryIO } from '../binary/io';
-import { BinaryImageFormat, BinaryIOReader, BinaryTypeStruct, DataCursorView, SafeBinaryIOWriter } from '../main';
+import {
+   BinaryImageFormat,
+   BinaryIOReader,
+   BinarySymbolStruct,
+   DataCursorView,
+   SafeBinaryIOWriter,
+   SerializableMetadata,
+} from '../main';
+
+class TestSerializer extends MetadataToSerializableTransformer {
+   testTransformType = (m: MetadataType) => this.transformType(m, this.typeRef);
+}
+
+class TestBinaryImageFormat extends BinaryImageFormat {
+   static testType = this.type;
+
+   static testSymbol = this.symbol;
+
+   static testModuleData = this.moduleData;
+}
+
+const view = DataCursorView.alloc(1024 * 1024 * 1024);
+function testMarshal<T extends object>(expected: T, marshal: (m: BinaryIO<T>) => void) {
+   view.pointer = 0;
+   const write = new SafeBinaryIOWriter(view, expected) as unknown as BinaryIO<T>;
+   marshal(write);
+
+   write.data.pointer = 0;
+   const read = new BinaryIOReader(write.data, {}) as unknown as BinaryIO<T>;
+   marshal(read);
+
+   return { actual: read.storage, expected };
+}
+
+let cache: SerializableMetadata | undefined;
+
+async function getTestData() {
+   if (cache) return cache;
+   const provider = new SystemFileMetadataProvider('./bds-docs-stable/metadata/script_modules/');
+   cache = await new MetadataToSerializableTransformer().transform(provider);
+   return cache;
+}
 
 describe('io test', () => {
-   class TestSerializer extends MetadataToSerializableTransformer {
-      testTransformType = (m: MetadataType) => this.transformType(m, this.typeRef);
-   }
+   it('serialize symbols', { timeout: 5000 }, async () => {
+      const data = await getTestData();
+      const collector = new IndexedCollector<BinarySymbolStruct>(JSON.stringify);
+      for (const module of data.modules) for (const symbol of module.data.symbols) collector.getIndexFor(symbol);
+      const symbols = collector.getArrayAndLock();
 
-   class TestIOSerializer extends BinaryImageFormat {
-      static testType = this.type;
-   }
+      for (const symbol of symbols) {
+         const a = testMarshal(symbol, m => TestBinaryImageFormat.testSymbol(m));
+         expect(a.actual).toEqual((a.expected as unknown as { toJSON(): object }).toJSON());
+      }
+   });
 
-   type DeepPartial<T> =
-      T extends Record<string, unknown>
-         ? { [K in keyof T]?: DeepPartial<T[K]> }
-         : T extends (infer A)[]
-           ? DeepPartial<A>[]
-           : T extends MetadataTypeName
-             ? string
-             : T;
+   it('serialize module', { timeout: 5000 }, async () => {
+      const data = await getTestData();
+      data.modules = data.modules.slice(0, 10);
+      const reread = BinaryImageFormat.read(BinaryImageFormat.write(data));
+      const actual = { modules: reread.modules.map(e => BinaryIO.readEncapsulatedData(e)), metadata: reread.metadata };
+      const { modules, metadata } = data;
+      expect(actual).toEqual({
+         modules: modules.map(e => ({
+            ...e,
+            data: { ...e.data, symbols: e.data.symbols.map(e => (e as unknown as { toJSON(): object }).toJSON()) },
+         })),
+         metadata,
+      });
+   });
 
-   function testType(m: DeepPartial<MetadataType>) {
-      const s = new TestSerializer().testTransformType(m as unknown as MetadataType);
-      const write = new SafeBinaryIOWriter(
-         DataCursorView.alloc(1024 * 4),
-         s as object,
-      ) as unknown as BinaryIO<BinaryTypeStruct>;
-      TestIOSerializer.testType(write);
-
-      write.data.pointer = 0;
-      const read = new BinaryIOReader(write.data, {}) as unknown as BinaryIO<BinaryTypeStruct>;
-      TestIOSerializer.testType(read);
-
-      const actual = read.storage as BinaryTypeStruct;
-      const expected = s;
-      return { actual, expected };
-   }
-
-   it('should serialize and deserialize without problems', () => {
-      const a = testType({
+   it.each([
+      {
          is_bind_type: false,
          is_errorable: true,
          key_type: {
@@ -58,12 +94,7 @@ describe('io test', () => {
                min: -2147483648,
             },
          },
-      });
-
-      expect(a.actual).toEqual(a.expected);
-   });
-
-   it.each([
+      },
       {
          is_bind_type: false,
          is_errorable: false,
@@ -111,8 +142,9 @@ describe('io test', () => {
          is_errorable: true,
          name: 'AimAssistPreset',
       },
-   ])('aaaa', e => {
-      const a = testType(e);
+   ])('serialize types', e => {
+      const s = new TestSerializer().testTransformType(e as unknown as MetadataType);
+      const a = testMarshal(s, io => TestBinaryImageFormat.testType(io));
       expect(a.actual).toEqual(a.expected);
    });
 });

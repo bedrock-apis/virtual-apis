@@ -1,111 +1,10 @@
 import { TagType } from '@bedrock-apis/nbt-core';
 import { TextDecoder } from 'node:util';
-import { DataCursorView } from './data-cursor-view';
 import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType, readEncapsulatedDataSymbol } from './io';
 
 const utf8Decoder = new TextDecoder();
 
 // Use LE always
-export class BinaryReader {
-   public static getCheckPointUint16(_: DataCursorView): DataCursorView {
-      const size = BinaryReader.readUint16(_);
-      return _.peek(size);
-   }
-   public static getCheckPointUint32(_: DataCursorView): DataCursorView {
-      const size = BinaryReader.readUint16(_);
-      _.pointer += size;
-      return _.peek(size);
-   }
-   public static readCheckPointUint16<T>(_: DataCursorView, reader: (_: DataCursorView) => T): T {
-      const size = BinaryReader.readUint16(_);
-      return reader(_.peek(size));
-   }
-   public static readCheckPointUint32<T>(_: DataCursorView, reader: (_: DataCursorView) => T): T {
-      const size = BinaryReader.readUint32(_);
-      return reader(_.peek(size));
-   }
-   public static readUint8(dataProvider: DataCursorView): number {
-      return dataProvider.view.getUint8(dataProvider.pointer++);
-   }
-
-   public static readUint16(dataProvider: DataCursorView): number {
-      const value = dataProvider.view.getUint16(dataProvider.pointer, true);
-      dataProvider.pointer += 2;
-      return value;
-   }
-
-   // Memory efficient but not as fast, has to be benchamarked on real-world samples
-   public static readVarUint32(dataProvider: DataCursorView): number {
-      let current = dataProvider.buffer[dataProvider.pointer++] ?? 0;
-      let value = current;
-      let shift = 0;
-      let i = 0;
-      while (value & 0x80 && i++ < 5) {
-         current = dataProvider.buffer[dataProvider.pointer++] ?? 0;
-         value |= (current & 0x7f) << (shift += 7);
-      }
-      return value;
-   }
-
-   public static readUint32(dataProvider: DataCursorView): number {
-      const value = dataProvider.view.getUint32(dataProvider.pointer, true);
-      dataProvider.pointer += 4;
-      return value;
-   }
-   public static readFloat64(dataProvider: DataCursorView): number {
-      const value = dataProvider.view.getFloat64(dataProvider.pointer, true);
-      dataProvider.pointer += 8;
-      return value;
-   }
-
-   public static readBuffer(dataProvider: DataCursorView, length: number): Uint8Array {
-      return dataProvider.buffer.subarray(dataProvider.pointer, (dataProvider.pointer += length));
-   }
-
-   public static readStringWith(
-      lengthReader: (d: DataCursorView) => number,
-      decoder = utf8Decoder,
-      dataProvider: DataCursorView,
-   ): string {
-      const length = lengthReader(dataProvider);
-      const buffer = BinaryReader.readBuffer(dataProvider, length);
-      return decoder.decode(buffer);
-   }
-
-   public static readStringU8: (dataProvider: DataCursorView) => string = BinaryReader.readStringWith.bind(
-      BinaryReader,
-      BinaryReader.readUint8,
-      utf8Decoder,
-   );
-   public static readStringU16: (dataProvider: DataCursorView) => string = BinaryReader.readStringWith.bind(
-      BinaryReader,
-      BinaryReader.readUint16,
-      utf8Decoder,
-   );
-   public static readStringU32: (dataProvider: DataCursorView) => string = BinaryReader.readStringWith.bind(
-      BinaryReader,
-      BinaryReader.readUint32,
-      utf8Decoder,
-   );
-
-   public static readAfrrayBufferU16(dataProvider: DataCursorView): Uint8Array {
-      const length = BinaryReader.readUint16(dataProvider);
-      return BinaryReader.readBuffer(dataProvider, length);
-   }
-
-   public static readArrayBufferU32(dataProvider: DataCursorView): Uint8Array {
-      const length = BinaryReader.readUint32(dataProvider);
-      return BinaryReader.readBuffer(dataProvider, length);
-   }
-   public static readUint16Array(_: DataCursorView, length: number): number[] {
-      const view = _.view;
-      const buffer = [];
-      let offset = _.pointer;
-      for (let i = 0; i < length; i++, offset += 2) buffer[i] = view.getUint16(offset, true);
-      _.pointer += offset;
-      return buffer;
-   }
-}
 
 type ReaderKey = string;
 
@@ -145,7 +44,11 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    }
 
    public override dynamic(key: string): this {
-      this.storage[key] = this.nbtFormatReader[this.nbtFormatReader.readType(this.data) as TagType.Byte](this.data);
+      const type = this.nbtFormatReader.readType(this.data);
+      if (type === 0) return (this.storage[key] = undefined), this; // special case
+
+      this.storage[key] = this.nbtFormatReader[type as TagType.Byte](this.data);
+      if (type === TagType.Byte) this.storage[key] = !!this.storage[key]; // nbt reads bool as 1 or 0
       return this;
    }
 
@@ -181,7 +84,7 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       return (this.storage[key] = this.readUint32()), this;
    }
 
-   // Memory efficient but not as fast, has to be benchamarked on real-world samples
+   // Memory efficient but not as fast, has to be benchmarked on real-world samples
    public varuint32(key: string) {
       let current = this.data.buffer[this.data.pointer++] ?? 0;
       let value = current;

@@ -1,17 +1,21 @@
 import { BinaryTypeStruct, TypeBitFlagsU16 } from '@bedrock-apis/binary';
 import { BitFlags } from '@bedrock-apis/common';
-import { ModuleSymbol } from '@bedrock-apis/virtual-apis';
-import { Type, voidType } from '@bedrock-apis/virtual-apis/src/runtime-types';
-import { ArrayType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/array';
-import { booleanType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/boolean';
-import { functionType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/function';
-import { generatorObjectType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/generator-object';
-import { MapType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/map';
-import { bigintType, NumberType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/number';
-import { promiseType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/promise';
-import { stringType } from '@bedrock-apis/virtual-apis/src/runtime-types/build-ins/string';
-import { OptionalType } from '@bedrock-apis/virtual-apis/src/runtime-types/optional';
-import { VariantType } from '@bedrock-apis/virtual-apis/src/runtime-types/variant';
+import {
+   ArrayType,
+   bigintType,
+   booleanType,
+   functionType,
+   generatorObjectType,
+   MapType,
+   ModuleSymbol,
+   NumberType,
+   OptionalType,
+   promiseType,
+   stringType,
+   Type,
+   VariantType,
+   voidType,
+} from '@bedrock-apis/virtual-apis';
 import { BinaryImageLoader, PreparedImage } from './image-loader';
 
 const { allOf } = BitFlags;

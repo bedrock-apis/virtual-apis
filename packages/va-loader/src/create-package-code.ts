@@ -10,8 +10,10 @@ const virtualApis = import.meta.resolve('@bedrock-apis/virtual-apis');
  * @returns - Module cache
  */
 export function createPackageCode(specifier: string, version: string, virtualApiPath = virtualApis, parentUrl = '') {
-   return `import { Context } from '${virtualApiPath}';
-const moduleContext = Context.GetModule('${specifier}', '${version}')
-export const { ...exportNames } = moduleContext.compileExports()
+   return `import { BinaryImageLoader } from '${virtualApiPath}';
+const moduleSymbol = BinaryImageLoader.getModule('${specifier}', '${version}')
+console.log(moduleSymbol)
+export const { ...exportNames } = moduleSymbol.getRuntimeValue()
+
 // parentUrl: ${parentUrl}`;
 }

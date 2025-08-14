@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DataCursorView } from './data-cursor-view';
-import { BinaryIO } from './io';
+import { BinaryIO, WithEncapsulatedData } from './io';
 import { BinaryIOReader } from './reader';
 import { BinaryIOWriter } from './writer';
 
@@ -26,8 +26,6 @@ describe('marshalling test', () => {
       otherDataio.float64('float');
 
       io.external({ nbt: io.storage.otherData }).dynamic('nbt');
-
-      console.log('finish');
    }
 
    function read(source: DataCursorView): SomeData {
@@ -43,7 +41,7 @@ describe('marshalling test', () => {
       return cursor;
    }
 
-   it('should conver them without chaning', () => {
+   it('should convert them without changing', () => {
       const data: SomeData = {
          data: 30,
          array: [123, 54, 12],
@@ -64,10 +62,10 @@ describe('marshalling test', () => {
 
 describe('checkpoint test', () => {
    interface SomeData {
-      somethinf: string;
-      data: { n: number; data: SomeDataA }[];
+      something: string;
+      data: ({ n: number; data: Encapsulated } & WithEncapsulatedData)[];
    }
-   interface SomeDataA {
+   interface Encapsulated {
       data: number;
       array: number[];
       string: string;
@@ -78,13 +76,13 @@ describe('checkpoint test', () => {
       };
    }
    function marshal(io: BinaryIO<SomeData>) {
-      io.string16('somethinf');
+      io.string16('something');
       io.array16('data', io => {
          io.uint16('n');
          io.encapsulate16(() => marshalA(io.sub('data')));
       });
    }
-   function marshalA(io: BinaryIO<SomeDataA>) {
+   function marshalA(io: BinaryIO<Encapsulated>) {
       io.uint8('data');
       io.uint16Array8('array');
       io.string8('string');
@@ -110,8 +108,8 @@ describe('checkpoint test', () => {
       return cursor;
    }
 
-   it('should conver them without chaning', () => {
-      const dataa: SomeDataA = {
+   it('should convert them without changing', () => {
+      const data: Encapsulated = {
          data: 30,
          array: [123, 54, 12],
          string: 'something',
@@ -122,21 +120,21 @@ describe('checkpoint test', () => {
          },
       };
 
-      const data: SomeData = {
-         somethinf: 'somethin',
+      const d: SomeData = {
+         something: 'something',
          data: [
-            { data: dataa, n: 1 },
-            { n: 2, data: dataa },
+            { data: data, n: 1 },
+            { data: data, n: 2 },
          ],
       };
 
-      const cursor = write(data);
+      const cursor = write(d);
       cursor.pointer = 0;
 
       const rrr = read(cursor);
       rrr.data.forEach(e => {
          BinaryIO.readEncapsulatedData(e);
       });
-      expect(rrr).toEqual(data);
+      expect(rrr).toEqual(d);
    });
 });

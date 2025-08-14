@@ -6,8 +6,9 @@ import {
    ModuleMetadata,
    SerializableMetadata,
 } from '@bedrock-apis/binary';
-import { IndexedAccessor } from '@bedrock-apis/va-image-generator/src/binary/indexed-collector';
+import { IndexedAccessor } from '@bedrock-apis/common';
 import { ModuleSymbol } from '@bedrock-apis/virtual-apis';
+import { writeFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import { BinarySymbolLoader } from './symbol-loader';
 
@@ -48,7 +49,7 @@ export class BinaryImageLoader {
       return this.cached;
    }
 
-   public static prepare(parsed: SerializableMetadata): PreparedImage {
+   private static prepare(parsed: SerializableMetadata): PreparedImage {
       const stringSlice = new IndexedAccessor(parsed.metadata.stringSlices);
       const typeSlice = new IndexedAccessor(parsed.metadata.types);
       const modules: PreparedImage['modules'] = parsed.modules.map(e => ({
@@ -69,18 +70,30 @@ export class BinaryImageLoader {
       return this.MODULES.get(this.getModuleId(name, version));
    }
 
-   public static async getModule(name: string, version: string) {
-      const cached = this.MODULES.get(this.getModuleId(name, version));
-      if (cached) return cached;
+   public static getModule(name: string, version: string) {
+      console.log('getModule', name, version);
+      return {
+         getRuntimeValue() {
+            return {
+               Block: 1,
+               BlockPermutation: 1,
+               Entity: 1,
+               ItemStack: 1,
+               world: 1,
+            };
+         },
+      };
+      // const cached = this.MODULES.get(this.getModuleId(name, version));
+      // if (cached) return cached;
 
-      const image = await this.getParsed();
-      const { stringSlice, modules } = image;
-      const { fromIndex: str } = stringSlice;
-      const imageModule = modules.find(e => str(e.metadata.name) === name && str(e.metadata.version) === version);
+      // const image = await this.getParsed();
+      // const { stringSlice, modules } = image;
+      // const { fromIndex: str } = stringSlice;
+      // const imageModule = modules.find(e => str(e.metadata.name) === name && str(e.metadata.version) === version);
 
-      if (!imageModule) throw new Error(`Unknown module: ${name} ${version}`);
+      // if (!imageModule) throw new Error(`Unknown module: ${name} ${version}`);
 
-      this.loadModule(image, imageModule);
+      // return this.loadModule(image, imageModule);
    }
 
    public static loadModule(image: PreparedImage, imageModule: PreparedModule) {
