@@ -3,19 +3,19 @@
    "version": "0.0.1-alpha",
    "type": "module",
    "exports": {
-      "./node": {
-         "default": "./dist/node.js",
-         "types": "./src/node.ts",
+      "./api": {
+         "default": "./dist/api.js",
+         "types": "./src/api.ts",
          "rolldown": null
       },
-      "./ecma": {
-         "default": "./dist/ecma.js",
-         "types": "./src/ecma/index.ts",
+      "./node": {
+         "default": "./dist/node-default.js",
+         "types": "./src/node-default/index.ts",
          "rolldown": null
       },
       "./vitest": {
          "default": "./dist/vitest.js",
-         "types": "./src/vitest.ts",
+         "types": "./src/vitest-plugin/vitest.ts",
          "rolldown": null
       }
    }

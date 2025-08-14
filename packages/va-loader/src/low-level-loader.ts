@@ -1,19 +1,7 @@
-import { type Context } from '@bedrock-apis/virtual-apis';
-import type Module from 'node:module';
-import { registerHooks } from 'node:module';
-
-const { getOwnPropertyNames } = Object;
-export class CreateResolverContext {
+// This code has to be redone, but other higher-level loaders doesn't not rely on it
+/*
+export class CreateSecureValidator {
    protected static readonly resolutionTree = new Map<string, CreateResolverContext>();
-   static {
-      registerHooks({
-         resolve: (specifier, context, nextResolve) => {
-            const resolverContext = this.resolutionTree.get(context.parentURL!);
-            if (!resolverContext) return nextResolve(specifier, context);
-            return resolverContext.resolve(specifier, context);
-         },
-      });
-   }
 
    public readonly filesLoaded = new Set();
    public readonly exportsURLStore = new Map<string, string>();
@@ -51,11 +39,9 @@ export class CreateResolverContext {
       };
    }
    public createModuleURLFromExports(object: object, specifier: string): string {
-      const code = `
-      import {Context} from "@bedrock-apis/virtual-apis";
-      export const {${getOwnPropertyNames(object).join(',')}} = Context.getRuntimeModule(${this.context.runtimeId}, ${JSON.stringify(specifier)});`;
-      const url = `data:application/javascript;utf8,${code}`;
+      const url = createCodeURL(object, specifier, this.context.runtimeId);
       this.exportsURLStore.set(specifier, url);
       return url;
    }
 }
+*/

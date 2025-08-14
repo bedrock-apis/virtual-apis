@@ -1,5 +1,5 @@
-import { createPackageCode } from './create-package-code';
-import { getModuleVersions } from './get-module-versions';
+import { createCodeURL } from '../create-code-url';
+import { getModuleVersions } from '../get-module-versions';
 
 export function virtualApi(): import('vitest/node').Vite.Plugin {
    const versions = getModuleVersions();
@@ -17,7 +17,7 @@ export function virtualApi(): import('vitest/node').Vite.Plugin {
             id = id.slice(virtualPrefix.length);
             const version = versions.get(id);
             if (!version) throw new Error('No version found for module ' + id);
-            return createPackageCode(id, version);
+            return createCodeURL({}, id, 0);
          }
          return null;
       },
