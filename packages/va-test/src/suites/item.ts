@@ -1,5 +1,5 @@
 import { ItemStack } from '@minecraft/server';
-import { TestSuite } from '../suite';
+import { TestSuite } from '../addon/suite';
 
 TestSuite.withSetup('item', () => new ItemStack('minecraft:apple'))
    .test(item => item.typeId)

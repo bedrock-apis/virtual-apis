@@ -1,6 +1,6 @@
 import { BlockPermutation } from '@minecraft/server';
+import { TestSuite } from '../addon/suite';
 import { placeBlock } from '../environment/environment';
-import { TestSuite } from '../suite';
 
 TestSuite.withSetup('block', () => placeBlock('minecraft:stone'))
    .test(block => block.typeId)

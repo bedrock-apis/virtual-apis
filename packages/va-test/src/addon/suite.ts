@@ -1,5 +1,5 @@
+import { setEnvironment, TestEnvironment } from '../environment/environment';
 import { defaultThreadRunner, RunThreadAsync, ThreadRunner } from './async-generator';
-import { setEnvironment, TestEnvironment } from './environment/environment';
 import { TestReport } from './types';
 
 export class TestSuite<T> {
