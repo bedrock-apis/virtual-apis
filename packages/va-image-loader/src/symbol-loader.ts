@@ -20,6 +20,7 @@ export class BinarySymbolLoader {
       for (const bin of symbols) {
          const name = str(bin.name);
 
+         //@ts-expect-error Expect error on this line
          if (BitFlags.allOf(bin.bitFlags, SymbolBitFlags.IsEnum) && bin.isEnumData) {
             const symbol = new EnumerableAPISymbol().setName(name);
             for (const [i, key] of bin.isEnumData.keys.entries()) {
@@ -27,6 +28,7 @@ export class BinarySymbolLoader {
                symbol.addEntry(str(key), bin.isEnumData?.hasNumericalValues ? value : str(value));
             }
             add(symbol);
+            //@ts-expect-error Expect error on this line
          } else if (BitFlags.allOf(bin.bitFlags, SymbolBitFlags.IsInterface) && bin.isInterfaceData) {
             const symbol = new InterfaceSymbol().setName(name);
             for (const [i, key] of bin.isInterfaceData.keys.entries()) {
