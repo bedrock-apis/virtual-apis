@@ -1,5 +1,5 @@
-import { TestEnvironment } from '../environment/environment';
 import { ThreadRunner } from './async-generator';
+import { TestEnvironment } from './environment/environment';
 import { TestSuite } from './suite';
 import { TestReport } from './types';
 
