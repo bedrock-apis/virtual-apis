@@ -1,5 +1,5 @@
 import { Diagnostics, type Report } from '../errorable';
-import { type InvocableSymbol } from '../symbols/invocable';
+import { type InvocableSymbol } from '../symbols/abstracts/invocable';
 import { type Context } from './base';
 /**
  * ## Execution Context

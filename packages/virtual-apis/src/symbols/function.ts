@@ -1,8 +1,8 @@
 import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
-import { IBindableSymbol } from './bindable';
-import { InvocableSymbol } from './invocable';
+import { IBindableSymbol } from './abstracts/bindable';
+import { InvocableSymbol } from './abstracts/invocable';
 
 export class FunctionSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
    protected override compile(context: Context): (...params: unknown[]) => unknown {

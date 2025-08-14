@@ -1,6 +1,6 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../errorable';
 import { RuntimeType } from '../runtime-types';
-import { CompilableSymbol } from './general';
+import { CompilableSymbol } from './abstracts/compilable';
 
 const { fromEntries } = Object;
 export class EnumerableAPISymbol extends CompilableSymbol<object> implements RuntimeType {

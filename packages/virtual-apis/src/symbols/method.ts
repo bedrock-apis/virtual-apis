@@ -2,9 +2,9 @@ import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
-import { IBindableSymbol } from './bindable';
-import type { ConstructableSymbol } from './constructable';
-import { InvocableSymbol } from './invocable';
+import { IBindableSymbol } from './abstracts/bindable';
+import type { ConstructableSymbol } from './abstracts/constructable';
+import { InvocableSymbol } from './abstracts/invocable';
 
 export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
    public readonly thisType!: ConstructableSymbol;

@@ -1,9 +1,9 @@
-import { Context } from '../context/base';
-import { InvocationInfo } from '../context/invocation-info';
-import { CompileTimeError } from '../errorable';
-import { RuntimeType } from '../runtime-types';
-import type { ParamsValidator } from '../runtime-types/params-validator';
-import { CompilableSymbol } from './general';
+import { Context } from '../../context/base';
+import { InvocationInfo } from '../../context/invocation-info';
+import { CompileTimeError } from '../../errorable';
+import { RuntimeType } from '../../runtime-types';
+import type { ParamsValidator } from '../../runtime-types/params-validator';
+import { CompilableSymbol } from './compilable';
 
 export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly returnType!: RuntimeType;

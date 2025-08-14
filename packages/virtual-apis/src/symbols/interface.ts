@@ -1,7 +1,7 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../errorable';
 import { Context } from '../main';
 import { RuntimeType } from '../runtime-types';
-import { CompilableSymbol } from './general';
+import { CompilableSymbol } from './abstracts/compilable';
 
 const { get } = Reflect;
 export class InterfaceSymbol extends CompilableSymbol<null> implements RuntimeType {

@@ -2,9 +2,9 @@ import { Context } from '../context/base';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
-import { IBindableSymbol } from './bindable';
-import { ConstructableSymbol } from './constructable';
-import { InvocableSymbol } from './invocable';
+import { IBindableSymbol } from './abstracts/bindable';
+import { ConstructableSymbol } from './abstracts/constructable';
+import { InvocableSymbol } from './abstracts/invocable';
 
 export class PropertySetterSymbol
    extends InvocableSymbol<(...params: unknown[]) => unknown>
