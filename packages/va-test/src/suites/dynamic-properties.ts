@@ -1,5 +1,5 @@
 import { world } from '@minecraft/server';
-import { TestSuite } from '../addon/suite';
+import { TestSuite } from '../suite';
 
 TestSuite.simple('dynamic properties')
    .test(() => world.getDynamicPropertyIds())

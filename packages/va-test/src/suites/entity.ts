@@ -1,5 +1,5 @@
-import { TestSuite } from '../addon/suite';
-import { spawnEntity } from '../environment/environment';
+import { spawnEntity } from '../environment';
+import { TestSuite } from '../suite';
 
 TestSuite.withSetup('entity', () => spawnEntity('minecraft:cow'))
    .test(entity => entity.typeId)

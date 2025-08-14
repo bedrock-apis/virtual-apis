@@ -2,11 +2,6 @@
    "name": "@bedrock-apis/va-test",
    "version": "0.0.1-alpha",
    "exports": {
-      "./addon": {
-         "default": "./dist/index.js",
-         "types": "./src/addon/index.ts",
-         "rolldown": null
-      },
       ".": {
          "default": "./dist/main.js",
          "types": "./src/main.ts",

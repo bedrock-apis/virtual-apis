@@ -1,8 +1,8 @@
 import '@bedrock-apis/core-plugin';
-import '../suites/all';
+import './suites/all';
 
 import fs from 'node:fs/promises';
-import results from '../../../../bds-docs-stable/reports/api.json' with { type: 'json' };
+import results from '../../../bds-docs-stable/reports/api.json' with { type: 'json' };
 import { runAndCompare } from './compare';
 import { VirtualApiEnvironment } from './environment/va';
 
