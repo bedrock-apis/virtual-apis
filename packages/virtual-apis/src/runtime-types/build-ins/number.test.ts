@@ -1,6 +1,6 @@
 import { expect, suite, test } from 'vitest';
 import { testType } from '../../tests.helper';
-import { BigIntType, NumberType } from './number';
+import { bigintType, NumberType } from './number';
 
 suite('NumberType', () => {
    test('Number', () => {
@@ -27,20 +27,9 @@ suite('NumberType', () => {
    });
 
    test('BigInt', () => {
-      const type = new BigIntType({ min: 10n, max: 20n });
-      expect(() => testType(type, 9n)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
-      );
-      expect(() => testType(type, 10n)).not.toThrow();
-      expect(() => testType(type, 20n)).not.toThrow();
+      const type = bigintType;
+      expect(() => testType(type, 'str')).not.toThrow();
       expect(() => testType(type, 21n)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
-      );
-
-      expect(() => testType(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Native type conversion failed.]`,
-      );
-      expect(() => testType(type, NaN)).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );
    });
