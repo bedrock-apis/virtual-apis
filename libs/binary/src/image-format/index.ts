@@ -2,7 +2,14 @@ import { BitFlags } from '@bedrock-apis/common';
 import { BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from '../binary';
 import { BinaryIO } from '../binary/io';
 import { IMAGE_GENERAL_DATA_MAGIC } from '../constants';
-import { BinarySymbolStruct, ImageHeader, ImageModuleData, SymbolBitFlags } from '../types';
+import {
+   BinaryDetailsStruct,
+   BinaryDetailsType,
+   BinarySymbolStruct,
+   ImageHeader,
+   ImageModuleData,
+   SymbolBitFlags,
+} from '../types';
 import { SerializableMetadata, SerializableModule } from '../types/module-data';
 import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
 
@@ -40,8 +47,19 @@ export class BinaryImageFormat {
    protected static header(io: BinaryIO<ImageHeader>): void {
       io.dynamic('metadata');
       io.string8Array16('stringSlices');
-      // io.dynamic('details');
+      io.array16('details', io => this.details(io));
       io.array16('types', io => this.type(io));
+   }
+
+   protected static details(io: BinaryIO<BinaryDetailsStruct>) {
+      io.uint8('type');
+      if (io.storage.type === BinaryDetailsType.Empty) return;
+
+      io.dynamic('defaultValue');
+      if (io.storage.type === BinaryDetailsType.Range) {
+         io.float64('maxValue');
+         io.float64('minValue');
+      }
    }
 
    protected static module(io: BinaryIO<SerializableModule>): void {
@@ -51,7 +69,7 @@ export class BinaryImageFormat {
       io.encapsulate16(() => this.moduleData(io.sub('data')));
 
       console.log(
-         `Module '${io.storage.id}', uniqueTypes ${io.storage.stats?.uniqueTypes} size: ${io.data.pointer - start}`,
+         `Module '${io.storage.metadata.name}' ${io.storage.metadata.version} size: ${io.data.pointer - start}`,
       );
    }
 
@@ -60,6 +78,7 @@ export class BinaryImageFormat {
       io.index('uuid');
       io.index('version');
       io.array8('dependencies', io => {
+         io.index('name');
          io.index('uuid');
          io.uint16Array8('versions');
       });

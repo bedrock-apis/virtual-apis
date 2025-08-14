@@ -6,7 +6,7 @@ import {
    ModuleMetadata,
    SerializableMetadata,
 } from '@bedrock-apis/binary';
-import { IndexedAccessor } from '@bedrock-apis/va-image-generator/src/binary/indexed-collector';
+import { IndexedAccessor } from '@bedrock-apis/common';
 import { ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import fs from 'node:fs/promises';
 import { BinarySymbolLoader } from './symbol-loader';

@@ -1,16 +1,16 @@
 import {
+   BinaryDetailsStruct,
+   BinaryDetailsType,
    BinarySymbolStruct,
    BinaryTypeStruct,
    ImageHeader,
    IndexId,
    SerializableMetadata,
    SerializableModule,
-   SerializableModuleStats,
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
-import { BitFlags } from '@bedrock-apis/common';
-import { Short } from '@bedrock-apis/nbt-core';
+import { BitFlags, IndexedCollector } from '@bedrock-apis/common';
 import {
    MetadataClassDefinition,
    MetadataConstantDefinition,
@@ -25,7 +25,6 @@ import {
    Privilege,
 } from '@bedrock-apis/types';
 import { IMetadataProvider, StrippedMetadataModuleDefinition } from '../metadata-provider';
-import { IndexedCollector } from './indexed-collector';
 
 export class MetadataToSerializableTransformer {
    protected readonly stringCollector = new IndexedCollector<string>();
@@ -34,7 +33,7 @@ export class MetadataToSerializableTransformer {
    protected readonly typesCollector = new IndexedCollector<MetadataType>(JSON.stringify); // fast enough actually
    protected readonly typeRef = this.typesCollector.getIndexFor.bind(this.typesCollector);
 
-   protected readonly detailsCollector = new IndexedCollector<NonNullable<MetadataFunctionArgumentDetailsDefinition>>(
+   protected readonly detailsCollector = new IndexedCollector<MetadataFunctionArgumentDetailsDefinition>(
       JSON.stringify,
    );
    protected readonly detailsRef = this.detailsCollector.getIndexFor.bind(this.detailsCollector);
@@ -52,20 +51,7 @@ export class MetadataToSerializableTransformer {
       for await (const metadata of metadataProvider.getMetadataModules()) {
          metadata.enums ??= [];
 
-         const symbols: BinarySymbolStruct[] = [];
-
-         // stats are used mostly for debugging, so we may remove them later
-         const stats: SerializableModuleStats = {
-            uniqueTypes: this.typesCollector.getArray().length,
-            classes: metadata.classes.length,
-            enums: metadata.enums.length,
-            interfaces: metadata.interfaces.length,
-            constants: metadata.constants.length,
-         };
-
          modules.push({
-            id: `${metadata.name} ${metadata.version}`,
-            stats,
             metadata: {
                name: stringRef(metadata.name),
                uuid: stringRef(metadata.uuid),
@@ -73,11 +59,11 @@ export class MetadataToSerializableTransformer {
                dependencies: metadata.dependencies.map(e => ({
                   name: stringRef(e.name),
                   uuid: stringRef(e.uuid),
-                  versions: e.versions?.map(v => stringRef(v.version)),
+                  versions: e.versions?.map(v => stringRef(v.version)) ?? [],
                })),
             },
             data: {
-               symbols,
+               symbols: [...this.transformModule(metadata)],
                exports: [
                   ...metadata.enums,
                   ...metadata.classes,
@@ -88,25 +74,31 @@ export class MetadataToSerializableTransformer {
                ].map(c => stringRef(c.name)),
             },
          });
-
-         symbols.push(...this.transformModule(metadata));
-
-         stats.uniqueTypes = this.typesCollector.getArray().length - stats.uniqueTypes;
       }
 
-      const types = this.transformTypes();
-
       const metadata: ImageHeader = {
-         metadata: { engine: new Short(stringRef('1.21.80.0')) },
+         metadata: { engine: stringRef('1.21.80.0') },
+         details: this.detailsCollector.getArrayAndLock().map(e => this.transformDetails(e)),
+         types: this.transformTypes(),
          stringSlices: this.stringCollector.getArrayAndLock(),
-         // details: this.detailsCollector.getArrayAndLock(),
-         types,
       };
-
-      console.log(this.detailsCollector.getArray());
 
       return { metadata, modules };
    }
+
+   protected transformDetails(e: MetadataFunctionArgumentDetailsDefinition): BinaryDetailsStruct {
+      if (!e) return { type: BinaryDetailsType.Empty };
+
+      return 'max_value' in e
+         ? {
+              defaultValue: e.default_value,
+              maxValue: e.max_value,
+              minValue: e.min_value,
+              type: BinaryDetailsType.Range,
+           }
+         : { type: BinaryDetailsType.Value, defaultValue: e.default_value };
+   }
+
    protected *transformModule(metadata: StrippedMetadataModuleDefinition): Generator<BinarySymbolStruct> {
       for (const e of metadata.enums || []) yield this.transformEnum(e);
       for (const e of metadata.interfaces) yield this.transformInterface(e);
@@ -118,15 +110,19 @@ export class MetadataToSerializableTransformer {
 
    protected transformTypes() {
       const typeRef = (t: MetadataType) => {
-         const index = IndexedCollector.unlockedGetIndexFor(this.typesCollector, t);
-         const transformed = this.transformType(t, typeRef);
-         types.push(transformed);
+         const index = this.typesCollector.getIndexFor(t);
+         types[index] = this.transformType(t, typeRef);
          return index;
       };
+
       const types: BinaryTypeStruct[] = [];
-      for (const type of this.typesCollector.getArrayAndLock()) {
-         types.push(this.transformType(type, typeRef));
+      const array = this.typesCollector.getArray();
+
+      // Manually iterate so that we can change array during iteration
+      for (let i = 0; i < array.length; i++) {
+         types[i] = this.transformType(array[i]!, typeRef);
       }
+      this.typesCollector.getArrayAndLock();
       return types;
    }
 
@@ -321,7 +317,7 @@ type SymbolBuilderStruct = SymbolBuilder & BinarySymbolStruct;
 type ContextSymbolBuilder = {
    readonly stringRef: (_: string) => number;
    readonly typeRef: (_: MetadataType) => number;
-   readonly detailsRef: (_: NonNullable<MetadataFunctionArgumentDetailsDefinition>) => number;
+   readonly detailsRef: (_: MetadataFunctionArgumentDetailsDefinition) => number;
 };
 
 export class SymbolBuilder implements BinarySymbolStruct {
@@ -348,9 +344,9 @@ export class SymbolBuilder implements BinarySymbolStruct {
    public setArguments<T extends SymbolBuilderStruct>(this: T, type: MetadataFunctionArgumentDefinition[]): T {
       this.bitFlags |= SymbolBitFlags.IsFunction;
       this.functionArguments = type.map(e => this.context.typeRef(e.type));
-      if (type.some(e => e.details)) {
+      if (type.some(e => !!e.details)) {
          this.bitFlags |= SymbolBitFlags.IsDetailedFunction;
-         this.functionArgumentsDetails = type.map(e => (e.details ? this.context.detailsRef(e.details) : -1));
+         this.functionArgumentsDetails = type.map(e => this.context.detailsRef(e.details));
       }
       return this;
    }
@@ -383,6 +379,10 @@ export class SymbolBuilder implements BinarySymbolStruct {
    public removeBits<T extends SymbolBuilderStruct>(this: T, bits: number): T {
       this.bitFlags &= ~bits;
       return this;
+   }
+   public toJSON() {
+      const { context, ...json } = this;
+      return json;
    }
 }
 

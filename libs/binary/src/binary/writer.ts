@@ -1,80 +1,10 @@
 import { TagType } from '@bedrock-apis/nbt-core';
 import { TextEncoder } from 'node:util';
-import { DataCursorView } from './data-cursor-view';
 import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType } from './io';
 
 const utf8Encoder = new TextEncoder();
 
 // Use LE always
-export class BinaryWriter {
-   public static writeCheckPointUint16(_: DataCursorView, writer: (_: DataCursorView) => void) {
-      const rented = _.rent(2);
-      writer(rented);
-
-      BinaryWriter.writeUint16(_, rented.pointer);
-      _.pointer += rented.pointer;
-   }
-   public static writeCheckPointUint32(_: DataCursorView, writer: (_: DataCursorView) => void) {
-      const rented = _.rent(2);
-      writer(rented);
-
-      BinaryWriter.writeUint32(_, rented.pointer);
-      _.pointer += rented.pointer;
-   }
-   public static writeUint8(dataProvider: DataCursorView, value: number): void {
-      dataProvider.view.setUint8(dataProvider.pointer++, value);
-   }
-   public static writeUint16(dataProvider: DataCursorView, value: number): void {
-      dataProvider.view.setUint16(dataProvider.pointer, value, true);
-      dataProvider.pointer += 2;
-   }
-   public static writeUint32(dataProvider: DataCursorView, value: number): void {
-      dataProvider.view.setUint32(dataProvider.pointer, value, true);
-      dataProvider.pointer += 2;
-   }
-   public static writeFloat64(dataProvider: DataCursorView, value: number): void {
-      dataProvider.view.setFloat64(dataProvider.pointer, value, true);
-      dataProvider.pointer += 8;
-   }
-   public static writeBuffer(dataProvider: DataCursorView, value: Uint8Array): void {
-      dataProvider.buffer.set(value, dataProvider.pointer);
-      dataProvider.pointer += value.length;
-   }
-   public static writeStringWith(
-      lengthWriter: (d: DataCursorView, v: number) => void,
-      encoder = utf8Encoder,
-      dataProvider: DataCursorView,
-      value: string,
-   ) {
-      const buffer = encoder.encode(value);
-      lengthWriter(dataProvider, buffer.length);
-      BinaryWriter.writeBuffer(dataProvider, buffer);
-   }
-   public static writeStringU8: (dataProvider: DataCursorView, value: string) => void =
-      BinaryWriter.writeStringWith.bind(null, BinaryWriter.writeUint8, utf8Encoder);
-   public static writeStringU16: (dataProvider: DataCursorView, value: string) => void =
-      BinaryWriter.writeStringWith.bind(null, BinaryWriter.writeUint16, utf8Encoder);
-   public static writeStringU32: (dataProvider: DataCursorView, value: string) => void =
-      BinaryWriter.writeStringWith.bind(null, BinaryWriter.writeUint32, utf8Encoder);
-   public static writeArrayBufferU16(dataProvider: DataCursorView, value: Uint8Array): void {
-      BinaryWriter.writeUint16(dataProvider, value.length);
-      dataProvider.buffer.set(value, dataProvider.pointer);
-      dataProvider.pointer += value.length;
-   }
-   public static writeArrayBufferU32(dataProvider: DataCursorView, value: Uint8Array): void {
-      BinaryWriter.writeUint16(dataProvider, value.length);
-      dataProvider.buffer.set(value, dataProvider.pointer);
-      dataProvider.pointer += value.length;
-   }
-
-   public static writeUint16Array(_: DataCursorView, value: ArrayLike<number>): void {
-      const view = _.view;
-      let offset = _.pointer;
-      for (let i = 0; i < value.length; i++, offset += 2) view.setUint16(offset, value[i] as number, true);
-      _.pointer = offset;
-   }
-}
-
 type WriteKey = string;
 
 export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, unknown>>> {
@@ -125,6 +55,7 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
       const value = this.storage[key];
       const type = this.nbtFormatWriter.determinateType(value);
       this.nbtFormatWriter.writeType(this.data, type);
+      if (type === 0) return this; // special case
       this.nbtFormatWriter[type as TagType.Byte](this.data, value as number);
       return this;
    }
@@ -170,22 +101,15 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
       return this.writeBuffer(encoder.encode(value));
    }
 
-   // public WriteArrayBufferU16(dataProvider: DataCursorView, value: Uint8Array): void {
-   //    BinaryWriter.WriteUint16(dataProvider, value.length);
-   //    dataProvider.buffer.set(value, dataProvider.pointer);
-   //    dataProvider.pointer += value.length;
-   // }
-   // public WriteArrayBufferU32(dataProvider: DataCursorView, value: Uint8Array): void {
-   //    BinaryWriter.WriteUint16(dataProvider, value.length);
-   //    dataProvider.buffer.set(value, dataProvider.pointer);
-   //    dataProvider.pointer += value.length;
-   // }
+   protected get getUint16Setter() {
+      return this.data.view.setUint16.bind(this.data.view);
+   }
 
    public uint16Array(key: string) {
       const value = this.storage[key] as ArrayLike<number>;
-      const view = this.data.view;
+      const setUint16 = this.getUint16Setter;
       let offset = this.data.pointer;
-      for (let i = 0; i < value.length; i++, offset += 2) view.setUint16(offset, value[i] as number, true);
+      for (let i = 0; i < value.length; i++, offset += 2) setUint16(offset, value[i] as number, true);
       this.data.pointer = offset;
       return this;
    }
@@ -210,18 +134,29 @@ export class BinaryIOWriter extends BinaryIO<object & Partial<Record<WriteKey, u
 
 export class SafeBinaryIOWriter extends BinaryIOWriter {
    protected override writeUint8(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 8)
-         throw new RangeError(`Used uint8 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
+      this.validateUint(value, 8);
       return super.writeUint8(value);
    }
    protected override writeUint16(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 16)
-         throw new RangeError(`Used uint16 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
+      this.validateUint(value, 16);
       return super.writeUint16(value);
    }
+
+   private validateUint(value: number, size: number) {
+      if ((value !== 0 && !value) || value < 0 || value > 2 ** size)
+         throw new RangeError(`Used uint16 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
+   }
+
    protected override writeUint32(value: number): number {
-      if ((value !== 0 && !value) || value < 0 || value > 2 ** 32)
-         throw new RangeError(`Used uint32 for ${value}, storage ${JSON.stringify(this.storage, null, 2)}`);
+      this.validateUint(value, 32);
       return super.writeUint32(value);
+   }
+
+   protected override get getUint16Setter() {
+      const set = super.getUint16Setter;
+      return (offset: number, value: number, la: boolean) => {
+         this.validateUint(value, 16);
+         set(offset, value, la);
+      };
    }
 }

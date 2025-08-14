@@ -1,11 +1,4 @@
 export class IndexedCollector<T> {
-   public static unlockedGetIndexFor<T>(t: IndexedCollector<T>, key: T) {
-      t.locked = false;
-      const value = t.getIndexFor(key);
-      t.locked = true;
-      return value;
-   }
-
    protected readonly MAP = new Map<unknown, number>();
    protected readonly LIST: T[] = [];
 

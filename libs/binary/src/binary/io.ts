@@ -53,12 +53,12 @@ export abstract class BinaryIO<T extends object> {
    public sub<K extends keyof Filter<Narrow<T>, Record<string, unknown>>>(
       key: K,
    ): BinaryIO<Filter<Narrow<T>, Record<string, unknown>>[K]> {
-      // @ts-expect-error yeaah i love breaking ts
+      // @ts-expect-error i love breaking ts
       return this.external((this.storage[key] ??= {}));
    }
 
    public external<T extends Record<string, unknown>>(data: T): BinaryIO<T> {
-      // @ts-expect-error yeaah i love breaking ts
+      // @ts-expect-error i love breaking ts
       return new (this.constructor as typeof BinaryIO)(this.data, data);
    }
 
@@ -141,5 +141,5 @@ export abstract class BinaryIO<T extends object> {
       key: keyof Filter<T, S>,
       type: MarshalSerializableType<S>,
    ): this;
-   public abstract encapsulate16(io: () => void): this;
+   public abstract encapsulate16<T extends BinaryIO<WithEncapsulatedData>>(this: T, io: () => void): this;
 }
