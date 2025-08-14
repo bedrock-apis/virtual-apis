@@ -131,7 +131,7 @@ export class BinaryImageFormat {
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsInvocable)) io.uint16Array8('invocablePrivileges');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasSetter)) io.uint16Array8('setterPrivileges');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasType)) io.index('hasType');
-      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsBindType)) io.index('bindType');
+      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsBound)) io.index('bindType');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasValue)) io.dynamic('hasValue');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsFunction)) {
          io.uint16Array8('functionArguments');

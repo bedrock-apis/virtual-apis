@@ -24,7 +24,7 @@ export class BinarySymbolLoader {
             const symbol = new EnumerableAPISymbol().setName(name);
             for (const [i, key] of bin.isEnumData.keys.entries()) {
                const value = bin.isEnumData.values[i]!;
-               symbol.setValue(str(key), bin.isEnumData?.hasNumericalValues ? value : str(value));
+               symbol.addEntry(str(key), bin.isEnumData?.hasNumericalValues ? value : str(value));
             }
             add(symbol);
          } else if (BitFlags.allOf(bin.bitFlags, SymbolBitFlags.IsInterface) && bin.isInterfaceData) {

@@ -6,7 +6,7 @@ const { fromEntries } = Object;
 export class EnumerableAPISymbol extends CompilableSymbol<object> implements RuntimeType {
    public constants = new Map();
    public values = new Set();
-   public setValue(key: string, value: unknown) {
+   public addEntry(key: string, value: unknown) {
       this.constants.set(key, value);
       this.values.add(value);
    }

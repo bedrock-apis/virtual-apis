@@ -4,8 +4,8 @@ import { CompilableSymbol } from './abstracts/compilable';
 
 export class ObjectValueSymbol extends CompilableSymbol<object> {
    public readonly constructable!: ConstructableSymbol;
-   public readonly constants = new Map();
-   public readonly values = new Set();
+   //public readonly constants = new Map();
+   //public readonly values = new Set();
    protected override compile(context: Context): object {
       this.constructable.compile(context);
       return this.constructable.createHandleInternal(context);
@@ -15,6 +15,17 @@ export class ObjectValueSymbol extends CompilableSymbol<object> {
    }
    public setConstructable(ctor: ConstructableSymbol): this {
       (this as Mutable<this>).constructable = ctor;
+      return this;
+   }
+}
+
+export class ConstantValueSymbol extends CompilableSymbol<unknown> {
+   public readonly value: unknown;
+   protected override compile(): unknown {
+      return this.value;
+   }
+   public setValue(value: unknown): this {
+      (this as Mutable<this>).value = value;
       return this;
    }
 }

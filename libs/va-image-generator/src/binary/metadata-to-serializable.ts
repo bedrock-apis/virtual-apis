@@ -3,6 +3,7 @@ import {
    BinaryDetailsType,
    BinarySymbolStruct,
    BinaryTypeStruct,
+   ExportType,
    ImageHeader,
    IndexId,
    SerializableMetadata,
@@ -100,12 +101,12 @@ export class MetadataToSerializableTransformer {
    }
 
    protected *transformModule(metadata: StrippedMetadataModuleDefinition): Generator<BinarySymbolStruct> {
-      for (const e of metadata.enums || []) yield this.transformEnum(e);
-      for (const e of metadata.interfaces) yield this.transformInterface(e);
-      for (const fn of metadata.functions) yield this.transformFunction(fn);
+      for (const e of metadata.enums || []) yield this.transformEnum(e).addBits(SymbolBitFlags.IsExportedSymbol);
+      for (const e of metadata.interfaces) yield this.transformInterface(e).addBits(SymbolBitFlags.IsExportedSymbol);
+      for (const fn of metadata.functions) yield this.transformFunction(fn).addBits(SymbolBitFlags.IsExportedSymbol);
       for (const cl of metadata.classes) yield* this.transformClass(cl);
-      for (const e of metadata.objects) yield this.transformObject(e);
-      for (const e of metadata.constants) yield this.transformConstant(e);
+      for (const e of metadata.objects) yield this.transformObject(e).addBits(SymbolBitFlags.IsExportedSymbol);
+      for (const e of metadata.constants) yield this.transformConstant(e).addBits(SymbolBitFlags.IsExportedSymbol);
    }
 
    protected transformTypes() {
@@ -202,7 +203,7 @@ export class MetadataToSerializableTransformer {
       return type;
    }
 
-   protected transformFunction(metadata: MetadataFunctionDefinition): SymbolBuilder & BinarySymbolStruct {
+   protected transformFunction(metadata: MetadataFunctionDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol()
          .setName(metadata.name)
          .setInvocable(metadata.call_privilege)
@@ -212,10 +213,10 @@ export class MetadataToSerializableTransformer {
       return symbol;
    }
 
-   protected transformEnum(metadata: MetadataEnumDefinition): BinarySymbolStruct {
+   protected transformEnum(metadata: MetadataEnumDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol()
          .setName(metadata.name)
-         .addBits<SymbolBuilder & BinarySymbolStruct>(SymbolBitFlags.IsEnum);
+         .addBits<SymbolBuilder & BinarySymbolStruct>(SymbolBitFlags.IsExportedSymbol | ExportType.Enum);
 
       symbol.isEnumData = {
          hasNumericalValues: metadata.constants.some(e => typeof e.value === 'number'),
@@ -236,7 +237,7 @@ export class MetadataToSerializableTransformer {
 
    // mostly its for
    // const world: World and const system: System
-   protected transformObject(metadata: MetadataObjectDefinition): BinarySymbolStruct {
+   protected transformObject(metadata: MetadataObjectDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol()
          .addBits(SymbolBitFlags.IsObject)
          .setName(metadata.name)
@@ -244,17 +245,19 @@ export class MetadataToSerializableTransformer {
       return symbol;
    }
 
-   protected transformConstant(metadata: MetadataConstantDefinition): BinarySymbolStruct {
+   protected transformConstant(metadata: MetadataConstantDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol()
-         .addBits(SymbolBitFlags.IsConstant)
+         .addBits(ExportType.Constant)
          .setName(metadata.name)
          .setTypeFor(metadata.type)
          .setValue(metadata.value);
       return symbol;
    }
 
-   protected *transformClass(metadata: MetadataClassDefinition): Generator<BinarySymbolStruct> {
-      const symbol = this.createSymbol().addBits(SymbolBitFlags.IsClass).setName(metadata.name);
+   protected *transformClass(metadata: MetadataClassDefinition): Generator<SymbolBuilderStruct> {
+      const symbol = this.createSymbol()
+         .addBits(ExportType.Class | SymbolBitFlags.IsExportedSymbol)
+         .setName(metadata.name);
       // TODO Handle symbol.iterator
 
       // Inherits from
@@ -295,16 +298,18 @@ export class MetadataToSerializableTransformer {
       });
    }
 
-   protected transformError(e: MetadataErrorClassDefinition): BinarySymbolStruct {
+   protected transformError(e: MetadataErrorClassDefinition): SymbolBuilderStruct {
       // TODO Complete
       const symbol = this.createSymbol().setName(e.name);
-      symbol.addBits(SymbolBitFlags.IsError);
+      symbol.addBits(ExportType.Error | SymbolBitFlags.IsExportedSymbol);
       return symbol;
    }
 
-   protected transformInterface(e: MetadataInterfaceDefinition): BinarySymbolStruct {
+   protected transformInterface(e: MetadataInterfaceDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol().setName(e.name);
-      symbol.addBits<BinarySymbolStruct & SymbolBuilder>(SymbolBitFlags.IsInterface).isInterfaceData = {
+      symbol.addBits<BinarySymbolStruct & SymbolBuilder>(
+         ExportType.Interface | SymbolBitFlags.IsExportedSymbol,
+      ).isInterfaceData = {
          keys: e.properties.map(e => this.stringRef(e.name)),
          types: e.properties.map(e => this.typeRef(e.type)),
       };
@@ -337,8 +342,8 @@ export class SymbolBuilder implements BinarySymbolStruct {
       return this;
    }
    public setBindType<T extends SymbolBuilderStruct>(this: T, type: MetadataType): T {
-      this.bitFlags |= SymbolBitFlags.IsBindType;
-      this.bindType = this.context.typeRef(type);
+      this.bitFlags |= SymbolBitFlags.IsBound;
+      this.boundTo = this.context.typeRef(type);
       return this;
    }
    public setArguments<T extends SymbolBuilderStruct>(this: T, type: MetadataFunctionArgumentDefinition[]): T {
