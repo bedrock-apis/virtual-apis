@@ -17,18 +17,6 @@ export class BinarySymbolLoader {
 
       const types = new BinaryTypesLoader(image, mod);
 
-      const resolveType = (index: number) => {
-         // @ts-expect-error make resolveType accept serializedtype
-         return this.resolveType(types.fromIndex(index));
-      };
-
-      // for const type of typesCollector.getList()
-      //   if BinaryFlags.allOf(TypeKind.Number)
-      //     this.registerType(fromIndex(type.name), new NumberType(type.range))
-      //   if BinaryFlags.allOf(TypeKind.String)
-      //     this.registerType(fromIndex(type.name), StringType)
-      // ...
-
       for (const bin of symbols) {
          const name = str(bin.name);
 
@@ -43,8 +31,9 @@ export class BinarySymbolLoader {
             const symbol = new InterfaceSymbol().setName(name);
             for (const [i, key] of bin.isInterfaceData.keys.entries()) {
                const value = bin.isInterfaceData.types[i]!;
-               symbol.properties.set(str(key), resolveType(value));
+               symbol.properties.set(str(key), types.resolveType(value));
             }
+            add(symbol);
          }
          //  else if (BitFlags.allOf(bin.bitFlags, SymbolBitFlags.IsObject) && bin.hasType) {
          //    mod.addSymbol(new ObjectAPISymbol(this, name, str(types.fromIndex(bin.hasType).name)));
