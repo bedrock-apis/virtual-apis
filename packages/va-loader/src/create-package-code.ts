@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const virtualApis = pathToFileURL(require.resolve('@bedrock-apis/virtual-apis')).href;
+const virtualApis = pathToFileURL(require.resolve('@bedrock-apis/va-image-loader')).href;
 
 /**
  * Creates module loader code
@@ -14,8 +14,10 @@ const virtualApis = pathToFileURL(require.resolve('@bedrock-apis/virtual-apis'))
  * @returns - Module cache
  */
 export function createPackageCode(specifier: string, version: string, virtualApiPath = virtualApis, parentUrl = '') {
-   return `import { Context } from '${virtualApiPath}';
-const moduleContext = Context.GetModule('${specifier}', '${version}')
-export const { ...exportNames } = moduleContext.compileExports()
+   return `import { BinaryImageLoader } from '${virtualApiPath}';
+const moduleSymbol = BinaryImageLoader.getModule('${specifier}', '${version}')
+console.log(moduleSymbol)
+export const { ...exportNames } = moduleSymbol.getRuntimeValue()
+
 // parentUrl: ${parentUrl}`;
 }

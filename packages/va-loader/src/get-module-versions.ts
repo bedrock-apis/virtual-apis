@@ -1,8 +1,10 @@
 // This function is run only at the startup time, before any user code
 
 import fs from 'node:fs';
+import module from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
+import url from 'node:url';
 
 function readJsonFileSafely(pathToFile: string) {
    try {
@@ -19,11 +21,23 @@ export function getModuleVersions(cwd = process.cwd()) {
 
    if (packageJson) {
       const deps = { ...packageJson.devDependencies, ...packageJson.dependencies };
-      for (const [depName, depVersion] of Object.entries(deps)) {
-         console.log(depName, depVersion);
+      // It is required to make node think we are importing all modules from the cwd, because
+      // otherwise they will not resolve
+      //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
+      const require = module.createRequire(url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
+
+      for (const [depName] of Object.entries(deps)) {
          if (!depName.startsWith('@minecraft')) continue;
 
-         modules.set(depName, depVersion);
+         try {
+            const pathToPackage = require.resolve(depName + '/package.json');
+            let { version } = JSON.parse(fs.readFileSync(pathToPackage, 'utf-8')) as { version: string };
+            version = version.replace(/\.\d+\.\d+\.\d+-(stable|preview).*/, '');
+            console.log(depName, version);
+            modules.set(depName, version);
+         } catch (e) {
+            console.error('[virtual-api][get-module-versions] Unable to resolve', depName, e);
+         }
       }
 
       return modules;

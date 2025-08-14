@@ -8,6 +8,7 @@ const moduleCache = new Map<string, Module.ResolveFnOutput>();
 registerHooks({
    resolve(specifier, context, nextResolve) {
       const version = modules.get(specifier);
+      console.log({ specifier, version });
       if (!version) return nextResolve(specifier, context);
 
       const id = specifier + ' ' + version;
