@@ -80,6 +80,7 @@ export class BinaryImageFormat {
       io.array8('dependencies', io => {
          io.index('name');
          io.index('uuid');
+         io.index('name');
          io.uint16Array8('versions');
       });
    }
