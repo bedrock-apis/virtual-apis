@@ -61,6 +61,7 @@ export class BinaryImageFormat {
       io.index('version');
       io.array8('dependencies', io => {
          io.index('uuid');
+         io.index('name');
          io.uint16Array8('versions');
       });
    }

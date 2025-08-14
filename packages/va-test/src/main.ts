@@ -1,14 +1,16 @@
 // TODO Make separate export for running code on virtual apis and writing incompatability.md
 
-import { Context } from '@bedrock-apis/virtual-apis';
-
 // Context.configure({
 //   GetterRequireValidBound: true,
 //   StrictReturnTypes: false,
 //});
 
-import '@bedrock-apis/core-plugin';
+import { CreateResolverContext } from '@bedrock-apis/va-loader/node';
+import { Context } from '@bedrock-apis/virtual-apis';
 
-import './suites/all';
+const entryPoint = import.meta.resolve('@bedrock-apis/va-test/addon');
+const _ = new CreateResolverContext(entryPoint, new Context());
 
-import './run-compare';
+// run
+// we can use exports to run or grap test results
+await import(entryPoint);

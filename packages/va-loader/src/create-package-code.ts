@@ -1,8 +1,4 @@
-import { createRequire } from 'node:module';
-import { pathToFileURL } from 'node:url';
-
-const require = createRequire(import.meta.url);
-const virtualApis = pathToFileURL(require.resolve('@bedrock-apis/virtual-apis')).href;
+const virtualApis = import.meta.resolve('@bedrock-apis/virtual-apis');
 
 /**
  * Creates module loader code

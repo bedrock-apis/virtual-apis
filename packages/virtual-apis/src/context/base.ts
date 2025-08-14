@@ -4,6 +4,8 @@ import { PluginContext } from './plugin';
 const { create } = Object;
 
 export class Context {
+   private static runtimeIdIncrementalVariable = 0;
+   public readonly runtimeId = Context.runtimeIdIncrementalVariable++;
    public readonly plugins: Set<PluginContext> = new Set();
    public readonly moduleSymbols: Map<string, ModuleSymbol> = new Map();
    // Compiled modules
