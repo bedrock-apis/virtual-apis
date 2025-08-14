@@ -1,0 +1,14 @@
+import { expect, suite, test } from 'vitest';
+import { testType } from '../../tests.helper';
+import { booleanType } from './boolean';
+
+suite('BooleanType', () => {
+   test('Boolean', () => {
+      const type = booleanType;
+
+      expect(() => testType(type, false)).not.toThrow();
+      expect(() => testType(type, true)).not.toThrow();
+
+      expect(() => testType(type, 2)).toThrowErrorMatchingInlineSnapshot(`[TypeError: Native type conversion failed.]`);
+   });
+});
