@@ -2,9 +2,10 @@ import {
    BinarySymbolStruct,
    BinaryTypeStruct,
    ImageHeader,
-   ImageModuleData,
    IndexId,
-   ModuleMetadata,
+   SerializableMetadata,
+   SerializableModule,
+   SerializableModuleStats,
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
@@ -25,27 +26,6 @@ import {
 } from '@bedrock-apis/types';
 import { IMetadataProvider, StrippedMetadataModuleDefinition } from '../metadata-provider';
 import { IndexedCollector } from './indexed-collector';
-
-export interface SerializableModuleStats {
-   uniqueTypes: number;
-   classes: number;
-   enums: number;
-   interfaces: number;
-   constants: number;
-}
-
-export interface SerializableModule {
-   id: string;
-   stats: SerializableModuleStats;
-   metadata: Required<ModuleMetadata>;
-   data: ImageModuleData;
-}
-
-export interface SerializableMetadata {
-   version?: number;
-   metadata: ImageHeader;
-   modules: SerializableModule[];
-}
 
 export class MetadataToSerializableTransformer {
    protected readonly stringCollector = new IndexedCollector<string>();
@@ -431,5 +411,5 @@ export const STRING_TYPE_TO_BITS_MAP = {
    this: TypeBitFlagsU16.This,
    iterator: TypeBitFlagsU16.Iterator,
    unknown: TypeBitFlagsU16.Unknown,
-   Error: TypeBitFlagsU16.Error
+   Error: TypeBitFlagsU16.Error,
 };

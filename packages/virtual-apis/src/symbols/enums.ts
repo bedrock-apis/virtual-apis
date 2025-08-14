@@ -4,8 +4,12 @@ import { CompilableSymbol } from './abstracts/compilable';
 
 const { fromEntries } = Object;
 export class EnumerableAPISymbol extends CompilableSymbol<object> implements RuntimeType {
-   public readonly constants = new Map();
-   public readonly values = new Set();
+   public constants = new Map();
+   public values = new Set();
+   public setValue(key: string, value: unknown) {
+      this.constants.set(key, value);
+      this.values.add(value);
+   }
    protected override compile(): object {
       return fromEntries(this.constants.entries());
    }

@@ -1,4 +1,3 @@
-export * from './data-type';
 export * from './general';
 export * from './image-header';
 export * from './metadata';

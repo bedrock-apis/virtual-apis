@@ -1,21 +1,15 @@
 import { MetadataType, MetadataTypeName } from '@bedrock-apis/types';
 import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
 import { describe, expect, it } from 'vitest';
-import {
-   BinaryImageSerializerIOV1,
-   BinaryIOReader,
-   BinaryTypeStruct,
-   DataCursorView,
-   SafeBinaryIOWriter,
-} from '../main';
 import { BinaryIO } from '../binary/io';
+import { BinaryImageFormat, BinaryIOReader, BinaryTypeStruct, DataCursorView, SafeBinaryIOWriter } from '../main';
 
 describe('io test', () => {
    class TestSerializer extends MetadataToSerializableTransformer {
       testTransformType = (m: MetadataType) => this.transformType(m, this.typeRef);
    }
 
-   class TestIOSerializer extends BinaryImageSerializerIOV1 {
+   class TestIOSerializer extends BinaryImageFormat {
       static testType = this.type;
    }
 

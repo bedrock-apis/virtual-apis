@@ -19,12 +19,16 @@ export type Filter<T extends object, Filter> = {
 
 type ArrayIO<T, K> = K extends keyof T ? (T[K] extends object[] ? (io: BinaryIO<T[K][number]>) => void : never) : never;
 
-export const readEncapsulatedDataSymbol = Symbol();
+export const readEncapsulatedDataSymbol = Symbol('readEncapsulatedDataSymbol');
 export interface MarshalSerializable<T extends object> {
    marshal(io: BinaryIO<T>): T;
 }
 export interface MarshalSerializableType<T extends MarshalSerializable<T>> {
    create(): T;
+}
+
+export interface WithEncapsulatedData {
+   [readEncapsulatedDataSymbol]?: unknown;
 }
 
 export abstract class BinaryIO<T extends object> {
@@ -33,11 +37,11 @@ export abstract class BinaryIO<T extends object> {
       public readonly storage: T,
    ) {}
 
-   public static readEncapsulatedData<T extends object>(storage: object): T {
-      const read = (storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol];
+   public static readEncapsulatedData<T extends object>(storage: WithEncapsulatedData): T {
+      const read = storage[readEncapsulatedDataSymbol];
       if (typeof read !== 'function') throw new Error('Reader does not have encapsulated data');
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete (storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol];
+      delete storage[readEncapsulatedDataSymbol];
       return read() as T;
    }
 

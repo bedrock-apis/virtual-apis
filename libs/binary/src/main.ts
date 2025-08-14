@@ -1,4 +1,4 @@
 export * from './binary';
-export * from './image-formats';
+export * from './binary/io';
+export * from './image-format';
 export * from './types';
-export * from './get-image';

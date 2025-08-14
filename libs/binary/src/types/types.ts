@@ -81,6 +81,6 @@ export interface BinaryTypeStruct {
    extendedRefs?: IndexId[];
    errorTypes?: IndexId[];
    bindTypeNameId?: IndexId;
-   fromModuleInfo?: { nameId?: IndexId; version?: IndexId };
+   fromModuleInfo?: { nameId: IndexId; version: IndexId };
    numberRange?: { max: number; min: number };
 }

@@ -2,7 +2,9 @@ import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../errorable';
 import { RuntimeType, Type } from './type';
 
 export class VariantType extends Type {
-   public readonly variants: RuntimeType[] = [];
+   public constructor(public readonly variants: RuntimeType[] = []) {
+      super();
+   }
    public isValidValue(diagnostics: DiagnosticsStackReport, value: unknown) {
       const variants = new DiagnosticsStackReport();
       for (const variant of this.variants.values()) {

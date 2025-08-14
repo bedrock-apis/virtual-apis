@@ -1,10 +1,11 @@
 import type { Context } from '../context/base';
-import { CompilableSymbol } from './abstracts/compilable';
+import { CompilableSymbol } from '../symbols/abstracts';
 
 // Kernel Safe as its extracted in initialization before any plugins or addons code
 const { defineProperty, create } = Object;
 export class ModuleSymbol extends CompilableSymbol<object> {
    public readonly symbols: Set<CompilableSymbol<unknown>> = new Set();
+   public metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
    public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();
    protected override compile(context: Context): object {
       // Pre compile, for correct order

@@ -1,22 +1,38 @@
 import { BitFlags } from '@bedrock-apis/common';
-import {
-   SerializableMetadata,
-   SerializableModule,
-} from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
+import { BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from '../binary';
 import { BinaryIO } from '../binary/io';
+import { IMAGE_GENERAL_DATA_MAGIC } from '../constants';
 import { BinarySymbolStruct, ImageHeader, ImageModuleData, SymbolBitFlags } from '../types';
+import { SerializableMetadata, SerializableModule } from '../types/module-data';
 import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
-import { BaseBinaryIOImageSerializer } from './base-format-io';
 
 const { allOf: AllOf } = BitFlags;
 
 // Keep Strict Order of the Binary Writer methods
-export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
-   public static override readonly isDeprecated = false;
-   // Version should be hardcoded and don't change (super.version + 1;) is bad practice
-   public static override readonly version: number = 1;
+export class BinaryImageFormat {
+   protected constructor() {}
 
-   protected static override marshal(io: BinaryIO<SerializableMetadata>): void {
+   public static write(data: SerializableMetadata) {
+      const buffer = DataCursorView.alloc(2 ** 16 * 10); // 196608 bytes -> 192 kb
+      data.version = 1;
+
+      const io = new SafeBinaryIOWriter(buffer, data as object) as unknown as BinaryIO<SerializableMetadata>;
+      this.marshal(io);
+
+      return io.data.getBuffer();
+   }
+
+   public static read(source: Uint8Array<ArrayBufferLike>) {
+      const buffer = new DataCursorView(source);
+      buffer.pointer = 0;
+      const io = new BinaryIOReader(buffer, {}) as unknown as BinaryIO<SerializableMetadata>;
+      this.marshal(io);
+      return io.storage;
+   }
+
+   protected static marshal(io: BinaryIO<SerializableMetadata>): void {
+      io.magic(IMAGE_GENERAL_DATA_MAGIC);
+      io.uint32('version');
       this.header(io.sub('metadata'));
       io.array8('modules', io => this.module(io));
    }
@@ -73,7 +89,6 @@ export class BinaryImageSerializerIOV1 extends BaseBinaryIOImageSerializer {
          io.sub('numberRange').float64('min').float64('max');
          return;
       }
-
 
       // Type with types
       if (AllOf(io.storage.flags, TypeBitFlagsU16.HasSingleParamBit)) {
