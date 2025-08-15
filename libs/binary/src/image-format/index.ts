@@ -127,19 +127,29 @@ export class BinaryImageFormat {
       if (io.storage.bitFlags === 0) return;
 
       // Strict Order Do not change!!!
-      if (AllOf(io.storage.bitFlags, ExportType.Enum)) this.enumData(io.sub('isEnumData'));
-      else if (AllOf(io.storage.bitFlags, ExportType.Interface)) this.interfaceData(io.sub('isInterfaceData'));
-      else if (AllOf(io.storage.bitFlags, ExportType.Constant)) io.dynamic('hasValue');
+      switch (io.storage.bitFlags & SymbolBitFlags.ExportTypeMask) {
+         case ExportType.Enum:
+            this.enumData(io.sub('isEnumData'));
+            break;
+         case ExportType.Interface:
+            this.interfaceData(io.sub('isInterfaceData'));
+            break;
+         case ExportType.Constant:
+            io.dynamic('hasValue');
+            break;
+         case ExportType.Function:
+            io.uint16Array8('functionArguments');
+            if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsDetailedFunction)) {
+               io.uint16Array8('functionArgumentsDetails');
+            }
+            break;
+         default:
+            break;
+      }
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsInvocable)) io.uint16Array8('invocablePrivileges');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasSetter)) io.uint16Array8('setterPrivileges');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.HasType)) io.index('hasType');
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsBound)) io.index('boundTo');
-      if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsFunction)) {
-         io.uint16Array8('functionArguments');
-         if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsDetailedFunction)) {
-            io.uint16Array8('functionArgumentsDetails');
-         }
-      }
    }
 
    protected static interfaceData(io: BinaryIO<NonNullable<BinarySymbolStruct['isInterfaceData']>>): void {

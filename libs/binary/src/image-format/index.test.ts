@@ -1,9 +1,6 @@
 import { IndexedCollector } from '@bedrock-apis/common';
 import { MetadataType } from '@bedrock-apis/types';
-import {
-   MetadataToSerializableTransformer,
-   SymbolBuilder,
-} from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
+import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
 import { SystemFileMetadataProvider } from '@bedrock-apis/va-image-generator/src/metadata-provider';
 import { describe, expect, it } from 'vitest';
 import { BinaryIO } from '../binary/io';
@@ -54,22 +51,12 @@ describe('io test', () => {
    it('serialize symbols', { timeout: 5000 }, async () => {
       const data = await getTestData();
       const collector = new IndexedCollector<BinarySymbolStruct>(JSON.stringify);
-      for (const module of data.modules)
-         for (let symbol of module.data.symbols) {
-            symbol = JSON.parse(JSON.stringify(symbol));
-            if (symbol.isEnumData && typeof symbol.isEnumData.isNumerical !== 'boolean')
-               console.log('Failed', module.metadata, symbol);
-            collector.getIndexFor(symbol);
-            if (symbol.isEnumData && typeof symbol.isEnumData.isNumerical !== 'boolean')
-               console.log('Failed 2', module.metadata, symbol);
-         }
+      for (const module of data.modules) for (let symbol of module.data.symbols) collector.getIndexFor(symbol);
       const symbols = collector.getArrayAndLock();
 
       for (const symbol of symbols) {
          const a = testMarshal(symbol, m => TestBinaryImageFormat.testSymbol(m));
-         if (symbol.isEnumData && typeof symbol.isEnumData.isNumerical !== 'boolean')
-            console.log('Actual', symbol, a.actual, a.expected);
-         expect(a.actual).toEqual((a.expected as SymbolBuilder).toJSON());
+         expect(a.actual).toEqual((a.expected as any)?.toJSON?.() ?? a.expected);
       }
    });
 
