@@ -39,8 +39,7 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    }
 
    public override bool(key: ReaderKey): this {
-      this.storage[key] = this.readUint8() === 1;
-      return this;
+      return (this.storage[key] = this.readUint8() !== 0), this;
    }
 
    public override dynamic(key: string): this {

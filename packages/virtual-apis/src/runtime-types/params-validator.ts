@@ -27,4 +27,8 @@ export class ParamsValidator extends Type {
 
       return isValid;
    }
+   public setMinimumParamsRequired(value: number): this {
+      (this as Mutable<this>).minimumArgumentsRequired = value;
+      return this;
+   }
 }

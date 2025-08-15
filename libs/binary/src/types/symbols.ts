@@ -35,7 +35,7 @@ export enum SymbolBitFlags {
    IsStatic = 1 << 5,
 
    /** Reads nbt serializable hasValue */
-   HasValue = ExportType.Constant,
+   IsConstantValue = ExportType.Constant,
    /** Reads hasType */
    HasType = 1 << 4,
 
@@ -49,7 +49,7 @@ export enum SymbolBitFlags {
 export interface BinarySymbolStruct {
    bitFlags: number;
    name: IndexId;
-   isEnumData?: { hasNumericalValues: boolean; keys: IndexId[]; values: number[] };
+   isEnumData?: { isNumerical: boolean; keys: IndexId[]; values: number[] };
    isInterfaceData?: { keys: IndexId[]; types: IndexId[] };
    hasValue?: unknown;
    hasType?: IndexId;

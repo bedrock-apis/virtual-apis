@@ -85,7 +85,7 @@ export class BinaryTypesLoader {
       if (allOf(flags, TypeBitFlagsU16.Map)) return new MapType(this.resolveType(extendedRefs?.[1]));
       if (allOf(flags, TypeBitFlagsU16.Array)) return new ArrayType(this.resolveType(extendedRef));
       if (allOf(flags, TypeBitFlagsU16.Optional)) return new OptionalType(this.resolveType(extendedRef));
-      if (allOf(flags, TypeBitFlagsU16.Optional)) return new VariantType(extendedRefs?.map(e => this.resolveType(e)));
+      if (allOf(flags, TypeBitFlagsU16.Variant)) return new VariantType(extendedRefs?.map(e => this.resolveType(e)));
 
       // TODO All bigInts
       if (allOf(flags, TypeBitFlagsU16.BigInt64)) return bigintType;

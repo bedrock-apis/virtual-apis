@@ -216,10 +216,10 @@ export class MetadataToSerializableTransformer {
    protected transformEnum(metadata: MetadataEnumDefinition): SymbolBuilderStruct {
       const symbol = this.createSymbol()
          .setName(metadata.name)
-         .addBits<SymbolBuilder & BinarySymbolStruct>(SymbolBitFlags.IsExportedSymbol | ExportType.Enum);
+         .addBits<SymbolBuilderStruct>(SymbolBitFlags.IsExportedSymbol | ExportType.Enum);
 
       symbol.isEnumData = {
-         hasNumericalValues: metadata.constants.some(e => typeof e.value === 'number'),
+         isNumerical: Boolean(metadata.constants.some(e => typeof e.value === 'number')),
          keys: metadata.constants.map(e => this.stringRef(e.name)),
          values: metadata.constants.map(e => {
             switch (typeof e.value) {
@@ -246,11 +246,8 @@ export class MetadataToSerializableTransformer {
    }
 
    protected transformConstant(metadata: MetadataConstantDefinition): SymbolBuilderStruct {
-      const symbol = this.createSymbol()
-         .addBits(ExportType.Constant)
-         .setName(metadata.name)
-         .setTypeFor(metadata.type)
-         .setValue(metadata.value);
+      const symbol = this.createSymbol().addBits(ExportType.Constant).setName(metadata.name).setTypeFor(metadata.type);
+      if (('value' satisfies keyof MetadataConstantDefinition) in metadata) symbol.setValue(metadata.value);
       return symbol;
    }
 
@@ -373,7 +370,7 @@ export class SymbolBuilder implements BinarySymbolStruct {
    public setValue<T extends SymbolBuilderStruct>(this: T, value: unknown): T {
       if (typeof value === 'undefined') return this;
 
-      this.bitFlags |= SymbolBitFlags.HasValue;
+      this.bitFlags |= SymbolBitFlags.IsConstantValue;
       this.hasValue = value;
       return this;
    }

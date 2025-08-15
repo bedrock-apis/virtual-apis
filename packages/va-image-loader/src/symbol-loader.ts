@@ -1,4 +1,4 @@
-import { ImageModuleData, SymbolBitFlags } from '@bedrock-apis/binary';
+import { ExportType, ImageModuleData, SymbolBitFlags } from '@bedrock-apis/binary';
 import { BitFlags } from '@bedrock-apis/common';
 import { CompilableSymbol, EnumerableAPISymbol, InterfaceSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { PreparedImage } from './image-loader';
@@ -20,12 +20,11 @@ export class BinarySymbolLoader {
       for (const bin of symbols) {
          const name = str(bin.name);
 
-         //@ts-expect-error Expect error on this line
-         if (BitFlags.allOf(bin.bitFlags, SymbolBitFlags.IsEnum) && bin.isEnumData) {
+         if (BitFlags.allOf(bin.bitFlags, ExportType.Enum) && bin.isEnumData) {
             const symbol = new EnumerableAPISymbol().setName(name);
             for (const [i, key] of bin.isEnumData.keys.entries()) {
                const value = bin.isEnumData.values[i]!;
-               symbol.addEntry(str(key), bin.isEnumData?.hasNumericalValues ? value : str(value));
+               symbol.addEntry(str(key), bin.isEnumData?.isNumerical ? value : str(value));
             }
             add(symbol);
             //@ts-expect-error Expect error on this line
