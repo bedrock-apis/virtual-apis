@@ -7,7 +7,7 @@ export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
    const versions = getModuleVersions();
    const loader = BinaryLoaderContext.create(await BinaryLoaderContext.getImageFromNodeModules());
    const context = new Context();
-   await loader.loadModules(versions);
+   await loader.loadModules(versions, context);
 
    const virtualPrefix = '/@virtual:bedrock-apis-virtual-apis/';
    return {
