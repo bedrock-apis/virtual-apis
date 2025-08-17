@@ -1,7 +1,8 @@
+import { getOrGenerateMetadataFilepath } from '@bedrock-apis/bds-dumps/api';
 import { SystemFileMetadataProvider } from '../metadata-provider';
 import { main } from './index';
 
-main(new SystemFileMetadataProvider('./bds-docs-stable/metadata/script_modules/')).then(
+main(new SystemFileMetadataProvider(await getOrGenerateMetadataFilepath())).then(
    r => (process.exitCode = r),
    e => {
       console.error(e);

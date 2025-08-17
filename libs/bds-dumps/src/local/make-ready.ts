@@ -1,13 +1,13 @@
 import { fetchJson } from '@bedrock-apis/common';
 import { createReadStream, createWriteStream, existsSync, rmSync } from 'node:fs';
-import { mkdir, readdir, rm } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { appendFile, mkdir, readdir, rm } from 'node:fs/promises';
+import path, { dirname, resolve } from 'node:path';
 import { env, platform } from 'node:process';
 import { Readable } from 'node:stream';
 import { UnzipStreamConsumer } from 'unzip-web-stream';
 import { CACHE_DUMP_DIR, CACHE_EXECUTABLE_DIR, CACHE_OUTPUT_DIR, EXPECTED_SOURCE } from './constants';
 
-export async function makeReady(): Promise<void> {
+export async function prepareBdsAndCacheFolders(): Promise<void> {
    if (env.REMOVE_CACHE) {
       if (existsSync(CACHE_DUMP_DIR)) await rm(CACHE_DUMP_DIR, { recursive: true, force: true });
    }
@@ -47,6 +47,7 @@ export async function makeReady(): Promise<void> {
       }),
    );
    await Promise.all(promises);
+   await appendFile(path.join(CACHE_DUMP_DIR, 'server.properties'), '\n\nemit-server-telemetry=true\n');
    console.log(
       `\n📦\tExtracting done . . .    ->    \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
    );

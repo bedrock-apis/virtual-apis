@@ -47,7 +47,7 @@
       "build:packages": "node --enable-source-maps --import @bedrock-apis/va-image-generator \"--eval=console.log('Loading...')\"",
       "build": "pnpm run build:src && pnpm run build:packages",
       "   ": "",
-      "dump:run": "node --enable-source-maps libs/bds-dumps/dist/local.js",
+      "dump:run": "node --enable-source-maps --import @bedrock-apis/bds-dumps/run \"--eval=0;\"",
       "    ": "",
       "test:coverage": "vitest --ui --coverage",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",

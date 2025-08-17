@@ -1,4 +1,6 @@
-export interface ErrorMessagesDataPacketData {
+import { TestReport } from '@bedrock-apis/va-test';
+
+export interface ErrorMessagesReport {
    general: {
       message: string | null;
       type: string | null;
@@ -11,16 +13,11 @@ export interface ErrorMessagesDataPacketData {
       code: string;
    }[];
 }
-export interface BlocksDataPacketData {
+export interface BlocksDataReport {
    tags: string[];
-   blocks: Record<
-      string,
-      {
-         tags: number[];
-      }
-   >;
+   blocks: Record<string, { tags: number[] }>;
 }
-export interface ItemsDataPacketData {
+export interface ItemsDataReport {
    tags: string[];
    items: Record<
       string,
@@ -32,8 +29,10 @@ export interface ItemsDataPacketData {
    >;
 }
 
-export interface LocalizationKeysPacketData {
+export interface LocalizationKeysReport {
    entities: Record<string, string>;
    items: Record<string, string>;
    blocks: Record<string, string>;
 }
+
+export type TestsReport = TestReport.Run;

@@ -1,9 +1,9 @@
 import { ItemStack, ItemTypes } from '@minecraft/server';
-import { ItemsDataPacketData } from './types';
+import { ItemsDataReport } from '../../shared';
 
-export type ItemData = ItemsDataPacketData['items'][string];
+type ItemData = ItemsDataReport['items'][string];
 
-export function* itemStackResolver() {
+export function* itemStackResolver(): Generator<undefined, ItemsDataReport, unknown> {
    let lastIndex = 0;
    const map = new Map<string, number>();
    const items: Record<string, ItemData> = {};

@@ -1,9 +1,9 @@
 import { BlockPermutation, BlockTypes } from '@minecraft/server';
-import { BlocksDataPacketData } from './types';
+import { BlocksDataReport } from '../../shared';
 
-export type BlockData = BlocksDataPacketData['blocks'][string];
+type BlockData = BlocksDataReport['blocks'][string];
 
-export function* blockResolver() {
+export function* blockResolver(): Generator<undefined, BlocksDataReport, unknown> {
    let lastIndex = 0;
    const map = new Map<string, number>();
    const blocks: Record<string, BlockData> = {};

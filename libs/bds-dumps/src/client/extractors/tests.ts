@@ -2,7 +2,8 @@ import { BedrockDedicatedServerEnvironment, TestSuite } from '@bedrock-apis/va-t
 import '@bedrock-apis/va-test/suites';
 
 import { system } from '@minecraft/server';
+import { TestsReport } from '../../shared';
 
-export function testsResolver() {
+export function testsResolver(): Promise<TestsReport> {
    return TestSuite.runThread(new BedrockDedicatedServerEnvironment(), system.runJob.bind(system));
 }

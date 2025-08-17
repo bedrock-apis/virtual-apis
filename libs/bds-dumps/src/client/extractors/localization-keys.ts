@@ -8,13 +8,13 @@ import {
    VanillaEntityIdentifier,
    world,
 } from '@minecraft/server';
-import { LocalizationKeysPacketData } from './types';
+import { LocalizationKeysReport } from '../../shared';
 
-export function* localizationKeysResolver() {
+export function* localizationKeysResolver(): Generator<Promise<unknown> | undefined, LocalizationKeysReport, Block> {
    const dimension = world.getDimension('overworld');
    const block: Block = yield loadChunk({ x: 0, y: 0, z: 0 }, 'localizationKey');
 
-   const data: LocalizationKeysPacketData = {
+   const data: LocalizationKeysReport = {
       blocks: {},
       entities: {},
       items: {},

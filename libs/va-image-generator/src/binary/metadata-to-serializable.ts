@@ -156,7 +156,10 @@ export class MetadataToSerializableTransformer {
       {
          // Assign type
          const typeBit = STRING_TYPE_TO_BITS_MAP[e.name] ?? null;
-         if (typeBit === null) throw new ReferenceError('Unknown value type: ' + e.name);
+         if (typeBit === null) {
+            console.error(e);
+            throw new ReferenceError('Unknown value type: ' + e.name);
+         }
 
          type.flags |= typeBit;
       }
@@ -414,4 +417,5 @@ export const STRING_TYPE_TO_BITS_MAP = {
    iterator: TypeBitFlagsU16.Iterator,
    unknown: TypeBitFlagsU16.Unknown,
    Error: TypeBitFlagsU16.Error,
+   error: TypeBitFlagsU16.Error,
 };

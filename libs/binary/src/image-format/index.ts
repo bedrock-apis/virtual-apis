@@ -64,14 +64,14 @@ export class BinaryImageFormat {
    }
 
    protected static module(io: BinaryIO<SerializableModule>): void {
-      const start = io.data.pointer;
+      // const start = io.data.pointer;
 
       this.moduleHeader(io.sub('metadata'));
       io.encapsulate16(() => this.moduleData(io.sub('data')));
 
-      console.log(
-         `Module '${io.storage.metadata.name}' ${io.storage.metadata.version} size: ${io.data.pointer - start}`,
-      );
+      // console.log(
+      //    `Module '${io.storage.metadata.name}' ${io.storage.metadata.version} size: ${io.data.pointer - start}`,
+      // );
    }
 
    protected static moduleHeader(io: BinaryIO<SerializableModule['metadata']>): void {

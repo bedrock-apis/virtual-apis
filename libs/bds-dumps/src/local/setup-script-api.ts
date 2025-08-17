@@ -17,7 +17,7 @@ export async function setupScriptAPI(): Promise<void> {
 
    const output = await build({ input: addonEntry, external: [/^@minecraft.+/] });
 
-   await writeFile(editorFile, '\r\n' + output.output[0].code);
+   await writeFile(editorFile, output.output[0].code);
 
    console.log('⚙️\t Script API injected . . .');
 }
@@ -43,13 +43,20 @@ export async function prepareManifest(): Promise<void> {
    if (!existsSync(filename)) throw new ReferenceError('Corrupted installation or outdated information!!!');
 
    const data = await readFile(filename);
-   const manifest = JSON.parse(data.toString());
+   const manifest = JSON.parse(data.toString()) as {
+      dependencies: { module_name: string; version: string }[];
+      capabilities: string[];
+   };
    if (manifest.dependencies.find((_: { module_name?: string }) => _.module_name === '@minecraft/server-net')) return;
 
    manifest.dependencies.push({
       module_name: '@minecraft/server-net',
       version: '1.0.0-beta',
    });
+
+   manifest.dependencies = manifest.dependencies.filter(e => e.module_name !== '@minecraft/server-editor');
+
+   manifest.capabilities = [];
 
    await writeFile(filename, JSON.stringify(manifest));
 }

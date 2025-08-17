@@ -12,7 +12,7 @@ interface Config {
 class ComponentsPlugin extends PluginWithConfig<Config> {
    protected id = 'components';
 
-   // TODO Pull data from bds-docs
+   // TODO Pull data from bds-dump
    protected config: Config = {
       componentsMetadata: {
          Entity: {},

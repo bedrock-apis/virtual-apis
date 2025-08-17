@@ -1,3 +1,4 @@
+import { getOrGenerateMetadataFilepath } from '@bedrock-apis/bds-dumps/api';
 import { IndexedCollector } from '@bedrock-apis/common';
 import { MetadataType } from '@bedrock-apis/types';
 import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
@@ -42,7 +43,7 @@ let cache: SerializableMetadata | undefined;
 
 async function getTestData() {
    if (cache) return cache;
-   const provider = new SystemFileMetadataProvider('./bds-docs-stable/metadata/script_modules/');
+   const provider = new SystemFileMetadataProvider(await getOrGenerateMetadataFilepath());
    cache = await new MetadataToSerializableTransformer().transform(provider);
    return cache;
 }
