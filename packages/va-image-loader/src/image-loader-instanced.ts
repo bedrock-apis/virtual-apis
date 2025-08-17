@@ -40,6 +40,10 @@ import {
    VariantType,
    voidType,
 } from '@bedrock-apis/virtual-apis';
+import fs from 'node:fs/promises';
+import module from 'node:module';
+import path from 'node:path';
+import url from 'node:url';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;
@@ -60,6 +64,21 @@ export class BinaryLoaderContext {
       this.stringAccessor = this.preparedImage.stringSlices;
       this.typeAccessor = this.preparedImage.typeSlices;
    }
+   public static async getImageFromNodeModules(): Promise<Uint8Array<ArrayBufferLike>> {
+      try {
+         // It is required to make node think we are importing all modules from the cwd, because
+         // otherwise they will not resolve
+         //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
+         const require = module.createRequire(url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
+         const installed = require.resolve('@bedrock-apis/va-images');
+         return new Uint8Array(await fs.readFile(installed));
+      } catch (e) {
+         if (!(e instanceof Error && 'code' in e && e.code === 'MODULE_NOT_FOUND')) {
+            throw new Error('Module @bedrock-apis/va-images not found');
+         }
+         throw e;
+      }
+   }
    public static create(buffer: Uint8Array): BinaryLoaderContext {
       return new this(this.getPreparedImageFromRaw(buffer));
    }
@@ -79,7 +98,25 @@ export class BinaryLoaderContext {
       } satisfies PreparedImage;
    }
    public readonly loadedModuleSymbols: Map<string, ModuleSymbol> = new Map();
-   public getSymbolForPreparedImage(prepared: PreparedModule): ModuleSymbol {
+
+   public async loadModules(versions: Map<string, string>) {
+      console.log('loading modules', versions);
+      const str = this.preparedImage.stringSlices.fromIndex;
+
+      for (const [name, version] of versions) {
+         const mod = this.preparedImage.modules.find(
+            e => str(e.metadata.name) === name && str(e.metadata.version) === version,
+         );
+
+         if (!mod) {
+            console.warn('not found module', name, version);
+            continue;
+         }
+
+         this.getSymbolForPreparedModule(mod);
+      }
+   }
+   public getSymbolForPreparedModule(prepared: PreparedModule): ModuleSymbol {
       const name = this.stringAccessor.fromIndex(prepared.metadata.name);
       let symbol = this.loadedModuleSymbols.get(name);
       if (!symbol) {
@@ -113,7 +150,7 @@ export class BinaryLoaderContext {
          if (!prepared)
             throw new ReferenceError('No such a module is available in current image: ' + resolvedName + '@' + version);
 
-         dependencies[name] = this.getSymbolForPreparedImage(prepared);
+         dependencies[name] = this.getSymbolForPreparedModule(prepared);
       }
 
       // Load Symbols
