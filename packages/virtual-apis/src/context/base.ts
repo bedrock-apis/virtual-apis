@@ -6,6 +6,15 @@ const { create } = Object;
 export class Context {
    private static runtimeIdIncrementalVariable = 0;
    public readonly runtimeId = Context.runtimeIdIncrementalVariable++;
+   private static contexts = new Map<number, Context>();
+   public constructor() {
+      Context.contexts.set(this.runtimeId, this);
+   }
+
+   public static getRuntimeModule(id: number, name: string) {
+      const context = this.contexts.get(id)!;
+      return context.moduleSymbols.get(name)?.getRuntimeValue(context);
+   }
    public readonly plugins: Set<PluginContext> = new Set();
    public readonly moduleSymbols: Map<string, ModuleSymbol> = new Map();
    // Compiled modules
@@ -22,5 +31,6 @@ export class Context {
       this.nativeHandles.add(handle);
       return handle;
    }
+
    //#endregion
 }

@@ -18,6 +18,7 @@ import {
    CompilableSymbol,
    ConstantValueSymbol,
    ConstructableSymbol,
+   Context,
    EnumerableAPISymbol,
    FunctionSymbol,
    functionType,
@@ -99,11 +100,21 @@ export class BinaryLoaderContext {
    }
    public readonly loadedModuleSymbols: Map<string, ModuleSymbol> = new Map();
 
-   public async loadModules(versions: Map<string, string>) {
+   public async loadModules(versions: Map<string, string>, context: Context) {
       console.log('loading modules', versions);
       const str = this.preparedImage.stringSlices.fromIndex;
 
-      for (const [name, version] of versions) {
+      const modulesToLoad: PreparedModule[] = [];
+
+      // JUST FOR SAKE OF TEST REMOVE LATER PLEASE
+      const commonLast = this.preparedImage.modules
+         .filter(e => str(e.metadata.name) === '@minecraft/common')
+         .map(e => ({ version: str(e.metadata.version), e }))
+         .sort((a, b) => b.version.localeCompare(a.version));
+      modulesToLoad.push(commonLast[0]!.e);
+      // END
+
+      for (const [name, version] of versions.entries()) {
          const mod = this.preparedImage.modules.find(
             e => str(e.metadata.name) === name && str(e.metadata.version) === version,
          );
@@ -113,7 +124,13 @@ export class BinaryLoaderContext {
             continue;
          }
 
-         this.getSymbolForPreparedModule(mod);
+         modulesToLoad.push(mod);
+      }
+
+      for (const mod of modulesToLoad) {
+         const symbol = this.getSymbolForPreparedModule(mod);
+         console.log('loadModules loaded', symbol.name);
+         context.moduleSymbols.set(symbol.name, symbol);
       }
    }
    public getSymbolForPreparedModule(prepared: PreparedModule): ModuleSymbol {

@@ -8,6 +8,7 @@ import { main } from './main';
 async function readAndMaybeRunBds(file: string): Promise<object> {
    const filepath = path.join(CACHE_OUTPUT_DIR, file);
    if (!existsSync(filepath)) await main();
+
    if (!existsSync(filepath)) {
       throw new Error('No file generated at ' + file + ' even after bds dump');
    }
@@ -16,10 +17,10 @@ async function readAndMaybeRunBds(file: string): Promise<object> {
 }
 
 async function readReport(name: string) {
-   return readAndMaybeRunBds(path.join(CACHE_OUTPUT_DIR, 'reports', name));
+   return readAndMaybeRunBds(path.join('report', name));
 }
 
-export const readTestReport = readReport.bind('api.json') as () => Promise<TestsReport>;
+export const readTestReport = readReport.bind(null, 'tests.json') as () => Promise<TestsReport>;
 
 // Dev mode only function. No need to be in provider
 export async function getOrGenerateMetadataFilepath(): Promise<string> {
