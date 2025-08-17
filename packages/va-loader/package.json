@@ -9,7 +9,7 @@
          "rolldown": null
       },
       "./node": {
-         "default": "./dist/node-default.js",
+         "default": "./dist/index.js",
          "types": "./src/node-default/index.ts",
          "rolldown": null
       },

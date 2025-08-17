@@ -1,8 +1,11 @@
+import { Context } from '@bedrock-apis/virtual-apis';
 import { createCodeURL } from '../create-code-url';
 import { getModuleVersions } from '../get-module-versions';
 
-export function virtualApi(): import('vitest/node').Vite.Plugin {
+export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
    const versions = getModuleVersions();
+   const context = new Context();
+   for (const [module, version] of versions) context;
 
    const virtualPrefix = '/@virtual:bedrock-apis-virtual-apis/';
    return {

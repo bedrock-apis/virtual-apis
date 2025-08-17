@@ -7,6 +7,7 @@ import {
    ExportType,
    ImageModuleData,
    ModuleMetadata,
+   SerializableModule,
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
@@ -72,7 +73,7 @@ export class BinaryLoaderContext {
          typeSlices: new IndexedAccessor(types),
          modules: modules.map(_ => ({
             metadata: _.metadata as Required<ModuleMetadata>,
-            read: () => BinaryIO.readEncapsulatedData(_),
+            read: () => (BinaryIO.readEncapsulatedData(_) as SerializableModule).data,
          })),
          details: new IndexedAccessor(details),
       } satisfies PreparedImage;
@@ -237,7 +238,8 @@ export class BinaryLoaderContext {
       if (allOf(type.flags, TypeBitFlagsU16.IsBindType)) {
          const bindTypeName = this.stringAccessor.fromIndex(bindTypeNameId!);
          let bindType: CompilableSymbol<unknown> | null;
-         if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.IsExternalBindType)) {
+         if (BitFlags.allOf(type.flags, TypeBitFlagsU16.IsExternalBindType)) {
+            console.log(type);
             const moduleSymbol = this.loadedModuleSymbols.get(this.stringAccessor.fromIndex(fromModuleInfo!.nameId));
             if (!moduleSymbol)
                throw new ReferenceError(
@@ -276,8 +278,8 @@ export class BinaryLoaderContext {
       if (allOf(flags, TypeBitFlagsU16.IsNumberType)) {
          return numberRange ? new NumberType(numberRange) : NumberType.default;
       }
-
-      throw new ReferenceError(`resolveType - Unknown type: ${flags}`);
+      if (flags === 0) return voidType;
+      throw new ReferenceError(`resolveType - Unknown type: ${flags} ${JSON.stringify(type)}`);
    }
    // For example you can set @minecraft/common, to all all versions of this module
    // you can also specify the version, eg. @minecraft/common@1.0.0-beta for example
