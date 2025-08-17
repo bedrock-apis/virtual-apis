@@ -28,6 +28,10 @@ function run() {
       promise: new Promise<void>((resolve, reject) => {
          child.stdout.pipe(process.stdout);
          child.stderr.pipe(process.stderr);
+         child.stdout.on('data', chunk => {
+            const str: string = chunk.toString();
+            console.log({ str });
+         });
          child.on('error', reject);
          child.on('close', (...args) => console.log('close', ...args));
          child.on('disconnect', (...args) => console.log('disconnect', ...args));
