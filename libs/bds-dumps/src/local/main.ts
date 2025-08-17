@@ -26,20 +26,22 @@ function run() {
    return {
       child,
       promise: new Promise<void>((resolve, reject) => {
+         let exited = false;
+         const exit = () => {
+            if (exited) return;
+            exited = true;
+            console.log(`🎉 BDS run done in ${((Date.now() - start) / 1000).toFixed(2)}s`);
+            resolve();
+         };
          child.stdout.pipe(process.stdout);
          child.stderr.pipe(process.stderr);
          child.stdout.on('data', chunk => {
-            const str: string = chunk.toString();
-            console.log({ str });
+            if (chunk.toString() === 'Quit correctly.') exit();
          });
          child.on('error', reject);
-         child.on('close', (...args) => console.log('close', ...args));
-         child.on('disconnect', (...args) => console.log('disconnect', ...args));
          child.on('exit', code => {
-            console.error({ code });
             if (code !== 0) return reject(new Error('BDS exited with exit code ' + code));
-            console.log(`🎉 BDS run done in ${((Date.now() - start) / 1000).toFixed(2)}s`);
-            resolve();
+            exit();
          });
       }),
    };
