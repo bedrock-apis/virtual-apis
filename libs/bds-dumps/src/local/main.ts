@@ -29,6 +29,8 @@ function run() {
          child.stdout.pipe(process.stdout);
          child.stderr.pipe(process.stderr);
          child.on('error', reject);
+         child.on('close', (...args) => console.log('close', ...args));
+         child.on('disconnect', (...args) => console.log('disconnect', ...args));
          child.on('exit', code => {
             console.error({ code });
             if (code !== 0) return reject(new Error('BDS exited with exit code ' + code));
