@@ -36,7 +36,7 @@ function run() {
          child.stdout.pipe(process.stdout);
          child.stderr.pipe(process.stderr);
          child.stdout.on('data', chunk => {
-            if (chunk.toString() === 'Quit correctly.') exit();
+            if (chunk.toString().trim() === 'Quit correctly') exit();
          });
          child.on('error', reject);
          child.on('exit', code => {
