@@ -30,6 +30,7 @@ function run() {
          child.stderr.pipe(process.stderr);
          child.on('error', reject);
          child.on('exit', code => {
+            console.error({ code });
             if (code !== 0) return reject(new Error('BDS exited with exit code ' + code));
             console.log(`🎉 BDS run done in ${((Date.now() - start) / 1000).toFixed(2)}s`);
             resolve();
