@@ -30,6 +30,8 @@ function run() {
          const exit = () => {
             if (exited) return;
             exited = true;
+            if (!child.killed) child.kill();
+            child.unref();
             console.log(`🎉 BDS run done in ${((Date.now() - start) / 1000).toFixed(2)}s`);
             resolve();
          };
