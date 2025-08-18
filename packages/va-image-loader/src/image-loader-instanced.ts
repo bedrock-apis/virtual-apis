@@ -41,10 +41,6 @@ import {
    VariantType,
    voidType,
 } from '@bedrock-apis/virtual-apis';
-import fs from 'node:fs/promises';
-import module from 'node:module';
-import path from 'node:path';
-import url from 'node:url';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;
@@ -64,21 +60,6 @@ export class BinaryLoaderContext {
    protected constructor(public readonly preparedImage: PreparedImage) {
       this.stringAccessor = this.preparedImage.stringSlices;
       this.typeAccessor = this.preparedImage.typeSlices;
-   }
-   public static async getImageFromNodeModules(): Promise<Uint8Array<ArrayBufferLike>> {
-      try {
-         // It is required to make node think we are importing all modules from the cwd, because
-         // otherwise they will not resolve
-         //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
-         const require = module.createRequire(url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
-         const installed = require.resolve('@bedrock-apis/va-images');
-         return new Uint8Array(await fs.readFile(installed));
-      } catch (e) {
-         if (!(e instanceof Error && 'code' in e && e.code === 'MODULE_NOT_FOUND')) {
-            throw new Error('Module @bedrock-apis/va-images not found');
-         }
-         throw e;
-      }
    }
    public static create(buffer: Uint8Array): BinaryLoaderContext {
       return new this(this.getPreparedImageFromRaw(buffer));
@@ -152,6 +133,7 @@ export class BinaryLoaderContext {
       ////////////////////////////////
       // Resolve dependencies
       ////////////////////////////////
+      //#region Dependencies
       for (const dependency of prepared.metadata.dependencies) {
          const name = stringOf(dependency.name!);
          if (this.loadedModuleSymbols.has(name)) {
@@ -169,6 +151,7 @@ export class BinaryLoaderContext {
 
          dependencies[name] = this.getSymbolForPreparedModule(prepared);
       }
+      //#endregion Dependencies
 
       // Load Symbols
       const namedSymbols: Record<string, CompilableSymbol<unknown>> = {};
@@ -176,6 +159,8 @@ export class BinaryLoaderContext {
       const { symbols } = prepared.read();
 
       //Base Symbol Creation
+      //#region Exports
+
       for (const symbol of symbols) {
          //Skip all not module based symbols
          if (!anyOf(symbol.bitFlags, SymbolBitFlags.IsExportedSymbol)) continue;
@@ -218,6 +203,7 @@ export class BinaryLoaderContext {
          base.symbols.add(s);
          base.publicSymbols.set(s.name, s);
       }
+      //#endregion
 
       const getDetails = this.preparedImage.details.fromIndex;
       //Again but all symbols with type resolution now
@@ -263,7 +249,6 @@ export class BinaryLoaderContext {
                      const type = this.resolveType(symbol.isInterfaceData.types[i]!, namedSymbols);
                      (s as InterfaceSymbol).properties.set(keyName, type);
                   }
-
                break;
          }
 

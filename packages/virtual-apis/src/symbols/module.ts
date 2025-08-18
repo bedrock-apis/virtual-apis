@@ -1,5 +1,6 @@
 import type { Context } from '../context/base';
 import { CompilableSymbol } from '../symbols/abstracts';
+import { InterfaceSymbol } from './interface';
 
 // Kernel Safe as its extracted in initialization before any plugins or addons code
 const { defineProperty, create } = Object;
@@ -13,13 +14,14 @@ export class ModuleSymbol extends CompilableSymbol<object> {
       for (const symbol of this.symbols.values()) symbol.getRuntimeValue(context);
 
       const moduleObject = create(null);
-      for (const key of this.publicSymbols.keys())
-         defineProperty(moduleObject, key, {
-            configurable: false,
-            writable: false,
-            enumerable: true,
-            value: this.publicSymbols.get(key)!.getRuntimeValue(context),
-         });
+      for (const symbol of this.publicSymbols.values())
+         if (!(symbol instanceof InterfaceSymbol))
+            defineProperty(moduleObject, symbol.name, {
+               configurable: false,
+               writable: false,
+               enumerable: true,
+               value: symbol.getRuntimeValue(context),
+            });
 
       return moduleObject;
    }
