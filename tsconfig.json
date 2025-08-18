@@ -1,7 +1,9 @@
 {
    "compilerOptions": {
       "target": "esnext",
-      "lib": ["ESNext"],
+      "lib": [
+         "ESNext"
+      ],
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
@@ -15,6 +17,18 @@
       "skipLibCheck": true,
       "noImplicitOverride": true
    },
-   "include": ["./packages/**/*.ts", "./libs/**/*.ts", "./tools/**/*.ts", "*.config.ts", "packages/va-image-loader"],
-   "exclude": ["**/bin/**/*", "**/dist/**/*"]
+   "include": [
+      "./packages/**/*.ts",
+      "./libs/**/*.ts",
+      "./tools/**/*.ts",
+      "*.config.ts",
+      "packages/va-image-loader",
+      "legacy-store/image-loader.ts",
+      "legacy-store/symbol-loader.ts",
+      "legacy-store/types-loader.ts"
+   ],
+   "exclude": [
+      "**/bin/**/*",
+      "**/dist/**/*"
+   ]
 }

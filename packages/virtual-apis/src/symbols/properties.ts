@@ -3,24 +3,30 @@ import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
-import { ConstructableSymbol } from './abstracts/constructable';
 import { InvocableSymbol } from './abstracts/invocable';
+import { ConstructableSymbol } from './constructable';
 
+const { defineProperty, getOwnPropertyDescriptor } = Reflect;
 export class PropertySetterSymbol
    extends InvocableSymbol<(...params: unknown[]) => unknown>
    implements IBindableSymbol
 {
+   protected override readonly stackTrimEncapsulation: number = 2;
+   public constructor() {
+      super();
+      this.setParamsLength(1);
+   }
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
-      function runnable(this: unknown, ...params: unknown[]): unknown {
+      function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, [params[0]]);
-         info.setThisObject(this);
+         info.setThisObject(that);
          const { diagnostics } = info;
 
-         if (context.isNativeHandle(this))
+         if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('setter', symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
@@ -29,7 +35,7 @@ export class PropertySetterSymbol
          // Correct implementation is to create new DiagnosticsStackReport and pass it here and manually creating the right base message
          // - BaseError: "Failed to set member"
          //     - SubError: Type mismatch for "this" value
-         symbol.thisType.isValidValue(diagnostics.errors, this);
+         symbol.thisType.isValidValue(diagnostics.errors, that);
 
          return symbol.runtimeGetResult(info);
       }
@@ -39,16 +45,15 @@ export class PropertySetterSymbol
       return executable;
    }
    public compileAssignment(context: Context, runtime: unknown): void {
-      const descriptor = Reflect.getOwnPropertyDescriptor(runtime as object, this.name) ?? {
+      const descriptor = getOwnPropertyDescriptor(runtime as object, this.name) ?? {
          configurable: true,
          enumerable: false,
-         writable: true,
       };
       descriptor.set = this.getRuntimeValue(context)!;
-      Reflect.defineProperty(runtime as object, this.name, descriptor);
+      defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {
-      return super.setIdentifier(`${this.thisType.identifier}::${identifier} setter`);
+      return super.setIdentifier(`${identifier} setter`);
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;
@@ -64,19 +69,25 @@ export class PropertyGetterSymbol
    extends InvocableSymbol<(...params: unknown[]) => unknown>
    implements IBindableSymbol
 {
+   protected override readonly stackTrimEncapsulation: number = 2;
+   public constructor() {
+      super();
+      this.setParamsLength(0);
+   }
    public readonly thisType!: ConstructableSymbol;
+   public readonly isRuntimeBaked: boolean = false;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // oxlint-disable-next-line no-this-alias
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
-      function runnable(this: unknown, ..._: unknown[]): unknown {
+      function runnable(that: unknown, ..._: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, []);
-         info.setThisObject(this);
+         info.setThisObject(that);
          const { diagnostics } = info;
 
          // If Config["Getter Require Valid Handle"] return undefined, without throwing
-         if (context.isNativeHandle(this))
+         if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('getter', symbol.identifier));
 
          //This check can be omitted as always results as successful
@@ -90,19 +101,22 @@ export class PropertyGetterSymbol
       return executable;
    }
    public compileAssignment(context: Context, runtime: unknown): void {
-      const descriptor = Reflect.getOwnPropertyDescriptor(runtime as object, this.name) ?? {
+      const descriptor = getOwnPropertyDescriptor(runtime as object, this.name) ?? {
          configurable: true,
          enumerable: false,
-         writable: true,
       };
       descriptor.get = this.getRuntimeValue(context)!;
-      Reflect.defineProperty(runtime as object, this.name, descriptor);
+      defineProperty(runtime as object, this.name, descriptor);
    }
    public override setIdentifier(identifier: string): this {
-      return super.setIdentifier(`${this.thisType.identifier}::${identifier} getter`);
+      return super.setIdentifier(`${identifier} getter`);
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;
+      return this;
+   }
+   public setIsRuntimeBaked(isBaked: boolean): this {
+      (this as Mutable<this>).isRuntimeBaked = isBaked;
       return this;
    }
 

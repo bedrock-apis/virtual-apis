@@ -280,11 +280,12 @@ export class MetadataToSerializableTransformer {
             .setName(e.name)
             .setBindType(metadata.type)
             .setInvocable(e.get_privilege)
-            .setTypeFor(e.type);
+            .setTypeFor(e.type)
+            .addBits(SymbolBitFlags.IsProperty);
 
          if (!e.is_read_only) $.setSetter(e.set_privilege);
          if (e.is_static) $.addBits(SymbolBitFlags.IsStatic);
-
+         if (e.is_baked) $.addBits(SymbolBitFlags.IsBakedProperty);
          return $;
       });
 

@@ -100,6 +100,7 @@ export interface Privilege {
 export interface MetadataPropertyMemberDefinition extends MetadataMemberDefinition, MetadataTypedDefinition {
    get_privilege: Privilege[];
    set_privilege: Privilege[];
+   is_baked: boolean;
 }
 
 export interface MetadataFunctionArgumentDefinition extends MetadataDefinition, MetadataTypedDefinition {

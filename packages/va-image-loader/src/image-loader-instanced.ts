@@ -4,10 +4,12 @@ import {
    BinaryIO,
    BinarySymbolStruct,
    BinaryTypeStruct,
+   bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
    ExportType,
    ImageModuleData,
    ModuleMetadata,
    SerializableModule,
+   SpecificSymbolFlags,
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
@@ -24,10 +26,13 @@ import {
    functionType,
    InterfaceSymbol,
    InvocableSymbol,
+   MethodSymbol,
    ModuleSymbol,
    NumberType,
    ObjectValueSymbol,
    ParamsValidator,
+   PropertyGetterSymbol,
+   PropertySetterSymbol,
    RuntimeType,
    stringType,
 } from '@bedrock-apis/virtual-apis';
@@ -126,6 +131,7 @@ export class BinaryLoaderContext {
       const {
          stringAccessor: { fromIndex: stringOf },
       } = this;
+      const r = this.resolveType.bind(this);
       const { anyOf } = BitFlags;
 
       const base = new ModuleSymbol().setName(stringOf(prepared.metadata.name));
@@ -206,70 +212,159 @@ export class BinaryLoaderContext {
       //#endregion
 
       const getDetails = this.preparedImage.details.fromIndex;
+      const symbolCreationCode = {
+         [SpecificSymbolFlags.ExportedError](f, s, l) {
+            //IDk for now?
+            this[SpecificSymbolFlags.ExportedClass]?.(f, s, l);
+         },
+         [SpecificSymbolFlags.ExportedClass](flags, symbol, list) {
+            const s = exportedSubMap.get(symbol)!;
+            list.push(s);
+            if (anyOf(flags, SymbolBitFlags.HasType))
+               if (symbol.hasType) {
+                  const ht = r(symbol.hasType, namedSymbols);
+                  if (!(ht instanceof ConstructableSymbol))
+                     throw new TypeError('Parent class must by constructable symbol only.');
+
+                  (s as ConstructableSymbol).setParent(ht);
+               }
+         },
+         [SpecificSymbolFlags.ExportedObject](flags, symbol, list) {
+            const s = exportedSubMap.get(symbol)!;
+            list.push(s);
+            if (anyOf(flags, SymbolBitFlags.HasType))
+               if (symbol.hasType) {
+                  const ht = r(symbol.hasType, namedSymbols);
+                  if (!(ht instanceof ConstructableSymbol))
+                     throw new TypeError('Parent class must by constructable symbol only.');
+
+                  (s as ObjectValueSymbol).setConstructable(ht);
+               }
+         },
+         [SpecificSymbolFlags.ExportedInterface](flags, symbol, list) {
+            const s = exportedSubMap.get(symbol)!;
+            list.push(s);
+            //TODO - Interface actually also might have parent types like interface theoretical inheritance
+            if (symbol.isInterfaceData)
+               for (let i = 0; i < symbol.isInterfaceData.keys.length; i++) {
+                  const keyName = stringOf(symbol.isInterfaceData.keys[i]!);
+                  const type = r(symbol.isInterfaceData.types[i]!, namedSymbols);
+                  (s as InterfaceSymbol).properties.set(keyName, type);
+               }
+         },
+         [SpecificSymbolFlags.ExportedConstant](flags, symbol, list) {
+            list.push(exportedSubMap.get(symbol)!);
+         },
+         [SpecificSymbolFlags.ExportedEnum](flags, symbol, list) {
+            list.push(exportedSubMap.get(symbol)!);
+         },
+         [SpecificSymbolFlags.ExportedFunction](flags, symbol, list) {
+            const s = exportedSubMap.get(symbol)!;
+            list.push(s);
+            console.log(stringOf(symbol.name));
+            if (!symbol.hasType) throw new ReferenceError('ExportedFunction missing function information');
+            applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), s as InvocableSymbol<unknown>);
+         },
+         [SpecificSymbolFlags.MethodFunction](flags, symbol, list) {
+            const isStatic = BitFlags.allOf(flags, SymbolBitFlags.IsStatic);
+            const s = isStatic ? new FunctionSymbol() : new MethodSymbol();
+            list.push(s);
+            if (symbol.hasType === undefined || symbol.boundTo === undefined)
+               throw new ReferenceError('MethodFunction missing function information');
+            applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), s);
+
+            const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+
+            if (s instanceof MethodSymbol) s.setThisType(base);
+            base[isStatic ? 'staticFields' : 'prototypeFields'].add(s);
+            s.setIdentifier(`${base.name}::${stringOf(symbol.name)}`);
+         },
+         [SpecificSymbolFlags.ConstructorInformation](flags, symbol) {
+            // No push as this symbol is identical to ExportClass option
+            if (symbol.hasType === undefined || symbol.boundTo === undefined)
+               throw new ReferenceError('ConstructorInformation missing constructor information');
+            const boundToConstructor = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+            applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), boundToConstructor);
+            boundToConstructor.setIsConstructable(true);
+         },
+         [SpecificSymbolFlags.BoundConstant](flags, symbol, list) {
+            if (symbol.boundTo === undefined) throw new ReferenceError('BoundConstant missing bound type information');
+            const boundToConstructor = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+            const isStatic = BitFlags.allOf(flags, SymbolBitFlags.IsStatic);
+            const s = new ConstantValueSymbol();
+            list.push(s);
+            s.setValue(symbol.hasValue);
+            boundToConstructor[isStatic ? 'staticFields' : 'prototypeFields'].add(s);
+         },
+         [SpecificSymbolFlags.BoundProperty](flags, symbol, list) {
+            const isStatic = BitFlags.allOf(flags, SymbolBitFlags.IsStatic);
+            if (symbol.boundTo === undefined || symbol.hasType === undefined)
+               throw new ReferenceError('MethodFunction missing function information');
+
+            const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+            const registry = base[isStatic ? 'staticFields' : 'prototypeFields'];
+            const selfName = stringOf(symbol.name);
+
+            const getter = new PropertyGetterSymbol();
+            list.push(getter);
+            if (!isStatic) getter.setThisType(base);
+            getter.setParams(new ParamsValidator([r(symbol.hasType, namedSymbols)]));
+            getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
+            getter.setIdentifier(`${base.name}::${selfName}`);
+            registry.add(getter);
+
+            if (BitFlags.anyOf(flags, SymbolBitFlags.HasSetter)) {
+               const setter = new PropertySetterSymbol();
+               list.push(setter);
+               if (!isStatic) setter.setThisType(base);
+               setter.setParams(new ParamsValidator([]));
+               setter.setIdentifier(`${base.name}::${selfName}`);
+            }
+         },
+      } satisfies Record<
+         number,
+         (flags: number, symbol: BinarySymbolStruct, compilableSymbols: CompilableSymbol<unknown>[]) => void
+      >;
+
       //Again but all symbols with type resolution now
       for (const symbol of symbols) {
          const { bitFlags: flags } = symbol;
-         const hasType = anyOf(flags, SymbolBitFlags.HasType) ? this.resolveType(symbol.hasType!, namedSymbols) : null;
-
-         let s: CompilableSymbol<unknown> | null = null;
-         if (anyOf(flags, SymbolBitFlags.IsExportedSymbol)) s = exportedSubMap.get(symbol)!;
-         if (!s)
-            named: {
-               if (anyOf(symbol.bitFlags, SymbolBitFlags.IsConstructor)) {
-                  if (!(hasType instanceof ConstructableSymbol))
-                     throw new TypeError("Constructor's binding type has to be constructable symbol");
-                  s = hasType.setIsConstructable(true);
-                  break named;
-               }
-               continue;
-            }
-
-         switch (symbol.bitFlags & SymbolBitFlags.ExportTypeMask) {
-            case ExportType.Error:
-            case ExportType.Class:
-               if (hasType) {
-                  if (!(hasType instanceof ConstructableSymbol))
-                     throw new TypeError('Parent class must by constructable symbol only.');
-
-                  (s as ConstructableSymbol).setParent(hasType);
-               }
-               break;
-            case ExportType.Object:
-               if (hasType) {
-                  if (!(hasType instanceof ConstructableSymbol))
-                     throw new TypeError('Parent class must by constructable symbol only.');
-
-                  (s as ObjectValueSymbol).setConstructable(hasType);
-               }
-               break;
-            case ExportType.Interface:
-               if (symbol.isInterfaceData)
-                  for (let i = 0; i < symbol.isInterfaceData.keys.length; i++) {
-                     const keyName = stringOf(symbol.isInterfaceData.keys[i]!);
-                     const type = this.resolveType(symbol.isInterfaceData.types[i]!, namedSymbols);
-                     (s as InterfaceSymbol).properties.set(keyName, type);
-                  }
-               break;
-         }
-
-         if (symbol.functionArguments) {
-            if (hasType) (s as InvocableSymbol<unknown>).setReturnType(hasType);
-            const paramValidator = new ParamsValidator(
-               symbol.functionArguments.map(_ => this.resolveType(_, namedSymbols)),
+         const compSymbols: CompilableSymbol<undefined>[] = [];
+         const currentExactBit = flags & bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot;
+         if (!(currentExactBit in symbolCreationCode))
+            throw new ReferenceError(
+               'No creating code for this bit combination: ' +
+                  currentExactBit +
+                  ' fullSymbolBits: ' +
+                  this.debugInternalSymbolListBitFlags(flags),
             );
-            if (symbol.functionArgumentsDetails) {
-               const index = symbol.functionArgumentsDetails.findIndex(
-                  _ => ('defaultValue' satisfies keyof BinaryDetailsStruct) in getDetails(_),
-               );
-               paramValidator.setMinimumParamsRequired(index);
-            }
-            (s as InvocableSymbol<unknown>).setParamsLength(symbol.functionArguments.length).setParams(paramValidator);
+         symbolCreationCode[currentExactBit as SpecificSymbolFlags.MethodFunction](flags, symbol, compSymbols);
+
+         // Shared code
+         for (const sm of compSymbols) {
+            if (!sm.name) sm.setName(stringOf(symbol.name));
          }
       }
 
+      function applyFunctionInformation(
+         symbol: BinarySymbolStruct,
+         returnType: RuntimeType,
+         runtime: InvocableSymbol<unknown>,
+      ) {
+         if (returnType) runtime.setReturnType(returnType);
+         const paramValidator = new ParamsValidator(symbol.functionArguments!.map(_ => r(_, namedSymbols)));
+         if (symbol.functionArgumentsDetails) {
+            const index = symbol.functionArgumentsDetails.findIndex(
+               _ => ('defaultValue' satisfies keyof BinaryDetailsStruct) in getDetails(_),
+            );
+            paramValidator.setMinimumParamsRequired(index);
+         }
+         runtime.setParamsLength(symbol.functionArguments!.length).setParams(paramValidator);
+      }
       return base;
    }
 
+   // Type Loading is pretty much done
    public resolveType(number: number, currentExports: Record<string, CompilableSymbol<unknown>>): RuntimeType {
       const { allOf } = BitFlags;
       const type = this.typeAccessor.fromIndex(number);
@@ -278,7 +373,6 @@ export class BinaryLoaderContext {
          const bindTypeName = this.stringAccessor.fromIndex(bindTypeNameId!);
          let bindType: CompilableSymbol<unknown> | null;
          if (BitFlags.allOf(type.flags, TypeBitFlagsU16.IsExternalBindType)) {
-            console.log(type);
             const moduleSymbol = this.loadedModuleSymbols.get(this.stringAccessor.fromIndex(fromModuleInfo!.nameId));
             if (!moduleSymbol)
                throw new ReferenceError(
@@ -327,4 +421,12 @@ export class BinaryLoaderContext {
    // so we have to check if the version is allowed and throw if not, MC engine also fails
    // if the modules version dependencies doesn't properly matches
    public resolver?: (name: string, versions?: string[]) => { name: string; version: string };
+   private debugInternalSymbolListBitFlags(flags: number): string {
+      return Object.keys(SymbolBitFlags)
+         .filter(_ => isNaN(Number(_)))
+         .map(
+            _ => `${_}: ${BitFlags.anyOf(flags, SymbolBitFlags[_ as unknown as SymbolBitFlags] as unknown as number)}`,
+         )
+         .join('\n');
+   }
 }

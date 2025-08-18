@@ -1,4 +1,5 @@
 export * from './abstracts';
+export * from './constructable';
 export * from './enums';
 export * from './function';
 export * from './interface';

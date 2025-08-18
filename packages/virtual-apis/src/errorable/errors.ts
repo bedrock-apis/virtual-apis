@@ -63,8 +63,8 @@ export const API_ERRORS_MESSAGES = {
       ErrorFactory.new(`Native ${kind} [${id}] does not have required privileges.`, TYPE_ERROR_TYPE),
    NativeBound: (kind: NativeKind, id: string) =>
       ErrorFactory.new(`Native ${kind} [${id}] object bound to prototype does not exist.`, REFERENCE_ERROR_TYPE),
-   NativeConversionFailed: (type: NativeTypeKind) =>
-      ErrorFactory.new(`Native ${type} conversion failed.`, TYPE_ERROR_TYPE), //Type error
+   NativeConversionFailed: (type: NativeTypeKind, additional?: string) =>
+      ErrorFactory.new(`Native ${type} conversion failed.${additional ?? ''}`, TYPE_ERROR_TYPE), //Type error
    ObjectHasInvalidHandle: () => ErrorFactory.new(`Object has an invalid native handle.`, TYPE_ERROR_TYPE), // Type Error
    ObjectDidNotHaveHandle: () => ErrorFactory.new(`Object did not have a native handle.`, TYPE_ERROR_TYPE), // Type Error
    ArrayUnsupportedType: () => ErrorFactory.new(`Array contains unsupported type.`, TYPE_ERROR_TYPE), // Type Error

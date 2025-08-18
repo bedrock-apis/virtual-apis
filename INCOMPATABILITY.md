@@ -9,9 +9,9 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 ```
 
 Suite dynamic properties (chained): 
-  0: Unexpected error: TypeError: world.getDynamicPropertyIds is not a function
+  0: Unexpected error: TypeError: Incorrect number of arguments to function. Expected 0, received 1
   1: 
-    0: Unexpected error: TypeError: world.setDynamicProperty is not a function
+    0: Unexpected error: TypeError: Native type conversion failed.
     1: No result, expected false
     2: No result, expected ""
     3: No result, expected "string"
@@ -21,5 +21,5 @@ Suite dynamic properties (chained):
     7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
     
   
-Suite item (chained): Unexpected setup error: TypeError: Undefined value expected, but received: string
+Suite item (chained): Unexpected setup error: TypeError: Incorrect number of arguments to function. Expected 1-2, received 0
 ```

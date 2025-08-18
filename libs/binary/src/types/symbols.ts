@@ -45,7 +45,25 @@ export enum SymbolBitFlags {
    /** Read functionArgumentsDetails */
    IsDetailedFunction = 1 << 3,
 }
+export enum SpecificSymbolFlags {
+   ExportedError = SymbolBitFlags.IsExportedSymbol | ExportType.Error,
+   ExportedClass = SymbolBitFlags.IsExportedSymbol | ExportType.Class,
+   ExportedConstant = SymbolBitFlags.IsExportedSymbol | ExportType.Constant,
+   ExportedEnum = SymbolBitFlags.IsExportedSymbol | ExportType.Enum,
+   ExportedFunction = SymbolBitFlags.IsExportedSymbol | ExportType.Function,
+   ExportedInterface = SymbolBitFlags.IsExportedSymbol | ExportType.Interface,
+   ExportedObject = SymbolBitFlags.IsExportedSymbol | ExportType.Object,
+   MethodFunction = ExportType.Function | SymbolBitFlags.IsBound,
+   ConstructorInformation = MethodFunction | SymbolBitFlags.IsConstructor,
+   BoundConstant = ExportType.Constant | SymbolBitFlags.IsBound,
+   BoundProperty = SymbolBitFlags.IsProperty | SymbolBitFlags.IsBound,
+}
 
+// This has to be
+export const bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot = Object.keys(SpecificSymbolFlags)
+   .map(Number)
+   .filter(isFinite)
+   .reduce((s, v) => s | v);
 export interface BinarySymbolStruct {
    bitFlags: number;
    name: IndexId;

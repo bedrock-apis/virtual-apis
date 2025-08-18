@@ -3,21 +3,22 @@ import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
-import type { ConstructableSymbol } from './abstracts/constructable';
 import { InvocableSymbol } from './abstracts/invocable';
+import type { ConstructableSymbol } from './constructable';
 
 export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
+   protected override readonly stackTrimEncapsulation: number = 2; // proxified
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
-      function runnable(this: unknown, ...params: unknown[]): unknown {
+      function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(this);
+         info.setThisObject(that);
          const { diagnostics } = info;
 
-         if (context.isNativeHandle(this))
+         if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('function', symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
@@ -36,9 +37,6 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
          writable: true,
          value: this.getRuntimeValue(context),
       });
-   }
-   public override setIdentifier(identifier: string): this {
-      return super.setIdentifier(`${this.thisType.identifier}::${identifier}`);
    }
 
    public setThisType(type: ConstructableSymbol): this {

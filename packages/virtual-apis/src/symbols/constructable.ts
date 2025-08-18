@@ -1,11 +1,11 @@
-import { finalizeAsConstructable } from '../../ecma-utils';
-import { InvocableSymbol } from './invocable';
+import { finalizeAsConstructable } from '../ecma-utils';
+import { InvocableSymbol } from './abstracts';
 
-import type { Context } from '../../context/base';
-import { InvocationInfo } from '../../context/invocation-info';
-import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../../errorable';
-import { RuntimeType } from '../../runtime-types';
-import { IBindableSymbol } from './bindable';
+import type { Context } from '../context/base';
+import { InvocationInfo } from '../context/invocation-info';
+import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
+import { RuntimeType } from '../runtime-types';
+import { IBindableSymbol } from './abstracts';
 
 const { setPrototypeOf } = Object;
 
@@ -22,6 +22,11 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       this.handles.add(handle);
       return handle;
    }
+   public createRuntimeInstanceInternal(context: Context) {
+      const $ = this.createHandleInternal(context);
+      setPrototypeOf($, this.getRuntimeValue(context).prototype);
+      return $;
+   }
    public override invoke(info: InvocationInfo): void {
       info.result = this.createHandleInternal(info.context);
       super.invoke(info);
@@ -29,10 +34,10 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public override compile(context: Context): new (...params: unknown[]) => unknown {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
-      function constructor(this: unknown, ...params: unknown[]): unknown {
+      function constructor(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(this);
+         info.setThisObject(that);
          info.setNewTargetObject(new.target ?? null);
          const { diagnostics } = info;
 
