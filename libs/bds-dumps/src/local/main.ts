@@ -1,10 +1,19 @@
 import { spawn } from 'node:child_process';
-import { chmod } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { EXPECTED_SOURCE, removeBdsTestConfig, writeBdsTestConfig } from './constants';
+import { chmod, rename } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import {
+   CACHE_DUMP_DIR,
+   CACHE_OUTPUT_DIR,
+   DUMP_CACHE_ZIP,
+   EXPECTED_SOURCE,
+   removeBdsTestConfig,
+   writeBdsTestConfig,
+} from './constants';
 import { prepareBdsAndCacheFolders } from './make-ready';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
+import { unzip } from './make-ready';
+import { createReadStream } from 'node:fs';
 
 function run() {
    const start = Date.now();
@@ -50,6 +59,20 @@ function run() {
 }
 
 export async function main() {
+   if (process.platform === 'win32' || (process.platform === 'linux' && !process.env.GITHUB_ACTION)) {
+      await mainSupported();
+   } else {
+      await mainUnsupported();
+   }
+}
+
+async function mainUnsupported() {
+   const stream = ReadableStream.from(createReadStream(DUMP_CACHE_ZIP).iterator());
+   await unzip(stream, CACHE_OUTPUT_DIR);
+   await rename(join(CACHE_OUTPUT_DIR, 'docs'), join(CACHE_DUMP_DIR, 'docs'));
+}
+
+async function mainSupported() {
    const start = Date.now();
 
    await prepareBdsAndCacheFolders();

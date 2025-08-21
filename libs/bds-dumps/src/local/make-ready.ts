@@ -7,6 +7,41 @@ import { Readable } from 'node:stream';
 import { UnzipStreamConsumer } from 'unzip-web-stream';
 import { CACHE_DUMP_DIR, CACHE_EXECUTABLE_DIR, CACHE_OUTPUT_DIR, EXPECTED_SOURCE } from './constants';
 
+export async function unzip(stream: ReadableStream, basePath: string) {
+   const promises: Promise<void>[] = [];
+
+   let filesExtracted = 0;
+   let lastUpdate = performance.now();
+   const startTime = lastUpdate;
+   console.log('unzipping to', basePath);
+   await stream.pipeTo(
+      new UnzipStreamConsumer({
+         async onFile(report, readable) {
+            const path = resolve(basePath, report.path);
+            const dir = dirname(path);
+            filesExtracted++;
+            if (!existsSync(dir)) {
+               await mkdir(dir, { recursive: true });
+            }
+            if (lastUpdate + 200 < performance.now()) {
+               lastUpdate = performance.now();
+               console.log(
+                  `📦\t...${path} \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
+               );
+            }
+            promises.push(
+               new Promise(res => Readable.fromWeb(readable).pipe(createWriteStream(path)).on('finish', res)),
+            );
+         },
+      }),
+   );
+   await Promise.all(promises);
+
+   console.log(
+      `\n📦\tExtracting done . . .    ->    \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
+   );
+}
+
 export async function prepareBdsAndCacheFolders(): Promise<void> {
    if (env.REMOVE_CACHE) {
       if (existsSync(CACHE_DUMP_DIR)) await rm(CACHE_DUMP_DIR, { recursive: true, force: true });
@@ -18,41 +53,11 @@ export async function prepareBdsAndCacheFolders(): Promise<void> {
    if (!existsSync(CACHE_DUMP_DIR)) await mkdir(CACHE_DUMP_DIR, { recursive: true });
    else if (existsSync(EXPECTED_SOURCE)) return void console.log('⌚\tCache found . . .');
 
-   const promises: Promise<void>[] = [];
-
-   let filesExtracted = 0;
-   let lastUpdate = performance.now();
-   const startTime = lastUpdate;
-   await (
-      await getSource()
-   ).pipeTo(
-      new UnzipStreamConsumer({
-         async onFile(report, readable) {
-            const path = resolve(CACHE_DUMP_DIR, report.path);
-            const dir = dirname(path);
-            filesExtracted++;
-            if (!existsSync(dir)) {
-               await mkdir(dir, { recursive: true });
-            }
-            if (lastUpdate + 200 < performance.now()) {
-               lastUpdate = performance.now();
-               console.log(
-                  `📦\t...${path.slice(-25)} \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
-               );
-            }
-            promises.push(
-               new Promise(res => Readable.fromWeb(readable).pipe(createWriteStream(path)).on('finish', res)),
-            );
-         },
-      }),
-   );
-   await Promise.all(promises);
+   await unzip(await getSource(), CACHE_DUMP_DIR);
    await appendFile(path.join(CACHE_DUMP_DIR, 'server.properties'), '\n\nemit-server-telemetry=true\n');
-   console.log(
-      `\n📦\tExtracting done . . .    ->    \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
-   );
    console.log('📌\tSuccessfully installed . . .');
 }
+
 export async function getSource(): Promise<ReadableStream> {
    if (env.USE_CACHE) {
       const readable = await getCachedBinary();

@@ -6,6 +6,7 @@ export const CACHE_EXECUTABLE_DIR = resolve(import.meta.dirname, './cache');
 export const CACHE_DUMP_DIR = resolve(import.meta.dirname, './cache-data');
 export const CACHE_OUTPUT_DIR = resolve(import.meta.dirname, './cache-output');
 export const SOURCE_DIR = resolve(import.meta.dirname, '../src/');
+export const DUMP_CACHE_ZIP = resolve(import.meta.dirname, '../dump-output.zip');
 export const EXPECTED_SOURCE = resolve(CACHE_DUMP_DIR, platform === 'win32' ? 'bedrock_server.exe' : 'bedrock_server');
 const FILE_CONTENT_BDS_TEST_CONFIG = JSON.stringify({ generate_documentation: true });
 const FILE_NAME_BDS_TEST_CONFIG = 'test_config.json';
