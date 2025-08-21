@@ -1,4 +1,5 @@
 import { ModuleSymbol } from '../symbols/module';
+import { InvocationInfo } from './invocation-info';
 import { PluginContext } from './plugin';
 
 const { create } = Object;
@@ -11,10 +12,6 @@ export class Context {
       Context.contexts.set(this.runtimeId, this);
    }
 
-   public static getRuntimeModule(id: number, name: string) {
-      const context = this.contexts.get(id)!;
-      return context.moduleSymbols.get(name)?.getRuntimeValue(context);
-   }
    public readonly plugins: Set<PluginContext> = new Set();
    public readonly moduleSymbols: Map<string, ModuleSymbol> = new Map();
    // Compiled modules
@@ -31,6 +28,19 @@ export class Context {
       this.nativeHandles.add(handle);
       return handle;
    }
-
+   public onInvocation(invocationInfo: InvocationInfo) {
+      //      invocationInfo.symbol.identifier;
+   }
+   public registerPlugin(plugin: PluginContext) {
+      this.plugins.add(plugin);
+   }
    //#endregion
+   public dispose(): void {
+      Context.contexts.delete(this.runtimeId);
+      (this as Mutable<this>).nativeHandles = new WeakSet();
+   }
+   public static getRuntimeModule(id: number, name: string) {
+      const context = this.contexts.get(id)!;
+      return context.moduleSymbols.get(name)?.getRuntimeValue(context);
+   }
 }

@@ -22,6 +22,8 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       this.handles.add(handle);
       return handle;
    }
+
+   //This is not solve yet, but required for objects to work yet
    public createRuntimeInstanceInternal(context: Context) {
       const $ = this.createHandleInternal(context);
       setPrototypeOf($, this.getRuntimeValue(context).prototype);

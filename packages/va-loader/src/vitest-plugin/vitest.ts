@@ -1,11 +1,11 @@
-import { BinaryLoaderContext } from '@bedrock-apis/va-image-loader/src/image-loader-instanced';
+import { BinaryLoaderContext } from '@bedrock-apis/va-image-loader';
 import { Context } from '@bedrock-apis/virtual-apis';
 import { createCodeURL } from '../create-code-url';
-import { getModuleVersions } from '../get-module-versions';
+import { getImageFromNodeModules, getModuleVersions } from '../get-module-versions';
 
 export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
    const versions = getModuleVersions();
-   const loader = BinaryLoaderContext.create(await BinaryLoaderContext.getImageFromNodeModules());
+   const loader = BinaryLoaderContext.create(await getImageFromNodeModules());
    const context = new Context();
    await loader.loadModules(versions, context);
 
