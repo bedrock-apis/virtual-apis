@@ -72,8 +72,6 @@ function compareResults(resultA: TestReport.Result, resultB: TestReport.Result):
       }
 
       if (resultA.error !== resultB.error) return `Error mismatch: ${indent(diff(resultA.error, resultB.error))}`;
-
-      return '✅';
    } else {
       if (Array.isArray(resultB)) return 'Unexpected chained result, expected primitive';
 
@@ -82,7 +80,7 @@ function compareResults(resultA: TestReport.Result, resultB: TestReport.Result):
       if (resultA !== resultB) return `Results mismatch: ${indent(diff(resultA, resultB))}`;
    }
 
-   return '';
+   return '✅';
 }
 
 function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestReport.Result[]): string {

@@ -1,10 +1,10 @@
 // VIRTUAL APIS CONFIG
-import { Context } from '@bedrock-apis/virtual-apis';
+// import { Context } from '@bedrock-apis/virtual-apis';
 
-Context.configure({
-   GetterRequireValidBound: true,
-   StrictReturnTypes: false,
-});
+// Context.configure({
+//    GetterRequireValidBound: true,
+//    StrictReturnTypes: false,
+// });
 
 // CORE PLUGINS ENTRYPOINT
 import '@bedrock-apis/core-plugin';
@@ -18,7 +18,7 @@ new EventsPlugin().configure({
 });
 
 // CUSTOM PLUGINS ENTRYPOINT
-import './plugin';
+import './plugin.js';
 
 // SCRIPT API CODE ENTRYPOINT
 import '../scripts/index.js';
