@@ -11,8 +11,8 @@
          "rolldown": null
       },
       "./run": {
-         "default": "./dist/run.js",
-         "types": "./src/local/run.ts",
+         "default": "./dist/main.js",
+         "types": "./src/local/main.ts",
          "rolldown": null
       }
    }

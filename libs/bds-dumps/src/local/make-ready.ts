@@ -5,7 +5,7 @@ import path, { dirname, resolve } from 'node:path';
 import { env, platform } from 'node:process';
 import { Readable } from 'node:stream';
 import { UnzipStreamConsumer } from 'unzip-web-stream';
-import { CACHE_DUMP_DIR, CACHE_EXECUTABLE_DIR, CACHE_OUTPUT_DIR, EXPECTED_SOURCE } from './constants';
+import { CACHE_BDS, CACHE_BDS_DOWNLOAD, CACHE_BDS_EXE_PATH, CACHE_DUMP_OUTPUT } from './constants';
 
 export async function unzip(stream: ReadableStream, basePath: string) {
    const promises: Promise<void>[] = [];
@@ -13,7 +13,7 @@ export async function unzip(stream: ReadableStream, basePath: string) {
    let filesExtracted = 0;
    let lastUpdate = performance.now();
    const startTime = lastUpdate;
-   console.log('unzipping to', basePath);
+   console.log('\n📦\tUnzipping to', basePath);
    await stream.pipeTo(
       new UnzipStreamConsumer({
          async onFile(report, readable) {
@@ -26,7 +26,7 @@ export async function unzip(stream: ReadableStream, basePath: string) {
             if (lastUpdate + 200 < performance.now()) {
                lastUpdate = performance.now();
                console.log(
-                  `📦\t...${path} \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
+                  `📦\t${path} \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
                );
             }
             promises.push(
@@ -38,23 +38,23 @@ export async function unzip(stream: ReadableStream, basePath: string) {
    await Promise.all(promises);
 
    console.log(
-      `\n📦\tExtracting done . . .    ->    \tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
+      `\n📦\tExtracting done . . .\t->\tTotal Files: ${filesExtracted}  Time: ${((lastUpdate - startTime) / 1000).toFixed(1)} \x1b[A`,
    );
 }
 
 export async function prepareBdsAndCacheFolders(): Promise<void> {
    if (env.REMOVE_CACHE) {
-      if (existsSync(CACHE_DUMP_DIR)) await rm(CACHE_DUMP_DIR, { recursive: true, force: true });
+      if (existsSync(CACHE_BDS)) await rm(CACHE_BDS, { recursive: true, force: true });
    }
-   if (existsSync(CACHE_OUTPUT_DIR)) await rm(CACHE_OUTPUT_DIR, { recursive: true, force: true });
+   if (existsSync(CACHE_DUMP_OUTPUT)) await rm(CACHE_DUMP_OUTPUT, { recursive: true, force: true });
 
    // Ensure
-   if (!existsSync(CACHE_EXECUTABLE_DIR)) await mkdir(CACHE_EXECUTABLE_DIR, { recursive: true });
-   if (!existsSync(CACHE_DUMP_DIR)) await mkdir(CACHE_DUMP_DIR, { recursive: true });
-   else if (existsSync(EXPECTED_SOURCE)) return void console.log('⌚\tCache found . . .');
+   if (!existsSync(CACHE_BDS_DOWNLOAD)) await mkdir(CACHE_BDS_DOWNLOAD, { recursive: true });
+   if (!existsSync(CACHE_BDS)) await mkdir(CACHE_BDS, { recursive: true });
+   else if (existsSync(CACHE_BDS_EXE_PATH)) return void console.log('⌚\tCache found . . .');
 
-   await unzip(await getSource(), CACHE_DUMP_DIR);
-   await appendFile(path.join(CACHE_DUMP_DIR, 'server.properties'), '\n\nemit-server-telemetry=true\n');
+   await unzip(await getSource(), CACHE_BDS);
+   await appendFile(path.join(CACHE_BDS, 'server.properties'), '\n\nemit-server-telemetry=true\n');
    console.log('📌\tSuccessfully installed . . .');
 }
 
@@ -87,7 +87,7 @@ export async function getSource(): Promise<ReadableStream> {
    if (!readable) throw new ReferenceError('No content, url:  ' + url);
 
    const [unzip, writeToFile] = readable.tee();
-   const file = resolve(CACHE_EXECUTABLE_DIR, filename);
+   const file = resolve(CACHE_BDS_DOWNLOAD, filename);
    Readable.fromWeb(writeToFile)
       .pipe(createWriteStream(file, { start: 0 }))
       .on('error', () => {
@@ -97,11 +97,11 @@ export async function getSource(): Promise<ReadableStream> {
    return unzip;
 }
 export async function getCachedBinary(): Promise<ReadableStream | null> {
-   for (const data of await readdir(CACHE_EXECUTABLE_DIR, { withFileTypes: true })) {
+   for (const data of await readdir(CACHE_BDS_DOWNLOAD, { withFileTypes: true })) {
       if (!data.isFile()) continue;
       if (!data.name.endsWith('.zip')) continue;
 
-      const path = resolve(CACHE_EXECUTABLE_DIR, data.name);
+      const path = resolve(CACHE_BDS_DOWNLOAD, data.name);
       console.log(`✅\tCache file found: ${data.name}`);
       return ReadableStream.from(createReadStream(path).iterator());
    }

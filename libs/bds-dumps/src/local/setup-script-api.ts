@@ -2,14 +2,14 @@ import { existsSync } from 'node:fs';
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { build } from 'rolldown';
-import { CACHE_DUMP_DIR, SOURCE_DIR } from './constants';
+import { CACHE_BDS, SOURCE_DIR } from './constants';
 
 export async function setupScriptAPI(): Promise<void> {
-   const worlds = resolve(CACHE_DUMP_DIR, './worlds');
+   const worlds = resolve(CACHE_BDS, './worlds');
    if (existsSync(worlds)) await rm(worlds, { recursive: true, force: true });
    await allowAllModules();
 
-   const editorFile = resolve(CACHE_DUMP_DIR, './behavior_packs/editor/scripts/Main.js');
+   const editorFile = resolve(CACHE_BDS, './behavior_packs/editor/scripts/Main.js');
    await prepareManifest();
 
    const addonEntry = resolve(SOURCE_DIR, './client/main.ts');
@@ -19,11 +19,11 @@ export async function setupScriptAPI(): Promise<void> {
 
    await writeFile(editorFile, output.output[0].code);
 
-   console.log('⚙️\t Script API injected . . .');
+   console.log('⚙️\tScript API injected . . .');
 }
 export async function allowAllModules(): Promise<void> {
    await writeFile(
-      resolve(CACHE_DUMP_DIR, './config/default/permissions.json'),
+      resolve(CACHE_BDS, './config/default/permissions.json'),
       JSON.stringify({
          allowed_modules: [
             '@minecraft/diagnostics',
@@ -39,7 +39,7 @@ export async function allowAllModules(): Promise<void> {
    );
 }
 export async function prepareManifest(): Promise<void> {
-   const filename = resolve(CACHE_DUMP_DIR, './behavior_packs/editor/manifest.json');
+   const filename = resolve(CACHE_BDS, './behavior_packs/editor/manifest.json');
    if (!existsSync(filename)) throw new ReferenceError('Corrupted installation or outdated information!!!');
 
    const data = await readFile(filename);

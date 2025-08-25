@@ -2,12 +2,12 @@ import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { TestsReport } from '../shared';
-import { CACHE_DUMP_DIR, CACHE_OUTPUT_DIR } from './constants';
-import { main } from './main';
+import { CACHE_DUMP_OUTPUT } from './constants';
+import { dump } from './dump';
 
 async function readAndMaybeRunBds(file: string): Promise<object> {
-   const filepath = path.join(CACHE_OUTPUT_DIR, file);
-   if (!existsSync(filepath)) await main();
+   const filepath = path.join(CACHE_DUMP_OUTPUT, file);
+   if (!existsSync(filepath)) await dump();
 
    if (!existsSync(filepath)) {
       throw new Error('No file generated at ' + file + ' even after bds dump');
@@ -24,8 +24,8 @@ export const readTestReport = readReport.bind(null, 'tests.json') as () => Promi
 
 // Dev mode only function. No need to be in provider
 export async function getOrGenerateMetadataFilepath(): Promise<string> {
-   const metadata = path.join(CACHE_DUMP_DIR, 'docs/script_modules');
-   if (!existsSync(metadata)) await main();
+   const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
+   if (!existsSync(metadata)) await dump();
    if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
 
    return metadata;

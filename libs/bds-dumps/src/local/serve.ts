@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createServer, Server } from 'node:http';
 import { dirname, resolve } from 'node:path';
-import { CACHE_OUTPUT_DIR } from './constants';
+import { CACHE_DUMP_OUTPUT } from './constants';
 
 export class HTTPServer {
    public readonly server: Server;
@@ -33,7 +33,7 @@ export class HTTPServer {
       console.log(url, 'switch: ' + mainSwitch);
       switch (mainSwitch) {
          case 'report': {
-            const filePath = resolve(CACHE_OUTPUT_DIR, '.' + url);
+            const filePath = resolve(CACHE_DUMP_OUTPUT, '.' + url);
             const dirName = dirname(filePath);
             if (!existsSync(dirName)) await mkdir(dirName, { recursive: true });
             await writeFile(filePath, await response.text());
