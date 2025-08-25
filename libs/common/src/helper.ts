@@ -26,3 +26,5 @@ export function compareVersions(a: string, b: string): number {
    if (!bTag) return 1;
    return [aTag, bTag].sort()[0] == aTag ? 1 : -1;
 }
+
+export const d = console.log.bind(console, '[DEBUG]');

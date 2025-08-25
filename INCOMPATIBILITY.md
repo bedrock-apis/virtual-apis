@@ -12,7 +12,7 @@ Suite block (chained): Unexpected setup error: TypeError: Cannot read properties
 Suite dynamic properties (chained): 
   0: Unexpected error: ReferenceError: Implementation missing depends on context implementation
   1: 
-    0: Unexpected error: TypeError: Undefined value expected, but received: boolean
+    0: Unexpected error: ReferenceError: Implementation missing depends on context implementation
     1: No result, expected false
     2: No result, expected ""
     3: No result, expected "string"
@@ -26,6 +26,16 @@ Suite entity (chained): Unexpected setup error: TypeError: Cannot read propertie
 Suite item (chained): Unexpected setup error: TypeError: Incorrect number of arguments to function. Expected 1-2, received 0
 Suite errors (chained): 
   0: ✅
-  1: Error mismatch: TypeError: Undefined value expected, but received: number != Error: Invalid item identifier 'Yes'.
-  2: Error mismatch: TypeError: Undefined value expected, but received: number != TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
+  1: Error mismatch: TypeError: Native variant type conversion failed. != Error: Invalid item identifier 'Yes'.
+  2: 
+    Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function argument [1] expected type: number
+      TypeError: Native type conversion failed.
+      
+  3: 
+    Error mismatch: 
+      
+      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
+      TypeError: Native variant type conversion failed.
 ```

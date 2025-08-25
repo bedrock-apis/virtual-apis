@@ -34,10 +34,9 @@ export function getModuleVersions(cwd = process.cwd()) {
             const pathToPackage = require.resolve(depName + '/package.json');
             let { version } = JSON.parse(fs.readFileSync(pathToPackage, 'utf-8')) as { version: string };
             version = version.replace(/\.\d+\.\d+\.\d+-(stable|preview).*/, '');
-            console.log(depName, version);
             modules.set(depName, version);
          } catch (e) {
-            console.error('[virtual-api][get-module-versions] Unable to resolve', depName, e);
+            console.error('[virtual-api] [get-module-versions] Unable to resolve', depName, e);
          }
       }
 

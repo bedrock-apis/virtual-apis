@@ -13,7 +13,7 @@ import {
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
-import { BitFlags, IndexedAccessor } from '@bedrock-apis/common';
+import { BitFlags, d, IndexedAccessor } from '@bedrock-apis/common';
 import {
    bigintType,
    booleanType,
@@ -87,18 +87,30 @@ export class BinaryLoaderContext {
    public readonly loadedModuleSymbols: Map<string, ModuleSymbol> = new Map();
 
    public async loadModules(versions: Map<string, string>, context: Context) {
-      console.log('loading modules', versions);
+      d('loading modules', versions);
       const str = this.preparedImage.stringSlices.fromIndex;
 
       const modulesToLoad: PreparedModule[] = [];
 
       // JUST FOR SAKE OF TEST REMOVE LATER PLEASE
       const commonLast = this.preparedImage.modules
-         .filter(e => str(e.metadata.name) === '@minecraft/common')
+         .filter(
+            e => str(e.metadata.name) === '@minecraft/common' || str(e.metadata.name) === '@minecraft/server-admin',
+         )
          .map(e => ({ version: str(e.metadata.version), e }))
          .sort((a, b) => b.version.localeCompare(a.version));
       modulesToLoad.push(commonLast[0]!.e);
+
       // END
+
+      // d(
+      //    'deps',
+      //    this.preparedImage.modules.map(e => ({
+      //       name: str(e.metadata.name),
+      //       version: str(e.metadata.version),
+      //       deps: e.metadata.dependencies.map(e => [str(e.name ?? 0), ...(e.versions?.map(str) ?? [])]),
+      //    })),
+      // );
 
       for (const [name, version] of versions.entries()) {
          const mod = this.preparedImage.modules.find(
@@ -110,12 +122,20 @@ export class BinaryLoaderContext {
             continue;
          }
 
+         if (name === '@minecraft/server-net') {
+            const adminLast = this.preparedImage.modules
+               .filter(e => str(e.metadata.name) === '@minecraft/server-admin')
+               .map(e => ({ version: str(e.metadata.version), e }))
+               .sort((a, b) => b.version.localeCompare(a.version));
+            modulesToLoad.push(adminLast[0]!.e);
+         }
+
          modulesToLoad.push(mod);
       }
 
       for (const mod of modulesToLoad) {
          const symbol = this.getSymbolForPreparedModule(mod);
-         console.log('loadModules loaded', symbol.name);
+         d('loadModules loaded', symbol.name);
          context.moduleSymbols.set(symbol.name, symbol);
       }
    }
@@ -142,6 +162,7 @@ export class BinaryLoaderContext {
       //#region Dependencies
       for (const dependency of prepared.metadata.dependencies) {
          const name = stringOf(dependency.name!);
+         d('dep name', name);
          if (this.loadedModuleSymbols.has(name)) {
             dependencies[name] = this.loadedModuleSymbols.get(name)!;
             continue;
@@ -261,7 +282,7 @@ export class BinaryLoaderContext {
          [SpecificSymbolFlags.ExportedFunction](flags, symbol, list) {
             const s = exportedSubMap.get(symbol)!;
             list.push(s);
-            console.log(stringOf(symbol.name));
+            d('exportedFunction name', stringOf(symbol.name));
             if (!symbol.hasType) throw new ReferenceError('ExportedFunction missing function information');
             applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), s as InvocableSymbol<unknown>);
          },
@@ -330,6 +351,7 @@ export class BinaryLoaderContext {
       for (const symbol of symbols) {
          const { bitFlags: flags } = symbol;
          const compSymbols: CompilableSymbol<undefined>[] = [];
+
          const currentExactBit = flags & bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot;
          if (!(currentExactBit in symbolCreationCode))
             throw new ReferenceError(
@@ -352,6 +374,7 @@ export class BinaryLoaderContext {
          runtime: InvocableSymbol<unknown>,
       ) {
          if (returnType) runtime.setReturnType(returnType);
+
          const paramValidator = new ParamsValidator(symbol.functionArguments!.map(_ => r(_, namedSymbols)));
          if (symbol.functionArgumentsDetails) {
             const index = symbol.functionArgumentsDetails.findIndex(
@@ -374,11 +397,15 @@ export class BinaryLoaderContext {
          let bindType: CompilableSymbol<unknown> | null;
          if (BitFlags.allOf(type.flags, TypeBitFlagsU16.IsExternalBindType)) {
             const moduleSymbol = this.loadedModuleSymbols.get(this.stringAccessor.fromIndex(fromModuleInfo!.nameId));
-            if (!moduleSymbol)
+            if (!moduleSymbol) {
+               const from = this.stringAccessor.fromIndex(fromModuleInfo!.nameId);
                throw new ReferenceError(
                   "Failed to create an bind type dependency from external module that doesn't exists or is not loaded: " +
-                     this.stringAccessor.fromIndex(fromModuleInfo!.nameId),
+                     bindTypeName +
+                     ' from ' +
+                     from,
                );
+            }
             bindType = moduleSymbol.publicSymbols.get(bindTypeName) ?? null;
          } else {
             bindType = currentExports[bindTypeName] ?? null;
@@ -390,27 +417,36 @@ export class BinaryLoaderContext {
             throw new TypeError('Symbol with name of ' + bindTypeName + ' can not be considered as type');
          return bindType as unknown as RuntimeType;
       }
+      if (allOf(flags, TypeBitFlagsU16.IsNumberType)) {
+         return numberRange ? new NumberType(numberRange) : NumberType.default;
+      }
+
+      if (BitFlags.anyOf(type.flags, TypeBitFlagsU16.HasMultiParamsBit | TypeBitFlagsU16.HasSingleParamBit)) {
+         if (typeof extendedRef !== 'number' && !extendedRefs)
+            throw new Error('Type without extended refs but with their flags ' + JSON.stringify(type, null, 2));
+         if (allOf(flags, TypeBitFlagsU16.Generator)) return generatorObjectType;
+         if (allOf(flags, TypeBitFlagsU16.Closure)) return functionType;
+         if (allOf(flags, TypeBitFlagsU16.Map)) return new MapType(this.resolveType(extendedRefs![1]!, currentExports));
+         if (allOf(flags, TypeBitFlagsU16.Variant))
+            return new VariantType(extendedRefs?.map(e => this.resolveType(e, currentExports)));
+
+         if (allOf(flags, TypeBitFlagsU16.Promise)) return promiseType;
+
+         if (allOf(flags, TypeBitFlagsU16.Array)) return new ArrayType(this.resolveType(extendedRef!, currentExports));
+
+         if (allOf(flags, TypeBitFlagsU16.Optional))
+            return new OptionalType(this.resolveType(extendedRef!, currentExports));
+      }
 
       if (allOf(flags, TypeBitFlagsU16.Boolean)) return booleanType;
       if (allOf(flags, TypeBitFlagsU16.String)) return stringType;
-      if (allOf(flags, TypeBitFlagsU16.Closure)) return functionType;
       if (allOf(flags, TypeBitFlagsU16.Undefined)) return voidType;
-      if (allOf(flags, TypeBitFlagsU16.Generator)) return generatorObjectType;
-      if (allOf(flags, TypeBitFlagsU16.Promise)) return promiseType;
-      if (allOf(flags, TypeBitFlagsU16.Map)) return new MapType(this.resolveType(extendedRefs![1]!, currentExports));
-      if (allOf(flags, TypeBitFlagsU16.Array)) return new ArrayType(this.resolveType(extendedRef!, currentExports));
-      if (allOf(flags, TypeBitFlagsU16.Optional))
-         return new OptionalType(this.resolveType(extendedRef!, currentExports));
-      if (allOf(flags, TypeBitFlagsU16.Variant))
-         return new VariantType(extendedRefs?.map(e => this.resolveType(e, currentExports)));
 
       // TODO - The BigUint should have proper range of only positive values basically right?
       // Not sure check metadata.json info
       if (allOf(flags, TypeBitFlagsU16.BigInt64)) return bigintType;
       if (allOf(flags, TypeBitFlagsU16.BigUint64)) return bigintType;
-      if (allOf(flags, TypeBitFlagsU16.IsNumberType)) {
-         return numberRange ? new NumberType(numberRange) : NumberType.default;
-      }
+
       if (flags === 0) return voidType;
       throw new ReferenceError(`resolveType - Unknown type: ${flags} ${JSON.stringify(type)}`);
    }
