@@ -41,6 +41,11 @@ export class Context {
    }
    public static getRuntimeModule(id: number, name: string) {
       const context = this.contexts.get(id)!;
+      if (!context) {
+         throw new TypeError(
+            `No context with id ${id} for module ${name}, all contexts: ${[...this.contexts.keys()].join(' ')}`,
+         );
+      }
       return context.moduleSymbols.get(name)?.getRuntimeValue(context);
    }
    public objectBindToHandleInternal(handle: object, isObjectConstant: string) {

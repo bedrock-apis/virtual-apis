@@ -65,14 +65,11 @@ export function getModuleVersions(cwd = process.cwd()) {
    );
 }
 
-export async function getImageFromNodeModules(): Promise<Uint8Array<ArrayBufferLike>> {
+export async function getImageFromNodeModules(binaryUrl?: string): Promise<Uint8Array<ArrayBufferLike>> {
    try {
-      // It is required to make node think we are importing all modules from the cwd, because
-      // otherwise they will not resolve
-      //console.warn("URL",url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
-      //const require = module.createRequire(url.pathToFileURL(path.join(process.cwd(), 'hooks.js')).href);
-      //const installed = require.resolve('@bedrock-apis/va-images/binary-data');
-      return new Uint8Array(await readFile(new URL(import.meta.resolve('@bedrock-apis/va-images/binary-data'))));
+      // import.meta.resolve does not work in all contexts and we want to catch errors so
+      if (!binaryUrl) binaryUrl = import.meta.resolve('@bedrock-apis/va-images');
+      return new Uint8Array(await readFile(new URL(binaryUrl)));
    } catch (e) {
       if (!(e instanceof Error && 'code' in e && e.code === 'MODULE_NOT_FOUND')) {
          throw new Error('Module @bedrock-apis/va-images not found');
