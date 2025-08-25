@@ -43,4 +43,7 @@ export class Context {
       const context = this.contexts.get(id)!;
       return context.moduleSymbols.get(name)?.getRuntimeValue(context);
    }
+   public objectBindToHandleInternal(handle: object, isObjectConstant: string) {
+      // Here it runs the binding
+   }
 }
