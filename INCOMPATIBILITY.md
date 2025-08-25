@@ -10,9 +10,9 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 Suite block (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
 Suite dynamic properties (chained): 
-  0: Unexpected error: TypeError: Incorrect number of arguments to function. Expected 0, received 1
+  0: Unexpected error: ReferenceError: Implementation missing depends on context implementation
   1: 
-    0: Unexpected error: TypeError: Native type conversion failed.
+    0: Unexpected error: TypeError: Undefined value expected, but received: boolean
     1: No result, expected false
     2: No result, expected ""
     3: No result, expected "string"
