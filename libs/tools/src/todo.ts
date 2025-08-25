@@ -1,11 +1,11 @@
+import { getFilesRecursive } from '@bedrock-apis/common';
 import chalk from 'chalk';
 import { readFile } from 'node:fs/promises';
 import { parseSync } from 'oxc-parser';
-import { getFilesRecursive } from '@bedrock-apis/common';
 
 const green = chalk.rgb(103, 175, 82);
 const matchPattern = /\.ts/;
-const excludePattern = /node_modules|git/;
+const excludePattern = /node_modules|git|legacy-store|dist/;
 const todoPattern = /^ *[A-Z]+:/;
 for await (const file of getFilesRecursive('.')) {
    if (excludePattern.test(file)) continue;

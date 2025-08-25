@@ -15,9 +15,7 @@ export class EnumerableAPISymbol extends CompilableSymbol<object> implements Run
    }
    public isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       const $ = this.values.has(value);
-      if (!$)
-         // TODO: What Error it should report?
-         diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
+      if (!$) diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type'));
       return $;
    }
 }

@@ -10,8 +10,7 @@ suite('NumberType', () => {
          `[TypeError: Native type conversion failed.]`,
       );
       expect(() => testType(type, 9)).toThrowErrorMatchingInlineSnapshot(
-         // TODO: Check what mc things, Its really just 'Error' and not 'TypeError'?
-         // I changed it to TypeError, but we should test what mc does
+         // TODO Its ArgumentOutOfBoundsError
          `[TypeError: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
       );
       expect(() => testType(type, 10)).not.toThrow();
