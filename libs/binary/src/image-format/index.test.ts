@@ -64,7 +64,6 @@ describe('io test', () => {
    it('serialize module', { timeout: 5000 }, async () => {
       const data = await getTestData();
       data.modules = data.modules.slice(0, 10);
-      console.log(data.modules[0]);
       const reread = BinaryImageFormat.read(BinaryImageFormat.write(data));
       const actual = { modules: reread.modules.map(e => BinaryIO.readEncapsulatedData(e)), metadata: reread.metadata };
       const { modules, metadata } = data;

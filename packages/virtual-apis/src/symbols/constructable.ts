@@ -48,7 +48,6 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
 
          // If constructor is present for this class
          if (!symbol.isConstructable) {
-            console.log(symbol);
             diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(symbol.identifier));
          }
 
