@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { ItemStack } from '@minecraft/server';
+import { Entity, ItemStack } from '@minecraft/server';
 import { TestSuite } from '../suite';
 
 TestSuite.simple('errors')
@@ -8,4 +8,9 @@ TestSuite.simple('errors')
    // @ts-expect-error
    .test(() => new ItemStack('Yes', 'wrong type'))
    // @ts-expect-error
-   .test(() => new ItemStack('Yes', 5, 5));
+   .test(() => new ItemStack('Yes', 5, 5))
+
+   // @ts-expect-error
+   .test(() => new Entity())
+   // @ts-expect-error
+   .test(() => new Entity('Yes', 5, 5));

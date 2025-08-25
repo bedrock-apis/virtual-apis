@@ -8,7 +8,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
+Suite block (chained): Unexpected setup error: ReferenceError: No constructor for native class 'Block'.
 Suite dynamic properties (chained): 
   0: Unexpected error: ReferenceError: Implementation missing depends on context implementation
   1: 
@@ -22,7 +22,7 @@ Suite dynamic properties (chained):
     7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
     
   
-Suite entity (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
+Suite entity (chained): Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
 Suite item (chained): Unexpected setup error: TypeError: Native type conversion failed.
 Suite errors (chained): 
   0: ✅
@@ -38,4 +38,7 @@ Suite errors (chained):
       
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
+      
+  4: ✅
+  5: ✅
 ```

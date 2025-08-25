@@ -48,10 +48,12 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
 
          // If constructor is present for this class
          if (!symbol.isConstructable) {
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(symbol.identifier));
+            // Identifier can be undefined in case of class
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoConstructor(symbol.identifier || symbol.name));
+         } else {
+            // THere is no params for non constructable symbols anyway
+            symbol.params.isValidValue(diagnostics.errors, info.params);
          }
-
-         symbol.params.isValidValue(diagnostics.errors, info.params);
 
          return setPrototypeOf(
             symbol.runtimeGetResult(info),
