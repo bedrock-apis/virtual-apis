@@ -1,10 +1,10 @@
 // VIRTUAL APIS CONFIG
-import { CONTEXT } from '@bedrock-apis/virtual-apis';
+// import { Context } from '@bedrock-apis/virtual-apis';
 
-CONTEXT.configure({
-   GetterRequireValidBound: true,
-   StrictReturnTypes: false,
-});
+// Context.Configure({
+//    GetterRequireValidBound: true,
+//    StrictReturnTypes: false,
+// });
 
 // CORE PLUGINS ENTRYPOINT
 import '@bedrock-apis/core-plugin';

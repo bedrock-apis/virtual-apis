@@ -1,17 +1,7 @@
-// TODO Move code from bds-docs/test-runner here
-// TODO Make separate export for running code on virtual apis and writing incompatability.md
-
-import { Context } from '@bedrock-apis/virtual-apis';
-
-const CONTEXT = new Context();
-
-CONTEXT.configure({
-   GetterRequireValidBound: true,
-   StrictReturnTypes: false,
-});
-
-import '@bedrock-apis/core-plugin';
-
-import '../../../bds-docs/test-runner/suites/all';
-
-import './compare';
+export * from './async-generator';
+export * from './compare';
+export * from './environment/bds';
+export * from './environment/environment';
+export * from './environment/va';
+export * from './suite';
+export * from './types';

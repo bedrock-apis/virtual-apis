@@ -2,6 +2,10 @@
    "files.autoSave": "onFocusChange",
    "editor.formatOnSave": true,
    "editor.defaultFormatter": "esbenp.prettier-vscode",
+   "editor.codeActionsOnSave": {
+      "addMissingImports": "explicit",
+      "source.organizeImports": "explicit"
+   },
    "typescript.preferences.autoImportSpecifierExcludeRegexes": [
       "node:test",
       "typescript",
@@ -24,5 +28,18 @@
    },
    "[json]": {
       "editor.defaultFormatter": "vscode.json-language-features"
-   }
+   },
+   "cSpell.words": [
+      "bapi",
+      "Errorable",
+      "esbuild",
+      "exitzero",
+      "gametest",
+      "overworld",
+      "Rolldown",
+      "tickingarea",
+      "toolbelt",
+      "varuint"
+   ],
+   "editor.tabSize": 3
 }

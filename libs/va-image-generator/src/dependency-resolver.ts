@@ -1,5 +1,3 @@
-import { Kernel } from '@bedrock-apis/kernel-isolation';
-
 interface Dependable<T> {
    id: string;
    dependencies: string[];
@@ -7,14 +5,13 @@ interface Dependable<T> {
 }
 
 export function resolveDependencies<T>(dependables: Dependable<T>[]): T[] {
-   const resolvedDependables = Kernel.Construct('Set') as Set<Dependable<T>>;
-   const visitedDependables = Kernel.Construct('Set') as Set<Dependable<T>>;
+   const resolvedDependables = new Set<Dependable<T>>();
+   const visitedDependables = new Set<Dependable<T>>();
 
    function resolve(parents: Dependable<T>[], dependable: Dependable<T>) {
       if (resolvedDependables.has(dependable)) return;
       if (visitedDependables.has(dependable)) {
-         throw Kernel.Construct(
-            'Error',
+         throw new Error(
             `Circular dependency detected! ${parents
                .map(e => e.id)
                .concat(dependable.id)
@@ -31,8 +28,8 @@ export function resolveDependencies<T>(dependables: Dependable<T>[]): T[] {
    }
 
    for (const dependable of dependables) {
-      resolve(Kernel.Construct('Array') as Dependable<T>[], dependable);
+      resolve([], dependable);
    }
 
-   return Kernel['Array::static'].from(resolvedDependables).map(e => e.value);
+   return Array.from(resolvedDependables).map(e => e.value);
 }

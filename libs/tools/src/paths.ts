@@ -1,6 +1,6 @@
+import { getDirectoriesRecursive, getFilesRecursive } from '@bedrock-apis/common';
 import { createWriteStream } from 'node:fs';
 import { readdir } from 'node:fs/promises';
-import { getDirectoriesRecursive, getFilesRecursive } from '@bedrock-apis/common';
 
 const time = Date.now();
 const pattern = /libs|packages/;
@@ -35,7 +35,10 @@ async function arrayFromAsync(aGen: AsyncIterable<string>): Promise<string[]> {
 }
 
 function arrayToTypeList(...array: string[]) {
-   return array.map(e => `\r\n   | '${e}'`).join('');
+   return array
+      .filter(e => !e.includes('dist'))
+      .map(e => `\r\n   | '${e}'`)
+      .join('');
 }
 
 console.log(`Generated ${file} in ${Date.now() - time}ms`);

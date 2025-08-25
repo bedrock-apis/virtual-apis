@@ -33,7 +33,9 @@ export type MetadataTypeName =
    | 'string'
    | 'undefined'
    | 'this'
-   | 'iterator';
+   | 'iterator'
+   | 'unknown'
+   | 'Error';
 export type MetadataTypeErrorable = { error_types: MetadataType[] };
 export type MetadataTypeBindable = { from_module: MetadataModuleBaseDefinition };
 export type MetadataTypeNumber = { valid_range: Range<number, number> };
@@ -92,8 +94,13 @@ export interface MetadataConstantDefinition extends MetadataObjectDefinition {
 export interface MetadataEnumDefinition extends MetadataDefinition {
    constants: MetadataConstantDefinition[];
 }
+export interface Privilege {
+   name: 'read_only' | 'none' | 'early_execution' | `${string}`;
+}
 export interface MetadataPropertyMemberDefinition extends MetadataMemberDefinition, MetadataTypedDefinition {
-   privilege: 'read_only' | 'none';
+   get_privilege: Privilege[];
+   set_privilege: Privilege[];
+   is_baked: boolean;
 }
 
 export interface MetadataFunctionArgumentDefinition extends MetadataDefinition, MetadataTypedDefinition {
@@ -102,7 +109,7 @@ export interface MetadataFunctionArgumentDefinition extends MetadataDefinition, 
 export interface MetadataFunctionDefinition extends Omit<MetadataMemberDefinition, 'is_read_only'> {
    arguments: MetadataFunctionArgumentDefinition[];
    is_constructor: boolean;
-   privilege: 'read_only' | 'none';
+   call_privilege: Privilege[];
    return_type: MetadataType;
 }
 

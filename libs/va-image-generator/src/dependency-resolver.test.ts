@@ -56,4 +56,3 @@ suite('Dependency Resolver', () => {
       ).toThrowErrorMatchingInlineSnapshot(`[Error: Circular dependency detected! a -> b -> d -> a]`);
    });
 });
-

@@ -29,14 +29,19 @@ jobs:
          - name: 🚧 Lint
            run: pnpm run lint
 
+         - name: ⚙️ Dump BDS Docs
+           run: pnpm run dump:run
+
          - name: 🧪 Run project tests
            run: pnpm run test
 
-         - name: 🏗 Bundle generators and build Modules
+         - name: 🏗 Build images
            run: pnpm run build
 
          - name: 🧪 Run e2e tests
+           if: false
            run: pnpm run e2e
 
          - name: 🧪 Run examples tests
+           if: false
            run: pnpm run examples

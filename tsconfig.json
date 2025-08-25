@@ -1,28 +1,34 @@
 {
    "compilerOptions": {
-      "target": "ES2024",
+      "target": "esnext",
       "lib": [
-         "ES2024"
+         "ESNext"
       ],
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
-      "outDir": "dist",
-      "baseUrl": ".",
-      "allowJs": true,
-      "checkJs": true,
+      "allowJs": false,
       "noEmit": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       "strict": true,
       "noUncheckedIndexedAccess": true,
-      "skipLibCheck": true
+      "noUncheckedSideEffectImports": true,
+      "skipLibCheck": true,
+      "noImplicitOverride": true
    },
    "include": [
       "./packages/**/*.ts",
       "./libs/**/*.ts",
       "./tools/**/*.ts",
       "*.config.ts",
-      "bds-docs"
+      "packages/va-image-loader",
+      "legacy-store/image-loader.ts",
+      "legacy-store/symbol-loader.ts",
+      "legacy-store/types-loader.ts"
+   ],
+   "exclude": [
+      "**/bin/**/*",
+      "**/dist/**/*"
    ]
 }
