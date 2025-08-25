@@ -116,7 +116,7 @@ export class BinaryLoaderContext {
       for (const mod of modulesToLoad) {
          const symbol = this.getSymbolForPreparedModule(mod);
          console.log('loadModules loaded', symbol.name);
-         context.moduleSymbols.set(symbol.name, symbol);
+         context.modules.set(symbol.name, symbol);
       }
    }
    public getSymbolForPreparedModule(prepared: PreparedModule): ModuleSymbol {

@@ -9,6 +9,7 @@ export class ModuleSymbol extends CompilableSymbol<object> {
    public metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
    public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();
    protected override compile(context: Context): object {
+      context.onBeforeModuleCompilation(this);
       // Pre compile, for correct order
       // For example interface is not exported value so its not considered as public symbol
       for (const symbol of this.symbols.values()) symbol.getRuntimeValue(context);

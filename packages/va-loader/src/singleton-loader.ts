@@ -13,7 +13,7 @@ export class SingletonLoaderContext extends BaseResolverContext {
       return specifier.startsWith('@minecraft/');
    }
    protected override getPackageRuntimeData(name: string): object {
-      const mod = this.context.moduleSymbols.get(name);
+      const mod = this.context.modules.get(name);
       if (!mod) throw new ReferenceError(`Minecraft module is not available: '${name}'`);
       return mod.getRuntimeValue(this.context);
    }

@@ -15,4 +15,7 @@ export abstract class CompilableSymbol<T> {
       if (!this.RUNTIME.has(context)) this.RUNTIME.set(context, this.compile(context));
       return this.RUNTIME.get(context)!;
    }
+   public isCompiledFor(context: Context): boolean {
+      return this.RUNTIME.has(context);
+   }
 }
