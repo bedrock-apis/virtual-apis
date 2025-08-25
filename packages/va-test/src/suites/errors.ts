@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Entity, ItemStack, world } from '@minecraft/server';
+import { ButtonPushAfterEventSignal, Entity, ItemStack, world } from '@minecraft/server';
 import { TestSuite } from '../suite';
 
 TestSuite.simple('errors')
@@ -22,7 +22,9 @@ TestSuite.simple('errors')
    .test(() => new ItemStack('minecraft:apple', 112319249219))
 
    // @ts-expect-error
-   .test(() => world.afterEvents.buttonPush.subscribe('not a function'))
+   .test(() => {
+      world.afterEvents.buttonPush.subscribe('not a function');
+   })
 
    .test(() => world.setTimeOfDay(2147483649))
 

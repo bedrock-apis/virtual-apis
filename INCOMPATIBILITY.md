@@ -11,7 +11,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 Suite block (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Block'.
 
 
-Suite dynamic properties (chained): 
+Suite dynamic properties (chained):
   0: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
   1: 0: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
     1: No result, expected false
@@ -21,8 +21,8 @@ Suite dynamic properties (chained):
     5: No result, expected 0
     6: No result, expected -1
     7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
-    
-  
+
+
 
 
 Suite entity (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
@@ -31,15 +31,15 @@ Suite entity (chained): ❓ Unexpected setup error: ReferenceError: No construct
 Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed. Function argument [1] expected type: number
 
 
-Suite errors (chained): 
+Suite errors (chained):
   0: ✅
   1: ❌ Error mismatch: ReferenceError: Implementation missing depends on context implementation != Error: Invalid item identifier 'Yes'.
   2: ✅
-  3: ❌ Error mismatch: 
-      
+  3: ❌ Error mismatch:
+
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
-      
+
   4: ✅
   5: ✅
   6: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
@@ -47,11 +47,12 @@ Suite errors (chained):
   8: ✅
   9: ✅
   10: ✅
-  11: ❌ Error mismatch: 
-      
+  11: ❌ Error mismatch:
+
       TypeError: Native type conversion failed. Function argument [0] expected type: Closure: (ButtonPushAfterEvent) => void
       ReferenceError: Implementation missing depends on context implementation
-      
+
   12: ✅
   13: ✅
 ```
+

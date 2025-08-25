@@ -14,6 +14,21 @@ export const functionType: RuntimeType = {
    },
 };
 
+export class ClosureType extends Type {
+   public override name: string;
+   public constructor(types: RuntimeType[]) {
+      super();
+      const [returnType, ...params] = types;
+      this.name = `Closure: (${params.map(e => e.name).join(', ')}) => ${returnType?.name}`;
+   }
+   public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
+      if (typeof value !== 'function') {
+         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false;
+      }
+      return true;
+   }
+}
+
 export class FunctionArgumentType extends Type {
    public constructor(
       public readonly type: RuntimeType,

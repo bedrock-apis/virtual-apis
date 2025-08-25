@@ -17,6 +17,7 @@ import { BitFlags, d, IndexedAccessor } from '@bedrock-apis/common';
 import {
    bigintType,
    booleanType,
+   ClosureType,
    CompilableSymbol,
    ConstantValueSymbol,
    ConstructableSymbol,
@@ -24,7 +25,6 @@ import {
    EnumerableAPISymbol,
    FunctionArgumentType,
    FunctionSymbol,
-   functionType,
    InterfaceSymbol,
    InvocableSymbol,
    MethodSymbol,
@@ -435,7 +435,9 @@ export class BinaryLoaderContext {
          if (typeof extendedRef !== 'number' && !extendedRefs)
             throw new Error('Type without extended refs but with their flags ' + JSON.stringify(type, null, 2));
          if (allOf(flags, TypeBitFlagsU16.Generator)) return generatorObjectType;
-         if (allOf(flags, TypeBitFlagsU16.Closure)) return functionType;
+         if (allOf(flags, TypeBitFlagsU16.Closure)) {
+            return new ClosureType((extendedRefs ?? []).map(e => this.resolveType(e, currentExports)));
+         }
          if (allOf(flags, TypeBitFlagsU16.Map)) return new MapType(this.resolveType(extendedRefs![1]!, currentExports));
          if (allOf(flags, TypeBitFlagsU16.Variant))
             return new VariantType(extendedRefs?.map(e => this.resolveType(e, currentExports)));
