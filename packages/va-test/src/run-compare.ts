@@ -25,4 +25,4 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 `;
 
-await fs.writeFile('INCOMPATABILITY.md', header + result + `\n\`\`\``);
+await fs.writeFile('INCOMPATIBILITY.md', header + result + `\n\`\`\``);

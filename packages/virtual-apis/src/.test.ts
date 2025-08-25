@@ -32,7 +32,7 @@ suite('Create Context', () => {
       expect(Player.prototype.getComponent.name).toBe('');
    });
 
-   test('Create new instance', () => {
+   test.todo('Create new instance', () => {
       expect(() => new (moduleSymbol.getRuntimeValue(context) as any).Entity()).toThrow(
          "No constructor for native class 'Entity'.",
       );

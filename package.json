@@ -64,9 +64,9 @@
       "@bedrock-apis/nbt-core": "0.0.1-alpha.2",
       "@bedrock-apis/types": "workspace:*",
       "@bedrock-apis/va-image-generator": "workspace:*",
+      "@bedrock-apis/va-image-loader": "workspace:*",
       "@bedrock-apis/va-images": "workspace:*",
       "@bedrock-apis/va-loader": "workspace:*",
-      "@bedrock-apis/va-image-loader": "workspace:*",
       "@bedrock-apis/va-pluggable": "workspace:*",
       "@bedrock-apis/va-test": "workspace:*",
       "@bedrock-apis/virtual-apis": "workspace:*"
@@ -74,9 +74,9 @@
    "devDependencies": {
       "@bedrock-apis/nbt": "0.0.1-alpha.3",
       "@eslint/js": "^9.27.0",
-      "@minecraft/server": "2.0.0",
-      "@minecraft/server-net": "1.0.0-beta.1.21.90-preview.23",
-      "@minecraft/server-ui": "2.0.0",
+      "@minecraft/server": "2.3.0-beta.1.21.110-preview.25",
+      "@minecraft/server-net": "1.0.0-beta.1.21.110-preview.25",
+      "@minecraft/server-ui": "2.1.0-beta.1.21.110-preview.25",
       "@types/node": "^24.0.0",
       "@typescript-eslint/parser": "^8.33.0",
       "@typescript-eslint/rule-tester": "^8.33.0",
