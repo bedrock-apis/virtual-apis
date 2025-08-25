@@ -2,6 +2,7 @@ import { ErrorFactory, TYPE_ERROR_TYPE } from '../../errorable';
 import { RuntimeType } from '../type';
 
 export const voidType: RuntimeType = {
+   name: 'undefined',
    isValidValue(diagnostics, value) {
       if (value !== undefined) {
          diagnostics.report(

@@ -2,6 +2,7 @@ import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../../errorable';
 import { RuntimeType } from '../type';
 
 export const functionType: RuntimeType = {
+   name: 'function',
    isValidValue(diagnostics: DiagnosticsStackReport, value: unknown) {
       // TODO: No error message
       if (typeof value !== 'function')

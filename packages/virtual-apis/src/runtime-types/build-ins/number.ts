@@ -7,6 +7,8 @@ export class NumberType extends Type {
       super();
    }
 
+   public override name = 'number';
+
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       if (typeof value !== 'number')
          return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false;
@@ -26,6 +28,7 @@ export class NumberType extends Type {
 }
 
 export const bigintType: RuntimeType = {
+   name: 'bigint',
    isValidValue(diagnostics, value) {
       if (typeof value !== 'string')
          return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false;

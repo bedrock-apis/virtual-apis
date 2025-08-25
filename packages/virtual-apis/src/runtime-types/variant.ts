@@ -4,7 +4,9 @@ import { RuntimeType, Type } from './type';
 export class VariantType extends Type {
    public constructor(public readonly variants: RuntimeType[] = []) {
       super();
+      this.name = variants.map(e => e.name).join(' | ');
    }
+   public override name: string;
    public isValidValue(diagnostics: DiagnosticsStackReport, value: unknown) {
       const variants = new DiagnosticsStackReport();
       for (const variant of this.variants.values()) {
