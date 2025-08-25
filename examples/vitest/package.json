@@ -1,0 +1,20 @@
+{
+   "name": "vitest",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "test": "vitest",
+      "start": "vitest --run"
+   },
+   "keywords": [],
+   "author": "",
+   "license": "Apache-2.0",
+   "dependencies": {
+      "@bedrock-apis/va-loader": "workspace:^",
+      "@bedrock-apis/virtual-apis": "workspace:^",
+      "@minecraft/server": "2.0.0-beta.1.21.83-stable",
+      "vitest": "^3.1.4"
+   },
+   "type": "module"
+}

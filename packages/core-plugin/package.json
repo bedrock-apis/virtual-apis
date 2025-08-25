@@ -1,0 +1,7 @@
+{
+   "name": "@bedrock-apis/core-plugin",
+   "version": "0.0.1-alpha",
+   "main": "./dist/main.js",
+   "types": "./src/main.ts",
+   "type": "module"
+}

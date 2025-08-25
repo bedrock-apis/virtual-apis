@@ -1,0 +1,22 @@
+{
+   "name": "@bedrock-apis/va-loader",
+   "version": "0.0.1-alpha",
+   "type": "module",
+   "exports": {
+      "./api": {
+         "default": "./dist/api.js",
+         "types": "./src/api.ts",
+         "rolldown": null
+      },
+      "./node": {
+         "default": "./dist/index.js",
+         "types": "./src/node-default/index.ts",
+         "rolldown": null
+      },
+      "./vitest": {
+         "default": "./dist/vitest.js",
+         "types": "./src/vitest-plugin/vitest.ts",
+         "rolldown": null
+      }
+   }
+}

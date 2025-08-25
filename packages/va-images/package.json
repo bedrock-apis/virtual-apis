@@ -1,0 +1,9 @@
+{
+   "name": "@bedrock-apis/va-images",
+   "version": "0.0.1-alpha",
+   "exports": {
+      "./binary-data": {
+         "default": "./image.bin"
+      }
+   }
+}

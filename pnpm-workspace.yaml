@@ -1,0 +1,7 @@
+packages:
+   - packages/*
+   - libs/*
+   - examples/**
+onlyBuiltDependencies:
+   - esbuild
+ignoreWorkspaceRootCheck: true

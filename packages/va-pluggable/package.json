@@ -1,0 +1,9 @@
+{
+   "name": "@bedrock-apis/va-pluggable",
+   "description": "Hight-Level apis build on top of va",
+   "version": "0.0.1-alpha",
+   "main": "./dist/main.js",
+   "type": "module",
+   "types": "./src/main.ts",
+   "dependencies": {}
+}

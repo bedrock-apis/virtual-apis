@@ -1,0 +1,22 @@
+{
+   "name": "@bedrock-apis/va-test",
+   "version": "0.0.1-alpha",
+   "type": "module",
+   "exports": {
+      ".": {
+         "default": "./dist/main.js",
+         "types": "./src/main.ts",
+         "rolldown": null
+      },
+      "./run-compare": {
+         "default": "./dist/run-compare.js",
+         "types": "./src/run-compare.ts",
+         "rolldown": null
+      },
+      "./suites": {
+         "default": "./dist/all.js",
+         "types": "./src/suites/all.ts",
+         "rolldown": null
+      }
+   }
+}

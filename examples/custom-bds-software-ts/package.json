@@ -1,0 +1,18 @@
+{
+   "name": "custom-bds-software-ts",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "start": "tsx --import @bedrock-apis/va-loader/node ./virtual-apis/load.ts"
+   },
+   "keywords": [],
+   "author": "",
+   "license": "Apache-2.0",
+   "dependencies": {
+      "@bedrock-apis/virtual-apis": "workspace:x.x.x",
+      "@minecraft/server": "2.0.0-beta.1.21.83-stable",
+      "tsx": "^4.19.2"
+   },
+   "type": "module"
+}
