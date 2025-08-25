@@ -1,3 +1,4 @@
+import { ObjectValueSymbol } from '../symbols';
 import type { Context } from './base';
 
 // Low level plugin system
@@ -8,6 +9,9 @@ export abstract class PluginContext {
       return new this();
    }
    //
-   public onBeforeCompilation(context: Context) {}
-   public onAfterCompilation(context: Context) {}
+   public onBeforeCompilation(context: Context): void {}
+   public onAfterCompilation(context: Context): void {}
+   public getStaticInstanceBinding(context: Context, symbol: ObjectValueSymbol): object | null {
+      return null;
+   }
 }
