@@ -2,7 +2,7 @@
 import { ItemStack } from '@minecraft/server';
 import { TestSuite } from '../suite';
 
-TestSuite.simple('error')
+TestSuite.simple('errors')
    .test(() => ItemStack.prototype.getComponents.call(null))
    .test(() => new ItemStack('Yes', 5))
    // @ts-expect-error

@@ -8,6 +8,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
+Suite block (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
 Suite dynamic properties (chained): 
   0: Unexpected error: TypeError: Incorrect number of arguments to function. Expected 0, received 1
   1: 
@@ -21,5 +22,10 @@ Suite dynamic properties (chained):
     7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
     
   
+Suite entity (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
 Suite item (chained): Unexpected setup error: TypeError: Incorrect number of arguments to function. Expected 1-2, received 0
+Suite errors (chained): 
+  0: ✅
+  1: Error mismatch: TypeError: Undefined value expected, but received: number != Error: Invalid item identifier 'Yes'.
+  2: Error mismatch: TypeError: Undefined value expected, but received: number != TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
 ```

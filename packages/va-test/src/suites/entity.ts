@@ -1,4 +1,4 @@
-import { spawnEntity } from '../environment';
+import { spawnEntity } from '../environment/environment';
 import { TestSuite } from '../suite';
 
 TestSuite.withSetup('entity', () => spawnEntity('minecraft:cow'))

@@ -4,13 +4,13 @@ import { TestSuite } from './suite';
 import { TestReport } from './types';
 
 export async function runAndCompare(
-   bdsDocsResults: TestReport.Run,
+   minecraftResults: TestReport.Run,
    Environment: TestEnvironment,
    runner?: ThreadRunner,
 ) {
    const result = await TestSuite.runThread(Environment, runner);
 
-   if (!Array.isArray(bdsDocsResults)) {
+   if (!Array.isArray(minecraftResults)) {
       return 'Bds docs Environment setup failed, skipping...';
    }
 
@@ -20,8 +20,8 @@ export async function runAndCompare(
 
    let report = '';
 
-   for (const [i, suiteA] of bdsDocsResults.entries()) {
-      const suiteB = result[i];
+   for (const suiteA of minecraftResults) {
+      const suiteB = result.find(e => e.id === suiteA.id);
 
       if (typeof suiteB === 'undefined') {
          report += `No suite ${suiteA.id}. Perhaps you forgot to import suite file.\n`;
@@ -70,6 +70,10 @@ function compareResults(resultA: TestReport.Result, resultB: TestReport.Result):
       if (typeof resultB !== 'object' || Array.isArray(resultB)) {
          return `Expected error, got: ${resultB}`;
       }
+
+      if (resultA.error !== resultB.error) return `Error mismatch: ${indent(diff(resultA.error, resultB.error))}`;
+
+      return '✅';
    } else {
       if (Array.isArray(resultB)) return 'Unexpected chained result, expected primitive';
 
