@@ -36,10 +36,10 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public override compile(context: Context): new (...params: unknown[]) => unknown {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
-      function constructor(that: unknown, ...params: unknown[]): unknown {
+      function constructor(this: unknown, ...params: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(that);
+         info.setThisObject(this);
          info.setNewTargetObject(new.target ?? null);
          const { diagnostics } = info;
 

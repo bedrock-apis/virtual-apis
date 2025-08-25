@@ -23,10 +23,10 @@ Suite dynamic properties (chained):
     
   
 Suite entity (chained): Unexpected setup error: TypeError: Cannot read properties of undefined (reading 'isValidValue')
-Suite item (chained): Unexpected setup error: TypeError: Incorrect number of arguments to function. Expected 1-2, received 0
+Suite item (chained): Unexpected setup error: TypeError: Native type conversion failed.
 Suite errors (chained): 
   0: ✅
-  1: Error mismatch: TypeError: Native variant type conversion failed. != Error: Invalid item identifier 'Yes'.
+  1: Error mismatch: ReferenceError: Implementation missing depends on context implementation != Error: Invalid item identifier 'Yes'.
   2: 
     Error mismatch: 
       
@@ -37,5 +37,5 @@ Suite errors (chained):
     Error mismatch: 
       
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
-      TypeError: Native variant type conversion failed.
+      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
 ```
