@@ -4,7 +4,10 @@ import { Type } from './type';
 export class OptionalType extends Type {
    public constructor(public readonly type: Type) {
       super();
+      this.name = 'optional<' + this.type.name + '>'; //TODO Check real name
    }
+
+   public override name: string;
 
    public isValidValue(diagnostics: DiagnosticsStackReport, value: unknown) {
       if (value === undefined || value === null) return true;

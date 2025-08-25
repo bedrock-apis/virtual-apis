@@ -8,10 +8,12 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
+Suite block (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Block'.
+
+
 Suite dynamic properties (chained): 
-  0: Unexpected error: TypeError: Incorrect number of arguments to function. Expected 0, received 1
-  1: 
-    0: Unexpected error: TypeError: Native type conversion failed.
+  0: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
+  1: 0: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
     1: No result, expected false
     2: No result, expected ""
     3: No result, expected "string"
@@ -21,5 +23,58 @@ Suite dynamic properties (chained):
     7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
     
   
-Suite item (chained): Unexpected setup error: TypeError: Incorrect number of arguments to function. Expected 1-2, received 0
+
+
+Suite entity (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
+
+
+Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed.
+
+
+Suite errors (chained): 
+  0: ✅
+  1: ❌ Error mismatch: ReferenceError: Implementation missing depends on context implementation != Error: Invalid item identifier 'Yes'.
+  2: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function argument [1] expected type: number
+      TypeError: Native type conversion failed.
+      
+  3: ❌ Error mismatch: 
+      
+      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
+      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
+      
+  4: ✅
+  5: ✅
+  6: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
+  7: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
+  8: ❌ Error mismatch: 
+      
+      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 344, Argument bounds: [1, 255]
+      ReferenceError: Implementation missing depends on context implementation
+      
+  9: ❌ Error mismatch: 
+      
+      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 1000000, Argument bounds: [1, 255]
+      ReferenceError: Implementation missing depends on context implementation
+      
+  10: ❌ Error mismatch: 
+      
+      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 112319249219.00, Argument bounds: [-2147483648, 2147483647]
+      TypeError: Provided integer value was out of range.  Value: 112319249219.00, Argument bounds: [-2147483648, 2147483647]
+      
+  11: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function argument [0] expected type: Closure: (ButtonPushAfterEvent) => void
+      ReferenceError: Implementation missing depends on context implementation
+      
+  12: ❌ Error mismatch: 
+      
+      TypeError: Native variant type conversion failed. Function argument [0] expected type: number | TimeOfDay
+      TypeError: Native variant type conversion failed.
+      
+  13: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function argument [0] expected type: Difficulty
+      TypeError: Native type conversion failed.
 ```

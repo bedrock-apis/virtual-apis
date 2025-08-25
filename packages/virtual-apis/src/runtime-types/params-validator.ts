@@ -7,7 +7,9 @@ export class ParamsValidator extends Type {
       public readonly minimumArgumentsRequired: number = types.length,
    ) {
       super();
+      this.name = `params(${this.types.map(e => e.name)})`;
    }
+   public override name: string;
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       const params: unknown[] = Array.isArray(value) ? value : [value];
 

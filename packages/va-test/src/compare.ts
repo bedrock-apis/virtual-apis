@@ -4,13 +4,13 @@ import { TestSuite } from './suite';
 import { TestReport } from './types';
 
 export async function runAndCompare(
-   bdsDocsResults: TestReport.Run,
+   minecraftResults: TestReport.Run,
    Environment: TestEnvironment,
    runner?: ThreadRunner,
 ) {
    const result = await TestSuite.runThread(Environment, runner);
 
-   if (!Array.isArray(bdsDocsResults)) {
+   if (!Array.isArray(minecraftResults)) {
       return 'Bds docs Environment setup failed, skipping...';
    }
 
@@ -20,8 +20,8 @@ export async function runAndCompare(
 
    let report = '';
 
-   for (const [i, suiteA] of bdsDocsResults.entries()) {
-      const suiteB = result[i];
+   for (const suiteA of minecraftResults) {
+      const suiteB = result.find(e => e.id === suiteA.id);
 
       if (typeof suiteB === 'undefined') {
          report += `No suite ${suiteA.id}. Perhaps you forgot to import suite file.\n`;
@@ -31,7 +31,7 @@ export async function runAndCompare(
       const suiteReport = compareSuite(suiteA, suiteB);
       if (suiteReport) {
          const suiteType = 'results' in suiteA && Array.isArray(suiteA.results) ? ' (chained)' : '';
-         report += `Suite ${suiteA.id}${suiteType}: ${indent(suiteReport)}\n`;
+         report += `\n\nSuite ${suiteA.id}${suiteType}: ${indent(suiteReport)}\n`;
       }
    }
 
@@ -41,44 +41,46 @@ export async function runAndCompare(
 function compareSuite(suiteA: TestReport.Suite, suiteB: TestReport.Suite): string {
    if ('results' in suiteA) {
       if (!('results' in suiteB)) {
-         return `Unexpected setup error: ${suiteB.setupError}`;
+         return `❓ Unexpected setup error: ${suiteB.setupError}`;
       }
 
       return compareMultipleResults(suiteA.results, suiteB.results);
    } else {
       if ('results' in suiteB) {
-         return `Expected setup error: ${suiteA.setupError}`;
+         return `❌ Expected setup error: ${suiteA.setupError}`;
       }
 
       if (suiteA.setupError !== suiteB.setupError) {
-         return `Setup error mismatch: ${indent(diff(suiteA.setupError, suiteB.setupError))}`;
+         return `❌ Setup error mismatch: ${indent(diff(suiteA.setupError, suiteB.setupError))}`;
       }
    }
    return '';
 }
 
 function compareResults(resultA: TestReport.Result, resultB: TestReport.Result): string {
-   if (typeof resultB === 'undefined') return 'Missing test result';
+   if (typeof resultB === 'undefined') return '❓ Missing test result';
 
    if (typeof resultA === 'object') {
       if (Array.isArray(resultA)) {
          if (!Array.isArray(resultB)) {
-            return 'Unexpected primitive result, expected chained';
+            return '❓ Unexpected primitive result, expected chained';
          } else return compareMultipleResults(resultA, resultB);
       }
 
       if (typeof resultB !== 'object' || Array.isArray(resultB)) {
-         return `Expected error, got: ${resultB}`;
+         return `❓ Expected error, got: ${resultB}`;
       }
+
+      if (resultA.error !== resultB.error) return `❌ Error mismatch: ${indent(diff(resultA.error, resultB.error))}`;
    } else {
-      if (Array.isArray(resultB)) return 'Unexpected chained result, expected primitive';
+      if (Array.isArray(resultB)) return '❓ Unexpected chained result, expected primitive';
 
-      if (typeof resultB === 'object') return `Unexpected error: ${errorResultToString(resultB)}`;
+      if (typeof resultB === 'object') return `❓ Unexpected error: ${errorResultToString(resultB)}`;
 
-      if (resultA !== resultB) return `Results mismatch: ${indent(diff(resultA, resultB))}`;
+      if (resultA !== resultB) return `❌ Results mismatch: ${indent(diff(resultA, resultB))}`;
    }
 
-   return '';
+   return '✅';
 }
 
 function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestReport.Result[]): string {
@@ -92,7 +94,7 @@ function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestRep
 
       const compare = compareResults(resultA, resultB);
       if (compare) {
-         report += `${i}: ${indent(compare)}\n`;
+         report += `${i}: ${indentNotFirst(compare)}\n`;
       }
    }
    return report;
@@ -112,6 +114,15 @@ function resultToString(result: TestReport.Result): string {
 
 function errorResultToString(result: TestReport.Error): string {
    return result.error;
+}
+
+function indentNotFirst(string: string) {
+   if (!isMultiline(string)) return string;
+
+   const [first, ...other] = string.split('\n');
+   if (!other.length) return first;
+
+   return first + indent(other.join('\n'));
 }
 
 function indent(string: string, level = 2) {

@@ -124,8 +124,8 @@ importers:
         specifier: workspace:x.x.x
         version: link:../../packages/virtual-apis
       '@minecraft/server':
-        specifier: 2.0.0-beta.1.21.83-stable
-        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
+        specifier: 2.0.0
+        version: 2.0.0(@minecraft/vanilla-data@1.21.80)
 
   examples/custom-bds-software-ts:
     dependencies:
@@ -133,8 +133,8 @@ importers:
         specifier: workspace:x.x.x
         version: link:../../packages/virtual-apis
       '@minecraft/server':
-        specifier: 2.0.0-beta.1.21.83-stable
-        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
+        specifier: 2.0.0
+        version: 2.0.0(@minecraft/vanilla-data@1.21.80)
       tsx:
         specifier: ^4.19.2
         version: 4.19.4
@@ -148,8 +148,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/virtual-apis
       '@minecraft/server':
-        specifier: 2.0.0-beta.1.21.83-stable
-        version: 2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)
+        specifier: 2.0.0
+        version: 2.0.0(@minecraft/vanilla-data@1.21.80)
       vitest:
         specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@24.0.0)(@vitest/ui@3.1.4)(jiti@2.4.2)(tsx@4.19.4)
@@ -517,8 +517,8 @@ packages:
       '@minecraft/common': ^1.0.0
       '@minecraft/server': ^2.0.0
 
-  '@minecraft/server@2.0.0-beta.1.21.83-stable':
-    resolution: {integrity: sha512-OcxFao4xOL9NJ4IT6yq85ghSHDQr9cpBzFSN/8VMs6GGyI3jErTfc7eHaXP/HudLSWfs+mNeOS2sPiihkB5khw==}
+  '@minecraft/server@2.0.0':
+    resolution: {integrity: sha512-X2LmT82eO0oCjOFaFgg6zoGenAUSyrG+YvIbe7/FSPj9hpMt4BtOIs7axoQUUvMx2NNbq8uEsnQadMMrDDBmUA==}
     peerDependencies:
       '@minecraft/vanilla-data': '>=1.20.70'
 
@@ -2090,7 +2090,7 @@ snapshots:
       '@minecraft/common': 1.2.0
       '@minecraft/server': 2.3.0-beta.1.21.110-preview.25(@minecraft/common@1.2.0)(@minecraft/vanilla-data@1.21.80)
 
-  '@minecraft/server@2.0.0-beta.1.21.83-stable(@minecraft/vanilla-data@1.21.80)':
+  '@minecraft/server@2.0.0(@minecraft/vanilla-data@1.21.80)':
     dependencies:
       '@minecraft/common': 1.2.0
       '@minecraft/vanilla-data': 1.21.80

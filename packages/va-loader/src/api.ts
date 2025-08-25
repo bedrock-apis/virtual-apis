@@ -20,7 +20,7 @@ export abstract class BaseResolverContext {
       if (!url) {
          this.cachedCodeURLs.set(
             name,
-            (url = createCodeURL(this.getPackageRuntimeData(name), name, this.context.runtimeId)),
+            (url = createCodeURL(this.getPackageRuntimeData(name), name, this.context.runtimeId).url),
          );
       }
       return url;

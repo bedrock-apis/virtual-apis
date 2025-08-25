@@ -7,7 +7,7 @@ import { InvocableSymbol } from './abstracts/invocable';
 import type { ConstructableSymbol } from './constructable';
 
 export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
-   protected override readonly stackTrimEncapsulation: number = 2; // proxified
+   protected override readonly stackTrimEncapsulation: number = 2; // proxied
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // eslint-disable-next-line @typescript-eslint/no-this-alias

@@ -41,6 +41,7 @@ export class Context implements Disposable {
       this.nativeHandles.add(handle);
       return handle;
    }
+
    public objectBindToHandleInternal(handle: object, isObjectConstant: string) {
       // Here it runs the binding
    }

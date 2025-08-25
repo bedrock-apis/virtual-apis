@@ -5,6 +5,7 @@ export class MapType extends Type {
    public constructor(public readonly valueType: RuntimeType) {
       super();
    }
+   public override name = 'map';
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       if (typeof value !== 'object' || value === null)
          //TODO: isn't 'function' type also allowed?

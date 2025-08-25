@@ -4,14 +4,14 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "start": "tsx --import @bedrock-apis/va-loader/node ./virtual-apis/load.js"
+      "start": "node --import @bedrock-apis/va-loader/node ./virtual-apis/load.js"
    },
    "keywords": [],
    "author": "",
    "license": "Apache-2.0",
    "dependencies": {
       "@bedrock-apis/virtual-apis": "workspace:x.x.x",
-      "@minecraft/server": "2.0.0-beta.1.21.83-stable"
+      "@minecraft/server": "2.0.0"
    },
    "type": "module"
 }

@@ -90,7 +90,7 @@ export const API_ERRORS_MESSAGES = {
 
    OutOfRange: (value: unknown, range: Range<unknown, unknown>) =>
       ErrorFactory.new(
-         `Provided integer value was out of range.  Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
+         `Provided integer value was out of range.  Value: ${typeof value === 'number' ? value.toFixed(2) : value}, Argument bounds: [${range.min}, ${range.max}]`,
          TYPE_ERROR_TYPE,
       ),
 

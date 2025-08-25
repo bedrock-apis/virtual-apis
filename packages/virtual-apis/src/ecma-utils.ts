@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-export function proxyifyFunction<T extends (...params: unknown[]) => unknown>(method: T): T {
+export function proxyifyFunction<T extends (params: unknown[]) => unknown>(method: T): T {
    // Handle with proxy for support with "this" callback
    const final = new Proxy(method, {
       apply(t, that, params) {
-         return t(that, params);
+         return (t as (...params: unknown[]) => unknown)(that, ...params);
       },
    });
 

@@ -13,7 +13,7 @@
    "dependencies": {
       "@bedrock-apis/va-loader": "workspace:^",
       "@bedrock-apis/virtual-apis": "workspace:^",
-      "@minecraft/server": "2.0.0-beta.1.21.83-stable",
+      "@minecraft/server": "2.0.0",
       "vitest": "^3.1.4"
    },
    "type": "module"
