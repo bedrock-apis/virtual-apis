@@ -22,6 +22,7 @@ import {
    ConstructableSymbol,
    Context,
    EnumerableAPISymbol,
+   FunctionArgumentType,
    FunctionSymbol,
    functionType,
    InterfaceSymbol,
@@ -375,11 +376,20 @@ export class BinaryLoaderContext {
       ) {
          if (returnType) runtime.setReturnType(returnType);
 
-         const paramValidator = new ParamsValidator(symbol.functionArguments!.map(_ => r(_, namedSymbols)));
-         if (symbol.functionArgumentsDetails) {
-            const index = symbol.functionArgumentsDetails.findIndex(
-               _ => ('defaultValue' satisfies keyof BinaryDetailsStruct) in getDetails(_),
-            );
+         const details = symbol.functionArgumentsDetails?.map(e => getDetails(e));
+         const paramValidator = new ParamsValidator(
+            symbol.functionArguments!.map((_, i) => {
+               const detail = details?.[i];
+               const range =
+                  typeof detail?.maxValue === 'number' && typeof detail.minValue === 'number'
+                     ? { max: detail.maxValue, min: detail.minValue }
+                     : undefined;
+
+               return new FunctionArgumentType(r(_, namedSymbols), i, range, detail?.defaultValue);
+            }),
+         );
+         if (details) {
+            const index = details.findIndex(_ => ('defaultValue' satisfies keyof BinaryDetailsStruct) in _);
             paramValidator.setMinimumParamsRequired(index);
          }
          runtime.setParamsLength(symbol.functionArguments!.length).setParams(paramValidator);

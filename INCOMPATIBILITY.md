@@ -28,17 +28,13 @@ Suite dynamic properties (chained):
 Suite entity (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
 
 
-Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed.
+Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed. Function argument [1] expected type: number
 
 
 Suite errors (chained): 
   0: ✅
   1: ❌ Error mismatch: ReferenceError: Implementation missing depends on context implementation != Error: Invalid item identifier 'Yes'.
-  2: ❌ Error mismatch: 
-      
-      TypeError: Native type conversion failed. Function argument [1] expected type: number
-      TypeError: Native type conversion failed.
-      
+  2: ✅
   3: ❌ Error mismatch: 
       
       TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
@@ -51,30 +47,23 @@ Suite errors (chained):
   8: ❌ Error mismatch: 
       
       ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 344, Argument bounds: [1, 255]
-      ReferenceError: Implementation missing depends on context implementation
+      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 344.00, Argument bounds: [1, 255]
       
   9: ❌ Error mismatch: 
       
       ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 1000000, Argument bounds: [1, 255]
-      ReferenceError: Implementation missing depends on context implementation
+      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 1000000.00, Argument bounds: [1, 255]
       
   10: ❌ Error mismatch: 
       
       ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 112319249219.00, Argument bounds: [-2147483648, 2147483647]
-      TypeError: Provided integer value was out of range.  Value: 112319249219.00, Argument bounds: [-2147483648, 2147483647]
+      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 112319249219.00, Argument bounds: [1, 255]
       
   11: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function argument [0] expected type: Closure: (ButtonPushAfterEvent) => void
       ReferenceError: Implementation missing depends on context implementation
       
-  12: ❌ Error mismatch: 
-      
-      TypeError: Native variant type conversion failed. Function argument [0] expected type: number | TimeOfDay
-      TypeError: Native variant type conversion failed.
-      
-  13: ❌ Error mismatch: 
-      
-      TypeError: Native type conversion failed. Function argument [0] expected type: Difficulty
-      TypeError: Native type conversion failed.
+  12: ✅
+  13: ✅
 ```

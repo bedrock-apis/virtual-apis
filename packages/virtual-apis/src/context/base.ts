@@ -12,7 +12,7 @@ export class Context implements Disposable {
    public static getRuntimeModule(id: number, name: string) {
       const context = this.contexts.get(id);
       if (!context) throw new ReferenceError('No such a context found with this id: ' + context);
-      return context.onModuleRequested(name);
+      return context.onModuleRequested(name).getRuntimeValue(context);
    }
    //#endregion
 

@@ -22,6 +22,10 @@ export class ErrorFactory {
    public getMessage(): string {
       return this.message ?? 'Default Base Error Message';
    }
+
+   public addFunctionArgumentExpected(index: number, type: string) {
+      (this as Mutable<this>).message += ` Function argument [${index}] expected type: ${type}`;
+   }
 }
 //#endregion
 
@@ -81,17 +85,16 @@ export const API_ERRORS_MESSAGES = {
    FunctionArgumentExpectedType: (error: string, argument: number, type: string) =>
       ErrorFactory.new(`${error} Function argument [${argument}] expected type: ${type}`, TYPE_ERROR_TYPE),
 
-   // TODO Somehow resolve ArgumentOutOfBoundsError
-   FunctionArgumentBounds: (value: unknown, range: Range<unknown, unknown>, argument: number) =>
-      ErrorFactory.new(
-         `Unsupported or out of bounds value passed to function argument [${argument}]. Value: ${value}, argument bounds: [${range.min}, ${range.max}]`,
-         TYPE_ERROR_TYPE,
-      ),
-
    OutOfRange: (value: unknown, range: Range<unknown, unknown>) =>
       ErrorFactory.new(
          `Provided integer value was out of range.  Value: ${typeof value === 'number' ? value.toFixed(2) : value}, Argument bounds: [${range.min}, ${range.max}]`,
          TYPE_ERROR_TYPE,
+      ),
+
+   UnsupportedFunctionValue: (index = 0, error: string) =>
+      ErrorFactory.new(
+         `Unsupported or out of bounds value passed to function argument [${index}] ${error}`,
+         TYPE_ERROR_TYPE, // TODO ArgumentOutOfBoundsError
       ),
 
    /* ItemStack */

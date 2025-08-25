@@ -21,6 +21,7 @@ export class NumberType extends Type {
 
       return true;
    }
+
    public static readonly default = new this({
       max: Number.MAX_SAFE_INTEGER,
       min: Number.MIN_SAFE_INTEGER,
