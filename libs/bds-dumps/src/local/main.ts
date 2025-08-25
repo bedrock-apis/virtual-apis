@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
-import { chmod, rename } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import { chmod, mkdir, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import {
    CACHE_DUMP_DIR,
@@ -9,11 +10,9 @@ import {
    removeBdsTestConfig,
    writeBdsTestConfig,
 } from './constants';
-import { prepareBdsAndCacheFolders } from './make-ready';
+import { prepareBdsAndCacheFolders, unzip } from './make-ready';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
-import { unzip } from './make-ready';
-import { createReadStream } from 'node:fs';
 
 function run() {
    const start = Date.now();
@@ -59,7 +58,10 @@ function run() {
 }
 
 export async function main() {
-   if (process.platform === 'win32' || (process.platform === 'linux' && !process.env.GITHUB_ACTION)) {
+   const { platform } = process;
+   const gha = process.env.GITHUB_ACTION;
+   const noBds = process.env.NO_BDS;
+   if (!noBds && (platform === 'win32' || (platform === 'linux' && !gha))) {
       await mainSupported();
    } else {
       await mainUnsupported();
@@ -69,6 +71,7 @@ export async function main() {
 async function mainUnsupported() {
    const stream = ReadableStream.from(createReadStream(DUMP_CACHE_ZIP).iterator());
    await unzip(stream, CACHE_OUTPUT_DIR);
+   await mkdir(CACHE_DUMP_DIR, { recursive: true });
    await rename(join(CACHE_OUTPUT_DIR, 'docs'), join(CACHE_DUMP_DIR, 'docs'));
 }
 
