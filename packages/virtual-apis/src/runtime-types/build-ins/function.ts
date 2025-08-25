@@ -1,5 +1,5 @@
 import { Range } from '@bedrock-apis/types';
-import { API_ERRORS_MESSAGES, DiagnosticsStackReport, ErrorFactory } from '../../errorable';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport, ErrorFactory, NumberErrorFactory } from '../../errorable';
 import { RuntimeType, Type } from '../type';
 import { NumberType } from './number';
 
@@ -21,25 +21,31 @@ export class FunctionArgumentType extends Type {
       public readonly range: undefined | Range<number, number>,
       public readonly defaultValue: unknown,
    ) {
-      if (range && type instanceof NumberType) (type as Mutable<NumberType>).range = range;
       super();
+      if (range && type instanceof NumberType) this.detailedType = new NumberType(range);
    }
+
+   public detailedType?: NumberType;
 
    public get name() {
       return this.type.name;
    }
 
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
-      const result = this.type.isValidValue(diagnostics, value);
+      let result = this.type.isValidValue(diagnostics, value);
 
-      if (this.type instanceof FunctionArgumentType) return result;
+      // Detailed type is checked after in mc so that bigger bounds are reported before smaller ones
+      if (result && this.detailedType) {
+         result = this.detailedType.isValidValue(diagnostics, value);
+      }
 
       for (const report of diagnostics.stack) {
          const error = report.factory as Mutable<ErrorFactory>;
 
          // TODO better way to determine error type, maybe property on factory
-         if (this.type instanceof NumberType && error.message?.includes('bounds')) {
-            error.message = `Unsupported or out of bounds value passed to function argument [${this.index}] ${error.message}`;
+         if (error instanceof NumberErrorFactory) {
+            (error as Mutable<ErrorFactory>).message =
+               `Unsupported or out of bounds value passed to function argument [${this.index}]. ${error.text}`;
          } else {
             error.message += ` Function argument [${this.index}] expected type: ${this.type.name}`;
          }

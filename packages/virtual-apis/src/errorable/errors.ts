@@ -22,10 +22,6 @@ export class ErrorFactory {
    public getMessage(): string {
       return this.message ?? 'Default Base Error Message';
    }
-
-   public addFunctionArgumentExpected(index: number, type: string) {
-      (this as Mutable<this>).message += ` Function argument [${index}] expected type: ${type}`;
-   }
 }
 //#endregion
 
@@ -36,6 +32,16 @@ export class ContextPanicError extends Error {
    }
 }
 export class CompileTimeError extends SyntaxError {}
+
+export class NumberErrorFactory extends ErrorFactory {
+   public constructor(
+      message: string,
+      type: ErrorConstructor,
+      public readonly text: unknown,
+   ) {
+      super(message + text, type);
+   }
+}
 //#endregion
 
 //#region Error Constants
@@ -47,6 +53,11 @@ export type NativeTypeKind = 'optional type' | 'variant type' | 'type';
 export const ERROR_TYPE = Error;
 export const REFERENCE_ERROR_TYPE = ReferenceError;
 export const TYPE_ERROR_TYPE = TypeError;
+
+// TODO Resolve it
+class ArgumentOutOfBoundsError extends Error {
+   public override name: string = 'ArgumentOutOfBoundsError';
+}
 
 // Custom type errors: ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: -3000000000, argument bounds: [-2147483648, 2147483647]
 // `Unsupported or out of bounds value passed to function argument [${argument}]. Value: ${value}, argument bounds: [${range.min}, ${range.max}]`
@@ -82,25 +93,21 @@ export const API_ERRORS_MESSAGES = {
          `Incorrect number of arguments to function. Expected ${t.min === t.max ? t.min : `${t.min}-${t.max}`}, received ${length}`,
          TYPE_ERROR_TYPE,
       ),
-   FunctionArgumentExpectedType: (error: string, argument: number, type: string) =>
-      ErrorFactory.new(`${error} Function argument [${argument}] expected type: ${type}`, TYPE_ERROR_TYPE),
 
-   OutOfRange: (value: unknown, range: Range<unknown, unknown>) =>
-      ErrorFactory.new(
-         `Provided integer value was out of range.  Value: ${typeof value === 'number' ? value.toFixed(2) : value}, Argument bounds: [${range.min}, ${range.max}]`,
-         TYPE_ERROR_TYPE,
-      ),
+   OutOfRange(value: unknown, range: Range<unknown, unknown>) {
+      // mc stores numbers that are bigger then int32 as something with .00 at the end lol
+      const correctValue =
+         typeof value === 'number' && (value > 2147483648 || value < -2147483648) ? value.toFixed(2) : value;
 
-   UnsupportedFunctionValue: (index = 0, error: string) =>
-      ErrorFactory.new(
-         `Unsupported or out of bounds value passed to function argument [${index}] ${error}`,
-         TYPE_ERROR_TYPE, // TODO ArgumentOutOfBoundsError
-      ),
+      return new NumberErrorFactory(
+         `Provided integer value was out of range.  `, // Note double space
+         ArgumentOutOfBoundsError,
+         `Value: ${correctValue}, Argument bounds: [${range.min}, ${range.max}]`,
+      );
+   },
 
    /* ItemStack */
    ItemTypeDoesNotExist: (itemType: string) => ErrorFactory.new(`ItemType '${itemType}' does not exists`),
-   InvalidAmount: (min = 0, max = 256) =>
-      ErrorFactory.new(`Invalid amount. Amount must be greater than ${min} and less than ${max}`),
 };
 //#endregion
 

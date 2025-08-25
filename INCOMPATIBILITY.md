@@ -44,21 +44,9 @@ Suite errors (chained):
   5: ✅
   6: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
   7: ❓ Unexpected error: ReferenceError: Implementation missing depends on context implementation
-  8: ❌ Error mismatch: 
-      
-      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 344, Argument bounds: [1, 255]
-      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 344.00, Argument bounds: [1, 255]
-      
-  9: ❌ Error mismatch: 
-      
-      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 1000000, Argument bounds: [1, 255]
-      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 1000000.00, Argument bounds: [1, 255]
-      
-  10: ❌ Error mismatch: 
-      
-      ArgumentOutOfBoundsError: Unsupported or out of bounds value passed to function argument [1]. Value: 112319249219.00, Argument bounds: [-2147483648, 2147483647]
-      TypeError: Unsupported or out of bounds value passed to function argument [1] Provided integer value was out of range.  Value: 112319249219.00, Argument bounds: [1, 255]
-      
+  8: ✅
+  9: ✅
+  10: ✅
   11: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function argument [0] expected type: Closure: (ButtonPushAfterEvent) => void
