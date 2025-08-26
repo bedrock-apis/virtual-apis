@@ -21,8 +21,8 @@ TestSuite.simple('errors')
    .test(() => new ItemStack('minecraft:apple', 1000000))
    .test(() => new ItemStack('minecraft:apple', 112319249219))
 
-   // @ts-expect-error
    .test(() => {
+      // @ts-expect-error
       world.afterEvents.buttonPush.subscribe('not a function');
    })
 
