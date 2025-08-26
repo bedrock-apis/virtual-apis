@@ -333,6 +333,7 @@ export class BinaryLoaderContext {
             getter.setParams(new ParamsValidator([r(symbol.hasType, namedSymbols)]));
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
             getter.setIdentifier(`${base.name}::${selfName}`);
+            if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
             registry.add(getter);
 
             if (BitFlags.anyOf(flags, SymbolBitFlags.HasSetter)) {
@@ -341,6 +342,7 @@ export class BinaryLoaderContext {
                if (!isStatic) setter.setThisType(base);
                setter.setParams(new ParamsValidator([]));
                setter.setIdentifier(`${base.name}::${selfName}`);
+               if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }
          },
       } satisfies Record<
@@ -391,6 +393,9 @@ export class BinaryLoaderContext {
          if (details) {
             const index = details.findIndex(_ => ('defaultValue' satisfies keyof BinaryDetailsStruct) in _);
             paramValidator.setMinimumParamsRequired(index);
+         }
+         if (symbol.invocablePrivileges) {
+            runtime.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
          }
          runtime.setParamsLength(symbol.functionArguments!.length).setParams(paramValidator);
       }

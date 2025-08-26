@@ -10,6 +10,7 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly params!: ParamsValidator;
    public readonly identifier!: string;
    public readonly paramsLength!: number;
+   public readonly privileges: ('read_only' | 'none' | 'early_execution')[] = [];
    protected readonly stackTrimEncapsulation: number = 1;
    protected runtimeGetResult(info: InvocationInfo): unknown {
       const diagnostics = info.diagnostics;
@@ -43,6 +44,14 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       throw new ReferenceError('Implementation missing depends on context implementation');
    }
    //#region  SetMethods
+   public setPrivileges(privileges: string[]): this {
+      if (privileges.some(_ => _ !== 'read_only' && _ !== 'none' && _ !== 'early_execution')) {
+         console.warn('Unknown privileges for', this.name, privileges);
+      } else {
+         (this as Mutable<this>).privileges = privileges as this['privileges'];
+      }
+      return this;
+   }
    public setReturnType(type: RuntimeType): this {
       (this as Mutable<this>).returnType = type;
       return this;
