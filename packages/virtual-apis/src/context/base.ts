@@ -1,7 +1,7 @@
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
 import { InvocationInfo } from './invocation-info';
-import { PluginContext } from './plugin';
+import { ContextPlugin } from './plugin';
 
 const { create } = Object;
 
@@ -21,12 +21,15 @@ export class Context implements Disposable {
       Context.contexts.set(this.runtimeId, this);
    }
 
-   public readonly plugins: Set<PluginContext> = new Set();
+   public readonly plugins: Set<ContextPlugin> = new Set();
    public readonly modules: Map<string, ModuleSymbol> = new Map();
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
-   public registerPlugin(plugin: PluginContext) {
+   public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
+      return this.symbols.get(id) ?? null;
+   }
+   public registerPlugin(plugin: ContextPlugin) {
       this.plugins.add(plugin);
-      plugin.onContextInitialization(this);
+      plugin.onInitialization();
       // Register all the methods on this context
    }
 
@@ -56,10 +59,10 @@ export class Context implements Disposable {
             symbol,
          );
       }
-      for (const plugin of this.plugins) plugin.onAfterModuleCompilation(this, moduleSymbol);
+      for (const plugin of this.plugins) plugin.onAfterModuleCompilation(moduleSymbol);
    }
    public onBeforeModuleCompilation(moduleSymbol: ModuleSymbol): void {
-      for (const plugin of this.plugins) plugin.onBeforeModuleCompilation(this, moduleSymbol);
+      for (const plugin of this.plugins) plugin.onBeforeModuleCompilation(moduleSymbol);
    }
    public onModuleRequested(name: string): ModuleSymbol {
       const module = this.modules.get(name);
@@ -81,6 +84,6 @@ export class Context implements Disposable {
    public dispose(): void {
       Context.contexts.delete(this.runtimeId);
       (this as Mutable<this>).nativeHandles = new WeakSet();
-      for (const plugin of this.plugins) plugin.onContextDispose(this);
+      for (const plugin of this.plugins) plugin.onDispose();
    }
 }
