@@ -203,10 +203,6 @@ export class MetadataToSerializableTransformer {
                break;
          }
 
-      if (type.flags === 513 && type.extendedRef == 1593) {
-         console.log(type, e.optional_type);
-      }
-
       return type;
    }
 

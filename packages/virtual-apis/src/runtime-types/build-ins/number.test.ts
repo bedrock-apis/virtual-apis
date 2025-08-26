@@ -11,12 +11,12 @@ suite('NumberType', () => {
       );
       expect(() => testType(type, 9)).toThrowErrorMatchingInlineSnapshot(
          // TODO Its ArgumentOutOfBoundsError
-         `[TypeError: Provided integer value was out of range.  Value: 9, argument bounds: [10, 20]]`,
+         `[ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: 9, Argument bounds: [10, 20]]`,
       );
       expect(() => testType(type, 10)).not.toThrow();
       expect(() => testType(type, 20)).not.toThrow();
       expect(() => testType(type, 21)).toThrowErrorMatchingInlineSnapshot(
-         `[TypeError: Provided integer value was out of range.  Value: 21, argument bounds: [10, 20]]`,
+         `[ArgumentOutOfBoundsError: Provided integer value was out of range.  Value: 21, Argument bounds: [10, 20]]`,
       );
 
       expect(() => testType(type, Infinity)).toThrowErrorMatchingInlineSnapshot(
