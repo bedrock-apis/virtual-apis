@@ -39,7 +39,7 @@
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
-      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/va-loader/node ./packages/va-test/dist/run-compare",
+      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/core-plugin --import @bedrock-apis/va-loader/node ./packages/va-test/dist/run-compare",
       "e2e:dev": "pnpm build:src && pnpm dump:run && pnpm e2e",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",

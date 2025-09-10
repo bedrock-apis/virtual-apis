@@ -1,4 +1,4 @@
-import '@bedrock-apis/core-plugin';
+// Plugin and loader are imported by command line
 import './suites/all';
 
 import { readTestReport } from '@bedrock-apis/bds-dumps/api';

@@ -4,7 +4,7 @@ import { Type } from './type';
 export class OptionalType extends Type {
    public constructor(public readonly type: Type) {
       super();
-      this.name = 'optional<' + this.type.name + '>'; //TODO Check real name
+      this.name = '' + this.type.name + ' | undefined'; //TODO Check real name
    }
 
    public override name: string;

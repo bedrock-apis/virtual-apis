@@ -1,3 +1,5 @@
 export * from './context/base';
-export * from './symbols';
+export * from './context/invocation-info';
+export * from './context/plugin';
 export * from './runtime-types';
+export * from './symbols';

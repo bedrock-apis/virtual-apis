@@ -41,7 +41,7 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       return info.result;
    }
    protected invoke(info: InvocationInfo) {
-      throw new ReferenceError('Implementation missing depends on context implementation');
+      info.context.onInvocation(info);
    }
    //#region  SetMethods
    public setPrivileges(privileges: string[]): this {

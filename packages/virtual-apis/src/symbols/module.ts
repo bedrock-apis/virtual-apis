@@ -6,6 +6,7 @@ import { InterfaceSymbol } from './interface';
 const { defineProperty, create } = Object;
 export class ModuleSymbol extends CompilableSymbol<object> {
    public readonly symbols: Set<CompilableSymbol<unknown>> = new Set();
+   public readonly symbolsMap: Map<string, CompilableSymbol<unknown>> = new Map();
    public metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
    public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();
    protected override compile(context: Context): object {
@@ -28,6 +29,7 @@ export class ModuleSymbol extends CompilableSymbol<object> {
    }
    public addSymbol(symbol: CompilableSymbol<unknown>, isPublic: boolean) {
       this.symbols.add(symbol);
+      this.symbolsMap.set(symbol.name, symbol);
       if (!isPublic) return;
       if (this.publicSymbols.has(symbol.name))
          throw new ReferenceError(`Public symbol with name of '${symbol.name}' is already registered in this module`);

@@ -1,9 +1,12 @@
+import { ErrorFactory, PANIC_ERROR_MESSAGES } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
 import { InvocationInfo } from './invocation-info';
 import { ContextPlugin } from './plugin';
 
 const { create } = Object;
+
+type SymbolImpl = (ctx: InvocationInfo, ...args: unknown[]) => void;
 
 export class Context implements Disposable {
    //#region Static
@@ -14,11 +17,18 @@ export class Context implements Disposable {
       if (!context) throw new ReferenceError('No such a context found with this id: ' + context);
       return context.onModuleRequested(name).getRuntimeValue(context);
    }
+   public static wasLoadedAtLeastOnce = false;
    //#endregion
 
    public readonly runtimeId = Context.runtimeIdIncrementalVariable++;
    public constructor() {
+      Context.wasLoadedAtLeastOnce = true;
       Context.contexts.set(this.runtimeId, this);
+
+      // TODO Some kind of config to filter out unneded plugins
+      for (const plugin of ContextPlugin.plugins.values()) {
+         (plugin as unknown as { instantiate(c: Context): void }).instantiate(this);
+      }
    }
 
    public readonly plugins: Set<ContextPlugin> = new Set();
@@ -72,8 +82,34 @@ export class Context implements Disposable {
          );
       return module;
    }
+
+   // TODO Check symbol/impl version?
+   // TODO Implement based on symbol type?
+   // TODO Priority system?
+   public implement(identifier: string, impl: SymbolImpl) {
+      let impls = this.implementations.get(identifier);
+      if (!impls) this.implementations.set(identifier, (impls = []));
+      impls.push(impl);
+   }
+
+   protected implementations = new Map<string, SymbolImpl[]>();
+
    public onInvocation(invocationInfo: InvocationInfo) {
-      //invocationInfo.symbol.identifier;
+      const implemetations = this.implementations.get(invocationInfo.symbol.identifier);
+      if (!implemetations?.length) {
+         // TODO Config to ignore? Default implementation?
+         invocationInfo.diagnostics.errors.report(new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation));
+         return;
+      }
+
+      for (const implementation of implemetations) {
+         try {
+            implementation(invocationInfo, ...invocationInfo.params);
+         } catch (error) {
+            // TODO Catch by plugin? Config to stop here?
+            invocationInfo.diagnostics.errors.report(new ErrorFactory((error as Error).stack));
+         }
+      }
    }
    //#endregion
 

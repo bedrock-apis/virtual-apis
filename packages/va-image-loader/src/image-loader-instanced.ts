@@ -1,51 +1,51 @@
 import {
-   BinaryDetailsStruct,
-   BinaryImageFormat,
-   BinaryIO,
-   BinarySymbolStruct,
-   BinaryTypeStruct,
-   bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
-   ExportType,
-   ImageModuleData,
-   ModuleMetadata,
-   SerializableModule,
-   SpecificSymbolFlags,
-   SymbolBitFlags,
-   TypeBitFlagsU16,
+    BinaryDetailsStruct,
+    BinaryImageFormat,
+    BinaryIO,
+    BinarySymbolStruct,
+    BinaryTypeStruct,
+    bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
+    ExportType,
+    ImageModuleData,
+    ModuleMetadata,
+    SerializableModule,
+    SpecificSymbolFlags,
+    SymbolBitFlags,
+    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
 import { BitFlags, d, IndexedAccessor } from '@bedrock-apis/common';
 import {
-   bigintType,
-   booleanType,
-   ClosureType,
-   CompilableSymbol,
-   ConstantValueSymbol,
-   ConstructableSymbol,
-   Context,
-   EnumerableAPISymbol,
-   FunctionArgumentType,
-   FunctionSymbol,
-   InterfaceSymbol,
-   InvocableSymbol,
-   MethodSymbol,
-   ModuleSymbol,
-   NumberType,
-   ObjectValueSymbol,
-   ParamsValidator,
-   PropertyGetterSymbol,
-   PropertySetterSymbol,
-   RuntimeType,
-   stringType,
+    bigintType,
+    booleanType,
+    ClosureType,
+    CompilableSymbol,
+    ConstantValueSymbol,
+    ConstructableSymbol,
+    Context,
+    EnumerableAPISymbol,
+    FunctionArgumentType,
+    FunctionSymbol,
+    InterfaceSymbol,
+    InvocableSymbol,
+    MethodSymbol,
+    ModuleSymbol,
+    NumberType,
+    ObjectValueSymbol,
+    ParamsValidator,
+    PropertyGetterSymbol,
+    PropertySetterSymbol,
+    RuntimeType,
+    stringType,
 } from '@bedrock-apis/virtual-apis';
 
 import {
-   ArrayType,
-   generatorObjectType,
-   MapType,
-   OptionalType,
-   promiseType,
-   VariantType,
-   voidType,
+    ArrayType,
+    generatorObjectType,
+    MapType,
+    OptionalType,
+    promiseType,
+    VariantType,
+    voidType,
 } from '@bedrock-apis/virtual-apis';
 
 interface PreparedModule {
@@ -228,8 +228,7 @@ export class BinaryLoaderContext {
          s.setName(stringOf(symbol.name));
          namedSymbols[s.name] = s;
          exportedSubMap.set(symbol, s);
-         base.symbols.add(s);
-         base.publicSymbols.set(s.name, s);
+         base.addSymbol(s, true);
       }
       //#endregion
 
@@ -326,11 +325,13 @@ export class BinaryLoaderContext {
             const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
             const registry = base[isStatic ? 'staticFields' : 'prototypeFields'];
             const selfName = stringOf(symbol.name);
+            const type = r(symbol.hasType, namedSymbols);
 
             const getter = new PropertyGetterSymbol();
             list.push(getter);
             if (!isStatic) getter.setThisType(base);
-            getter.setParams(new ParamsValidator([r(symbol.hasType, namedSymbols)]));
+            getter.setReturnType(type);
+            getter.setParams(new ParamsValidator([type]));
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
             getter.setIdentifier(`${base.name}::${selfName}`);
             if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
@@ -341,6 +342,7 @@ export class BinaryLoaderContext {
                list.push(setter);
                if (!isStatic) setter.setThisType(base);
                setter.setParams(new ParamsValidator([]));
+               setter.setReturnType(voidType); // TODO Boolean type?
                setter.setIdentifier(`${base.name}::${selfName}`);
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }

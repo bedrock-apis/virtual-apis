@@ -19,7 +19,7 @@ export class ClosureType extends Type {
    public constructor(types: RuntimeType[]) {
       super();
       const [returnType, ...params] = types;
-      this.name = `Closure: (${params.map(e => e.name).join(', ')}) => ${returnType?.name}`;
+      this.name = `Closure: (${params.map(e => e.name).join(', ')}) => ${returnType?.name === 'undefined' ? 'void' : returnType?.name}`;
    }
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       if (typeof value !== 'function') {

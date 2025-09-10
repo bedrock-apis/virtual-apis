@@ -1,5 +1,5 @@
 import { ConstructableSymbol, type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
-import type { Context } from './base';
+import { Context } from './base';
 
 // It's not Symbol(Symbol.vaIdentifier), bc it's not assigned to Symbol constructor it self
 export const vaTypeIdentifier: unique symbol = Symbol('Symbol(vaTypeIdentifier)');
@@ -17,8 +17,24 @@ export abstract class ContextPlugin {
    ): S {
       return new this(context);
    }
-   protected constructor(public readonly context: Context) {}
-   public abstract readonly identifier: string;
+   public static plugins = new Map<string, typeof ContextPlugin>();
+   public static identifier: string;
+   public static register(identifier: string) {
+      if (Context.wasLoadedAtLeastOnce) {
+         console.warn(
+            'Plugin',
+            identifier,
+            'wont be loaded by all contexts because some of them have already been initialized. Plugin loading should happen before context loading',
+         );
+      }
+      this.identifier = identifier;
+      this.prototype.identifier = identifier;
+      this.plugins.set(this.prototype.identifier, this);
+   }
+   protected constructor(public readonly context: Context) {
+      this.onInitialization();
+   }
+   public identifier!: string;
    // It's private we don't want a plugin to have direct access
    private readonly bindings: WeakMap<object, object> = new WeakMap<object, object>();
    private readonly bindingsInverted: WeakMap<object, object> = new WeakMap<object, object>();

@@ -9,6 +9,10 @@ export class TestSuite<T> {
       return JSON.stringify(object);
    }
 
+   public static assert(v1: unknown) {
+      if (!v1) throw new Error('Assertion failed');
+   }
+
    public static withSetup<T>(id: string, setupFn: () => T) {
       return new TestSuite(id, setupFn);
    }
