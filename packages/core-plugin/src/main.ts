@@ -11,6 +11,8 @@ class CoreTestPlugin extends ContextPlugin {
 
       this.implementSimpleGetter('World::afterEvents getter', 'WorldAfterEvents');
       this.implementSimpleGetter('WorldAfterEvents::buttonPush getter', 'ButtonPushAfterEventSignal');
+
+
    }
 
    private implementSimpleGetter(symbolName: string, instanceClassId: string) {
@@ -19,6 +21,7 @@ class CoreTestPlugin extends ContextPlugin {
          if (!storage) this.storages.set(ctx.symbol.identifier, (storage = {}));
 
          if (!storage.impl) {
+        
             const symbol = ctx.context.modules.get('@minecraft/server')?.symbolsMap.get(instanceClassId);
             if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
 

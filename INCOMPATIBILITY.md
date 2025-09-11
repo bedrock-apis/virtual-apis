@@ -8,7 +8,17 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Block'.
+Suite block (chained): 
+  0: ❓ Unexpected error: Error: No implementation error.
+  1: ❓ Unexpected error: Error: No implementation error.
+  2: ❓ Unexpected error: Error: No implementation error.
+  3: ❓ Unexpected error: Error: No implementation error.
+  4: ❓ Unexpected error: Error: No implementation error.
+  5: ❓ Unexpected error: Error: No implementation error.
+  6: 0: ❓ Unexpected error: Error: No implementation error.
+    1: No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
+    
+  
 
 
 Suite dynamic properties (chained): 
@@ -25,7 +35,12 @@ Suite dynamic properties (chained):
   
 
 
-Suite entity (chained): ❓ Unexpected setup error: ReferenceError: No constructor for native class 'Entity'.
+Suite entity (chained): 
+  0: ❓ Unexpected error: Error: No implementation error.
+  1: ❓ Unexpected error: Error: No implementation error.
+  2: ❓ Unexpected error: Error: No implementation error.
+  3: ❓ Unexpected error: Error: No implementation error.
+  
 
 
 Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed. Function argument [1] expected type: number

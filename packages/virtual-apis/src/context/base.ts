@@ -18,6 +18,9 @@ export class Context implements Disposable {
       return context.onModuleRequested(name).getRuntimeValue(context);
    }
    public static wasLoadedAtLeastOnce = false;
+   public static getContext(id: number) {
+      return this.contexts.get(id);
+   }
    //#endregion
 
    public readonly runtimeId = Context.runtimeIdIncrementalVariable++;
