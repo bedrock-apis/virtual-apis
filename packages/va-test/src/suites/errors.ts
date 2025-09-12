@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Entity, ItemStack, world } from '@minecraft/server';
+import { placeBlock, spawnEntity } from '../main';
 import { TestSuite } from '../suite';
 
 TestSuite.simple('errors')
@@ -31,7 +32,15 @@ TestSuite.simple('errors')
       TestSuite.assert(world.afterEvents.buttonPush === world.afterEvents.buttonPush);
    })
 
+   // more then max type
    .test(() => world.setTimeOfDay(2147483649))
 
    // @ts-expect-error
-   .test(() => world.setDifficulty('nonexistent')); // more then max type
+   .test(() => world.setDifficulty('nonexistent'))
+
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', spawnEntity('minecraft:cow')))
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, spawnEntity('minecraft:cow')))
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', null))
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, null))
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', placeBlock('minecraft:stone')))
+   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, placeBlock('minecraft:stone')));

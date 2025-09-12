@@ -1,3 +1,4 @@
+import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { ErrorFactory, PANIC_ERROR_MESSAGES } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
@@ -34,6 +35,8 @@ export class Context implements Disposable {
       }
    }
 
+   public currentPrivilege = VirtualPrivilege.None;
+
    public readonly plugins = new Map<string, ContextPlugin>();
    protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
    public readonly modules: Map<string, ModuleSymbol> = new Map();
@@ -49,6 +52,11 @@ export class Context implements Disposable {
    }
    public getPlugin<T extends typeof ContextPlugin>(plugin: T) {
       return this.pluginTypes.get(plugin) as InstanceType<T> | undefined;
+   }
+   public getPluginForce<T extends typeof ContextPlugin>(plugin: T, ctx: InvocationInfo) {
+      const instance = this.getPlugin(plugin);
+      if (!instance) throw new Error(`${plugin.name} is required for ${ctx.symbol.identifier ?? ctx.symbol.name}`);
+      return instance;
    }
 
    //#region NativeHandles

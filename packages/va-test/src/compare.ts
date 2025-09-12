@@ -68,7 +68,7 @@ function compareResults(resultA: TestReport.Result, resultB: TestReport.Result):
       }
 
       if (typeof resultB !== 'object' || Array.isArray(resultB)) {
-         return `❓ Expected error, got: ${resultB}`;
+         return `❓ Expected error (${resultA.error}), got: ${resultB}`;
       }
 
       if (resultA.error !== resultB.error) return `❌ Error mismatch: ${indent(diff(resultA.error, resultB.error))}`;
@@ -88,7 +88,7 @@ function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestRep
    for (const [i, resultA] of resultsA.entries()) {
       const resultB = resultsB[i];
       if (typeof resultB === 'undefined') {
-         report += `${i}: No result, expected ${resultToString(resultA)}\n`;
+         report += `${i}: ❓ No result, expected ${resultToString(resultA)}\n`;
          continue;
       }
 

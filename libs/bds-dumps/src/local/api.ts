@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { BlocksDataReport, ItemsDataReport, TestsReport } from '../shared';
+import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
 import { CACHE_DUMP_OUTPUT } from './constants';
 import { dump } from './dump';
 
@@ -22,6 +22,10 @@ async function readReport(name: string) {
 
 export const readTestReport = readReport.bind(null, 'tests.json') as () => Promise<TestsReport>;
 export const readItemsReport = readReport.bind(null, 'items.json') as () => Promise<ItemsDataReport>;
+export const readLocalizationReport = readReport.bind(
+   null,
+   'localization.json',
+) as () => Promise<LocalizationKeysReport>;
 export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
 
 // Dev mode only function. No need to be in provider

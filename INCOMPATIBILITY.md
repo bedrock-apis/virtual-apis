@@ -16,21 +16,25 @@ Suite block (chained):
   4: ❓ Unexpected error: Error: No implementation error.
   5: ❓ Unexpected error: Error: No implementation error.
   6: 0: ❓ Unexpected error: Error: No implementation error.
-    1: No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
+    1: ❓ No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
     
   
 
 
 Suite dynamic properties (chained): 
-  0: ❓ Unexpected error: Error: No implementation error.
-  1: 0: ❓ Unexpected error: Error: No implementation error.
-    1: No result, expected false
-    2: No result, expected ""
-    3: No result, expected "string"
-    4: No result, expected 1
-    5: No result, expected 0
-    6: No result, expected -1
-    7: No result, expected TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
+  0: ✅
+  1: 0: ✅
+    1: ✅
+    2: ✅
+    3: ✅
+    4: ✅
+    5: ✅
+    6: ✅
+    7: ❌ Error mismatch: 
+        
+        TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
+        TypeError: Native optional type conversion failed. Function argument [1] expected type: boolean | number | number | string | Vector3 | undefined
+        
     
   
 
@@ -43,9 +47,14 @@ Suite entity (chained):
   
 
 
+Suite disposal (chained): 
+  0: ✅
+  
+
+
 Suite errors (chained): 
   0: ✅
-  1: ❓ Expected error, got: {}
+  1: ❓ Expected error (Error: Invalid item identifier 'Yes'.), got: {}
   2: ✅
   3: ❌ Error mismatch: 
       
@@ -63,6 +72,12 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
+  15: ❌ Results mismatch: false != true
+  16: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
+  17: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
+  18: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
+  19: ❓ Expected error (Error: Failed to set member), got: false
+  20: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
   
 
 
@@ -81,13 +96,24 @@ Suite item (chained):
   5: ✅
   6: ❓ Unexpected error: Error: No implementation error.
   7: 0: ❓ Unexpected error: Error: No implementation error.
-    1: No result, expected 2
+    1: ❓ No result, expected 2
     
   
 
 
 Suite privileges (chained): 
-  0: ❓ Expected error, got: undefined
-  1: ❓ Unexpected error: Error: No implementation error.
-  2: No result, expected null
+  0: ❓ Expected error (ReferenceError: Native constructor for [ItemStack] does not have required privileges.), got: undefined
+  1: ❓ Expected error (ReferenceError: Native function [World::setDifficulty] does not have required privileges.), got: undefined
+  2: ❌ Error mismatch: 
+      
+      ReferenceError: Native property getter [World::gameRules] does not have required privileges.
+      TypeError: Cannot set property commandBlockOutput of #<constructor> which has only a getter
+      
+  3: ❌ Error mismatch: 
+      
+      ReferenceError: Native property getter [World::gameRules] does not have required privileges.
+      TypeError: Cannot set property commandBlockOutput of #<constructor> which has only a getter
+      
+  4: ❓ Unexpected error: Error: No implementation error.
+  5: ❓ No result, expected null
 ```

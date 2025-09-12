@@ -7,11 +7,19 @@ import {
 } from '@bedrock-apis/virtual-apis';
 import type * as mc from '@minecraft/server';
 
+type ModuleTypeValue =
+   | {
+        new (...args: unknown[]): void;
+        prototype: object;
+     }
+   | {
+        prototype: object;
+     }
+   | Record<string, unknown>;
+
 // TODO Figure out how to properly map types?
 export type ServerModuleTypeMap = {
-   [K in keyof typeof mc as (typeof mc)[K] extends NewableFunction ? K : never]: (typeof mc)[K] extends NewableFunction
-      ? (typeof mc)[K]
-      : never;
+   [K in keyof typeof mc as (typeof mc)[K] extends ModuleTypeValue ? K : never]: (typeof mc)[K];
 };
 
 type PartialParts<B, ThisArg = B> = {
@@ -38,14 +46,14 @@ export abstract class Plugin extends ContextPlugin {
    }
 }
 
-interface DefaultImplementationThis<T, Mod extends ModuleTypeMap> {
+interface CallThis<T, Mod extends ModuleTypeMap> {
    invocation: InvocationInfo;
    instance: object;
    implementation: T;
    module: PluginModuleImplementer<Mod>;
 }
 
-interface StorageImplementationThis<T, Mod extends ModuleTypeMap, Storage> extends DefaultImplementationThis<T, Mod> {
+interface StorageThis<T, Mod extends ModuleTypeMap, Storage> extends CallThis<T, Mod> {
    storage: Storage;
 }
 
@@ -58,16 +66,7 @@ type ConstructorImpl<This, Mod extends ModuleTypeMap, T extends keyof Mod> = Mod
      }
    : object;
 
-type ModuleTypeMap = Record<
-   string,
-   | {
-        new (...args: unknown[]): void;
-        prototype: object;
-     }
-   | {
-        prototype: object;
-     }
->;
+type ModuleTypeMap = Record<string, ModuleTypeValue>;
 
 type Constructable = { prototype: object };
 
@@ -86,23 +85,25 @@ export class PluginModuleImplementer<Mod extends ModuleTypeMap> {
 
    public implement<T extends keyof Mod>(
       className: T,
-      implementation: PartialParts<Mod[T]['prototype'], DefaultImplementationThis<Mod[T]['prototype'], Mod>>,
+      implementation: PartialParts<Mod[T]['prototype'], CallThis<Mod[T]['prototype'], Mod>>,
    ) {
       new PluginImplementation(this as PluginModuleImplementer<ModuleTypeMap>, className as string, implementation);
    }
    public implementStatic<T extends keyof Mod>(
       className: T,
-      implementation: PartialParts<Mod[T], DefaultImplementationThis<Mod[T], Mod>>,
+      implementation: PartialParts<Mod[T], CallThis<Mod[T], Mod>>,
    ) {
       new PluginStaticImpl(this, className as string, implementation);
    }
    public implementWithStorage<T extends keyof Mod, Storage extends object>(
       className: T,
       createStorage: (implementation: Mod[T]['prototype']) => Storage,
-      implementation: PartialParts<Mod[T]['prototype'], StorageImplementationThis<Mod[T]['prototype'], Mod, Storage>> &
-         ConstructorImpl<StorageImplementationThis<Mod[T]['prototype'], Mod, Storage>, Mod, T>,
+      implementation: PartialParts<Mod[T]['prototype'], StorageThis<Mod[T]['prototype'], Mod, Storage>> &
+         ConstructorImpl<StorageThis<Mod[T]['prototype'], Mod, Storage>, Mod, T>,
    ) {
-      return new PluginImplementationWithStorage<Storage, Mod[T]['prototype']>(
+      type Native = Mod[T]['prototype'] extends object ? Mod[T]['prototype'] : never;
+
+      return new PluginImplementationWithStorage<Storage, Native>(
          this,
          className as string,
          implementation,
@@ -179,10 +180,7 @@ export class PluginImplementation {
       return `${this.className}::${key}`;
    }
 
-   protected getThisValue(
-      native: unknown,
-      invocation: InvocationInfo,
-   ): DefaultImplementationThis<object, ModuleTypeMap> {
+   protected getThisValue(native: unknown, invocation: InvocationInfo): CallThis<object, ModuleTypeMap> {
       return { invocation, module: this.module, implementation: this.implementation, instance: native as object };
    }
 }
@@ -209,7 +207,7 @@ export class PluginImplementationWithStorage<T extends object, Native extends ob
    protected override getThisValue(
       native: unknown,
       invocationInfo: InvocationInfo,
-   ): StorageImplementationThis<object, ModuleTypeMap, T> {
+   ): StorageThis<object, ModuleTypeMap, T> {
       return { ...super.getThisValue(native, invocationInfo), storage: this.getStorage(native as Native) };
    }
 
