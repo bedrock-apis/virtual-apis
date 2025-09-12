@@ -297,7 +297,7 @@ export class BinaryLoaderContext {
             const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
 
             if (s instanceof MethodSymbol) s.setThisType(base);
-            base[isStatic ? 'staticFields' : 'prototypeFields'].add(s);
+            base[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
             s.setIdentifier(`${base.name}::${stringOf(symbol.name)}`);
          },
          [SpecificSymbolFlags.ConstructorInformation](flags, symbol) {
@@ -315,7 +315,7 @@ export class BinaryLoaderContext {
             const s = new ConstantValueSymbol();
             list.push(s);
             s.setValue(symbol.hasValue);
-            boundToConstructor[isStatic ? 'staticFields' : 'prototypeFields'].add(s);
+            boundToConstructor[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
          },
          [SpecificSymbolFlags.BoundProperty](flags, symbol, list) {
             const isStatic = BitFlags.allOf(flags, SymbolBitFlags.IsStatic);
@@ -335,14 +335,15 @@ export class BinaryLoaderContext {
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
             getter.setIdentifier(`${base.name}::${selfName}`);
             if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
-            registry.add(getter);
+            registry.set(selfName, getter);
 
             if (BitFlags.anyOf(flags, SymbolBitFlags.HasSetter)) {
                const setter = new PropertySetterSymbol();
                list.push(setter);
                if (!isStatic) setter.setThisType(base);
+               getter.setSetter(setter);
                setter.setParams(new ParamsValidator([]));
-               setter.setReturnType(voidType); // TODO Boolean type?
+               setter.setReturnType(voidType);
                setter.setIdentifier(`${base.name}::${selfName}`);
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }

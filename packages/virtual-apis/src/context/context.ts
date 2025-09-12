@@ -30,21 +30,25 @@ export class Context implements Disposable {
 
       // TODO Some kind of config to filter out unneded plugins
       for (const plugin of ContextPlugin.plugins.values()) {
-        const instance = (plugin as unknown as { instantiate(c: Context): ContextPlugin }).instantiate(this);
-      this.registerPlugin(instance)
+         this.registerPlugin(plugin);
       }
    }
 
-   public readonly plugins: Set<ContextPlugin> = new Set();
+   public readonly plugins = new Map<string, ContextPlugin>();
+   protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
    public readonly modules: Map<string, ModuleSymbol> = new Map();
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
    public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
       return this.symbols.get(id) ?? null;
    }
-   public registerPlugin(plugin: ContextPlugin) {
-      this.plugins.add(plugin);
+   public registerPlugin(pluginType: typeof ContextPlugin) {
+      const plugin = pluginType.instantiate(this);
+      this.plugins.set(pluginType.identifier, plugin);
+      this.pluginTypes.set(pluginType, plugin);
       plugin.onInitialization();
-      // Register all the methods on this context
+   }
+   public getPlugin<T extends typeof ContextPlugin>(plugin: T) {
+      return this.pluginTypes.get(plugin) as InstanceType<T> | undefined;
    }
 
    //#region NativeHandles
@@ -73,22 +77,18 @@ export class Context implements Disposable {
             symbol,
          );
       }
-      for (const plugin of this.plugins) plugin.onAfterModuleCompilation(moduleSymbol);
+      for (const plugin of this.plugins.values()) plugin.onAfterModuleCompilation(moduleSymbol);
    }
    public onBeforeModuleCompilation(moduleSymbol: ModuleSymbol): void {
-      for (const plugin of this.plugins) plugin.onBeforeModuleCompilation(moduleSymbol);
+      for (const plugin of this.plugins.values()) plugin.onBeforeModuleCompilation(moduleSymbol);
    }
    public onModuleRequested(name: string): ModuleSymbol {
       const module = this.modules.get(name);
-      if (!module)
-         throw new ReferenceError(
-            'No such a module registered in current context, contextId: ' + this.runtimeId + ' moduleName: ' + name,
-         );
+      if (!module) throw new ReferenceError(`Module ${name} is not registered in context with id ${this.runtimeId}`);
       return module;
    }
 
    // TODO Check symbol/impl version?
-   // TODO Implement based on symbol type?
    // TODO Priority system?
    public implement(identifier: string, impl: SymbolImpl) {
       let impls = this.implementations.get(identifier);
@@ -124,6 +124,6 @@ export class Context implements Disposable {
    public dispose(): void {
       Context.contexts.delete(this.runtimeId);
       (this as Mutable<this>).nativeHandles = new WeakSet();
-      for (const plugin of this.plugins) plugin.onDispose();
+      for (const plugin of this.plugins.values()) plugin.onDispose();
    }
 }

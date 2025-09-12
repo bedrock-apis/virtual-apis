@@ -1,5 +1,5 @@
 import { ConstructableSymbol, type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
-import { Context } from './base';
+import { Context } from './context';
 
 // It's not Symbol(Symbol.vaIdentifier), bc it's not assigned to Symbol constructor it self
 export const vaTypeIdentifier: unique symbol = Symbol('Symbol(vaTypeIdentifier)');
@@ -9,12 +9,31 @@ export interface PluginInstanceStorageLike {
    [vaIdentifier]?(): string;
 }
 
+export class ContextPluginLinkedStorage<T extends object> {
+   private readonly storages = new WeakMap<object, T>();
+   protected readonly instances = new WeakMap<T, WeakRef<object>>();
+
+   public constructor(protected readonly create: (instance: object) => T) {}
+
+   public get(instance: object) {
+      const storage = this.storages.get(instance);
+      if (storage) return storage;
+
+      const createdStorage = this.create(instance);
+      this.storages.set(instance, createdStorage);
+      this.instances.set(createdStorage, new WeakRef(instance));
+      return createdStorage;
+   }
+
+   public getInstance(storage: T) {
+      return this.instances.get(storage)?.deref();
+   }
+}
+
 // Low level plugin system
 export abstract class ContextPlugin {
-   public static instantiate<T extends new (context: Context) => S, S extends ContextPlugin>(
-      this: T,
-      context: Context,
-   ): S {
+   public static instantiate<T extends typeof ContextPlugin, S extends ContextPlugin>(this: T, context: Context): S {
+      // @ts-expect-error Abstract bypass
       return new this(context);
    }
    public static plugins = new Map<string, typeof ContextPlugin>();
@@ -31,8 +50,11 @@ export abstract class ContextPlugin {
       this.prototype.identifier = identifier;
       this.plugins.set(this.prototype.identifier, this);
    }
-   protected constructor(public readonly context: Context) {}
+   public constructor(public readonly context: Context) {}
    public identifier!: string;
+
+   public storage?: ContextPluginLinkedStorage<object>;
+
    // It's private we don't want a plugin to have direct access
    private readonly bindings: WeakMap<object, object> = new WeakMap<object, object>();
    private readonly bindingsInverted: WeakMap<object, object> = new WeakMap<object, object>();
@@ -66,7 +88,7 @@ export abstract class ContextPlugin {
       if (!id) throw new ReferenceError('Failed to resolve type of the storage instance');
       const symbol = this.context.tryGetSymbolByIdentifier(id);
       if (!symbol) throw new ReferenceError('Failed to resolve type of the storage instance, id of ' + id);
-      if (!(symbol instanceof ConstructableSymbol)) throw new ReferenceError('Symbol type must by class like symbol');
+      if (!(symbol instanceof ConstructableSymbol)) throw new ReferenceError('Symbol type must be class like symbol');
       const handle = symbol.createHandleInternal(this.context);
       this.bindInstanceTo(handle, instance);
       return handle;

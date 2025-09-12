@@ -1,3 +1,4 @@
+import { ContextPluginLinkedStorage } from '@bedrock-apis/virtual-apis';
 import type * as mc from '@minecraft/server';
 
 // TODO Figure out how to properly map types?
@@ -8,6 +9,10 @@ type PartialParts<B, ThisArg = B> = {
 };
 
 export const STORAGE = Symbol('STORAGE');
+
+interface PluginWithStorage<T extends object = object> {
+   storage: ContextPluginLinkedStorage<T>;
+}
 
 export abstract class Plugin {
    protected abstract readonly id: string;
@@ -26,6 +31,10 @@ export abstract class Plugin {
       implementation: PartialParts<ModuleTypeMap[T]['prototype'], ModuleTypeMap[T]['prototype'] & { STORAGE: Storage }>,
    ) {
       return undefined as unknown as PluginImplementation<Storage, ModuleTypeMap[T]>; // TODO Implement
+   }
+
+   protected getStorage<T extends object = object>(instance: object, storage: ContextPluginLinkedStorage<T>): T {
+      return storage.get(instance);
    }
 }
 

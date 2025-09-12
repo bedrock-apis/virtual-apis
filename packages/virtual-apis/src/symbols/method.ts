@@ -1,4 +1,4 @@
-import { Context } from '../context/base';
+import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
@@ -14,8 +14,7 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(that);
+         const info = new InvocationInfo(context, symbol, params, that);
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))

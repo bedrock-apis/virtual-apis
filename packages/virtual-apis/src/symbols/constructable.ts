@@ -1,7 +1,7 @@
 import { finalizeAsConstructable } from '../ecma-utils';
 import { InvocableSymbol } from './abstracts';
 
-import type { Context } from '../context/base';
+import type { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
 import { RuntimeType } from '../runtime-types';
@@ -12,8 +12,8 @@ const { setPrototypeOf } = Object;
 export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown[]) => unknown> implements RuntimeType {
    public override readonly returnType: RuntimeType = this;
    public readonly handles: WeakSet<object> = new WeakSet();
-   public readonly staticFields: Set<IBindableSymbol> = new Set();
-   public readonly prototypeFields: Set<IBindableSymbol> = new Set();
+   public readonly staticFields = new Map<string, IBindableSymbol>();
+   public readonly prototypeFields = new Map<string, IBindableSymbol>();
    public readonly parent: ConstructableSymbol | null = null;
    public readonly requireNew: boolean = true;
    public readonly isConstructable: boolean = false;
@@ -38,8 +38,7 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       const symbol = this;
       function constructor(this: unknown, ...params: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(this);
+         const info = new InvocationInfo(context, symbol, params, this);
          info.setNewTargetObject(new.target ?? null);
          const { diagnostics } = info;
 

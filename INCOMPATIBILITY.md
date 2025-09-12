@@ -10,9 +10,9 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 Suite block (chained): 
   0: ❓ Unexpected error: Error: No implementation error.
-  1: ❓ Unexpected error: Error: No implementation error.
+  1: ❌ Results mismatch: {} != {"id":"minecraft:stone"}
   2: ❓ Unexpected error: Error: No implementation error.
-  3: ❓ Unexpected error: Error: No implementation error.
+  3: ✅
   4: ❓ Unexpected error: Error: No implementation error.
   5: ❓ Unexpected error: Error: No implementation error.
   6: 0: ❓ Unexpected error: Error: No implementation error.

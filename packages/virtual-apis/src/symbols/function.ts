@@ -1,4 +1,4 @@
-import { Context } from '../context/base';
+import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { IBindableSymbol } from './abstracts/bindable';
@@ -12,9 +12,7 @@ export class FunctionSymbol extends InvocableSymbol<(...params: unknown[]) => un
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
          const info = new InvocationInfo(context, symbol, params);
-         info.setThisObject(that);
-         const { diagnostics } = info;
-         symbol.params.isValidValue(diagnostics.errors, info.params);
+         symbol.params.isValidValue(info.diagnostics.errors, info.params);
          return symbol.runtimeGetResult(info);
       }
       const executable = proxyifyFunction(runnable);

@@ -1,4 +1,4 @@
-import { Context } from '../context/base';
+import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
 import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
@@ -22,8 +22,7 @@ export class PropertySetterSymbol
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, [params[0]]);
-         info.setThisObject(that);
+         const info = new InvocationInfo(context, symbol, [params[0]], that);
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))
@@ -75,6 +74,7 @@ export class PropertyGetterSymbol
       this.setParamsLength(0);
    }
    public readonly thisType!: ConstructableSymbol;
+   public readonly setter?: PropertySetterSymbol;
    public readonly isRuntimeBaked: boolean = false;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       // oxlint-disable-next-line no-this-alias
@@ -82,8 +82,7 @@ export class PropertyGetterSymbol
       const symbol = this;
       function runnable(that: unknown, ..._: unknown[]): unknown {
          // new invocation info
-         const info = new InvocationInfo(context, symbol, []);
-         info.setThisObject(that);
+         const info = new InvocationInfo(context, symbol, [], that);
          const { diagnostics } = info;
 
          // If Config["Getter Require Valid Handle"] return undefined, without throwing
@@ -117,6 +116,11 @@ export class PropertyGetterSymbol
    }
    public setIsRuntimeBaked(isBaked: boolean): this {
       (this as Mutable<this>).isRuntimeBaked = isBaked;
+      return this;
+   }
+
+   public setSetter(setter: PropertySetterSymbol) {
+      (this as Mutable<this>).setter = setter;
       return this;
    }
 

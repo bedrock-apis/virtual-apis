@@ -1,4 +1,4 @@
-import { Context } from '../../context/base';
+import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';
 import { CompileTimeError } from '../../errorable';
 import { RuntimeType } from '../../runtime-types';
@@ -37,6 +37,9 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
          // TODO: What design of our plugin system we want right?
          // definition.__reports(executionContext);
          throw diagnostics.throw(this.stackTrimEncapsulation + 1);
+      }
+      if (!diagnostics.warns.isEmpty) {
+         console.warn(diagnostics.warns.stack.map(e => e.throw()));
       }
       return info.result;
    }

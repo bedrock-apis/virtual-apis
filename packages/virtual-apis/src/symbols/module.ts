@@ -1,4 +1,4 @@
-import type { Context } from '../context/base';
+import type { Context } from '../context/context';
 import { CompilableSymbol } from '../symbols/abstracts';
 import { InterfaceSymbol } from './interface';
 
@@ -25,7 +25,7 @@ export class ModuleSymbol extends CompilableSymbol<object> {
                value: symbol.getRuntimeValue(context),
             });
 
-      context.onAfterModuleCompilation(this)
+      context.onAfterModuleCompilation(this);
       return moduleObject;
    }
    public addSymbol(symbol: CompilableSymbol<unknown>, isPublic: boolean) {

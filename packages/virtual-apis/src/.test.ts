@@ -1,5 +1,5 @@
 import { expect, suite, test } from 'vitest';
-import { Context } from './context/base';
+import { Context } from './context/context';
 import { ParamsValidator } from './runtime-types';
 import { ConstructableSymbol, MethodSymbol, ModuleSymbol } from './symbols';
 suite('Create Context', () => {
@@ -10,7 +10,7 @@ suite('Create Context', () => {
       EntitySymbol.setName('Entity')
          .setIsConstructable(false)
          .setParams(new ParamsValidator([]))
-         .prototypeFields.add(new MethodSymbol().setThisType(EntitySymbol).setName('getComponent'));
+         .prototypeFields.set('getComponent', new MethodSymbol().setThisType(EntitySymbol).setName('getComponent'));
 
       const PlayerSymbol = new ConstructableSymbol();
       PlayerSymbol.setName('Player')

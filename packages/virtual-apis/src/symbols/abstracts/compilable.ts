@@ -1,4 +1,4 @@
-import type { Context } from '../../context/base';
+import type { Context } from '../../context/context';
 
 export abstract class CompilableSymbol<T> {
    // Do not expose this property yet, maybe it will be an map of (Context -> ApiValue)

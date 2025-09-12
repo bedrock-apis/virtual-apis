@@ -1,6 +1,6 @@
 import { Diagnostics, type Report } from '../errorable';
 import { type InvocableSymbol } from '../symbols/abstracts/invocable';
-import { type Context } from './base';
+import { type Context } from './context';
 /**
  * ## Execution Context
  *
@@ -26,27 +26,22 @@ import { type Context } from './base';
 export class InvocationInfo {
    public readonly diagnostics: Diagnostics = new Diagnostics();
    public result: unknown;
-   public readonly thisObject: unknown | null = null;
    public readonly newTargetObject: unknown | null = null;
    public constructor(
       public readonly context: Context,
       public readonly symbol: InvocableSymbol<unknown>,
       public readonly params: unknown[],
+      public readonly thisObject: unknown | null = null,
    ) {}
 
    public get isSuccessful() {
       return this.diagnostics.success;
    }
-
    public report(error: Report) {
       this.diagnostics.errors.report(error);
    }
    public throw(errorStack: number = 0) {
       return this.diagnostics.throw(errorStack + 1);
-   }
-   public setThisObject(object: unknown): this {
-      (this as Mutable<this>).thisObject = object;
-      return this;
    }
    public setParams(params: unknown[]): this {
       (this as Mutable<this>).params = params;
