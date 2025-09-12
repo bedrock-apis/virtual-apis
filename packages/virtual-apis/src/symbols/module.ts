@@ -25,6 +25,7 @@ export class ModuleSymbol extends CompilableSymbol<object> {
                value: symbol.getRuntimeValue(context),
             });
 
+      context.onAfterModuleCompilation(this)
       return moduleObject;
    }
    public addSymbol(symbol: CompilableSymbol<unknown>, isPublic: boolean) {

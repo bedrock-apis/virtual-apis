@@ -31,9 +31,7 @@ export abstract class ContextPlugin {
       this.prototype.identifier = identifier;
       this.plugins.set(this.prototype.identifier, this);
    }
-   protected constructor(public readonly context: Context) {
-      this.onInitialization();
-   }
+   protected constructor(public readonly context: Context) {}
    public identifier!: string;
    // It's private we don't want a plugin to have direct access
    private readonly bindings: WeakMap<object, object> = new WeakMap<object, object>();

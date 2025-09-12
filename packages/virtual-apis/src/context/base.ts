@@ -30,7 +30,8 @@ export class Context implements Disposable {
 
       // TODO Some kind of config to filter out unneded plugins
       for (const plugin of ContextPlugin.plugins.values()) {
-         (plugin as unknown as { instantiate(c: Context): void }).instantiate(this);
+        const instance = (plugin as unknown as { instantiate(c: Context): ContextPlugin }).instantiate(this);
+      this.registerPlugin(instance)
       }
    }
 
