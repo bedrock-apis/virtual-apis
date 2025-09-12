@@ -45,7 +45,7 @@ Suite entity (chained):
 
 Suite errors (chained): 
   0: ✅
-  1: ❌ Error mismatch: Error: No implementation error. != Error: Invalid item identifier 'Yes'.
+  1: ❓ Expected error, got: {}
   2: ✅
   3: ❌ Error mismatch: 
       
@@ -54,8 +54,8 @@ Suite errors (chained):
       
   4: ✅
   5: ✅
-  6: ❓ Unexpected error: Error: No implementation error.
-  7: ❓ Unexpected error: Error: No implementation error.
+  6: ✅
+  7: ✅
   8: ✅
   9: ✅
   10: ✅
@@ -66,15 +66,28 @@ Suite errors (chained):
   
 
 
-Suite item (chained): ❓ Unexpected setup error: Error: No implementation error.
+Suite itemTypes (chained): 
+  0: ✅
+  1: ✅
+  
+
+
+Suite item (chained): 
+  0: ❌ Results mismatch: undefined != "minecraft:apple"
+  1: ❓ Unexpected error: Error: No implementation error.
+  2: ❓ Unexpected error: Error: No implementation error.
+  3: ❓ Unexpected error: Error: No implementation error.
+  4: ❓ Unexpected error: Error: No implementation error.
+  5: ✅
+  6: ❓ Unexpected error: Error: No implementation error.
+  7: 0: ❓ Unexpected error: Error: No implementation error.
+    1: No result, expected 2
+    
+  
 
 
 Suite privileges (chained): 
-  0: ❌ Error mismatch: 
-      
-      ReferenceError: Native constructor for [ItemStack] does not have required privileges.
-      Error: No implementation error.
-      
+  0: ❓ Expected error, got: undefined
   1: ❓ Unexpected error: Error: No implementation error.
   2: No result, expected null
 ```

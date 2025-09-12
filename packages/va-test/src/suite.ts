@@ -6,6 +6,7 @@ export class TestSuite<T> {
    public static stringify(object: unknown): string {
       if (object === undefined) return 'undefined';
       // TODO Better stringify
+
       return JSON.stringify(object);
    }
 
@@ -82,7 +83,7 @@ export class TestSuite<T> {
       this.tests.push(setupData => {
          try {
             const result = testFn(setupData);
-            console.log(testFn.toString(), result);
+            // console.log(testFn.toString(), result);
             return TestSuite.stringify(result);
          } catch (error) {
             return this.createErrorReport(error);

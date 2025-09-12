@@ -3,6 +3,7 @@ import { InvocationInfo } from '../../context/invocation-info';
 import { CompileTimeError } from '../../errorable';
 import { RuntimeType } from '../../runtime-types';
 import type { ParamsValidator } from '../../runtime-types/params-validator';
+import { ModuleSymbol } from '../module';
 import { CompilableSymbol } from './compilable';
 
 export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
@@ -67,8 +68,9 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       (this as Mutable<this>).paramsLength = length;
       return this;
    }
-   public setIdentifier(identifier: string): this {
+   public setIdentifier(identifier: string, mod: ModuleSymbol): this {
       (this as Mutable<this>).identifier = identifier;
+      mod.invocables.set(identifier, this);
       return this;
    }
    public override precompileChecks(_: Context): void {

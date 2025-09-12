@@ -30,6 +30,7 @@ export default tseslint.config(
          '@typescript-eslint/no-extraneous-class': 'off',
          '@typescript-eslint/no-unused-vars': 'off',
          '@typescript-eslint/no-non-null-assertion': 'off',
+         '@typescript-eslint/no-this-alias': 'off',
          '@typescript-eslint/prefer-literal-enum-member': 'off',
          '@typescript-eslint/explicit-member-accessibility': ['warn', { accessibility: 'explicit' }],
          '@typescript-eslint/naming-convention': ['warn', ...namingConvention()],

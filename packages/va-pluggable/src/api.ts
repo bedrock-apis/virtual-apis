@@ -1,40 +1,143 @@
-import { ContextPluginLinkedStorage } from '@bedrock-apis/virtual-apis';
+import {
+   ConstructableSymbol,
+   ContextPlugin,
+   ContextPluginLinkedStorage,
+   InvocationInfo,
+   ModuleSymbol,
+} from '@bedrock-apis/virtual-apis';
 import type * as mc from '@minecraft/server';
 
 // TODO Figure out how to properly map types?
-export type ModuleTypeMap = { [K in keyof typeof mc]: (typeof mc)[K] extends NewableFunction ? (typeof mc)[K] : never };
+export type ServerModuleTypeMap = {
+   [K in keyof typeof mc as (typeof mc)[K] extends NewableFunction ? K : never]: (typeof mc)[K] extends NewableFunction
+      ? (typeof mc)[K]
+      : never;
+};
 
 type PartialParts<B, ThisArg = B> = {
    [P in keyof B]?: B[P] extends (...param: infer param) => infer ret ? (this: ThisArg, ...param: param) => ret : B[P];
 };
 
-export const STORAGE = Symbol('STORAGE');
-
-interface PluginWithStorage<T extends object = object> {
-   storage: ContextPluginLinkedStorage<T>;
-}
-
-export abstract class Plugin {
-   protected abstract readonly id: string;
-
+export abstract class Plugin extends ContextPlugin {
    protected onWarning(warning: unknown) {}
    protected onError(error: unknown) {}
    protected onPanic(panic: unknown) {}
-   protected implement<T extends keyof ModuleTypeMap>(
-      className: T,
-      implementation: PartialParts<ModuleTypeMap[T]['prototype']>,
-   ) {}
-   protected implementWithStorage<T extends keyof ModuleTypeMap, Storage>(
-      className: T,
-      id: string,
-      storage: (implementation: ModuleTypeMap[T]) => Storage,
-      implementation: PartialParts<ModuleTypeMap[T]['prototype'], ModuleTypeMap[T]['prototype'] & { STORAGE: Storage }>,
-   ) {
-      return undefined as unknown as PluginImplementation<Storage, ModuleTypeMap[T]>; // TODO Implement
-   }
+
+   protected serverBeta = new PluginModuleImplementer<ServerModuleTypeMap>(this, '@minecraft/server', 'beta');
 
    protected getStorage<T extends object = object>(instance: object, storage: ContextPluginLinkedStorage<T>): T {
       return storage.get(instance);
+   }
+
+   public override onAfterModuleCompilation(module: ModuleSymbol): void {
+      this.serverBeta.onAfterModuleCompilation(module);
+   }
+
+   protected getPlugin(plugin: typeof ContextPlugin) {
+      this.context.getPlugin(plugin);
+   }
+}
+
+interface DefaultImplementationThis<T, Mod extends ModuleTypeMap> {
+   invocation: InvocationInfo;
+   instance: object;
+   implementation: T;
+   module: PluginModuleImplementer<Mod>;
+}
+
+interface StorageImplementationThis<T, Mod extends ModuleTypeMap, Storage> extends DefaultImplementationThis<T, Mod> {
+   storage: Storage;
+}
+
+type ConstructorImpl<This, Mod extends ModuleTypeMap, T extends keyof Mod> = Mod[T] extends new (
+   ...args: infer T
+) => unknown
+   ? {
+        // eslint-disable-next-line @typescript-eslint/no-misused-new
+        constructor(this: This, ...args: T): void;
+     }
+   : object;
+
+type ModuleTypeMap = Record<
+   string,
+   | {
+        new (...args: unknown[]): void;
+        prototype: object;
+     }
+   | {
+        prototype: object;
+     }
+>;
+
+type Constructable = { prototype: object };
+
+type Constructables<T extends ModuleTypeMap> = {
+   [K in keyof T as T[K] extends Constructable ? K : never]: T[K] extends Constructable ? object : never;
+};
+
+export class PluginModuleImplementer<Mod extends ModuleTypeMap> {
+   public constructor(
+      public readonly plugin: Plugin,
+      public readonly name: string,
+      public readonly version: string,
+   ) {}
+
+   protected moduleSymbol?: ModuleSymbol;
+
+   public implement<T extends keyof Mod>(
+      className: T,
+      implementation: PartialParts<Mod[T]['prototype'], DefaultImplementationThis<Mod[T]['prototype'], Mod>>,
+   ) {
+      new PluginImplementation(this as PluginModuleImplementer<ModuleTypeMap>, className as string, implementation);
+   }
+   public implementStatic<T extends keyof Mod>(
+      className: T,
+      implementation: PartialParts<Mod[T], DefaultImplementationThis<Mod[T], Mod>>,
+   ) {
+      new PluginStaticImpl(this, className as string, implementation);
+   }
+   public implementWithStorage<T extends keyof Mod, Storage extends object>(
+      className: T,
+      createStorage: (implementation: Mod[T]['prototype']) => Storage,
+      implementation: PartialParts<Mod[T]['prototype'], StorageImplementationThis<Mod[T]['prototype'], Mod, Storage>> &
+         ConstructorImpl<StorageImplementationThis<Mod[T]['prototype'], Mod, Storage>, Mod, T>,
+   ) {
+      return new PluginImplementationWithStorage<Storage, Mod[T]['prototype']>(
+         this,
+         className as string,
+         implementation,
+         createStorage as unknown as (n: object) => Storage,
+      );
+   }
+
+   public onAfterModuleCompilation(module: ModuleSymbol): void {
+      if (module.name === this.name) {
+         this.moduleSymbol = module;
+         // TODO Version check
+         this.onLoad?.();
+      }
+   }
+
+   public resolve<T extends keyof Mod>(className: T) {
+      if (!this.moduleSymbol) throw new Error(`Unable to resolve ${String(className)}: module is not loaded`);
+
+      const symbol = this.moduleSymbol?.symbolsMap.get(String(className));
+      if (!symbol) throw new Error(`Unable to resolve ${String(className)}: symbol not found`);
+
+      return symbol.getRuntimeValue(this.plugin.context) as Mod[T];
+   }
+
+   public onLoad?: () => void;
+
+   public construct<T extends keyof Constructables<Mod>>(className: T) {
+      if (!this.moduleSymbol) throw new Error(`Unable to construct ${String(className)}: module is not loaded`);
+      const symbol = this.moduleSymbol?.symbolsMap.get(String(className));
+
+      if (!symbol) throw new Error(`Unable to construct ${String(className)}: symbol not found`);
+      if (!(symbol instanceof ConstructableSymbol))
+         throw new Error(`Unable to construct ${String(className)}: non constructable`);
+
+      return symbol?.createRuntimeInstanceInternal(this.plugin.context) as Mod[T]['prototype'];
    }
 }
 
@@ -45,9 +148,73 @@ export abstract class PluginWithConfig<Config extends object> extends Plugin {
    }
 }
 
-export class PluginImplementation<T, Native> {
+export class PluginImplementation {
+   public constructor(
+      protected readonly module: PluginModuleImplementer<ModuleTypeMap>,
+      protected readonly className: string,
+      protected readonly implementation: object,
+   ) {
+      for (const [key, { value, set, get }] of Object.entries(Object.getOwnPropertyDescriptors(implementation))) {
+         // TODO Implement setter
+
+         if (get) {
+            this.module.plugin.context.implement(this.getKey(key) + ' getter', ctx => {
+               ctx.result = get.call(this.getThisValue(ctx.thisObject!, ctx));
+            });
+         } else {
+            if (key === 'constructor') {
+               this.module.plugin.context.implement(this.className, ctx => {
+                  value.call(this.getThisValue(ctx.thisObject!, ctx), ...ctx.params);
+               });
+            } else {
+               this.module.plugin.context.implement(this.getKey(key), ctx => {
+                  ctx.result = value.call(this.getThisValue(ctx.thisObject!, ctx), ...ctx.params);
+               });
+            }
+         }
+      }
+   }
+
+   protected getKey(key: string) {
+      return `${this.className}::${key}`;
+   }
+
+   protected getThisValue(
+      native: unknown,
+      invocation: InvocationInfo,
+   ): DefaultImplementationThis<object, ModuleTypeMap> {
+      return { invocation, module: this.module, implementation: this.implementation, instance: native as object };
+   }
+}
+
+export class PluginStaticImpl extends PluginImplementation {
+   protected override getKey(key: string): string {
+      return super.getKey(key) + ' static';
+   }
+}
+
+export class PluginImplementationWithStorage<T extends object, Native extends object> extends PluginImplementation {
+   protected storage: ContextPluginLinkedStorage<T>;
+
+   public constructor(
+      module: PluginModuleImplementer<ModuleTypeMap>,
+      className: string,
+      implementation: object,
+      createStorage: (n: object) => T,
+   ) {
+      super(module, className, implementation);
+      this.storage = new ContextPluginLinkedStorage(createStorage);
+   }
+
+   protected override getThisValue(
+      native: unknown,
+      invocationInfo: InvocationInfo,
+   ): StorageImplementationThis<object, ModuleTypeMap, T> {
+      return { ...super.getThisValue(native, invocationInfo), storage: this.getStorage(native as Native) };
+   }
+
    public getStorage(nativeObject: Native): T {
-      return undefined as T; // TODO Implement
+      return this.storage.get(nativeObject);
    }
 }
 

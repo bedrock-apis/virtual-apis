@@ -53,8 +53,6 @@ export abstract class ContextPlugin {
    public constructor(public readonly context: Context) {}
    public identifier!: string;
 
-   public storage?: ContextPluginLinkedStorage<object>;
-
    // It's private we don't want a plugin to have direct access
    private readonly bindings: WeakMap<object, object> = new WeakMap<object, object>();
    private readonly bindingsInverted: WeakMap<object, object> = new WeakMap<object, object>();

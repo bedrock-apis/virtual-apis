@@ -1,12 +1,11 @@
-import { ModuleTypeMap, Plugin } from '@bedrock-apis/va-pluggable';
+import { Plugin, ServerModuleTypeMap } from '@bedrock-apis/va-pluggable';
 
 class InventoryPlugin extends Plugin {
    protected id = 'inventory';
 
-   public inventory = this.implementWithStorage(
+   public inventory = this.serverBeta.implementWithStorage(
       'EntityInventoryComponent',
-      'inventory',
-      () => ({ container: undefined as undefined | ModuleTypeMap['Container'] }),
+      () => ({ container: undefined as undefined | ServerModuleTypeMap['Container'] }),
       {
          get canBeSiphonedFrom() {
             return true;
@@ -20,24 +19,23 @@ class InventoryPlugin extends Plugin {
       },
    );
 
-   public container = this.implementWithStorage(
+   public container = this.serverBeta.implementWithStorage(
       'Container',
-      'container',
-      () => new Map<number, InstanceType<ModuleTypeMap['ItemStack']>>(),
+      () => new Map<number, InstanceType<ServerModuleTypeMap['ItemStack']>>(),
       {
          getItem(slot) {
-            return this.STORAGE.get(slot);
+            return this.storage.get(slot);
          },
          // @ts-expect-error Way to do new ContainerSlot?
          getSlot(slot) {
             return;
          },
          addItem(item) {
-            this.STORAGE.set(this.STORAGE.size, item);
+            this.storage.set(this.storage.size, item);
             return item;
          },
       },
    );
 }
 
-export default new InventoryPlugin();
+InventoryPlugin.register('inventory');

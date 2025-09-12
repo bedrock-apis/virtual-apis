@@ -1,5 +1,11 @@
-import { ItemStack } from '@minecraft/server';
+import { ItemStack, ItemTypes } from '@minecraft/server';
 import { TestSuite } from '../suite';
+
+TestSuite.simple('itemTypes')
+   .test(() => {
+      //return ItemTypes.getAll();
+   })
+   .test(() => ItemTypes.get('minecraft:apple')?.id);
 
 TestSuite.withSetup('item', () => new ItemStack('minecraft:apple'))
    .test(item => item.typeId)

@@ -25,7 +25,6 @@ export class CoreInstanceGetterPlugin extends ContextPlugin {
                   if (this.ignoredInstanceClassIds.includes(instanceClassId)) continue;
 
                   const identifier = property.identifier;
-                  d(identifier, instanceClassId);
                   this.implementInstanceGetter(identifier, instanceClassId);
                }
             }
@@ -35,7 +34,7 @@ export class CoreInstanceGetterPlugin extends ContextPlugin {
 
    public readonly ignoredInstanceClassIds = ['ItemStack', 'Player', 'Entity', 'Dimension', 'Block'];
 
-   public override storage = new ContextPluginLinkedStorage<{
+   public storage = new ContextPluginLinkedStorage<{
       properties: Map<string, unknown>;
       parent?: WeakRef<object>;
    }>(() => ({ properties: new Map() }));

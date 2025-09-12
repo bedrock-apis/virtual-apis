@@ -22,9 +22,8 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
    };
 
    protected addComponents(target: 'Entity' | 'ItemStack' | 'Block') {
-      return this.implementWithStorage(
+      return this.serverBeta.implementWithStorage(
          target,
-         'components',
          () => {
             const storage = new Map<string, unknown>();
             const metadata = this.config.componentsMetadata[target];
@@ -35,11 +34,11 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
          },
          {
             getComponents() {
-               return Array.from(this.STORAGE.values()) as unknown as [];
+               return Array.from(this.storage.values()) as unknown as [];
             },
             getComponent(componentId) {
                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-               return this.STORAGE.get(componentId) as unknown as any;
+               return this.storage.get(componentId) as unknown as any;
             },
          },
       );
@@ -50,4 +49,4 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
    public ItemStack = this.addComponents('ItemStack');
 }
 
-export default new ComponentsPlugin();
+ComponentsPlugin.register('components');

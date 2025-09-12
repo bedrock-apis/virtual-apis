@@ -1,11 +1,12 @@
 import type { Context } from '../context/context';
-import { CompilableSymbol } from '../symbols/abstracts';
+import { CompilableSymbol, InvocableSymbol } from '../symbols/abstracts';
 import { InterfaceSymbol } from './interface';
 
 // Kernel Safe as its extracted in initialization before any plugins or addons code
 const { defineProperty, create } = Object;
 export class ModuleSymbol extends CompilableSymbol<object> {
    public readonly symbols: Set<CompilableSymbol<unknown>> = new Set();
+   public readonly invocables = new Map<string, InvocableSymbol<unknown>>();
    public readonly symbolsMap: Map<string, CompilableSymbol<unknown>> = new Map();
    public metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
    public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();

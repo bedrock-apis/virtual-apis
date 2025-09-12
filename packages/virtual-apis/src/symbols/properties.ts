@@ -5,6 +5,7 @@ import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
 import { InvocableSymbol } from './abstracts/invocable';
 import { ConstructableSymbol } from './constructable';
+import { ModuleSymbol } from './module';
 
 const { defineProperty, getOwnPropertyDescriptor } = Reflect;
 export class PropertySetterSymbol
@@ -18,7 +19,6 @@ export class PropertySetterSymbol
    }
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
@@ -51,8 +51,8 @@ export class PropertySetterSymbol
       descriptor.set = this.getRuntimeValue(context)!;
       defineProperty(runtime as object, this.name, descriptor);
    }
-   public override setIdentifier(identifier: string): this {
-      return super.setIdentifier(`${identifier} setter`);
+   public override setIdentifier(identifier: string, mod: ModuleSymbol): this {
+      return super.setIdentifier(`${identifier} setter`, mod);
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;
@@ -77,8 +77,6 @@ export class PropertyGetterSymbol
    public readonly setter?: PropertySetterSymbol;
    public readonly isRuntimeBaked: boolean = false;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
-      // oxlint-disable-next-line no-this-alias
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(that: unknown, ..._: unknown[]): unknown {
          // new invocation info
@@ -107,8 +105,8 @@ export class PropertyGetterSymbol
       descriptor.get = this.getRuntimeValue(context)!;
       defineProperty(runtime as object, this.name, descriptor);
    }
-   public override setIdentifier(identifier: string): this {
-      return super.setIdentifier(`${identifier} getter`);
+   public override setIdentifier(identifier: string, mod: ModuleSymbol): this {
+      return super.setIdentifier(`${identifier} getter`, mod);
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;

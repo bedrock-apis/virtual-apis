@@ -195,7 +195,7 @@ export class BinaryLoaderContext {
          let s: CompilableSymbol<unknown>;
          switch (symbol.bitFlags & SymbolBitFlags.ExportTypeMask) {
             case ExportType.Class:
-               s = new ConstructableSymbol();
+               s = new ConstructableSymbol().setIdentifier(stringOf(symbol.name), base);
                break;
             case ExportType.Constant:
                s = new ConstantValueSymbol().setValue(symbol.hasValue);
@@ -294,11 +294,11 @@ export class BinaryLoaderContext {
                throw new ReferenceError('MethodFunction missing function information');
             applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), s);
 
-            const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+            const cls = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
 
-            if (s instanceof MethodSymbol) s.setThisType(base);
-            base[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
-            s.setIdentifier(`${base.name}::${stringOf(symbol.name)}`);
+            if (s instanceof MethodSymbol) s.setThisType(cls);
+            cls[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
+            s.setIdentifier(`${cls.name}::${stringOf(symbol.name)}${isStatic ? ' static' : ''}`, base);
          },
          [SpecificSymbolFlags.ConstructorInformation](flags, symbol) {
             // No push as this symbol is identical to ExportClass option
@@ -322,29 +322,29 @@ export class BinaryLoaderContext {
             if (symbol.boundTo === undefined || symbol.hasType === undefined)
                throw new ReferenceError('MethodFunction missing function information');
 
-            const base = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
-            const registry = base[isStatic ? 'staticFields' : 'prototypeFields'];
+            const cls = r(symbol.boundTo, namedSymbols) as ConstructableSymbol;
+            const registry = cls[isStatic ? 'staticFields' : 'prototypeFields'];
             const selfName = stringOf(symbol.name);
             const type = r(symbol.hasType, namedSymbols);
 
             const getter = new PropertyGetterSymbol();
             list.push(getter);
-            if (!isStatic) getter.setThisType(base);
+            if (!isStatic) getter.setThisType(cls);
             getter.setReturnType(type);
             getter.setParams(new ParamsValidator([type]));
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
-            getter.setIdentifier(`${base.name}::${selfName}`);
+            getter.setIdentifier(`${cls.name}::${selfName}`, base);
             if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
             registry.set(selfName, getter);
 
             if (BitFlags.anyOf(flags, SymbolBitFlags.HasSetter)) {
                const setter = new PropertySetterSymbol();
                list.push(setter);
-               if (!isStatic) setter.setThisType(base);
+               if (!isStatic) setter.setThisType(cls);
                getter.setSetter(setter);
                setter.setParams(new ParamsValidator([]));
                setter.setReturnType(voidType);
-               setter.setIdentifier(`${base.name}::${selfName}`);
+               setter.setIdentifier(`${cls.name}::${selfName}`, base);
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }
          },

@@ -10,7 +10,6 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
    protected override readonly stackTrimEncapsulation: number = 2; // proxied
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info

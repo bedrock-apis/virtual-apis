@@ -1,6 +1,7 @@
 import { finalizeAsConstructable } from '../ecma-utils';
 import { InvocableSymbol } from './abstracts';
 
+import { d } from '@bedrock-apis/common';
 import type { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
@@ -34,7 +35,6 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       super.invoke(info);
    }
    public override compile(context: Context): new (...params: unknown[]) => unknown {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function constructor(this: unknown, ...params: unknown[]): unknown {
          // new invocation info

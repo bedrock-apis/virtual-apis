@@ -78,6 +78,9 @@ export class Context implements Disposable {
          );
       }
       for (const plugin of this.plugins.values()) plugin.onAfterModuleCompilation(moduleSymbol);
+      for (const [impl] of this.implementations.entries()) {
+         if (!moduleSymbol.invocables.has(impl)) console.warn('Unknown invocable id', impl);
+      }
    }
    public onBeforeModuleCompilation(moduleSymbol: ModuleSymbol): void {
       for (const plugin of this.plugins.values()) plugin.onBeforeModuleCompilation(moduleSymbol);

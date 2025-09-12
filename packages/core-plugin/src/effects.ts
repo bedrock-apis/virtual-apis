@@ -3,7 +3,7 @@ import { Plugin } from '@bedrock-apis/va-pluggable';
 class EffectsPlugin extends Plugin {
    protected id = 'effects';
 
-   public effects = this.implementWithStorage('Entity', 'inventory', () => new Map(), {});
+   public effects = this.serverBeta.implementWithStorage('Entity', () => new Map(), {});
 }
 
-export default new EffectsPlugin();
+EffectsPlugin.register('effects');

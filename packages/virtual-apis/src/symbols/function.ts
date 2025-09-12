@@ -7,7 +7,6 @@ import { InvocableSymbol } from './abstracts/invocable';
 export class FunctionSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
    protected override readonly stackTrimEncapsulation: number = 2;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
          // new invocation info
