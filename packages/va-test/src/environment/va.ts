@@ -1,6 +1,6 @@
+import { ConstructableSymbol, Context } from '@bedrock-apis/virtual-apis';
 import { Block, Entity } from '@minecraft/server';
 import { TestEnvironment } from './environment';
-import { ConstructableSymbol, Context, ContextPlugin } from '@bedrock-apis/virtual-apis';
 
 export class VirtualApiEnvironment extends TestEnvironment {
    public async onSetup() {
@@ -9,12 +9,12 @@ export class VirtualApiEnvironment extends TestEnvironment {
 
    public spawnEntity(typeId: string): Entity {
       // @ts-expect-error types bypass
-      return this.instanc("Entity")
+      return this.instanc('Entity');
    }
 
    public placeBlock(typeId: string): Block {
       // @ts-expect-error types bypass
-      return this.instanc("Block")
+      return this.instanc('Block');
    }
 
    public ctx: Context = Context.getContext(0)!;

@@ -1,5 +1,6 @@
 import './block';
 import './dynamic-properties';
 import './entity';
-import './item';
 import './errors';
+import './item';
+import './privileges';

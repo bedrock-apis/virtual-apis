@@ -101,7 +101,7 @@ function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestRep
 }
 
 function resultToString(result: TestReport.Result): string {
-   if (typeof result === 'object' && 'error' in result) {
+   if (typeof result === 'object' && result && 'error' in result) {
       return errorResultToString(result);
    }
 

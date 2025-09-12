@@ -38,7 +38,11 @@ export class TestSuite<T> {
 
       const suites = [];
       for (const suite of this.suites.values()) {
-         suites.push(yield* suite.run());
+         if (suite.earlyExecutionResult) {
+            suites.push(suite.earlyExecutionResult);
+         } else {
+            suites.push(yield* suite.run());
+         }
       }
       return suites;
    }
@@ -105,5 +109,16 @@ export class TestSuite<T> {
          }
       });
       return this;
+   }
+
+   protected earlyExecutionResult: TestReport.Suite | undefined;
+
+   public runEarlyExecution() {
+      const gen = this.run();
+      let v = gen.next();
+      while (!v.done) {
+         v = gen.next();
+         if (v.done) this.earlyExecutionResult = v.value;
+      }
    }
 }

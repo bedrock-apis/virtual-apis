@@ -43,9 +43,6 @@ Suite entity (chained):
   
 
 
-Suite item (chained): ❓ Unexpected setup error: TypeError: Native type conversion failed. Function argument [1] expected type: number
-
-
 Suite errors (chained): 
   0: ✅
   1: ❌ Error mismatch: Error: No implementation error. != Error: Invalid item identifier 'Yes'.
@@ -66,4 +63,18 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
+  
+
+
+Suite item (chained): ❓ Unexpected setup error: Error: No implementation error.
+
+
+Suite privileges (chained): 
+  0: ❌ Error mismatch: 
+      
+      ReferenceError: Native constructor for [ItemStack] does not have required privileges.
+      Error: No implementation error.
+      
+  1: ❓ Unexpected error: Error: No implementation error.
+  2: No result, expected null
 ```

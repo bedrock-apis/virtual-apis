@@ -1,4 +1,5 @@
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport } from '../errorable';
+import { FunctionArgumentType } from '../main';
 import { RuntimeType, Type } from './type';
 
 export class ParamsValidator extends Type {
@@ -7,7 +8,7 @@ export class ParamsValidator extends Type {
       public readonly minimumArgumentsRequired: number = types.length,
    ) {
       super();
-      this.name = `params(${this.types.map(e => e.name)})`;
+      this.name = `params(${this.types.map(e => e.name).join(', ')})`;
    }
    public override name: string;
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
@@ -24,8 +25,11 @@ export class ParamsValidator extends Type {
       }
 
       let isValid = true;
-      for (let i = 0; i < this.types.length; i++)
-         if (!this.types[i]!.isValidValue(diagnostics, params[i])) isValid = false;
+      for (let i = 0; i < this.types.length; i++) {
+         const type = this.types[i]!;
+         if (type instanceof FunctionArgumentType) params[i] ??= type.defaultValue;
+         if (!type.isValidValue(diagnostics, params[i])) isValid = false;
+      }
 
       return isValid;
    }

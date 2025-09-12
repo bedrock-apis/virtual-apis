@@ -43,7 +43,7 @@ export class FunctionArgumentType extends Type {
    public detailedType?: NumberType;
 
    public get name() {
-      return this.type.name;
+      return this.type.name + ' (default ' + this.defaultValue + ')';
    }
 
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
@@ -57,7 +57,6 @@ export class FunctionArgumentType extends Type {
       for (const report of diagnostics.stack) {
          const error = report.factory as Mutable<ErrorFactory>;
 
-         // TODO better way to determine error type, maybe property on factory
          if (error instanceof NumberErrorFactory) {
             (error as Mutable<ErrorFactory>).message =
                `Unsupported or out of bounds value passed to function argument [${this.index}]. ${error.text}`;
