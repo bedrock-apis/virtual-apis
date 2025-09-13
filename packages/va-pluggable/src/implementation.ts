@@ -84,9 +84,12 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
    ) {
       super(module, className, implementation);
       this.module.onLoad.subscribe(loaded => {
+         this.loaded = loaded;
          this.storage = new ContextPluginLinkedStorage(native => createStorage(native, loaded));
       });
    }
+
+   protected loaded?: PluginModuleLoaded;
 
    protected override getThisValue(
       native: unknown,
@@ -105,5 +108,18 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
 
    public getStorage(nativeObject: Native): T {
       return this.storage.get(nativeObject);
+   }
+
+   public create(partialStorage: Partial<T>): Native {
+      if (!this.loaded) {
+         throw new Error(
+            `Unable to create ${this.className} implemented by ${this.module.plugin.identifier}: module not loaded`,
+         );
+      }
+
+      const native = this.loaded.construct(this.className);
+      const storage = this.getKey(native);
+      Object.assign(storage, partialStorage);
+      return native;
    }
 }

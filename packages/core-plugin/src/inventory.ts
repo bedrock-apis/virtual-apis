@@ -29,11 +29,9 @@ class InventoryPlugin extends Plugin {
             return this.storage.items.get(slot);
          },
          getSlot(slotIndex) {
-            const slot = this.storage.slots.getOrCreate(slotIndex, () => this.module.construct('ContainerSlot'));
-            const slotStorage = this.plugin.containerSlot.getStorage(slot);
-            slotStorage.item = this.storage.items.get(slotIndex);
-
-            return slot;
+            return this.storage.slots.getOrCreate(slotIndex, () =>
+               this.plugin.containerSlot.create({ item: this.storage.items.get(slotIndex) }),
+            );
          },
          addItem(item) {
             this.storage.items.set(this.storage.items.size, item);
@@ -51,6 +49,22 @@ class InventoryPlugin extends Plugin {
          },
          setItem(item) {
             this.storage.item = item;
+         },
+         // Find a way to redirect calls more efficiently
+         getCanDestroy() {
+            return this.storage.item?.getCanDestroy() ?? [];
+         },
+         getCanPlaceOn() {
+            return this.storage.item?.getCanPlaceOn() ?? [];
+         },
+         getTags() {
+            return this.storage.item?.getTags() ?? [];
+         },
+         isStackableWith(itemStack) {
+            return this.storage.item?.isStackableWith(itemStack) ?? false;
+         },
+         get isStackable() {
+            return this.storage.item.isStackable;
          },
       },
    );

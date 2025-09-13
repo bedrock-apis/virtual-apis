@@ -1,3 +1,4 @@
+import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
@@ -27,6 +28,9 @@ export class PropertySetterSymbol
 
          if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('setter', symbol.identifier));
+
+         if (!symbol.privileges.includes(context.currentPrivilege))
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('property setter', symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
 
@@ -87,6 +91,12 @@ export class PropertyGetterSymbol
          if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('getter', symbol.identifier));
 
+         if (
+            context.currentPrivilege !== VirtualPrivilege.None &&
+            !symbol.privileges.includes(context.currentPrivilege)
+         )
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('property getter', symbol.identifier));
+
          //This check can be omitted as always results as successful
          //symbol.params.isValidValue(diagnostics.errors, info.params);
 
@@ -104,9 +114,6 @@ export class PropertyGetterSymbol
       };
       descriptor.get = this.getRuntimeValue(context)!;
       defineProperty(runtime as object, this.name, descriptor);
-   }
-   public override setIdentifier(identifier: string, mod: ModuleSymbol): this {
-      return super.setIdentifier(`${identifier} getter`, mod);
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;

@@ -47,6 +47,7 @@ export class NumberErrorFactory extends ErrorFactory {
 //#region Error Constants
 
 export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
+export type NativeKindPrivilege = 'function' | 'property getter' | 'property setter' | 'constructor for' | 'property';
 export type NativeActionKind = 'call' | 'get' | 'set';
 export type NativeTypeKind = 'optional type' | 'variant type' | 'type';
 
@@ -66,16 +67,15 @@ export const WARNING_ERROR_MESSAGES = {
 };
 export const PANIC_ERROR_MESSAGES = {
    EmptyDiagnosticsStackInstance: `Failed to throw report error on empty DiagnosticsStack instance.`,
-   NoImplementation: `No implementation error.`,
-   DynamicTypeNotResolved: (data: unknown) => `Failed to call validate on unresolved DynamicType ${data}`,
+   NoImplementation: (symbol: string) => `${symbol} is not implemented`,
 };
 export const QUICK_JS_ENV_ERROR_MESSAGES = {
    NewExpected: () => ErrorFactory.new(`must be called with new`), // TypeError
 };
 export const API_ERRORS_MESSAGES = {
    NoConstructor: (id: string) => ErrorFactory.new(`No constructor for native class '${id}'.`, REFERENCE_ERROR_TYPE),
-   NoPrivilege: (kind: NativeKind, id: string) =>
-      ErrorFactory.new(`Native ${kind} [${id}] does not have required privileges.`, TYPE_ERROR_TYPE),
+   NoPrivilege: (kind: NativeKindPrivilege, id: string) =>
+      ErrorFactory.new(`Native ${kind} [${id.split(' ')[0]}] does not have required privileges.`, REFERENCE_ERROR_TYPE),
    NativeBound: (kind: NativeKind, id: string) =>
       ErrorFactory.new(`Native ${kind} [${id}] object bound to prototype does not exist.`, REFERENCE_ERROR_TYPE),
    NativeConversionFailed: (type: NativeTypeKind, additional?: string) =>

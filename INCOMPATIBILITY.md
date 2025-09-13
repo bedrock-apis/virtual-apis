@@ -9,13 +9,13 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 ```
 
 Suite block (chained): 
-  0: ❓ Unexpected error: Error: No implementation error.
+  0: ❓ Unexpected error: Error: Block::typeId getter is not implemented
   1: ❌ Results mismatch: {} != {"id":"minecraft:stone"}
-  2: ❓ Unexpected error: Error: No implementation error.
+  2: ❓ Unexpected error: Error: Block::location getter is not implemented
   3: ✅
-  4: ❓ Unexpected error: Error: No implementation error.
-  5: ❓ Unexpected error: Error: No implementation error.
-  6: 0: ❓ Unexpected error: Error: No implementation error.
+  4: ❓ Unexpected error: Error: Block::center is not implemented
+  5: ❓ Unexpected error: Error: Block::localizationKey getter is not implemented
+  6: 0: ❓ Unexpected error: Error: BlockPermutation::getAllStates is not implemented
     1: ❓ No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
     
   
@@ -39,16 +39,11 @@ Suite dynamic properties (chained):
   
 
 
-Suite entity (chained): 
-  0: ❓ Unexpected error: Error: No implementation error.
-  1: ❓ Unexpected error: Error: No implementation error.
-  2: ❓ Unexpected error: Error: No implementation error.
-  3: ❓ Unexpected error: Error: No implementation error.
-  
+Suite entity (chained): ❓ Unexpected setup error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
 
 
 Suite disposal (chained): 
-  0: 0: ❓ Unexpected error: Error: No implementation error.
+  0: 0: ❓ Unexpected error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
     1: ❓ No result, expected false
     2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
     
@@ -57,7 +52,7 @@ Suite disposal (chained):
 
 Suite errors (chained): 
   0: ✅
-  1: ❓ Expected error (Error: Invalid item identifier 'Yes'.), got: {}
+  1: ❌ Error mismatch: Error: Invalid item identifier 'Yes' != Error: Invalid item identifier 'Yes'.
   2: ✅
   3: ❌ Error mismatch: 
       
@@ -75,48 +70,53 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❌ Results mismatch: false != true
-  16: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
-  17: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
-  18: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
-  19: ❓ Expected error (Error: Failed to set member), got: false
-  20: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
+  15: ❓ Unexpected error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+  16: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function return value expected type: string
+      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+      
+  17: ❌ Error mismatch: 
+      
+      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
+      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+      
+  18: ❌ Error mismatch: 
+      
+      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
+      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+      
+  19: ❌ Error mismatch: 
+      
+      Error: Failed to set member
+      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+      
+  20: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function return value expected type: string
+      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+      
   
 
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ❓ Unexpected error: Error: No implementation error.
+  1: ✅
   
 
 
-Suite item (chained): 
-  0: ❓ Unexpected error: Error: No implementation error.
-  1: ❓ Unexpected error: Error: No implementation error.
-  2: ❓ Unexpected error: Error: No implementation error.
-  3: ❓ Unexpected error: Error: No implementation error.
-  4: ❓ Unexpected error: Error: No implementation error.
-  5: ✅
-  6: ❓ Unexpected error: Error: No implementation error.
-  7: 0: ❓ Unexpected error: Error: No implementation error.
-    1: ❓ No result, expected 2
-    
-  
+Suite item (chained): ❓ Unexpected setup error: Error: Max stack
 
 
 Suite privileges (chained): 
-  0: ❓ Expected error (ReferenceError: Native constructor for [ItemStack] does not have required privileges.), got: undefined
-  1: ❓ Expected error (ReferenceError: Native function [World::setDifficulty] does not have required privileges.), got: undefined
-  2: ❌ Error mismatch: 
+  0: ✅
+  1: ❌ Error mismatch: 
       
-      ReferenceError: Native property getter [World::gameRules] does not have required privileges.
-      TypeError: Cannot set property commandBlockOutput of #<constructor> which has only a getter
+      ReferenceError: Native function [World::setDifficulty] does not have required privileges.
+      ReferenceError: Native function [World::setDifficulty] does not have required privileges. Function argument [0] expected type: Difficulty
       
-  3: ❌ Error mismatch: 
-      
-      ReferenceError: Native property getter [World::gameRules] does not have required privileges.
-      TypeError: Cannot set property commandBlockOutput of #<constructor> which has only a getter
-      
-  4: ❓ Unexpected error: Error: No implementation error.
+  2: ✅
+  3: ✅
+  4: ❓ Unexpected error: Error: System::run is not implemented
   5: ❓ No result, expected null
 ```

@@ -33,7 +33,8 @@ export class ThisContext<T, P extends Plugin, Mod extends ModuleTypeMap> {
    ) {}
 
    public getPlugin<T extends typeof ContextPlugin>(plugin: T): InstanceType<T> {
-      return this.plugin.context.getPluginForce(plugin, this.invocation);
+      const requiredFor = `${this.plugin.identifier} ${this.invocation.symbol.identifier ?? this.invocation.symbol.name}`;
+      return this.plugin.context.getPlugin(plugin, requiredFor);
    }
 }
 

@@ -1,3 +1,4 @@
+import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
@@ -18,6 +19,12 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
 
          if (!context.isNativeHandle(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('function', symbol.identifier));
+
+         if (
+            context.currentPrivilege !== VirtualPrivilege.None &&
+            !symbol.privileges.includes(context.currentPrivilege)
+         )
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('function', symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
 

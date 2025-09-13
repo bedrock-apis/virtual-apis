@@ -1,9 +1,10 @@
+import { MapWithDefaults } from '@bedrock-apis/common';
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import { Dimension } from '@minecraft/server';
+import type { Dimension } from '@minecraft/server';
 import { EntityPlugin } from './entity';
 
 export class DimensionPlugin extends Plugin {
-   public storage = this.server.implementWithStorage('Dimension', () => ({}), {
+   public dimension = this.server.implementWithStorage('Dimension', () => ({ id: '' }), {
       spawnEntity(identifier, location, options) {
          const entityPlugin = this.getPlugin(EntityPlugin);
 
@@ -20,6 +21,23 @@ export class DimensionPlugin extends Plugin {
 
          return entity;
       },
+      get id() {
+         return this.storage.id;
+      },
    });
+
+   public worldStorage = this.server.implementWithStorage(
+      'World',
+      () => ({
+         dimensions: new MapWithDefaults<string, Dimension>(),
+      }),
+      {
+         getDimension(dimensionId) {
+            return this.storage.dimensions.getOrCreate(dimensionId, () =>
+               this.plugin.dimension.create({ id: dimensionId }),
+            );
+         },
+      },
+   );
 }
 DimensionPlugin.register('dimension');

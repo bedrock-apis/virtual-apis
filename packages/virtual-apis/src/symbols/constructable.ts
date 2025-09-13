@@ -1,7 +1,7 @@
 import { finalizeAsConstructable } from '../ecma-utils';
 import { InvocableSymbol } from './abstracts';
 
-import { d } from '@bedrock-apis/common';
+import { VirtualPrivilege } from '@bedrock-apis/binary';
 import type { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
@@ -53,6 +53,12 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
             // THere is no params for non constructable symbols anyway
             symbol.params.isValidValue(diagnostics.errors, info.params);
          }
+
+         if (
+            context.currentPrivilege !== VirtualPrivilege.None &&
+            !symbol.privileges.includes(context.currentPrivilege)
+         )
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('constructor for', symbol.identifier));
 
          return setPrototypeOf(
             symbol.runtimeGetResult(info),

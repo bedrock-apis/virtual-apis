@@ -1,4 +1,6 @@
+import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
 import { ConstructableSymbol, MethodSymbol, ModuleSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
 import { SystemAfterEvents, SystemBeforeEvents, WorldAfterEvents, WorldBeforeEvents } from '@minecraft/server';
 
@@ -12,6 +14,13 @@ interface Groups {
    worldAfter: WorldAfterEvents;
    worldBefore: WorldBeforeEvents;
 }
+
+const groupsMap: Record<keyof Groups, keyof ServerModuleTypeMap> = {
+   systemAfter: 'SystemAfterEvents',
+   systemBefore: 'SystemBeforeEvents',
+   worldAfter: 'WorldAfterEvents',
+   worldBefore: 'WorldBeforeEvents',
+};
 
 type Events<T extends SystemAfterEvents | SystemBeforeEvents | WorldBeforeEvents | WorldAfterEvents> = {
    [K in keyof T]: T[K] extends { subscribe(c: (a: infer A) => void): void } ? A : never;
@@ -45,12 +54,19 @@ export class EventsPlugin extends PluginWithConfig<Config> {
    public implementedEvents = new Set<string>();
 
    public createTrigger<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(group: T, event: Event) {
-      const eventId = EventsPlugin.getEventId(group, String(event));
+      const eventId = EventsPlugin.getEventId(groupsMap[group], String(event));
+      const privilege = group.includes('before') ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
       this.implementedEvents.add(eventId);
       return (args: Events<Groups[T]>[Event]) => {
-         for (const listener of this.events.get(eventId)?.keys() ?? []) {
-            // Im not sure how to properly call it here but uhh
-            listener(args);
+         const p = this.context.currentPrivilege;
+         try {
+            this.context.currentPrivilege = privilege;
+            for (const listener of this.events.get(eventId)?.keys() ?? []) {
+               // Im not sure how to properly call it here but uhh
+               listener(args);
+            }
+         } finally {
+            this.context.currentPrivilege = p;
          }
       };
    }
@@ -59,22 +75,29 @@ export class EventsPlugin extends PluginWithConfig<Config> {
       group: T,
       event: Event,
    ) {
-      const eventId = EventsPlugin.getEventId(group, String(event));
+      const eventId = EventsPlugin.getEventId(groupsMap[group], String(event));
+      const privilege = group.includes('before') ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
       this.implementedEvents.add(eventId);
       return (
          filter: (v: EventsWithFilters<Groups[T]>[Event]['filter']) => boolean,
          args: EventsWithFilters<Groups[T]>[Event]['event'],
       ) => {
-         for (const [listener, filterData] of this.events.get(eventId)?.entries() ?? []) {
-            if (!filter(filterData as EventsWithFilters<Groups[T]>[Event]['filter'])) continue;
+         const p = this.context.currentPrivilege;
+         try {
+            this.context.currentPrivilege = privilege;
+            for (const [listener, filterData] of this.events.get(eventId)?.entries() ?? []) {
+               if (!filter(filterData as EventsWithFilters<Groups[T]>[Event]['filter'])) continue;
 
-            // Im not sure how to properly call it here but uhh
-            listener(args);
+               // Im not sure how to properly call it here but uhh
+               listener(args);
+            }
+         } finally {
+            this.context.currentPrivilege = p;
          }
       };
    }
 
-   protected _ = this.server.onLoad.subscribe((loaded, versions) => {
+   protected _ = this.server.onLoad.subscribe((_, versions) => {
       for (const module of versions) {
          for (const eventsGroup of module.symbols.values()) {
             if (eventsGroup instanceof ConstructableSymbol && eventsGroup.name.endsWith('Events')) {
@@ -95,7 +118,7 @@ export class EventsPlugin extends PluginWithConfig<Config> {
 
             if (!(subscribe instanceof MethodSymbol) || !(unsubscribe instanceof MethodSymbol)) continue;
 
-            const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignal.name);
+            const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignalGetter.name);
 
             this.context.implement(module.nameVersion, subscribe.identifier, ctx => {
                if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {

@@ -1,6 +1,6 @@
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import type { ItemType } from '@minecraft/server';
-import { items as itemsReport } from './reports-provider';
+import type { ItemStack, ItemType } from '@minecraft/server';
+import { items as itemsReport, localizationKeys } from './reports-provider';
 
 export class ItemTypesPlugin extends Plugin {
    public source = itemsReport;
@@ -46,9 +46,12 @@ export class ItemStackPlugin extends Plugin {
    public itemStack = this.server.implementWithStorage(
       'ItemStack',
       () => ({
-         canDestroy: [] as string[],
          typeId: '',
          amount: 0,
+         canDestroy: [] as string[],
+         canPlaceOn: [] as string[],
+         maxAmount: 0,
+         langKey: '',
       }),
       {
          constructor(itemType, amount = 1) {
@@ -58,8 +61,13 @@ export class ItemStackPlugin extends Plugin {
             if (!info) throw new Error(`Invalid item identifier '${typeId}'`);
             if (info.maxStack > amount) throw new Error('Max stack'); // TODO
 
+            this.storage.maxAmount = info.maxStack;
             this.storage.typeId = typeId;
             this.storage.amount = amount; // We need to somehow tell type system that default value is set
+            this.storage.langKey = localizationKeys.items[typeId] ?? '';
+         },
+         get localizationKey() {
+            return this.storage.langKey;
          },
          get typeId() {
             return this.storage.typeId;
@@ -69,6 +77,19 @@ export class ItemStackPlugin extends Plugin {
          },
          setCanDestroy(blockIdentifiers) {
             this.storage.canDestroy = blockIdentifiers ?? [];
+         },
+
+         setCanPlaceOn(blockIdentifiers) {
+            this.storage.canPlaceOn = blockIdentifiers ?? [];
+         },
+         getCanPlaceOn() {
+            return this.storage.canPlaceOn;
+         },
+
+         get isStackable() {
+            if ((this as ItemStack).getDynamicPropertyIds().length !== 0) return false;
+            if ((this as ItemStack).maxAmount > 0) return false;
+            return true;
          },
       },
    );

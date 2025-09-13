@@ -64,18 +64,19 @@ export async function getSource(): Promise<ReadableStream> {
       if (readable) return readable;
    }
 
-   const latest = await fetchJson<{ linux: { preview: string }; windows: { preview: string } }>(
-      'https://raw.githubusercontent.com/Bedrock-OSS/BDS-Versions/main/versions.json',
-   );
+   const latest = await fetchJson<{
+      linux: { preview: string; stable: string };
+      windows: { preview: string; stable: string };
+   }>('https://raw.githubusercontent.com/Bedrock-OSS/BDS-Versions/main/versions.json');
    if (!latest) {
       const readable = await getCachedBinary();
       if (readable) return readable;
       throw new ReferenceError('No source available, no cache, no internet');
    }
-   const version = platform === 'win32' ? latest.windows.preview : latest.linux.preview;
+   const version = platform === 'win32' ? latest.windows.stable : latest.linux.stable;
 
    const filename = `bedrock-server-${version}.zip`;
-   const url = `https://www.minecraft.net/bedrockdedicatedserver/bin-${platform === 'win32' ? 'win' : 'linux'}-preview/${filename}`;
+   const url = `https://www.minecraft.net/bedrockdedicatedserver/bin-${platform === 'win32' ? 'win' : 'linux'}/${filename}`;
 
    const response = await fetch(url).catch(_ => null);
    if (!response) throw new ReferenceError('Something went wrong while requesting url: ' + url);

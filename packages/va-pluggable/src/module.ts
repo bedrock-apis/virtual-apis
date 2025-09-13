@@ -1,4 +1,4 @@
-import { compareVersions, VaEventEmitter } from '@bedrock-apis/common';
+import { compareVersions, d, VaEventEmitter } from '@bedrock-apis/common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { Plugin } from './api';
 import { Impl, ImplStatic, ImplStoraged } from './implementation';
@@ -66,10 +66,11 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
 
    public onModulesLoaded(): void {
       const mod = this.moduleSymbols[0];
-      if (!mod)
-         throw new Error(`Failed to load module ${this.name} with version ${this.versionFrom}...${this.versionTo}`);
-
-      this.onLoad.invoke(new PluginModuleLoaded(mod, this.plugin), this.moduleSymbols);
+      if (!mod) {
+         d(`Not loading ${this.name} with version ${this.versionFrom}...${this.versionTo}`);
+      } else {
+         this.onLoad.invoke(new PluginModuleLoaded(mod, this.plugin), this.moduleSymbols);
+      }
    }
 
    public onAfterModuleCompilation(module: ModuleSymbol): void {

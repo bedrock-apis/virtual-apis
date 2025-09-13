@@ -18,6 +18,13 @@ export abstract class Plugin extends ContextPlugin {
       '2.0.0',
    );
 
+   protected server_above_v2_0_0 = new PluginModule<ServerModuleTypeMap, this>(
+      this,
+      '@minecraft/server',
+      '2.0.0',
+      undefined,
+   );
+
    protected server_below_v1_17_0 = new PluginModule<ServerModuleTypeMap, this>(
       this,
       '@minecraft/server',
@@ -37,8 +44,8 @@ export abstract class Plugin extends ContextPlugin {
       for (const module of this.modules.values()) module.onModulesLoaded();
    }
 
-   protected getPlugin(plugin: typeof ContextPlugin) {
-      this.context.getPlugin(plugin);
+   protected getPlugin<T extends typeof ContextPlugin>(plugin: T): InstanceType<T> {
+      return this.context.getPlugin(plugin, this.identifier);
    }
 }
 

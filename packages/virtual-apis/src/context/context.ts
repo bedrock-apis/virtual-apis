@@ -38,6 +38,12 @@ export class Context implements Disposable {
 
    public currentPrivilege = VirtualPrivilege.None;
 
+   public temporaryPrivilege(privilege: VirtualPrivilege): Disposable {
+      const before = this.currentPrivilege;
+      this.currentPrivilege = privilege;
+      return { [Symbol.dispose]: () => (this.currentPrivilege = before) };
+   }
+
    public readonly plugins = new Map<string, ContextPlugin>();
    protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
 
@@ -53,12 +59,13 @@ export class Context implements Disposable {
       plugin.onInitialization();
       return plugin as InstanceType<T>;
    }
-   public getPlugin<T extends typeof ContextPlugin>(plugin: T) {
+
+   public tryGetPlugin<T extends typeof ContextPlugin>(plugin: T) {
       return this.pluginTypes.get(plugin) as InstanceType<T> | undefined;
    }
-   public getPluginForce<T extends typeof ContextPlugin>(plugin: T, ctx: InvocationInfo) {
-      const instance = this.getPlugin(plugin);
-      if (!instance) throw new Error(`${plugin.name} is required for ${ctx.symbol.identifier ?? ctx.symbol.name}`);
+   public getPlugin<T extends typeof ContextPlugin>(plugin: T, requiredFor: string) {
+      const instance = this.tryGetPlugin(plugin);
+      if (!instance) throw new Error(`${plugin.name} is required for ${requiredFor}`);
       return instance;
    }
 
@@ -131,8 +138,9 @@ export class Context implements Disposable {
          ?.get(invocation.symbol.identifier);
 
       if (!implemetations?.length) {
-         // TODO Config to ignore? Default implementation?
-         invocation.diagnostics.errors.report(new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation));
+         invocation.diagnostics.errors.report(
+            new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation(invocation.symbol.identifier)),
+         );
          return;
       }
 
