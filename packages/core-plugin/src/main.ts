@@ -6,5 +6,6 @@ export * from './entity';
 export * from './events';
 export * from './instance-getter';
 export * from './item-stack';
+export * from './system';
 export * from './validity';
 export * from './world';

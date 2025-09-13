@@ -77,6 +77,8 @@ function compareResults(need: TestReport.Result, got: TestReport.Result): string
 
       if (typeof got === 'object') return `❓ Unexpected error: ${errorResultToString(got)}`;
 
+      if (typeof need === 'undefined' || need === null) return `❌ Expected ${need}, got: ${got}`;
+
       if (need !== got) return `❌ Results mismatch: ${indent(diff(need, got))}`;
    }
 

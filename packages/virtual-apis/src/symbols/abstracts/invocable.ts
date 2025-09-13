@@ -1,3 +1,6 @@
+import { d } from '@bedrock-apis/common';
+import chalk from 'chalk';
+import { inspect } from 'node:util';
 import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';
 import { CompileTimeError, NativeActionKind, NativeKind } from '../../errorable';
@@ -33,16 +36,19 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       }
 
       // We want to warn that plugin probably returned mismatched type
-      this.returnType.isValidValue(diagnostics.warns, info.result);
+      if (!this.returnType.isValidValue(diagnostics.warns, info.result)) {
+         d(
+            chalk.yellow(
+               `${this.identifier} returned wrong type: ${inspect(info.result)}, expected ${this.returnType.name}`,
+            ),
+         );
+      }
 
       // Checks 2
       if (!diagnostics.success) {
          // TODO: What design of our plugin system we want right?
          // definition.__reports(executionContext);
          throw diagnostics.throw(this.stackTrimEncapsulation + 1);
-      }
-      if (!diagnostics.warns.isEmpty) {
-         console.warn(diagnostics.warns.stack.map(e => e.throw()));
       }
       return info.result;
    }

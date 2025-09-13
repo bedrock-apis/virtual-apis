@@ -1,5 +1,6 @@
 import { compareVersions, d, VaEventEmitter } from '@bedrock-apis/common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
+import chalk from 'chalk';
 import { Plugin } from './api';
 import { Impl, ImplStatic, ImplStoraged } from './implementation';
 import { ModuleTypeMap, PartialParts, StorageThis, ThisContext } from './types';
@@ -23,6 +24,8 @@ export type Constructables<T extends ModuleTypeMap> = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Plugin> {
+   private static debugMessagesRemoveLater = new Set();
+
    public constructor(
       public readonly plugin: P,
       public readonly name: string,
@@ -50,12 +53,13 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
 
    public implementWithStorage<T extends keyof Mod, Storage extends object>(
       className: T,
-      createStorage: (implementation: Mod[T]['prototype'], mod: PluginModuleLoaded<Mod>) => Storage,
+      createStorage: (implementation: Mod[T]['prototype'], mod: PluginModuleLoaded<Mod>, plugin: P) => Storage,
       implementation: { storage?: Storage } & PartialParts<
          Mod[T]['prototype'],
          StorageThis<Mod[T]['prototype'], P, Mod, Storage>
       > &
          ConstructorImpl<StorageThis<Mod[T]['prototype'], P, Mod, Storage>, Mod, T>,
+      strict = false,
    ) {
       type Native = Mod[T]['prototype'];
 
@@ -63,14 +67,21 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
          this,
          className as string,
          implementation,
-         createStorage as unknown as (n: object, m: PluginModuleLoaded) => Storage,
+         createStorage as unknown as (n: object, m: PluginModuleLoaded, plugin: Plugin) => Storage,
+         strict,
       );
    }
+
+   protected notLoadingNotice = false;
 
    public onModulesLoaded(): void {
       const mod = this.moduleSymbols[0];
       if (!mod) {
-         d(`Not loading ${this.name} with version ${this.versionFrom}...${this.versionTo}`);
+         const m = `Not loading ${this.name} with version ${this.versionFrom}...${this.versionTo}`;
+         if (!PluginModule.debugMessagesRemoveLater.has(m)) {
+            d(chalk.yellow(m));
+            PluginModule.debugMessagesRemoveLater.add(m);
+         }
       } else {
          this.onLoad.invoke(new PluginModuleLoaded(mod, this.plugin), this.moduleSymbols);
       }

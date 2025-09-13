@@ -27,7 +27,9 @@ export class Impl {
    private implMethod(key: string, version: string, prop: PropertyDescriptor, loaded: PluginModuleLoaded) {
       if (key === 'constructor') {
          this.module.plugin.context.implement(version, this.ctorKey(this.className), ctx => {
-            prop.value.call(this.getThisValue(ctx.thisObject!, ctx, loaded), ...ctx.params);
+            // We use ctx.result here because ctx.thisObject is not a native handle
+            // which results in different storages between constructor and methods
+            prop.value.call(this.getThisValue(ctx.result!, ctx, loaded), ...ctx.params);
          });
       } else {
          this.module.plugin.context.implement(version, this.methodKey(this.className, key), ctx => {
@@ -47,10 +49,6 @@ export class Impl {
             ctx.result = set.call(this.getThisValue(ctx.thisObject!, ctx, loaded), ctx.params[0]);
          });
       }
-   }
-
-   protected getKey(key: string) {
-      return `${this.className}::${key}`;
    }
 
    protected methodKey = identifiers.method;
@@ -80,7 +78,8 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
       module: PluginModule,
       className: string,
       implementation: object,
-      protected createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>) => T,
+      protected createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>, plugin: Plugin) => T,
+      protected strict = false,
    ) {
       super(module, className, implementation);
       this.module.onLoad.subscribe(l => this.onLoad(l));
@@ -88,7 +87,10 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
 
    protected onLoad(loaded: PluginModuleLoaded) {
       this.loaded = loaded;
-      this.storage = new ContextPluginLinkedStorage(native => this.createStorage(native, loaded));
+      this.storage = new ContextPluginLinkedStorage(
+         native => this.createStorage(native, loaded, this.module.plugin),
+         this.strict,
+      );
    }
 
    protected loaded?: PluginModuleLoaded;
@@ -98,18 +100,13 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
       invocation: InvocationInfo,
       loaded: PluginModuleLoaded<ModuleTypeMap>,
    ) {
-      return StorageThis.create(
-         this.getStorage(native as Native),
-         invocation,
-         native as object,
-         this.implementation,
-         loaded,
-         this.module.plugin,
-      ) as StorageThis<object, Plugin, ModuleTypeMap, T>;
-   }
+      if (!this.module.plugin.context.isNativeHandle(native)) throw new Error('Not native');
+      const t = new StorageThis(invocation, native as object, this.implementation, loaded, this.module.plugin);
 
-   public getStorage(nativeObject: Native): T {
-      return this.storage.get(nativeObject);
+      const creator = invocation.symbol.kind === 'constructor' ? this.storage.create : this.storage.get;
+      (t as Mutable<typeof t>).storage = creator.call(this.storage, native as Native);
+
+      return t;
    }
 
    public create(partialStorage: Partial<T>): Native {
@@ -120,7 +117,7 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
       }
 
       const native = this.loaded.construct(this.className);
-      const storage = this.getKey(native);
+      const storage = this.storage.create(native);
       Object.assign(storage, partialStorage);
       return native;
    }

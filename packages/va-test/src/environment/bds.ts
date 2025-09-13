@@ -17,7 +17,7 @@ export async function loadChunk(location: Vector3, tickingareaName: string) {
       } catch {
          /* empty */
       }
-      await system.waitTicks(10);
+      if (!block?.isValid) await system.waitTicks(10);
    } while (!block?.isValid);
 
    return block;

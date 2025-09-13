@@ -2,9 +2,11 @@ import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 import {
    ConstructableSymbol,
    ContextPluginLinkedStorage,
+   DiagnosticsStackReport,
    ErrorFactory,
    InvocableSymbol,
    InvocationInfo,
+   PANIC_ERROR_MESSAGES,
 } from '@bedrock-apis/virtual-apis';
 
 interface Config {
@@ -14,6 +16,10 @@ interface Config {
 type Storage = ContextPluginLinkedStorage<{
    isValid: boolean;
 }>;
+
+class ValidityPluginError extends Error {
+   public override name = 'ValidityPluginError';
+}
 
 export class ValidityPlugin extends PluginWithConfig<Config> {
    protected override config: Config = {
@@ -58,8 +64,22 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
                   symbol.name === 'isValid'
                      ? this.isValidCheck.bind(null, storage)
                      : this.guard.bind(null, storage, target, error),
-                  1,
+                  10,
                );
+               if (symbol.name !== 'isValid') {
+                  // Since we implement method guard, we need to explicily mark this as not
+                  // implemented in case of return type mismatch
+                  this.context.implement(
+                     version.nameVersion,
+                     symbol.identifier,
+                     ctx => {
+                        if (!ctx.symbol.returnType.isValidValue(new DiagnosticsStackReport(), ctx.result)) {
+                           throw new ValidityPluginError(PANIC_ERROR_MESSAGES.NoImplementation(symbol.identifier));
+                        }
+                     },
+                     -10,
+                  );
+               }
             }
          }
       });

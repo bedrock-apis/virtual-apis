@@ -39,10 +39,5 @@ export class ThisContext<T, P extends Plugin, Mod extends ModuleTypeMap> {
 }
 
 export class StorageThis<T, P extends Plugin, Mod extends ModuleTypeMap, Storage> extends ThisContext<T, P, Mod> {
-   public static create(storage: object, ...args: ConstructorParameters<typeof ThisContext>) {
-      const storaged = new this(...args);
-      (storaged as Mutable<typeof storaged>).storage = storage;
-      return storaged;
-   }
    public readonly storage!: Storage;
 }

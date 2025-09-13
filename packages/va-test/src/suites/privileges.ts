@@ -16,6 +16,6 @@ TestSuite.simple('privileges')
       // @ts-expect-error aaaaaaaaaaaa
       world.gameRules.commandBlockOutput = 4;
    })
-   .test(() => system.run(() => {}))
-   .test(() => world.afterEvents.blockExplode.subscribe(() => {}))
+   .test(() => void system.run(() => {}))
+   .test(() => void world.afterEvents.blockExplode.subscribe(() => {}))
    .runEarlyExecution();

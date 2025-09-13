@@ -1,4 +1,4 @@
-import { ContextPlugin, ContextPluginLinkedStorage, ModuleSymbol } from '@bedrock-apis/virtual-apis';
+import { ContextPlugin, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { PluginModule } from './module';
 import { ServerModuleTypeMap } from './types';
 
@@ -31,10 +31,6 @@ export abstract class Plugin extends ContextPlugin {
       undefined,
       '1.17.0',
    );
-
-   protected getStorage<T extends object = object>(instance: object, storage: ContextPluginLinkedStorage<T>): T {
-      return storage.get(instance);
-   }
 
    public override onAfterModuleCompilation(symbol: ModuleSymbol): void {
       for (const module of this.modules.values()) module.onAfterModuleCompilation(symbol);

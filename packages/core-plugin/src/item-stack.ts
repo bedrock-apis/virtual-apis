@@ -8,26 +8,22 @@ export class ItemTypesPlugin extends Plugin {
    public itemTypes: ItemType[] = [];
 
    public override onInitialization(): void {
-      const self = this;
       const module = this.server;
 
       module.onLoad.subscribe(module => {
-         for (const itemTypeId of Object.keys(this.source.items)) {
-            const itemType = module.construct('ItemType');
-            const storage = this.itemType.storage.get(itemType);
-            storage.id = itemTypeId;
-            this.itemTypes.push(itemType);
+         for (const itemTypeId of Object.keys(this.source)) {
+            this.itemTypes.push(this.itemType.create({ id: itemTypeId }));
          }
       });
 
       module.implementStatic('ItemTypes', {
          getAll() {
-            return self.itemTypes;
+            return this.plugin.itemTypes;
          },
          get(itemId) {
-            for (const itemType of self.itemTypes) {
+            for (const itemType of this.plugin.itemTypes) {
                // Get storage to avoid expensive calls
-               if (self.itemType.getStorage(itemType).id === itemId) return itemType;
+               if (this.plugin.itemType.storage.get(itemType).id === itemId) return itemType;
             }
          },
       });
@@ -60,7 +56,7 @@ export class ItemStackPlugin extends Plugin {
             const itemTypes = this.getPlugin(ItemTypesPlugin);
             const info = itemTypes.source.items[typeId];
             if (!info) throw new Error(`Invalid item identifier '${typeId}'.`);
-            if (amount > info.maxStack) throw new Error('Max stack'); // TODO
+            // if (amount > info.maxStack) throw new Error('Max stack'); // TODO, mc does not really throws there lol
 
             this.storage.maxAmount = info.maxStack;
             this.storage.typeId = typeId;
@@ -105,6 +101,7 @@ export class ItemStackPlugin extends Plugin {
             return true;
          },
       },
+      true,
    );
 }
 ItemStackPlugin.register('itemStack');

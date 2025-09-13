@@ -8,8 +8,6 @@ export class EarlyExecutionPlugin extends Plugin {
       const worldLoad = this.getPlugin(EventsPlugin).createTrigger('worldAfter', 'worldLoad');
       const startup = this.getPlugin(EventsPlugin).createTrigger('systemBefore', 'startup');
 
-      console.log('alod');
-
       setTimeout(() => {
          startup({
             blockComponentRegistry: this.blockComponentRegistry.create({}),

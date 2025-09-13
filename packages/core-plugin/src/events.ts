@@ -122,7 +122,7 @@ export class EventsPlugin extends PluginWithConfig<Config> {
 
             this.context.implement(module.nameVersion, subscribe.identifier, ctx => {
                if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
-                  console.warn('Event', eventId, 'is not implemented');
+                  console.warn(`Event ${eventId} is not implemented`);
                }
 
                const listener = ctx.params[0];

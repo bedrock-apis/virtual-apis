@@ -13,13 +13,21 @@ export class ContextPluginLinkedStorage<T extends object> {
    private readonly storages = new WeakMap<object, T>();
    protected readonly instances = new WeakMap<T, WeakRef<object>>();
 
-   public constructor(protected readonly create: (instance: object) => T) {}
+   public constructor(
+      protected readonly createStorage: (instance: object) => T,
+      protected strict = false,
+   ) {}
 
    public get(instance: object) {
       const storage = this.storages.get(instance);
       if (storage) return storage;
 
-      const createdStorage = this.create(instance);
+      if (this.strict) throw new Error('Unitialized storage');
+      return this.create(instance);
+   }
+
+   public create(instance: object) {
+      const createdStorage = this.createStorage(instance);
       this.storages.set(instance, createdStorage);
       this.instances.set(createdStorage, new WeakRef(instance));
       return createdStorage;

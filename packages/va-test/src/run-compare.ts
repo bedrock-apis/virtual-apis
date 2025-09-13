@@ -28,4 +28,13 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 `;
 
    await fs.writeFile('INCOMPATIBILITY.md', header + result + `\n\`\`\``);
+
+   // Stats
+   // const ctx = Context.getContext(0)!;
+   // const mod = ctx!.modules.get('@minecraft/server')!;
+   // console.log(
+   //    mod.invocables.size,
+   //    ctx.implementations.get(mod.nameVersion)!.size,
+   //    [...ctx.implementations.get(mod.nameVersion)!.keys()].join('\n'),
+   // );
 });

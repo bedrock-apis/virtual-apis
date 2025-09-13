@@ -120,14 +120,11 @@ export class Context implements Disposable {
          .getOrCreate(moduleNameVersion, () => new MapWithDefaults())
          .getOrCreate(identifier, () => []);
 
-      if ((impls[0]?.priority ?? 0) <= priority) {
-         impls.unshift({ impl, priority });
-      } else {
-         impls.push({ impl, priority });
-      }
+      impls.push({ impl, priority });
+      impls.sort((a, b) => b.priority - a.priority);
    }
 
-   protected implementations = new MapWithDefaults<
+   public implementations = new MapWithDefaults<
       string,
       MapWithDefaults<string, { impl: SymbolImpl; priority: number }[]>
    >();

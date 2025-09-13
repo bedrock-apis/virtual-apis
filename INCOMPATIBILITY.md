@@ -9,13 +9,13 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 ```
 
 Suite block (chained): 
-  0: ❓ Unexpected error: TypeError: Failed to get property 'typeId' due to Block being invalid (has the Block been removed?).
-  1: ❓ Unexpected error: TypeError: Failed to get property 'type' due to Block being invalid (has the Block been removed?).
-  2: ❓ Unexpected error: TypeError: Failed to get property 'location' due to Block being invalid (has the Block been removed?).
-  3: ❓ Unexpected error: TypeError: Failed to get property 'permutation' due to Block being invalid (has the Block been removed?).
-  4: ❓ Unexpected error: TypeError: Failed to call function 'center' due to Block being invalid (has the Block been removed?).
-  5: ❓ Unexpected error: TypeError: Failed to get property 'localizationKey' due to Block being invalid (has the Block been removed?).
-  6: 0: ❓ Unexpected error: TypeError: Failed to get property 'type' due to Block being invalid (has the Block been removed?).
+  0: ✅
+  1: ❌ Results mismatch: {} != {"id":"minecraft:stone"}
+  2: ✅
+  3: ✅
+  4: ✅
+  5: ✅
+  6: 0: ❓ Unexpected error: Error: BlockPermutation::getAllStates is not implemented
     1: ❓ No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
     
   
@@ -40,14 +40,10 @@ Suite dynamic properties (chained):
 
 
 Suite entity (chained): 
-  0: ❌ Results mismatch: "" != "minecraft:cow"
-  1: ❌ Results mismatch: {"x":0,"y":0,"z":0} != {"x":0.44999998807907104,"y":0,"z":2.450000047683716}
-  2: ❌ Results mismatch: "" != "entity.cow.name"
-  3: ❌ Results mismatch: 
-      
-      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
-      undefined
-      
+  0: ✅
+  1: ✅
+  2: ✅
+  3: ❓ Unexpected error: ValidityPluginError: Entity::getComponents is not implemented
   
 
 
@@ -70,8 +66,8 @@ Suite errors (chained):
       
   4: ✅
   5: ✅
-  6: ❓ Unexpected error: Error: Max stack
-  7: ❓ Unexpected error: Error: Max stack
+  6: ✅
+  7: ✅
   8: ✅
   9: ✅
   10: ✅
@@ -90,19 +86,19 @@ Suite errors (chained):
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ✅
+  1: ❌ Results mismatch: undefined != "minecraft:apple"
   
 
 
 Suite item (chained): 
-  0: ❌ Results mismatch: "" != "minecraft:apple"
-  1: ❌ Results mismatch: 0 != 1
-  2: ❌ Results mismatch: "" != "item.apple.name"
+  0: ✅
+  1: ✅
+  2: ✅
   3: ✅
   4: ❓ Unexpected error: Error: ItemStack::clone is not implemented
   5: ✅
   6: ❓ Unexpected error: Error: ItemStack::getComponents is not implemented
-  7: 0: ❌ Results mismatch: 0 != 1
+  7: 0: ✅
     1: ❓ Unexpected error: TypeError: Cannot set property amount of #<constructor> which has only a getter
     
   
@@ -117,6 +113,6 @@ Suite privileges (chained):
       
   2: ✅
   3: ✅
-  4: ❓ Unexpected error: Error: System::run is not implemented
-  5: ❓ No result, expected null
+  4: ✅
+  5: ✅
 ```

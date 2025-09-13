@@ -3,7 +3,9 @@ import { placeBlock } from '../environment/environment';
 import { TestSuite } from '../suite';
 
 TestSuite.withSetup('block', () => placeBlock('minecraft:stone'))
-   .test(block => block.typeId)
+   .test(block => {
+      return block.typeId;
+   })
    .test(block => block.type)
    .test(block => block.location)
    .test(block => block.permutation)

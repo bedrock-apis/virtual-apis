@@ -44,6 +44,7 @@ export class EntityPlugin extends Plugin {
                this.getPlugin(ValidityPlugin).entity.invalidate(this.instance);
             },
          },
+         true,
       );
    }
 

@@ -290,7 +290,6 @@ export class BinaryLoaderContext {
          [SpecificSymbolFlags.ExportedFunction](flags, symbol, list) {
             const s = exportedSubMap.get(symbol)!;
             list.push(s);
-            d('exportedFunction name', stringOf(symbol.name));
             if (!symbol.hasType) throw new ReferenceError('ExportedFunction missing function information');
             applyFunctionInformation(symbol, r(symbol.hasType, namedSymbols), s as InvocableSymbol<unknown>);
          },
@@ -401,7 +400,12 @@ export class BinaryLoaderContext {
                      ? { max: detail.maxValue, min: detail.minValue }
                      : undefined;
 
-               return new FunctionArgumentType(r(_, namedSymbols), i, range, detail?.defaultValue === 'null' ? undefined : detail?.defaultValue);
+               return new FunctionArgumentType(
+                  r(_, namedSymbols),
+                  i,
+                  range,
+                  detail?.defaultValue === 'null' ? undefined : detail?.defaultValue,
+               );
             }),
          );
          if (details) {

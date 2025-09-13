@@ -1,4 +1,3 @@
-import { ConstructableSymbol, Context } from '@bedrock-apis/virtual-apis';
 import { Block, Entity, VanillaEntityIdentifier, world } from '@minecraft/server';
 import { TestEnvironment } from './environment';
 
@@ -15,16 +14,13 @@ export class VirtualApiEnvironment extends TestEnvironment {
    }
 
    public placeBlock(typeId: string): Block {
-      // @ts-expect-error types bypass
-      return this.instanc('Block');
-   }
+      const location = this.getNextLocation('block', { x: 0, y: 0, z: 0 }, 'y');
+      world.getDimension('overworld').setBlockType(location, typeId);
 
-   public ctx: Context = Context.getContext(0)!;
+      const block = world.getDimension('overworld').getBlock(location);
 
-   public instanc(instanceClassId: string) {
-      const symbol = this.ctx.modules.get('@minecraft/server')?.symbols.get(instanceClassId);
-      if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
+      if (!block) throw new Error('Unable to place block');
 
-      return symbol?.createRuntimeInstanceInternal(this.ctx);
+      return block;
    }
 }

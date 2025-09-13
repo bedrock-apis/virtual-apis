@@ -5,7 +5,9 @@ import { TestSuite } from '../suite';
 
 TestSuite.simple('errors')
    .test(() => ItemStack.prototype.getComponents.call(null))
-   .test(() => new ItemStack('Yes', 5))
+   .test(() => {
+      return new ItemStack('Yes', 5);
+   })
    // @ts-expect-error
    .test(() => new ItemStack('Yes', 'wrong type'))
    // @ts-expect-error
