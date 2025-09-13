@@ -1,5 +1,5 @@
 import { Range } from '@bedrock-apis/types';
-import { API_ERRORS_MESSAGES, DiagnosticsStackReport, ErrorFactory, NumberErrorFactory } from '../../errorable';
+import { API_ERRORS_MESSAGES, DiagnosticsStackReport, ErrorFactory, NumberErrorFactory, Report } from '../../errorable';
 import { RuntimeType, Type } from '../type';
 import { NumberType } from './number';
 
@@ -55,7 +55,7 @@ export class FunctionArgumentType extends Type {
       }
 
       for (const report of diagnostics.stack) {
-         const error = report.factory as Mutable<ErrorFactory>;
+         const error = report instanceof Report ? (report.factory as Mutable<ErrorFactory>) : report.throw();
 
          if (error instanceof NumberErrorFactory) {
             (error as Mutable<ErrorFactory>).message =

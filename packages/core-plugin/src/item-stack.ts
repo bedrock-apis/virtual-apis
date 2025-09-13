@@ -45,13 +45,14 @@ export class ItemStackPlugin extends Plugin {
    // @ts-expect-error HUHH? wtf is this
    public itemStack = this.server.implementWithStorage(
       'ItemStack',
-      () => ({
+      (_, mod) => ({
          typeId: '',
          amount: 0,
          canDestroy: [] as string[],
          canPlaceOn: [] as string[],
          maxAmount: 0,
          langKey: '',
+         lockMode: mod.resolve('ItemLockMode').none,
       }),
       {
          constructor(itemType, amount = 1) {
@@ -59,7 +60,7 @@ export class ItemStackPlugin extends Plugin {
             const itemTypes = this.getPlugin(ItemTypesPlugin);
             const info = itemTypes.source.items[typeId];
             if (!info) throw new Error(`Invalid item identifier '${typeId}'.`);
-            if (info.maxStack > amount) throw new Error('Max stack'); // TODO
+            if (amount > info.maxStack) throw new Error('Max stack'); // TODO
 
             this.storage.maxAmount = info.maxStack;
             this.storage.typeId = typeId;
@@ -68,6 +69,18 @@ export class ItemStackPlugin extends Plugin {
          },
          get localizationKey() {
             return this.storage.langKey;
+         },
+         get amount() {
+            return this.storage.amount;
+         },
+         set amount(v) {
+            this.storage!.amount = v;
+         },
+         get lockMode() {
+            return this.storage.lockMode;
+         },
+         set lockMode(v) {
+            this.storage!.lockMode = v;
          },
          get typeId() {
             return this.storage.typeId;

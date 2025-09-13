@@ -5,15 +5,11 @@ import { PluginModule, PluginModuleLoaded } from './module';
 import { ModuleTypeMap, StorageThis, ThisContext } from './types';
 
 export class Impl {
-   public static getModuleAndImpl(impl: Impl) {
-      return { module: impl.module, impl: impl.implementation, className: impl.className };
-   }
-
    public constructor(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      protected readonly module: PluginModule<any, Plugin>,
-      protected readonly className: string,
-      protected readonly implementation: object,
+      public readonly module: PluginModule<any, Plugin>,
+      public readonly className: string,
+      public readonly implementation: object,
    ) {
       this.module.onLoad.subscribe((loaded, versions) => {
          for (const { nameVersion } of versions) {
@@ -78,10 +74,6 @@ export class ImplStatic extends Impl {
 }
 
 export class ImplStoraged<T extends object, Native extends object> extends Impl {
-   public static getStorage<T extends ImplStoraged<object, object>>(t: T) {
-      return t.storage;
-   }
-
    public storage!: ContextPluginLinkedStorage<T>;
 
    public constructor(

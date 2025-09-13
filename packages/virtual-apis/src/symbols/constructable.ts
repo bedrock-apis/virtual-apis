@@ -4,7 +4,13 @@ import { InvocableSymbol } from './abstracts';
 import { VirtualPrivilege } from '@bedrock-apis/binary';
 import type { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
-import { API_ERRORS_MESSAGES, QUICK_JS_ENV_ERROR_MESSAGES, type DiagnosticsStackReport } from '../errorable';
+import {
+   API_ERRORS_MESSAGES,
+   NativeActionKind,
+   NativeKind,
+   QUICK_JS_ENV_ERROR_MESSAGES,
+   type DiagnosticsStackReport,
+} from '../errorable';
 import { RuntimeType } from '../runtime-types';
 import { IBindableSymbol } from './abstracts';
 
@@ -17,6 +23,8 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public readonly prototypeFields = new Map<string, IBindableSymbol>();
    public readonly parent: ConstructableSymbol | null = null;
    public readonly requireNew: boolean = true;
+   public override actionKind: NativeActionKind = 'call';
+   public override kind: NativeKind = 'constructor';
    public readonly isConstructable: boolean = false;
    public createHandleInternal(context: Context): object {
       const handle = this.parent?.createHandleInternal(context) ?? context.createNativeHandle();

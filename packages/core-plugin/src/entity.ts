@@ -1,7 +1,7 @@
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import type { Dimension, Entity, Player, Vector3 } from '@minecraft/server';
 import { localizationKeys } from './reports-provider';
+import { ValidityPlugin } from './validity';
 
 export class EntityPlugin extends Plugin {
    public impl(name: 'Entity' | 'Player') {
@@ -39,6 +39,10 @@ export class EntityPlugin extends Plugin {
             setRotation(rotation) {
                this.storage.rotation = rotation;
             },
+
+            remove() {
+               this.getPlugin(ValidityPlugin).entity.invalidate(this.instance);
+            },
          },
       );
    }
@@ -46,28 +50,26 @@ export class EntityPlugin extends Plugin {
    public entity = this.impl('Entity');
    public player = this.impl('Player');
 
-   public createEntity!: (location: Vector3, dimension: Dimension, typeId: string) => Entity;
-   public createPlayer!: (location: Vector3, dimension: Dimension, typeId: string) => Player;
-
-   protected _ = this.server.onLoad.subscribe(loaded => {
-      this.createEntity = this.create.bind(this, loaded, 'Entity', 'entity');
-      this.createPlayer = this.create.bind(this, loaded, 'Player', 'player');
-   });
-
-   protected create(
-      loaded: PluginModuleLoaded,
-      className: 'Entity' | 'Player',
-      property: 'entity' | 'player',
+   public createEntity = this.create.bind(this, 'entity') as (
       location: Vector3,
       dimension: Dimension,
       typeId: string,
-   ) {
-      const entity = loaded.construct(className);
-      const storage = this[property].getStorage(entity);
-      storage.typeId = typeId;
-      storage.location = location;
-      storage.dimension = dimension;
-      storage.localizationKey = localizationKeys.entities[typeId] ?? '';
+   ) => Entity;
+
+   public createPlayer = this.create.bind(this, 'player') as (
+      location: Vector3,
+      dimension: Dimension,
+      typeId: string,
+   ) => Player;
+
+   protected create(property: 'entity' | 'player', location: Vector3, dimension: Dimension, typeId: string) {
+      const entity = this[property].create({
+         typeId,
+         location,
+         dimension,
+         localizationKey: localizationKeys.entities[typeId] ?? '',
+      });
+      this.context.getPlugin(ValidityPlugin, `creating ${property}`).entity.validate(entity);
       return entity;
    }
 }

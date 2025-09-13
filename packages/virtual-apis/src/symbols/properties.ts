@@ -2,7 +2,7 @@ import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
-import { API_ERRORS_MESSAGES, CompileTimeError } from '../errorable';
+import { API_ERRORS_MESSAGES, CompileTimeError, NativeActionKind, NativeKind } from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
 import { InvocableSymbol } from './abstracts/invocable';
 import { ConstructableSymbol } from './constructable';
@@ -18,6 +18,9 @@ export class PropertySetterSymbol
       super();
       this.setParamsLength(1);
    }
+
+   public override kind: NativeKind = 'property';
+   public override actionKind: NativeActionKind = 'set';
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       const symbol = this;
@@ -77,6 +80,8 @@ export class PropertyGetterSymbol
       super();
       this.setParamsLength(0);
    }
+   public override kind: NativeKind = 'property';
+   public override actionKind: NativeActionKind = 'get';
    public readonly thisType!: ConstructableSymbol;
    public readonly setter?: PropertySetterSymbol;
    public readonly isRuntimeBaked: boolean = false;
@@ -89,7 +94,7 @@ export class PropertyGetterSymbol
 
          // If Config["Getter Require Valid Handle"] return undefined, without throwing
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('getter', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.kind, symbol.identifier));
 
          if (
             context.currentPrivilege !== VirtualPrivilege.None &&

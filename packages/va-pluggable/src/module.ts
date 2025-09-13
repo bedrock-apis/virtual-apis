@@ -51,7 +51,10 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
    public implementWithStorage<T extends keyof Mod, Storage extends object>(
       className: T,
       createStorage: (implementation: Mod[T]['prototype'], mod: PluginModuleLoaded<Mod>) => Storage,
-      implementation: PartialParts<Mod[T]['prototype'], StorageThis<Mod[T]['prototype'], P, Mod, Storage>> &
+      implementation: { storage?: Storage } & PartialParts<
+         Mod[T]['prototype'],
+         StorageThis<Mod[T]['prototype'], P, Mod, Storage>
+      > &
          ConstructorImpl<StorageThis<Mod[T]['prototype'], P, Mod, Storage>, Mod, T>,
    ) {
       type Native = Mod[T]['prototype'];

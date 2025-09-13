@@ -1,6 +1,6 @@
 import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';
-import { CompileTimeError } from '../../errorable';
+import { CompileTimeError, NativeActionKind, NativeKind } from '../../errorable';
 import { RuntimeType } from '../../runtime-types';
 import type { ParamsValidator } from '../../runtime-types/params-validator';
 import { ModuleSymbol } from '../module';
@@ -11,6 +11,8 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly params!: ParamsValidator;
    public readonly identifier!: string;
    public readonly paramsLength!: number;
+   public abstract readonly kind: NativeKind;
+   public abstract readonly actionKind: NativeActionKind;
    public readonly privileges: ('read_only' | 'none' | 'early_execution')[] = [];
    protected readonly stackTrimEncapsulation: number = 1;
    protected runtimeGetResult(info: InvocationInfo): unknown {
