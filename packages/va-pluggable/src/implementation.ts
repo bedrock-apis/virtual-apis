@@ -5,6 +5,10 @@ import { PluginModule, PluginModuleLoaded } from './module';
 import { ModuleTypeMap, StorageThis, ThisContext } from './types';
 
 export class Impl {
+   public static getModuleAndImpl(impl: Impl) {
+      return { module: impl.module, impl: impl.implementation, className: impl.className };
+   }
+
    public constructor(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       protected readonly module: PluginModule<any, Plugin>,
@@ -74,19 +78,25 @@ export class ImplStatic extends Impl {
 }
 
 export class ImplStoraged<T extends object, Native extends object> extends Impl {
-   protected storage!: ContextPluginLinkedStorage<T>;
+   public static getStorage<T extends ImplStoraged<object, object>>(t: T) {
+      return t.storage;
+   }
+
+   public storage!: ContextPluginLinkedStorage<T>;
 
    public constructor(
       module: PluginModule,
       className: string,
       implementation: object,
-      createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>) => T,
+      protected createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>) => T,
    ) {
       super(module, className, implementation);
-      this.module.onLoad.subscribe(loaded => {
-         this.loaded = loaded;
-         this.storage = new ContextPluginLinkedStorage(native => createStorage(native, loaded));
-      });
+      this.module.onLoad.subscribe(l => this.onLoad(l));
+   }
+
+   protected onLoad(loaded: PluginModuleLoaded) {
+      this.loaded = loaded;
+      this.storage = new ContextPluginLinkedStorage(native => this.createStorage(native, loaded));
    }
 
    protected loaded?: PluginModuleLoaded;

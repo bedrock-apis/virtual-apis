@@ -401,7 +401,7 @@ export class BinaryLoaderContext {
                      ? { max: detail.maxValue, min: detail.minValue }
                      : undefined;
 
-               return new FunctionArgumentType(r(_, namedSymbols), i, range, detail?.defaultValue);
+               return new FunctionArgumentType(r(_, namedSymbols), i, range, detail?.defaultValue === 'null' ? undefined : detail?.defaultValue);
             }),
          );
          if (details) {

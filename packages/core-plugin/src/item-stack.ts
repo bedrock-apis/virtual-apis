@@ -14,7 +14,7 @@ export class ItemTypesPlugin extends Plugin {
       module.onLoad.subscribe(module => {
          for (const itemTypeId of Object.keys(this.source.items)) {
             const itemType = module.construct('ItemType');
-            const storage = this.itemType.getStorage(itemType);
+            const storage = this.itemType.storage.get(itemType);
             storage.id = itemTypeId;
             this.itemTypes.push(itemType);
          }
@@ -58,7 +58,7 @@ export class ItemStackPlugin extends Plugin {
             const typeId = itemType instanceof this.module.resolve('ItemType') ? itemType.id : itemType;
             const itemTypes = this.getPlugin(ItemTypesPlugin);
             const info = itemTypes.source.items[typeId];
-            if (!info) throw new Error(`Invalid item identifier '${typeId}'`);
+            if (!info) throw new Error(`Invalid item identifier '${typeId}'.`);
             if (info.maxStack > amount) throw new Error('Max stack'); // TODO
 
             this.storage.maxAmount = info.maxStack;

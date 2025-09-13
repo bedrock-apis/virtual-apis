@@ -1,6 +1,8 @@
 import { MapWithDefaults } from '@bedrock-apis/common';
 import { Plugin } from '@bedrock-apis/va-pluggable';
+import { Impl, ImplStoraged } from '@bedrock-apis/va-pluggable/src/implementation';
 import { Container, ContainerSlot, ItemStack } from '@minecraft/server';
+import { ItemStackPlugin } from './item-stack';
 
 class InventoryPlugin extends Plugin {
    protected id = 'inventory';
@@ -50,23 +52,18 @@ class InventoryPlugin extends Plugin {
          setItem(item) {
             this.storage.item = item;
          },
-         // Find a way to redirect calls more efficiently
-         getCanDestroy() {
-            return this.storage.item?.getCanDestroy() ?? [];
-         },
-         getCanPlaceOn() {
-            return this.storage.item?.getCanPlaceOn() ?? [];
-         },
-         getTags() {
-            return this.storage.item?.getTags() ?? [];
-         },
-         isStackableWith(itemStack) {
-            return this.storage.item?.isStackableWith(itemStack) ?? false;
-         },
-         get isStackable() {
-            return this.storage.item.isStackable;
-         },
       },
    );
+
+   // We take storage and implementation of the ItemStack and apply them to the container slot
+   protected _ = new (class ProxyImpl extends ImplStoraged<object, object> {
+      public constructor(containerSlot: Impl) {
+         const { module, className } = Impl.getModuleAndImpl(containerSlot);
+         const itemPlugin = module.plugin.context.getPlugin(ItemStackPlugin, 'containerSlot');
+
+         super(module, className, Impl.getModuleAndImpl(itemPlugin.itemStack).impl, () => ({}));
+         this.storage = itemPlugin.itemStack.storage;
+      }
+   })(this.containerSlot);
 }
 InventoryPlugin.register('inventory');

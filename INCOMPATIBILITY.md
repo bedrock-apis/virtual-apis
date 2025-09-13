@@ -39,11 +39,16 @@ Suite dynamic properties (chained):
   
 
 
-Suite entity (chained): ❓ Unexpected setup error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+Suite entity (chained): 
+  0: ✅
+  1: ❌ Results mismatch: {"x":0,"y":0,"z":2} != {"x":0.44999998807907104,"y":0,"z":2.450000047683716}
+  2: ✅
+  3: ❓ Unexpected error: Error: Entity::getComponents is not implemented
+  
 
 
 Suite disposal (chained): 
-  0: 0: ❓ Unexpected error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
+  0: 0: ❓ Unexpected error: Error: Entity::isValid getter is not implemented
     1: ❓ No result, expected false
     2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
     
@@ -52,7 +57,7 @@ Suite disposal (chained):
 
 Suite errors (chained): 
   0: ✅
-  1: ❌ Error mismatch: Error: Invalid item identifier 'Yes' != Error: Invalid item identifier 'Yes'.
+  1: ✅
   2: ✅
   3: ❌ Error mismatch: 
       
@@ -70,32 +75,12 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❓ Unexpected error: TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-  16: ❌ Error mismatch: 
-      
-      TypeError: Native type conversion failed. Function return value expected type: string
-      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-      
-  17: ❌ Error mismatch: 
-      
-      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
-      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-      
-  18: ❌ Error mismatch: 
-      
-      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
-      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-      
-  19: ❌ Error mismatch: 
-      
-      Error: Failed to set member
-      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-      
-  20: ❌ Error mismatch: 
-      
-      TypeError: Native type conversion failed. Function return value expected type: string
-      TypeError: Native optional type conversion failed. Function argument [2] expected type: SpawnEntityOptions | undefined
-      
+  15: ❌ Results mismatch: false != true
+  16: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
+  17: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
+  18: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
+  19: ❓ Expected error (Error: Failed to set member), got: false
+  20: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
   
 
 
