@@ -76,8 +76,11 @@ export const API_ERRORS_MESSAGES = {
    NoConstructor: (id: string) => ErrorFactory.new(`No constructor for native class '${id}'.`, REFERENCE_ERROR_TYPE),
    NoPrivilege: (kind: NativeKindPrivilege, id: string) =>
       ErrorFactory.new(`Native ${kind} [${id.split(' ')[0]}] does not have required privileges.`, REFERENCE_ERROR_TYPE),
-   NativeBound: (kind: NativeKind, id: string) =>
-      ErrorFactory.new(`Native ${kind} [${id}] object bound to prototype does not exist.`, REFERENCE_ERROR_TYPE),
+   NativeBound: (kind: NativeKindPrivilege, id: string) =>
+      ErrorFactory.new(
+         `Native ${kind} [${id.split(' ')[0]}] object bound to prototype does not exist.`,
+         REFERENCE_ERROR_TYPE,
+      ),
    NativeConversionFailed: (type: NativeTypeKind, additional?: string) =>
       ErrorFactory.new(`Native ${type} conversion failed.${additional ?? ''}`, TYPE_ERROR_TYPE), //Type error
    ObjectHasInvalidHandle: () => ErrorFactory.new(`Object has an invalid native handle.`, TYPE_ERROR_TYPE), // Type Error

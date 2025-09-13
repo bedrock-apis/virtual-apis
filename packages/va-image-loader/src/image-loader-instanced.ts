@@ -352,7 +352,7 @@ export class BinaryLoaderContext {
                list.push(setter);
                if (!isStatic) setter.setThisType(cls);
                getter.setSetter(setter);
-               setter.setParams(new ParamsValidator([]));
+               setter.setParams(new ParamsValidator([type]));
                setter.setReturnType(voidType);
                setter.setIdentifier(identifiers.setter(cls.name, selfName), mod);
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));

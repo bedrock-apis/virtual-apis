@@ -6,7 +6,6 @@ import { API_ERRORS_MESSAGES, CompileTimeError, NativeActionKind, NativeKind } f
 import { IBindableSymbol } from './abstracts/bindable';
 import { InvocableSymbol } from './abstracts/invocable';
 import { ConstructableSymbol } from './constructable';
-import { ModuleSymbol } from './module';
 
 const { defineProperty, getOwnPropertyDescriptor } = Reflect;
 export class PropertySetterSymbol
@@ -30,7 +29,7 @@ export class PropertySetterSymbol
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('setter', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('property setter', symbol.identifier));
 
          if (!symbol.privileges.includes(context.currentPrivilege))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('property setter', symbol.identifier));
@@ -51,15 +50,7 @@ export class PropertySetterSymbol
       return executable;
    }
    public compileAssignment(context: Context, runtime: unknown): void {
-      const descriptor = getOwnPropertyDescriptor(runtime as object, this.name) ?? {
-         configurable: true,
-         enumerable: false,
-      };
-      descriptor.set = this.getRuntimeValue(context)!;
-      defineProperty(runtime as object, this.name, descriptor);
-   }
-   public override setIdentifier(identifier: string, mod: ModuleSymbol): this {
-      return super.setIdentifier(`${identifier} setter`, mod);
+      throw new Error('PropertySetterSymbol compileAssignment should be done by Getter');
    }
    public setThisType(type: ConstructableSymbol): this {
       (this as Mutable<this>).thisType = type;
@@ -94,7 +85,7 @@ export class PropertyGetterSymbol
 
          // If Config["Getter Require Valid Handle"] return undefined, without throwing
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.kind, symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('property getter', symbol.identifier));
 
          if (
             context.currentPrivilege !== VirtualPrivilege.None &&
@@ -118,6 +109,13 @@ export class PropertyGetterSymbol
          enumerable: false,
       };
       descriptor.get = this.getRuntimeValue(context)!;
+      descriptor.set =
+         this.setter?.getRuntimeValue(context) ??
+         (() => {
+            // Special case. Maybe need all that proxifyFunction, finalizeAsMethod and stack trimming stuff too
+            throw new TypeError(`'${this.name}' is read-only`);
+         });
+
       defineProperty(runtime as object, this.name, descriptor);
    }
    public setThisType(type: ConstructableSymbol): this {

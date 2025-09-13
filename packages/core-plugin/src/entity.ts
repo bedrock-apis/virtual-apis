@@ -1,5 +1,6 @@
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import type { Dimension, Entity, Player, Vector3 } from '@minecraft/server';
+import { ComponentsPlugin } from './components';
 import { localizationKeys } from './reports-provider';
 import { ValidityPlugin } from './validity';
 
@@ -12,9 +13,17 @@ export class EntityPlugin extends Plugin {
             location: { x: 0, y: 0, z: 0 },
             localizationKey: '',
             rotation: { x: 0, y: 0 },
+            tags: new Set<string>(),
+            nameTag: undefined as string | undefined,
             dimension: undefined as unknown as Dimension,
          }),
          {
+            get nameTag() {
+               return this.storage?.nameTag;
+            },
+            set nameTag(v) {
+               this.storage!.nameTag = v;
+            },
             get typeId() {
                return this.storage.typeId;
             },
@@ -27,6 +36,20 @@ export class EntityPlugin extends Plugin {
             set location(v) {
                // @ts-expect-error huh idk how to set setter this type
                this.storage.location = v;
+            },
+
+            addTag(tag) {
+               if (this.storage.tags.has(tag)) return false;
+               return this.storage.tags.add(tag), true;
+            },
+            getTags() {
+               return [...this.storage.tags.values()];
+            },
+            hasTag(tag) {
+               return this.storage.tags.has(tag);
+            },
+            removeTag(tag) {
+               return this.storage.tags.delete(tag);
             },
 
             get dimension() {
@@ -50,6 +73,11 @@ export class EntityPlugin extends Plugin {
 
    public entity = this.impl('Entity');
    public player = this.impl('Player');
+
+   protected _ = this.server.onLoad.subscribe(mod => {
+      this.getPlugin(ComponentsPlugin).addComponents('Entity', {}, mod.resolve('EntityComponentTypes'));
+      this.getPlugin(ComponentsPlugin).addComponents('Player', {}, mod.resolve('EntityComponentTypes'));
+   });
 
    public createEntity = this.create.bind(this, 'entity') as (
       location: Vector3,

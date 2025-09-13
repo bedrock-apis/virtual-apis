@@ -68,7 +68,7 @@ export class TestSuite<T> {
       }
 
       const results: (TestReport.Chained | TestReport.Primitive)[] = [];
-      for (const test of this.tests) {
+      for (const test of this.collectedTests) {
          const result = test(setup);
          results.push(result);
          yield;
@@ -77,10 +77,10 @@ export class TestSuite<T> {
       return { id: this.id, results: results };
    }
 
-   protected tests: ((setupData: T) => TestReport.Chained | TestReport.Primitive)[] = [];
+   protected collectedTests: ((setupData: T) => TestReport.Chained | TestReport.Primitive)[] = [];
 
    public test(testFn: (setupData: T) => unknown): this {
-      this.tests.push(setupData => {
+      this.collectedTests.push(setupData => {
          try {
             const result = testFn(setupData);
             // console.log(testFn.toString(), result);
@@ -92,12 +92,17 @@ export class TestSuite<T> {
       return this;
    }
 
+   public tests(testFns: ((setupData: T) => unknown)[]) {
+      testFns.forEach(e => this.test(e));
+      return this;
+   }
+
    private createErrorReport(error: unknown): TestReport.Primitive {
       return { error: String(error) };
    }
 
    public testChain(testFn: (setupData: T) => Generator<unknown, void, unknown>) {
-      this.tests.push(setupData => {
+      this.collectedTests.push(setupData => {
          const results: string[] = [];
          try {
             for (const iteration of testFn(setupData)) {

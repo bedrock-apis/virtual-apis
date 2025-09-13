@@ -1,4 +1,4 @@
-import { compareVersions, d, VaEventEmitter } from '@bedrock-apis/common';
+import { compareVersions, d, VaEventLoader } from '@bedrock-apis/common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import chalk from 'chalk';
 import { Plugin } from './api';
@@ -101,7 +101,7 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
       }
    }
 
-   public onLoad = new VaEventEmitter<[PluginModuleLoaded<Mod>, ModuleSymbol[]]>();
+   public onLoad = new VaEventLoader<[PluginModuleLoaded<Mod>, ModuleSymbol[]]>();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

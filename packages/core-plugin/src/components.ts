@@ -1,34 +1,51 @@
-import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { Plugin } from '@bedrock-apis/va-pluggable';
+import type { Entity, EntityComponent, ItemComponent, ItemStack } from '@minecraft/server';
+import { ValidityPlugin } from './validity';
 
-const TARGETS = ['Entity', 'Block', 'ItemStack'] as const;
-type Targets = (typeof TARGETS)[number];
+export class ComponentsPlugin extends Plugin {
+   public addComponents(
+      target: 'Player' | 'Entity' | 'ItemStack',
+      defaultData: Record<string, Record<string, object>>,
+      typeMap: Record<string, `minecraft:${string}`>,
+   ) {
+      const typeMapReverse = Object.fromEntries(Object.entries(typeMap).map(([k, v]) => [v, k]));
 
-type ComponentsMetadata = Record<string, unknown>;
+      // Item stack does not have is valid method
+      if (target !== 'ItemStack') {
+         const validator = this.getPlugin(ValidityPlugin);
+         for (const componentClassId of Object.keys(typeMap)) {
+            // TODO Pull data from type aliases
+            const id =
+               componentClassId === 'CursorInventory'
+                  ? 'PlayerCursorInventoryComponent'
+                  : `Entity${componentClassId}Component`;
+            validator.createValidator(id as 'Component', {
+               customValidator: ctx => {
+                  try {
+                     const instance = this.getOrigin((ctx.thisObject ?? {}) as EntityComponent);
+                     return !!instance?.isValid;
+                  } catch (e) {
+                     console.error('component.isValid custom validator', e);
+                  }
+                  return false;
+               },
+            });
+         }
+      }
 
-interface Config {
-   componentsMetadata: Record<Targets, ComponentsMetadata>;
-}
-
-class ComponentsPlugin extends PluginWithConfig<Config> {
-   protected id = 'components';
-
-   // TODO Pull data from bds-dump
-   protected config: Config = {
-      componentsMetadata: {
-         Entity: {},
-         Block: {},
-         ItemStack: {},
-      },
-   };
-
-   protected addComponents(target: 'Entity' | 'ItemStack' | 'Block') {
       return this.server.implementWithStorage(
          target,
-         () => {
+         (instance, mod) => {
+            const { typeId } = instance;
             const storage = new Map<string, unknown>();
-            const metadata = this.config.componentsMetadata[target];
-            for (const component of Object.entries(metadata)) {
-               storage.set(component[0], component[1]); // TODO A way to resolve component type from its id and create it using metadata?
+            const metadata = defaultData[typeId] ?? {};
+
+            for (const [key, componentData] of Object.entries(metadata)) {
+               const instanceId = typeMapReverse[key]!;
+               const componentInstance = mod.construct(instanceId as 'EntityComponent' | 'ItemComponent');
+               this.componentToOriginMap.set(componentInstance, new WeakRef(instance));
+               this.componentStorages.set(componentInstance, componentData);
+               storage.set(key, storage);
             }
             return storage;
          },
@@ -44,9 +61,15 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
       );
    }
 
-   public Block = this.addComponents('Block');
-   public Entity = this.addComponents('Entity');
-   public ItemStack = this.addComponents('ItemStack');
+   protected componentStorages = new WeakMap<EntityComponent | ItemComponent, object>();
+
+   protected componentToOriginMap = new WeakMap<EntityComponent | ItemComponent, WeakRef<Entity | ItemStack>>();
+
+   public getOrigin<T extends EntityComponent | ItemComponent>(component: T) {
+      return this.componentToOriginMap.get(component)?.deref() as
+         | undefined
+         | (T extends EntityComponent ? Entity : ItemStack);
+   }
 }
 
 ComponentsPlugin.register('components');

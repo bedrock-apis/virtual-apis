@@ -1,48 +1,62 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Entity, ItemStack, world } from '@minecraft/server';
+import { Entity, ItemStack, ScoreboardIdentity, world } from '@minecraft/server';
 import { placeBlock, spawnEntity } from '../main';
 import { TestSuite } from '../suite';
 
-TestSuite.simple('errors')
-   .test(() => ItemStack.prototype.getComponents.call(null))
-   .test(() => {
-      return new ItemStack('Yes', 5);
-   })
-   // @ts-expect-error
-   .test(() => new ItemStack('Yes', 'wrong type'))
-   // @ts-expect-error
-   .test(() => new ItemStack('Yes', 5, 5))
+TestSuite.simple('errors').tests([
+   () => ItemStack.prototype.getComponents.call(null),
+   () => new ItemStack('Yes', 5),
 
    // @ts-expect-error
-   .test(() => new Entity())
+   () => new ItemStack('Yes', 'wrong type'),
    // @ts-expect-error
-   .test(() => new Entity('Yes', 5, 5))
+   () => new ItemStack('Yes', 5, 5),
+   // @ts-expect-error
+   () => new Entity(),
 
-   .test(() => new ItemStack('minecraft:apple', 65))
-   .test(() => new ItemStack('minecraft:apple', 128))
-   .test(() => new ItemStack('minecraft:apple', 344))
-   .test(() => new ItemStack('minecraft:apple', 1000000))
-   .test(() => new ItemStack('minecraft:apple', 112319249219))
+   // @ts-expect-error
+   () => new Entity('Yes', 5, 5),
+   () => new ItemStack('minecraft:apple', 65),
+   () => new ItemStack('minecraft:apple', 128),
+   () => new ItemStack('minecraft:apple', 344),
+   () => new ItemStack('minecraft:apple', 1000000),
+   () => new ItemStack('minecraft:apple', 112319249219),
 
-   .test(() => {
-      // @ts-expect-error
-      world.afterEvents.buttonPush.subscribe('not a function');
-   })
+   // @ts-expect-error
+   () => world.afterEvents.buttonPush.subscribe('not a function'),
 
-   .test(() => {
-      TestSuite.assert(world.afterEvents === world.afterEvents);
-      TestSuite.assert(world.afterEvents.buttonPush === world.afterEvents.buttonPush);
-   })
+   () => world.afterEvents === world.afterEvents,
+   () => world.afterEvents.worldLoad === world.afterEvents.worldLoad,
 
    // more then max type
-   .test(() => world.setTimeOfDay(2147483649))
+   () => world.setTimeOfDay(2147483649),
 
    // @ts-expect-error
-   .test(() => world.setDifficulty('nonexistent'))
+   () => world.setDifficulty('nonexistent'),
+   () => set('value', spawnEntity('minecraft:cow')),
+   () => set(235, spawnEntity('minecraft:cow')),
+   () => set('value', null),
+   () => set(235, null),
+   () => set('value', placeBlock('minecraft:stone')),
+   () => set(235, placeBlock('minecraft:stone')),
 
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', spawnEntity('minecraft:cow')))
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, spawnEntity('minecraft:cow')))
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', null))
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, null))
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 'value', placeBlock('minecraft:stone')))
-   .test(() => Reflect.set(spawnEntity('minecraft:cow'), 'nameTag', 235, placeBlock('minecraft:stone')));
+   () => invalidEntity().addTag('tag'),
+   () => (invalidEntity().nameTag = ''),
+
+   // @ts-expect-error
+   () => (invalidEntity().scoreboardIdentity = ScoreboardIdentity.prototype),
+   // @ts-expect-error
+   () => (invalidEntity().isValid = true),
+]);
+
+function set(v: unknown, reciever: unknown) {
+   const t = spawnEntity('minecraft:cow');
+   const prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(t), 'nameTag');
+   return prop?.set?.call(reciever, v);
+}
+
+function invalidEntity() {
+   const entity = spawnEntity('minecraft:cow');
+   entity.remove();
+   return entity;
+}

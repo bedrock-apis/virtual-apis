@@ -20,7 +20,7 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.kind, symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('function', symbol.identifier));
 
          if (
             context.currentPrivilege !== VirtualPrivilege.None &&

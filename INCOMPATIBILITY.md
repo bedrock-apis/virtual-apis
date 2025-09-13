@@ -43,7 +43,11 @@ Suite entity (chained):
   0: ✅
   1: ✅
   2: ✅
-  3: ❓ Unexpected error: ValidityPluginError: Entity::getComponents is not implemented
+  3: ❌ Results mismatch: 
+      
+      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
+      []
+      
   
 
 
@@ -75,12 +79,25 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❌ Results mismatch: false != true
-  16: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
-  17: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
-  18: ❓ Expected error (ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.), got: false
-  19: ❓ Expected error (Error: Failed to set member), got: false
-  20: ❓ Expected error (TypeError: Native type conversion failed. Function return value expected type: string), got: false
+  15: ✅
+  16: ✅
+  17: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function return value expected type: string
+      TypeError: Native type conversion failed.
+      
+  18: ✅
+  19: ✅
+  20: ❌ Error mismatch: TypeError: Native type conversion failed. != Error: Failed to set member
+  21: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Function return value expected type: string
+      TypeError: Native type conversion failed.
+      
+  22: ✅
+  23: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
+  24: ✅
+  25: ✅
   
 
 
@@ -99,7 +116,7 @@ Suite item (chained):
   5: ✅
   6: ❓ Unexpected error: Error: ItemStack::getComponents is not implemented
   7: 0: ✅
-    1: ❓ Unexpected error: TypeError: Cannot set property amount of #<constructor> which has only a getter
+    1: ✅
     
   
 

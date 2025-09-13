@@ -17,6 +17,15 @@ type Storage = ContextPluginLinkedStorage<{
    isValid: boolean;
 }>;
 
+type Validator = (ctx: InvocationInfo) => boolean;
+
+interface ValidatorOptions {
+   error?: typeof Error;
+   ignore?: string[];
+   isValidByDefault?: boolean;
+   customValidator?: Validator;
+}
+
 class ValidityPluginError extends Error {
    public override name = 'ValidityPluginError';
 }
@@ -26,12 +35,12 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
       defaultIsValid: false,
    };
 
-   protected isValidCheck(this: null, storage: Storage, ctx: InvocationInfo) {
-      ctx.result = storage.get(ctx.thisObject ?? {}).isValid;
+   private isValidCheck(this: null, validator: Validator, ctx: InvocationInfo) {
+      ctx.result = validator(ctx);
    }
 
-   private guard(storage: Storage, target: string, error: ErrorConstructor, ctx: InvocationInfo) {
-      const isValid = storage.get(ctx.thisObject ?? {}).isValid;
+   private guard(target: string, error: ErrorConstructor, validator: Validator, ctx: InvocationInfo) {
+      const isValid = validator(ctx);
       if (!isValid) {
          ctx.diagnostics.errors.report(
             new ErrorFactory(
@@ -42,13 +51,17 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
       }
    }
 
-   protected impl(
-      target: 'Player' | 'Entity' | 'Block' | 'ItemStack' | 'Structure',
-      ignore: string[] = [],
-      error: typeof Error,
+   public createValidator(
+      target: 'Player' | 'Entity' | 'Block' | 'ItemStack' | 'Structure' | 'ScreenDisplay' | 'Component',
+      { ignore = [], error = TypeError, isValidByDefault, customValidator }: ValidatorOptions,
    ) {
-      const storage = new ContextPluginLinkedStorage(() => ({ isValid: this.config.defaultIsValid }));
-      this.server_above_v2_0_0.onLoad.subscribe((loaded, versions) => {
+      const storage = new ContextPluginLinkedStorage(() => ({
+         isValid: isValidByDefault ?? this.config.defaultIsValid,
+      }));
+      customValidator ??= ctx => {
+         return storage.get(ctx.thisObject ?? {}).isValid;
+      };
+      this.server_above_v2_0_0.onLoad.subscribe((_, versions) => {
          for (const version of versions) {
             const cls = version.symbols.get(target);
             if (!cls) throw new Error(`Not found ${target} in ${version.nameVersion}`);
@@ -62,8 +75,8 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
                   version.nameVersion,
                   symbol.identifier,
                   symbol.name === 'isValid'
-                     ? this.isValidCheck.bind(null, storage)
-                     : this.guard.bind(null, storage, target, error),
+                     ? this.isValidCheck.bind(null, customValidator)
+                     : this.guard.bind(null, target, error, customValidator),
                   10,
                );
                if (symbol.name !== 'isValid') {
@@ -94,15 +107,13 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
       };
    }
 
-   public entity = this.impl(
-      'Entity',
-      [],
+   public entity = this.createValidator('Entity', {
       // They don't export it lol
-      class InvalidActorError extends Error {
+      error: class InvalidActorError extends Error {
          public override name = 'InvalidActorError';
       } as typeof Error,
-   );
+   });
 
-   public block = this.impl('Block', [], TypeError);
+   public block = this.createValidator('Block', { error: TypeError });
 }
 ValidityPlugin.register('validity');

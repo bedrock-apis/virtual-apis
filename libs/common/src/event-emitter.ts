@@ -37,3 +37,26 @@ export class VaEventEmitter<Args extends unknown[] = unknown[]> {
       return method;
    }
 }
+
+/**
+ * Similiar to {@link VaEventEmitter} but can be invoced only once. Once it was invoced any new calls to the subscribe
+ * will call method immediatly with the last incoce params
+ */
+export class VaEventLoader<Args extends unknown[] = unknown[]> extends VaEventEmitter<Args> {
+   public loaded = false;
+
+   protected params!: Args;
+
+   public override invoke(...params: Args): void {
+      if (this.loaded) return;
+
+      this.loaded = true;
+      this.params = params;
+      super.invoke(...params);
+   }
+
+   public override subscribe<M extends (...params: Args) => void>(method: M): M {
+      if (this.loaded) method(...this.params);
+      return super.subscribe(method);
+   }
+}
