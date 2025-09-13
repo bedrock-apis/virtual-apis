@@ -3,7 +3,7 @@ import type { Vector3 } from '@minecraft/server';
 
 export class DynamicPropertiesPlugin extends Plugin {
    public implementDynamicProperties(target: 'World' | 'Entity' | 'Player') {
-      this.serverBeta.implementWithStorage(
+      this.server.implementWithStorage(
          target,
          () => new Map<string, string | number | boolean | Vector3 | undefined>(),
          {

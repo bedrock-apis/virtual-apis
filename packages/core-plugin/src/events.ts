@@ -1,10 +1,5 @@
-import {
-   ConstructableSymbol,
-   ContextPlugin,
-   MethodSymbol,
-   ModuleSymbol,
-   PropertyGetterSymbol,
-} from '@bedrock-apis/virtual-apis';
+import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { ConstructableSymbol, MethodSymbol, ModuleSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
 import { SystemAfterEvents, SystemBeforeEvents, WorldAfterEvents, WorldBeforeEvents } from '@minecraft/server';
 
 interface Config {
@@ -36,7 +31,11 @@ type EventsWithFilters<T extends SystemAfterEvents | SystemBeforeEvents | WorldB
 
 type BaseListener = (...args: unknown[]) => unknown;
 
-export class EventsPlugin extends ContextPlugin {
+export class EventsPlugin extends PluginWithConfig<Config> {
+   protected static getEventId(group: string, event: string) {
+      return `${group}::${event}`;
+   }
+
    public config: Config = {
       warnIfEventIsNotImplemented: true,
    };
@@ -46,7 +45,7 @@ export class EventsPlugin extends ContextPlugin {
    public implementedEvents = new Set<string>();
 
    public createTrigger<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(group: T, event: Event) {
-      const eventId = `${group}::${String(event)}`;
+      const eventId = EventsPlugin.getEventId(group, String(event));
       this.implementedEvents.add(eventId);
       return (args: Events<Groups[T]>[Event]) => {
          for (const listener of this.events.get(eventId)?.keys() ?? []) {
@@ -60,7 +59,7 @@ export class EventsPlugin extends ContextPlugin {
       group: T,
       event: Event,
    ) {
-      const eventId = `${group}::${String(event)}`;
+      const eventId = EventsPlugin.getEventId(group, String(event));
       this.implementedEvents.add(eventId);
       return (
          filter: (v: EventsWithFilters<Groups[T]>[Event]['filter']) => boolean,
@@ -75,45 +74,47 @@ export class EventsPlugin extends ContextPlugin {
       };
    }
 
-   public override onAfterModuleCompilation(module: ModuleSymbol): void {
-      if (module.name !== '@minecraft/server') return;
-
-      for (const eventsGroup of module.symbols) {
-         if (eventsGroup instanceof ConstructableSymbol) {
-            if (eventsGroup.name.endsWith('Events')) {
-               for (const eventSignalGetter of eventsGroup.prototypeFields.values()) {
-                  if (eventSignalGetter instanceof PropertyGetterSymbol) {
-                     const eventSignal = eventSignalGetter.returnType;
-
-                     if (!(eventSignal instanceof ConstructableSymbol)) continue;
-                     const subscribe = eventSignal.prototypeFields.get('subscribe');
-                     const unsubscribe = eventSignal.prototypeFields.get('unsubscribe');
-
-                     if (!(subscribe instanceof MethodSymbol) || !(unsubscribe instanceof MethodSymbol)) continue;
-
-                     const eventId = eventsGroup.name + '::' + eventSignal.name;
-
-                     this.context.implement(subscribe.identifier, ctx => {
-                        if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
-                           console.warn('Event', eventId, 'is not implemented');
-                        }
-
-                        const listener = ctx.params[0];
-                        const filter = ctx.params[1] ?? {};
-
-                        let listeners = this.events.get(eventId);
-                        if (!listeners) this.events.set(eventId, (listeners = new Map()));
-                        listeners.set(listener as BaseListener, filter);
-
-                        ctx.result = ctx.params[0];
-                     });
-
-                     this.context.implement(unsubscribe.identifier, ctx => {
-                        this.events.get(eventId)?.delete(ctx.params[0] as BaseListener);
-                     });
-                  }
-               }
+   protected _ = this.server.onLoad.subscribe((loaded, versions) => {
+      for (const module of versions) {
+         for (const eventsGroup of module.symbols.values()) {
+            if (eventsGroup instanceof ConstructableSymbol && eventsGroup.name.endsWith('Events')) {
+               this.implementForGroup(eventsGroup, module);
             }
+         }
+      }
+   });
+
+   private implementForGroup(eventsGroup: ConstructableSymbol, module: ModuleSymbol) {
+      for (const eventSignalGetter of eventsGroup.prototypeFields.values()) {
+         if (eventSignalGetter instanceof PropertyGetterSymbol) {
+            const eventSignal = eventSignalGetter.returnType;
+
+            if (!(eventSignal instanceof ConstructableSymbol)) continue;
+            const subscribe = eventSignal.prototypeFields.get('subscribe');
+            const unsubscribe = eventSignal.prototypeFields.get('unsubscribe');
+
+            if (!(subscribe instanceof MethodSymbol) || !(unsubscribe instanceof MethodSymbol)) continue;
+
+            const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignal.name);
+
+            this.context.implement(module.nameVersion, subscribe.identifier, ctx => {
+               if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
+                  console.warn('Event', eventId, 'is not implemented');
+               }
+
+               const listener = ctx.params[0];
+               const filter = ctx.params[1] ?? {};
+
+               let listeners = this.events.get(eventId);
+               if (!listeners) this.events.set(eventId, (listeners = new Map()));
+               listeners.set(listener as BaseListener, filter);
+
+               ctx.result = ctx.params[0];
+            });
+
+            this.context.implement(module.nameVersion, unsubscribe.identifier, ctx => {
+               this.events.get(eventId)?.delete(ctx.params[0] as BaseListener);
+            });
          }
       }
    }

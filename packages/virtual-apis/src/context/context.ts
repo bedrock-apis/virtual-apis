@@ -1,5 +1,6 @@
 import { VirtualPrivilege } from '@bedrock-apis/binary';
-import { ErrorFactory, PANIC_ERROR_MESSAGES } from '../errorable';
+import { MapWithDefaults } from '@bedrock-apis/common';
+import { ErrorFactory, PANIC_ERROR_MESSAGES, ReportAsIs } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
 import { InvocationInfo } from './invocation-info';
@@ -39,16 +40,18 @@ export class Context implements Disposable {
 
    public readonly plugins = new Map<string, ContextPlugin>();
    protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
+
    public readonly modules: Map<string, ModuleSymbol> = new Map();
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
    public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
       return this.symbols.get(id) ?? null;
    }
-   public registerPlugin(pluginType: typeof ContextPlugin) {
+   public registerPlugin<T extends typeof ContextPlugin>(pluginType: T): InstanceType<T> {
       const plugin = pluginType.instantiate(this);
       this.plugins.set(pluginType.identifier, plugin);
       this.pluginTypes.set(pluginType, plugin);
       plugin.onInitialization();
+      return plugin as InstanceType<T>;
    }
    public getPlugin<T extends typeof ContextPlugin>(plugin: T) {
       return this.pluginTypes.get(plugin) as InstanceType<T> | undefined;
@@ -79,16 +82,22 @@ export class Context implements Disposable {
    //#region Actions
    public onAfterModuleCompilation(moduleSymbol: ModuleSymbol): void {
       // Register symbols
-      for (const symbol of moduleSymbol.symbols) {
+      for (const symbol of moduleSymbol.symbols.values()) {
          this.symbols.set(
             `${moduleSymbol.name}::${(symbol as InvocableSymbol<unknown>).identifier ?? symbol.name}`,
             symbol,
          );
       }
       for (const plugin of this.plugins.values()) plugin.onAfterModuleCompilation(moduleSymbol);
-      for (const [impl] of this.implementations.entries()) {
-         if (!moduleSymbol.invocables.has(impl)) console.warn('Unknown invocable id', impl);
+      for (const [versionId, version] of this.implementations.entries()) {
+         for (const impl of version.keys()) {
+            if (!moduleSymbol.invocables.has(impl)) console.warn('Unknown invocable id', versionId, impl);
+         }
       }
+   }
+
+   public onModulesLoaded() {
+      for (const plugin of this.plugins.values()) plugin.onModulesLoaded();
    }
    public onBeforeModuleCompilation(moduleSymbol: ModuleSymbol): void {
       for (const plugin of this.plugins.values()) plugin.onBeforeModuleCompilation(moduleSymbol);
@@ -99,30 +108,39 @@ export class Context implements Disposable {
       return module;
    }
 
-   // TODO Check symbol/impl version?
-   // TODO Priority system?
-   public implement(identifier: string, impl: SymbolImpl) {
-      let impls = this.implementations.get(identifier);
-      if (!impls) this.implementations.set(identifier, (impls = []));
-      impls.push(impl);
+   public implement(moduleNameVersion: string, identifier: string, impl: SymbolImpl, priority = 0) {
+      const impls = this.implementations
+         .getOrCreate(moduleNameVersion, () => new MapWithDefaults())
+         .getOrCreate(identifier, () => []);
+
+      if ((impls[0]?.priority ?? 0) <= priority) {
+         impls.unshift({ impl, priority });
+      } else {
+         impls.push({ impl, priority });
+      }
    }
 
-   protected implementations = new Map<string, SymbolImpl[]>();
+   protected implementations = new MapWithDefaults<
+      string,
+      MapWithDefaults<string, { impl: SymbolImpl; priority: number }[]>
+   >();
 
-   public onInvocation(invocationInfo: InvocationInfo) {
-      const implemetations = this.implementations.get(invocationInfo.symbol.identifier);
+   public onInvocation(invocation: InvocationInfo) {
+      const implemetations = this.implementations
+         .get(invocation.symbol.module.nameVersion)
+         ?.get(invocation.symbol.identifier);
+
       if (!implemetations?.length) {
          // TODO Config to ignore? Default implementation?
-         invocationInfo.diagnostics.errors.report(new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation));
+         invocation.diagnostics.errors.report(new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation));
          return;
       }
 
-      for (const implementation of implemetations) {
+      for (const { impl } of implemetations) {
          try {
-            implementation(invocationInfo, ...invocationInfo.params);
+            impl(invocation, ...invocation.params);
          } catch (error) {
-            // TODO Catch by plugin? Config to stop here?
-            invocationInfo.diagnostics.errors.report(new ErrorFactory((error as Error).stack));
+            invocation.diagnostics.errors.report(new ReportAsIs(error as Error));
          }
       }
    }

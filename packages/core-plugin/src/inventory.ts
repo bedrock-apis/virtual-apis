@@ -1,11 +1,13 @@
-import { Plugin, ServerModuleTypeMap } from '@bedrock-apis/va-pluggable';
+import { MapWithDefaults } from '@bedrock-apis/common';
+import { Plugin } from '@bedrock-apis/va-pluggable';
+import { Container, ContainerSlot, ItemStack } from '@minecraft/server';
 
 class InventoryPlugin extends Plugin {
    protected id = 'inventory';
 
-   public inventory = this.serverBeta.implementWithStorage(
+   public inventory = this.server.implementWithStorage(
       'EntityInventoryComponent',
-      () => ({ container: undefined as undefined | ServerModuleTypeMap['Container'] }),
+      () => ({ container: undefined as undefined | Container }),
       {
          get canBeSiphonedFrom() {
             return true;
@@ -19,23 +21,38 @@ class InventoryPlugin extends Plugin {
       },
    );
 
-   public container = this.serverBeta.implementWithStorage(
+   public container = this.server.implementWithStorage(
       'Container',
-      () => new Map<number, InstanceType<ServerModuleTypeMap['ItemStack']>>(),
+      () => ({ items: new Map<number, ItemStack>(), slots: new MapWithDefaults<number, ContainerSlot>() }),
       {
          getItem(slot) {
-            return this.storage.get(slot);
+            return this.storage.items.get(slot);
          },
-         // @ts-expect-error Way to do new ContainerSlot?
-         getSlot(slot) {
-            return;
+         getSlot(slotIndex) {
+            const slot = this.storage.slots.getOrCreate(slotIndex, () => this.module.construct('ContainerSlot'));
+            const slotStorage = this.plugin.containerSlot.getStorage(slot);
+            slotStorage.item = this.storage.items.get(slotIndex);
+
+            return slot;
          },
          addItem(item) {
-            this.storage.set(this.storage.size, item);
+            this.storage.items.set(this.storage.items.size, item);
             return item;
          },
       },
    );
-}
 
+   public containerSlot = this.server.implementWithStorage(
+      'ContainerSlot',
+      () => ({ item: undefined as undefined | ItemStack }),
+      {
+         getItem() {
+            return this.storage.item;
+         },
+         setItem(item) {
+            this.storage.item = item;
+         },
+      },
+   );
+}
 InventoryPlugin.register('inventory');

@@ -50,6 +50,9 @@ importers:
       '@bedrock-apis/virtual-apis':
         specifier: workspace:*
         version: link:packages/virtual-apis
+      semver-compare:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@bedrock-apis/nbt':
         specifier: 0.0.1-alpha.3
@@ -1541,6 +1544,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  semver-compare@1.0.0:
+    resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -3202,6 +3208,8 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
+
+  semver-compare@1.0.0: {}
 
   semver@6.3.1: {}
 

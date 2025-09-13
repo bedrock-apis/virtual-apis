@@ -1,0 +1,115 @@
+import { compareVersions, VaEventEmitter } from '@bedrock-apis/common';
+import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
+import { Plugin } from './api';
+import { Impl, ImplStatic, ImplStoraged } from './implementation';
+import { ModuleTypeMap, PartialParts, StorageThis, ThisContext } from './types';
+
+type Version = `${number}.${number}.${number}`;
+
+export type ConstructorImpl<This, Mod extends ModuleTypeMap, T extends keyof Mod> = Mod[T] extends new (
+   ...args: infer T
+) => unknown
+   ? {
+        // eslint-disable-next-line @typescript-eslint/no-misused-new
+        constructor(this: This, ...args: T): void;
+     }
+   : object;
+
+type Constructable = { prototype: object };
+
+export type Constructables<T extends ModuleTypeMap> = {
+   [K in keyof T as T[K] extends Constructable ? K : never]: T[K] extends Constructable ? object : never;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Plugin> {
+   public constructor(
+      public readonly plugin: P,
+      public readonly name: string,
+      public readonly versionFrom?: Version,
+      public readonly versionTo?: Version,
+   ) {
+      this.plugin.modules.add(this);
+   }
+
+   protected moduleSymbols: ModuleSymbol[] = [];
+
+   public implement<T extends keyof Mod>(
+      className: T,
+      implementation: PartialParts<Mod[T]['prototype'], ThisContext<Mod[T]['prototype'], P, Mod>>,
+   ) {
+      new Impl(this, className as string, implementation);
+   }
+
+   public implementStatic<T extends keyof Mod>(
+      className: T,
+      implementation: PartialParts<Mod[T], ThisContext<Mod[T], P, Mod>>,
+   ) {
+      new ImplStatic(this, className as string, implementation);
+   }
+
+   public implementWithStorage<T extends keyof Mod, Storage extends object>(
+      className: T,
+      createStorage: (implementation: Mod[T]['prototype'], mod: PluginModuleLoaded<Mod>) => Storage,
+      implementation: PartialParts<Mod[T]['prototype'], StorageThis<Mod[T]['prototype'], P, Mod, Storage>> &
+         ConstructorImpl<StorageThis<Mod[T]['prototype'], P, Mod, Storage>, Mod, T>,
+   ) {
+      type Native = Mod[T]['prototype'];
+
+      return new ImplStoraged<Storage, Native extends object ? Native : object>(
+         this,
+         className as string,
+         implementation,
+         createStorage as unknown as (n: object, m: PluginModuleLoaded) => Storage,
+      );
+   }
+
+   public onModulesLoaded(): void {
+      const mod = this.moduleSymbols[0];
+      if (!mod)
+         throw new Error(`Failed to load module ${this.name} with version ${this.versionFrom}...${this.versionTo}`);
+
+      this.onLoad.invoke(new PluginModuleLoaded(mod, this.plugin), this.moduleSymbols);
+   }
+
+   public onAfterModuleCompilation(module: ModuleSymbol): void {
+      if (module.name !== this.name) return;
+
+      if (this.versionFrom && compareVersions(this.versionFrom, module.version) === 1) return;
+      if (this.versionTo && compareVersions(this.versionTo, module.version) === -1) return;
+
+      const last = this.moduleSymbols[0];
+      if (!last || compareVersions(last.version, module.version) === -1) {
+         this.moduleSymbols.unshift(module);
+      } else {
+         this.moduleSymbols.push(module);
+      }
+   }
+
+   public onLoad = new VaEventEmitter<[PluginModuleLoaded<Mod>, ModuleSymbol[]]>();
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class PluginModuleLoaded<Mod extends ModuleTypeMap = any> {
+   public constructor(
+      protected readonly moduleSymbol: ModuleSymbol,
+      protected readonly plugin: Plugin,
+   ) {}
+
+   public resolve<T extends keyof Mod>(className: T) {
+      const symbol = this.moduleSymbol.symbols.get(String(className));
+      if (!symbol) throw new Error(`Unable to resolve ${String(className)}: symbol not found`);
+
+      return symbol.getRuntimeValue(this.plugin.context) as Mod[T];
+   }
+
+   public construct<T extends keyof Constructables<Mod>>(className: T) {
+      const symbol = this.moduleSymbol.symbols.get(String(className));
+      if (!symbol) throw new Error(`Unable to construct ${String(className)}: symbol not found`);
+
+      if (!(symbol instanceof ConstructableSymbol))
+         throw new Error(`Unable to construct ${String(className)}: non constructable`);
+
+      return symbol?.createRuntimeInstanceInternal(this.plugin.context) as Mod[T]['prototype'];
+   }
+}

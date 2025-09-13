@@ -3,9 +3,9 @@ import { Dimension } from '@minecraft/server';
 import { EntityPlugin } from './entity';
 
 export class DimensionPlugin extends Plugin {
-   public storage = this.serverBeta.implementWithStorage('Dimension', () => ({}), {
+   public storage = this.server.implementWithStorage('Dimension', () => ({}), {
       spawnEntity(identifier, location, options) {
-         const entityPlugin = this.module.plugin.context.getPluginForce(EntityPlugin, this.invocation);
+         const entityPlugin = this.getPlugin(EntityPlugin);
 
          const entity = entityPlugin.createEntity(location, this.instance as Dimension, identifier);
          if (options?.initialPersistence) {

@@ -28,3 +28,11 @@ export function compareVersions(a: string, b: string): number {
 }
 
 export const d = console.log.bind(console, '[DEBUG]');
+
+export class MapWithDefaults<K, V> extends Map<K, V> {
+   public getOrCreate(key: K, create: () => V) {
+      let value = this.get(key);
+      if (typeof value === 'undefined') this.set(key, (value = create()));
+      return value;
+   }
+}

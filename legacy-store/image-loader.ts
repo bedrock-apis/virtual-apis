@@ -102,8 +102,11 @@ export class BinaryImageLoader {
          this.getModule(str(dep.uuid!), str(dep.versions![dep.versions!.length - 1]!));
       }
 
-      const moduleSymbol = new ModuleSymbol();
-      moduleSymbol.metadata = { uuid: str(metadata.uuid), version: str(metadata.version), name: str(metadata.name) };
+      const moduleSymbol = new ModuleSymbol().setMetadata({
+         uuid: str(metadata.uuid),
+         version: str(metadata.version),
+         name: str(metadata.name),
+      });
       this.MODULES.set(this.getModuleId(moduleSymbol.metadata.name, moduleSymbol.metadata.version), moduleSymbol);
 
       BinarySymbolLoader.load(image, imageModule.read(), moduleSymbol);

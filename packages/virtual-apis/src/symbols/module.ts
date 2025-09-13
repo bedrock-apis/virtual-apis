@@ -5,11 +5,10 @@ import { InterfaceSymbol } from './interface';
 // Kernel Safe as its extracted in initialization before any plugins or addons code
 const { defineProperty, create } = Object;
 export class ModuleSymbol extends CompilableSymbol<object> {
-   public readonly symbols: Set<CompilableSymbol<unknown>> = new Set();
    public readonly invocables = new Map<string, InvocableSymbol<unknown>>();
-   public readonly symbolsMap: Map<string, CompilableSymbol<unknown>> = new Map();
-   public metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
-   public readonly publicSymbols: Map<string, CompilableSymbol<unknown>> = new Map();
+   public readonly symbols = new Map<string, CompilableSymbol<unknown>>();
+   public readonly publicSymbols = new Map<string, CompilableSymbol<unknown>>();
+
    protected override compile(context: Context): object {
       context.onBeforeModuleCompilation(this);
       // Pre compile, for correct order
@@ -29,9 +28,23 @@ export class ModuleSymbol extends CompilableSymbol<object> {
       context.onAfterModuleCompilation(this);
       return moduleObject;
    }
+
+   public readonly metadata: { name: string; uuid: string; version: string } = { name: '', version: '', uuid: '' };
+   public setMetadata(metadata: { name: string; uuid: string; version: string }) {
+      this.setName(metadata.name);
+      (this as Mutable<this>).metadata = metadata;
+      (this as Mutable<this>).version = metadata.version;
+      (this as Mutable<this>).nameVersion = `${metadata.name} ${metadata.version}`;
+      return this;
+   }
+   public readonly version!: string;
+
+   /** Name and version */
+   public readonly nameVersion!: string;
+
    public addSymbol(symbol: CompilableSymbol<unknown>, isPublic: boolean) {
-      this.symbols.add(symbol);
-      this.symbolsMap.set(symbol.name, symbol);
+      this.symbols.set(symbol.name, symbol);
+
       if (!isPublic) return;
       if (this.publicSymbols.has(symbol.name))
          throw new ReferenceError(`Public symbol with name of '${symbol.name}' is already registered in this module`);

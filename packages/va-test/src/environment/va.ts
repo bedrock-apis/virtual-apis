@@ -20,7 +20,7 @@ export class VirtualApiEnvironment extends TestEnvironment {
    public ctx: Context = Context.getContext(0)!;
 
    public instanc(instanceClassId: string) {
-      const symbol = this.ctx.modules.get('@minecraft/server')?.symbolsMap.get(instanceClassId);
+      const symbol = this.ctx.modules.get('@minecraft/server')?.symbols.get(instanceClassId);
       if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
 
       return symbol?.createRuntimeInstanceInternal(this.ctx);

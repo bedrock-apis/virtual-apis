@@ -1,10 +1,11 @@
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import type { Dimension, Vector3 } from '@minecraft/server';
+import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
+import type { Dimension, Entity, Player, Vector3 } from '@minecraft/server';
 import { localizationKeys } from './reports-provider';
 
 export class EntityPlugin extends Plugin {
    public impl(name: 'Entity' | 'Player') {
-      return this.serverBeta.implementWithStorage(
+      return this.server.implementWithStorage(
          name,
          () => ({
             typeId: '',
@@ -45,14 +46,23 @@ export class EntityPlugin extends Plugin {
    public entity = this.impl('Entity');
    public player = this.impl('Player');
 
+   public createEntity!: (location: Vector3, dimension: Dimension, typeId: string) => Entity;
+   public createPlayer!: (location: Vector3, dimension: Dimension, typeId: string) => Player;
+
+   protected _ = this.server.onLoad.subscribe(loaded => {
+      this.createEntity = this.create.bind(this, loaded, 'Entity', 'entity');
+      this.createPlayer = this.create.bind(this, loaded, 'Player', 'player');
+   });
+
    protected create(
+      loaded: PluginModuleLoaded,
       className: 'Entity' | 'Player',
       property: 'entity' | 'player',
       location: Vector3,
       dimension: Dimension,
       typeId: string,
    ) {
-      const entity = this.serverBeta.construct(className);
+      const entity = loaded.construct(className);
       const storage = this[property].getStorage(entity);
       storage.typeId = typeId;
       storage.location = location;
@@ -60,8 +70,5 @@ export class EntityPlugin extends Plugin {
       storage.localizationKey = localizationKeys.entities[typeId] ?? '';
       return entity;
    }
-
-   public createEntity = this.create.bind(this, 'Entity', 'entity');
-   public createPlayer = this.create.bind(this, 'Player', 'player');
 }
 EntityPlugin.register('entity');

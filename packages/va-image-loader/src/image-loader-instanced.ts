@@ -13,7 +13,7 @@ import {
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
-import { BitFlags, d, IndexedAccessor } from '@bedrock-apis/common';
+import { BitFlags, d, identifiers, IndexedAccessor } from '@bedrock-apis/common';
 import {
    bigintType,
    booleanType,
@@ -137,8 +137,12 @@ export class BinaryLoaderContext {
       for (const mod of modulesToLoad) {
          const symbol = this.getSymbolForPreparedModule(mod);
          d('loadModules loaded', symbol.name);
+
+         symbol.getRuntimeValue(context);
          context.modules.set(symbol.name, symbol);
       }
+
+      context.onModulesLoaded();
    }
    public getSymbolForPreparedModule(prepared: PreparedModule): ModuleSymbol {
       const name = this.stringAccessor.fromIndex(prepared.metadata.name);
@@ -155,7 +159,11 @@ export class BinaryLoaderContext {
       const r = this.resolveType.bind(this);
       const { anyOf } = BitFlags;
 
-      const base = new ModuleSymbol().setName(stringOf(prepared.metadata.name));
+      const mod = new ModuleSymbol().setMetadata({
+         name: stringOf(prepared.metadata.name),
+         version: stringOf(prepared.metadata.version),
+         uuid: stringOf(prepared.metadata.uuid),
+      });
       const dependencies: Record<string, ModuleSymbol> = {};
       ////////////////////////////////
       // Resolve dependencies
@@ -195,7 +203,7 @@ export class BinaryLoaderContext {
          let s: CompilableSymbol<unknown>;
          switch (symbol.bitFlags & SymbolBitFlags.ExportTypeMask) {
             case ExportType.Class:
-               s = new ConstructableSymbol().setIdentifier(stringOf(symbol.name), base);
+               s = new ConstructableSymbol().setIdentifier(stringOf(symbol.name), mod);
                break;
             case ExportType.Constant:
                s = new ConstantValueSymbol().setValue(symbol.hasValue);
@@ -228,7 +236,7 @@ export class BinaryLoaderContext {
          s.setName(stringOf(symbol.name));
          namedSymbols[s.name] = s;
          exportedSubMap.set(symbol, s);
-         base.addSymbol(s, true);
+         mod.addSymbol(s, true);
       }
       //#endregion
 
@@ -298,7 +306,10 @@ export class BinaryLoaderContext {
 
             if (s instanceof MethodSymbol) s.setThisType(cls);
             cls[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
-            s.setIdentifier(`${cls.name}::${stringOf(symbol.name)}${isStatic ? ' static' : ''}`, base);
+            s.setIdentifier(
+               (isStatic ? identifiers.static.method : identifiers.method)(cls.name, stringOf(symbol.name)),
+               mod,
+            );
          },
          [SpecificSymbolFlags.ConstructorInformation](flags, symbol) {
             // No push as this symbol is identical to ExportClass option
@@ -333,7 +344,7 @@ export class BinaryLoaderContext {
             getter.setReturnType(type);
             getter.setParams(new ParamsValidator([type]));
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
-            getter.setIdentifier(`${cls.name}::${selfName}`, base);
+            getter.setIdentifier(identifiers.getter(cls.name, selfName), mod);
             if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
             registry.set(selfName, getter);
 
@@ -344,7 +355,7 @@ export class BinaryLoaderContext {
                getter.setSetter(setter);
                setter.setParams(new ParamsValidator([]));
                setter.setReturnType(voidType);
-               setter.setIdentifier(`${cls.name}::${selfName}`, base);
+               setter.setIdentifier(identifiers.setter(cls.name, selfName), mod);
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }
          },
@@ -402,7 +413,7 @@ export class BinaryLoaderContext {
          }
          runtime.setParamsLength(symbol.functionArguments!.length).setParams(paramValidator);
       }
-      return base;
+      return mod;
    }
 
    // Type Loading is pretty much done

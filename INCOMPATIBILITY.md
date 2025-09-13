@@ -48,7 +48,10 @@ Suite entity (chained):
 
 
 Suite disposal (chained): 
-  0: ✅
+  0: 0: ❓ Unexpected error: Error: No implementation error.
+    1: ❓ No result, expected false
+    2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
+    
   
 
 
@@ -83,12 +86,12 @@ Suite errors (chained):
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ✅
+  1: ❓ Unexpected error: Error: No implementation error.
   
 
 
 Suite item (chained): 
-  0: ❌ Results mismatch: undefined != "minecraft:apple"
+  0: ❓ Unexpected error: Error: No implementation error.
   1: ❓ Unexpected error: Error: No implementation error.
   2: ❓ Unexpected error: Error: No implementation error.
   3: ❓ Unexpected error: Error: No implementation error.

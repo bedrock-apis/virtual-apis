@@ -9,16 +9,16 @@ export class ItemTypesPlugin extends Plugin {
 
    public override onInitialization(): void {
       const self = this;
-      const module = this.serverBeta;
+      const module = this.server;
 
-      module.onLoad = () => {
+      module.onLoad.subscribe(module => {
          for (const itemTypeId of Object.keys(this.source.items)) {
             const itemType = module.construct('ItemType');
             const storage = this.itemType.getStorage(itemType);
             storage.id = itemTypeId;
             this.itemTypes.push(itemType);
          }
-      };
+      });
 
       module.implementStatic('ItemTypes', {
          getAll() {
@@ -33,7 +33,7 @@ export class ItemTypesPlugin extends Plugin {
       });
    }
 
-   public itemType = this.serverBeta.implementWithStorage('ItemType', () => ({ id: '' }), {
+   public itemType = this.server.implementWithStorage('ItemType', () => ({ id: '' }), {
       get id() {
          return this.storage.id;
       },
@@ -42,17 +42,24 @@ export class ItemTypesPlugin extends Plugin {
 ItemTypesPlugin.register('itemTypes');
 
 export class ItemStackPlugin extends Plugin {
-   public storage = this.serverBeta.implementWithStorage(
+   // @ts-expect-error HUHH? wtf is this
+   public itemStack = this.server.implementWithStorage(
       'ItemStack',
       () => ({
          canDestroy: [] as string[],
-         itemType: '',
+         typeId: '',
          amount: 0,
       }),
       {
-         constructor(itemType, amount) {
-            this.storage.itemType = itemType instanceof this.module.resolve('ItemType') ? itemType.id : itemType;
-            this.storage.amount = amount ?? 1; // We need to somehow tell type system that default value is set
+         constructor(itemType, amount = 1) {
+            const typeId = itemType instanceof this.module.resolve('ItemType') ? itemType.id : itemType;
+            const itemTypes = this.getPlugin(ItemTypesPlugin);
+            const info = itemTypes.source.items[typeId];
+            if (!info) throw new Error(`Invalid item identifier '${typeId}'`);
+            if (info.maxStack > amount) throw new Error('Max stack'); // TODO
+
+            this.storage.typeId = typeId;
+            this.storage.amount = amount; // We need to somehow tell type system that default value is set
          },
          get typeId() {
             return this.storage.typeId;

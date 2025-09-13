@@ -20,6 +20,15 @@ export class Report extends BaseReport {
       return error;
    }
 }
+export class ReportAsIs extends BaseReport {
+   public override isThrowable = true;
+   public constructor(protected readonly error: Error) {
+      super();
+   }
+   public override throw(): Error {
+      return this.error;
+   }
+}
 
 export class DiagnosticsStackReport extends BaseReport {
    public get isThrowable() {
@@ -31,10 +40,10 @@ export class DiagnosticsStackReport extends BaseReport {
    public get isEmpty() {
       return this.length === 0;
    }
-   public readonly stack: Report[] = [];
-   public report(...params: [report: Report] | [report: ErrorFactory, child?: BaseReport]): this {
+   public readonly stack: BaseReport[] = [];
+   public report(...params: [report: BaseReport] | [report: ErrorFactory, child?: BaseReport]): this {
       const report = params[0];
-      if (report instanceof Report) this.stack.push(report);
+      if (report instanceof BaseReport) this.stack.push(report);
       else this.stack.push(new Report(report, params[1] ?? null));
       return this;
    }

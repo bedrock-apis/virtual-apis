@@ -68,9 +68,11 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       (this as Mutable<this>).paramsLength = length;
       return this;
    }
-   public setIdentifier(identifier: string, mod: ModuleSymbol): this {
+   public module!: ModuleSymbol;
+   public setIdentifier(identifier: string, module: ModuleSymbol): this {
       (this as Mutable<this>).identifier = identifier;
-      mod.invocables.set(identifier, this);
+      module.invocables.set(identifier, this);
+      this.module = module;
       return this;
    }
    public override precompileChecks(_: Context): void {

@@ -20,79 +20,79 @@ export async function runAndCompare(
 
    let report = '';
 
-   for (const suiteA of minecraftResults) {
-      const suiteB = result.find(e => e.id === suiteA.id);
+   for (const need of minecraftResults) {
+      const got = result.find(e => e.id === need.id);
 
-      if (typeof suiteB === 'undefined') {
-         report += `No suite ${suiteA.id}. Perhaps you forgot to import suite file.\n`;
+      if (typeof got === 'undefined') {
+         report += `No suite ${need.id}. Perhaps you forgot to import suite file.\n`;
          continue;
       }
 
-      const suiteReport = compareSuite(suiteA, suiteB);
+      const suiteReport = compareSuite(need, got);
       if (suiteReport) {
-         const suiteType = 'results' in suiteA && Array.isArray(suiteA.results) ? ' (chained)' : '';
-         report += `\n\nSuite ${suiteA.id}${suiteType}: ${indent(suiteReport)}\n`;
+         const suiteType = 'results' in need && Array.isArray(need.results) ? ' (chained)' : '';
+         report += `\n\nSuite ${need.id}${suiteType}: ${indent(suiteReport)}\n`;
       }
    }
 
    return report.trim();
 }
 
-function compareSuite(suiteA: TestReport.Suite, suiteB: TestReport.Suite): string {
-   if ('results' in suiteA) {
-      if (!('results' in suiteB)) {
-         return `❓ Unexpected setup error: ${suiteB.setupError}`;
+function compareSuite(need: TestReport.Suite, got: TestReport.Suite): string {
+   if ('results' in need) {
+      if (!('results' in got)) {
+         return `❓ Unexpected setup error: ${got.setupError}`;
       }
 
-      return compareMultipleResults(suiteA.results, suiteB.results);
+      return compareMultipleResults(need.results, got.results);
    } else {
-      if ('results' in suiteB) {
-         return `❌ Expected setup error: ${suiteA.setupError}`;
+      if ('results' in got) {
+         return `❌ Expected setup error: ${need.setupError}`;
       }
 
-      if (suiteA.setupError !== suiteB.setupError) {
-         return `❌ Setup error mismatch: ${indent(diff(suiteA.setupError, suiteB.setupError))}`;
+      if (need.setupError !== got.setupError) {
+         return `❌ Setup error mismatch: ${indent(diff(need.setupError, got.setupError))}`;
       }
    }
    return '';
 }
 
-function compareResults(resultA: TestReport.Result, resultB: TestReport.Result): string {
-   if (typeof resultB === 'undefined') return '❓ Missing test result';
+function compareResults(need: TestReport.Result, got: TestReport.Result): string {
+   if (typeof got === 'undefined') return '❓ Missing test result';
 
-   if (typeof resultA === 'object') {
-      if (Array.isArray(resultA)) {
-         if (!Array.isArray(resultB)) {
+   if (typeof need === 'object' && need) {
+      if (Array.isArray(need)) {
+         if (!Array.isArray(got)) {
             return '❓ Unexpected primitive result, expected chained';
-         } else return compareMultipleResults(resultA, resultB);
+         } else return compareMultipleResults(need, got);
       }
 
-      if (typeof resultB !== 'object' || Array.isArray(resultB)) {
-         return `❓ Expected error (${resultA.error}), got: ${resultB}`;
+      if (typeof got !== 'object' || Array.isArray(got)) {
+         return `❓ Expected error (${need.error}), got: ${got}`;
       }
 
-      if (resultA.error !== resultB.error) return `❌ Error mismatch: ${indent(diff(resultA.error, resultB.error))}`;
+      if (need.error !== got.error) return `❌ Error mismatch: ${indent(diff(need.error, got.error))}`;
    } else {
-      if (Array.isArray(resultB)) return '❓ Unexpected chained result, expected primitive';
+      if (Array.isArray(got)) return '❓ Unexpected chained result, expected primitive';
 
-      if (typeof resultB === 'object') return `❓ Unexpected error: ${errorResultToString(resultB)}`;
+      if (typeof got === 'object') return `❓ Unexpected error: ${errorResultToString(got)}`;
 
-      if (resultA !== resultB) return `❌ Results mismatch: ${indent(diff(resultA, resultB))}`;
+      if (need !== got) return `❌ Results mismatch: ${indent(diff(need, got))}`;
    }
 
    return '✅';
 }
 
-function compareMultipleResults(resultsA: TestReport.Result[], resultsB: TestReport.Result[]): string {
+function compareMultipleResults(needs: TestReport.Result[], gots: TestReport.Result[]): string {
    let report = '';
-   for (const [i, resultA] of resultsA.entries()) {
-      const resultB = resultsB[i];
-      if (typeof resultB === 'undefined') {
-         report += `${i}: ❓ No result, expected ${resultToString(resultA)}\n`;
+   for (const [i, need] of needs.entries()) {
+      const got = gots[i];
+      if (typeof got === 'undefined') {
+         report += `${i}: ❓ No result, expected ${resultToString(need)}\n`;
          continue;
       }
 
-      const compare = compareResults(resultA, resultB);
+      const compare = compareResults(need, got);
       if (compare) {
          report += `${i}: ${indentNotFirst(compare)}\n`;
       }

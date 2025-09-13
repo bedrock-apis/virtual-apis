@@ -59,6 +59,7 @@ export abstract class ContextPlugin {
    //
    public onBeforeModuleCompilation(module: ModuleSymbol): void {}
    public onAfterModuleCompilation(module: ModuleSymbol): void {}
+   public onModulesLoaded(): void {}
    public getStaticInstanceBinding(symbol: ObjectValueSymbol): object | null {
       return null;
    }

@@ -22,7 +22,7 @@ class ComponentsPlugin extends PluginWithConfig<Config> {
    };
 
    protected addComponents(target: 'Entity' | 'ItemStack' | 'Block') {
-      return this.serverBeta.implementWithStorage(
+      return this.server.implementWithStorage(
          target,
          () => {
             const storage = new Map<string, unknown>();

@@ -1,37 +1,12 @@
-import { d } from '@bedrock-apis/common';
+import { Plugin } from '@bedrock-apis/va-pluggable';
 import {
    ConstructableSymbol,
-   ContextPlugin,
    ContextPluginLinkedStorage,
    ModuleSymbol,
    PropertyGetterSymbol,
 } from '@bedrock-apis/virtual-apis';
 
-export class CoreInstanceGetterPlugin extends ContextPlugin {
-   public override onInitialization(): void {}
-
-   public override onAfterModuleCompilation(module: ModuleSymbol): void {
-      d('AA', module.name);
-      if (module.name !== '@minecraft/server') return;
-
-      const symbols = module.symbols;
-
-      for (const symbol of symbols) {
-         if (symbol instanceof ConstructableSymbol) {
-            for (const property of symbol.prototypeFields.values()) {
-               if (property instanceof PropertyGetterSymbol && property.returnType instanceof ConstructableSymbol) {
-                  const instanceClassId = property.returnType.name;
-
-                  if (this.ignoredInstanceClassIds.includes(instanceClassId)) continue;
-
-                  const identifier = property.identifier;
-                  this.implementInstanceGetter(identifier, instanceClassId);
-               }
-            }
-         }
-      }
-   }
-
+export class CoreInstanceGetterPlugin extends Plugin {
    public readonly ignoredInstanceClassIds = ['ItemStack', 'Player', 'Entity', 'Dimension', 'Block'];
 
    public storage = new ContextPluginLinkedStorage<{
@@ -39,8 +14,8 @@ export class CoreInstanceGetterPlugin extends ContextPlugin {
       parent?: WeakRef<object>;
    }>(() => ({ properties: new Map() }));
 
-   public setInstanceGetValue(symbolIdentifier: string, instance: object | (() => object)) {
-      this.context.implement(symbolIdentifier, ctx => {
+   public setInstanceGetValue(loaded: ModuleSymbol, symbolIdentifier: string, instance: object | (() => object)) {
+      this.context.implement(loaded.nameVersion, symbolIdentifier, ctx => {
          if (!ctx.thisObject) throw new Error('Implementation requires thisObject to work');
          const storage = this.storage.get(ctx.thisObject);
          const key = ctx.symbol.identifier;
@@ -51,13 +26,28 @@ export class CoreInstanceGetterPlugin extends ContextPlugin {
       });
    }
 
-   private implementInstanceGetter(symbolIdentifier: string, instanceClassId: string) {
-      this.setInstanceGetValue(symbolIdentifier, () => {
-         const symbol = this.context.modules.get('@minecraft/server')?.symbolsMap.get(instanceClassId);
-         if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
+   protected _ = this.server.onLoad.subscribe((_, versions) => {
+      for (const module of versions) {
+         for (const symbol of module.symbols.values()) {
+            if (symbol instanceof ConstructableSymbol) {
+               for (const property of symbol.prototypeFields.values()) {
+                  if (property instanceof PropertyGetterSymbol && property.returnType instanceof ConstructableSymbol) {
+                     const instanceClassId = property.returnType.name;
 
-         return symbol?.createRuntimeInstanceInternal(this.context);
-      });
-   }
+                     if (this.ignoredInstanceClassIds.includes(instanceClassId)) continue;
+
+                     const identifier = property.identifier;
+                     this.setInstanceGetValue(module, identifier, () => {
+                        const symbol = this.context.modules.get('@minecraft/server')?.symbols.get(instanceClassId);
+                        if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
+
+                        return symbol?.createRuntimeInstanceInternal(this.context);
+                     });
+                  }
+               }
+            }
+         }
+      }
+   });
 }
 CoreInstanceGetterPlugin.register('instanceGetter');
