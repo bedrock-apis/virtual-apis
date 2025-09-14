@@ -6,7 +6,10 @@ import { PluginModule } from './module';
 describe('PluginModule', () => {
    it('should load right modules', () => {
       const context = new Context();
-      const plugin = context.registerPlugin(class TestPlugin extends Plugin {});
+      class TestPlugin extends Plugin {}
+      TestPlugin.register('test');
+      context.configureAndLoadPlugins({});
+      const plugin = context.getPlugin(TestPlugin);
       const plugMod1 = new PluginModule(plugin, '@minecraft/server');
       const plugMod2 = new PluginModule(plugin, '@minecraft/server', '1.15.0');
       const plugMod3 = new PluginModule(plugin, '@minecraft/server', '1.15.0', '1.19.0');

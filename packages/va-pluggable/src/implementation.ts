@@ -79,21 +79,17 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
       className: string,
       implementation: object,
       protected createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>, plugin: Plugin) => T,
-      protected strict = false,
    ) {
       super(module, className, implementation);
       this.module.onLoad.subscribe(l => this.onLoad(l));
    }
 
    protected onLoad(loaded: PluginModuleLoaded) {
-      this.loaded = loaded;
-      this.storage = new ContextPluginLinkedStorage(
-         native => this.createStorage(native, loaded, this.module.plugin),
-         this.strict,
-      );
+      this.moduleLoaded = loaded;
+      this.storage = new ContextPluginLinkedStorage(native => this.createStorage(native, loaded, this.module.plugin));
    }
 
-   protected loaded?: PluginModuleLoaded;
+   protected moduleLoaded?: PluginModuleLoaded;
 
    protected override getThisValue(
       native: unknown,
@@ -103,20 +99,35 @@ export class ImplStoraged<T extends object, Native extends object> extends Impl 
       if (!this.module.plugin.context.isNativeHandle(native)) throw new Error('Not native');
       const t = new StorageThis(invocation, native as object, this.implementation, loaded, this.module.plugin);
 
-      const creator = invocation.symbol.kind === 'constructor' ? this.storage.create : this.storage.get;
+      const creator = invocation.symbol.kindShort === 'constructor' ? this.storage.create : this.storage.get;
       (t as Mutable<typeof t>).storage = creator.call(this.storage, native as Native);
 
       return t;
    }
 
+   public get symbolLoaded() {
+      if (!this.moduleLoaded) {
+         throw new Error(
+            `Unable to check for ${this.className} implemented by ${this.module.plugin.identifier}: module not loaded`,
+         );
+      }
+
+      return !!this.moduleLoaded.tryResolve(this.className);
+   }
+
+   public tryCreate(partialStorage: Partial<T>): undefined | Native {
+      if (!this.symbolLoaded) return;
+      return this.create(partialStorage);
+   }
+
    public create(partialStorage: Partial<T>): Native {
-      if (!this.loaded) {
+      if (!this.moduleLoaded) {
          throw new Error(
             `Unable to create ${this.className} implemented by ${this.module.plugin.identifier}: module not loaded`,
          );
       }
 
-      const native = this.loaded.construct(this.className);
+      const native = this.moduleLoaded.construct(this.className);
       const storage = this.storage.create(native);
       Object.assign(storage, partialStorage);
       return native;

@@ -1,9 +1,15 @@
-import { BinaryLoaderContext } from '@bedrock-apis/va-image-loader';
+import { d } from '@bedrock-apis/common';
+import { BinaryImageLoader } from '@bedrock-apis/va-image-loader';
 import { Context } from '@bedrock-apis/virtual-apis';
-import { getImageFromNodeModules, getModuleVersions } from '../get-module-versions';
+import { getModuleVersions, readImageFromNodeModules } from '../get-module-versions';
 import { SingletonLoaderContext } from '../singleton-loader';
 
-// Only add loading images to context and registering plugins that really all
-const context = new Context();
-await BinaryLoaderContext.create(await getImageFromNodeModules()).loadModules(getModuleVersions(), context);
-new SingletonLoaderContext(context);
+export async function loadModules(context: Context, versions = getModuleVersions()) {
+   const start = Date.now();
+   d('[NodeLoader] loading modules...');
+   await BinaryImageLoader.loadFromBuffer(await readImageFromNodeModules()).loadModules(versions, context);
+   const loader = new SingletonLoaderContext(context);
+   d(`[NodLoader] loaded in ${Date.now() - start}ms`);
+
+   return loader;
+}

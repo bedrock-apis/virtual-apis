@@ -1,1 +1,1 @@
-export * from './image-loader-instanced';
+export * from './binary-image-loader';

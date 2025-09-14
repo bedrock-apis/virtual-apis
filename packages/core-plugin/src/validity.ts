@@ -44,7 +44,7 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
       if (!isValid) {
          ctx.diagnostics.errors.report(
             new ErrorFactory(
-               `Failed to ${ctx.symbol.actionKind} ${ctx.symbol.kind} '${ctx.symbol.name}' due to ${target} being invalid (has the ${target} been removed?).`,
+               `Failed to ${ctx.symbol.kind} ${ctx.symbol.kindShort} '${ctx.symbol.name}' due to ${target} being invalid (has the ${target} been removed?).`,
                error,
             ),
          );

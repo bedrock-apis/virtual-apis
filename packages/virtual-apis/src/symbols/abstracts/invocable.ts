@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { inspect } from 'node:util';
 import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';
-import { CompileTimeError, NativeActionKind, NativeKind } from '../../errorable';
+import { CompileTimeError, NativeActionKindShort, NativeKind, NativeKindShort } from '../../errorable';
 import { RuntimeType } from '../../runtime-types';
 import type { ParamsValidator } from '../../runtime-types/params-validator';
 import { ModuleSymbol } from '../module';
@@ -14,8 +14,9 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly params!: ParamsValidator;
    public readonly identifier!: string;
    public readonly paramsLength!: number;
-   public abstract readonly kind: NativeKind;
-   public abstract readonly actionKind: NativeActionKind;
+   public readonly kind?: NativeActionKindShort;
+   public readonly kindShort?: NativeKindShort;
+   public readonly actionKind?: NativeKind;
    public readonly privileges: ('read_only' | 'none' | 'early_execution')[] = [];
    protected readonly stackTrimEncapsulation: number = 1;
    protected runtimeGetResult(info: InvocationInfo): unknown {

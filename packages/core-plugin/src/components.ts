@@ -2,6 +2,8 @@ import { Plugin } from '@bedrock-apis/va-pluggable';
 import type { Entity, EntityComponent, ItemComponent, ItemStack } from '@minecraft/server';
 import { ValidityPlugin } from './validity';
 
+// TODO Implement it to use system like EventsPlugin.implementEventArgument
+
 export class ComponentsPlugin extends Plugin {
    public addComponents(
       target: 'Player' | 'Entity' | 'ItemStack',

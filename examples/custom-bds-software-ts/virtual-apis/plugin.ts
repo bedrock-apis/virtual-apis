@@ -1,4 +1,18 @@
-// TODO Plugin
-import { Kernel } from '@bedrock-apis/kernel-isolation';
+import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 
-Kernel.log('Custom plugin');
+interface Config {
+   myConfigProperty: number;
+}
+
+export class MyPlugin extends PluginWithConfig<Config> {
+   protected config: Config = {
+      myConfigProperty: 4,
+   };
+
+   protected _ = this.server.implement('World', {
+      getDay() {
+         return this.plugin.config.myConfigProperty;
+      },
+   });
+}
+MyPlugin.register('myPlugin');

@@ -59,7 +59,6 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
          StorageThis<Mod[T]['prototype'], P, Mod, Storage>
       > &
          ConstructorImpl<StorageThis<Mod[T]['prototype'], P, Mod, Storage>, Mod, T>,
-      strict = false,
    ) {
       type Native = Mod[T]['prototype'];
 
@@ -68,16 +67,13 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
          className as string,
          implementation,
          createStorage as unknown as (n: object, m: PluginModuleLoaded, plugin: Plugin) => Storage,
-         strict,
       );
    }
-
-   protected notLoadingNotice = false;
 
    public onModulesLoaded(): void {
       const mod = this.moduleSymbols[0];
       if (!mod) {
-         const m = `Not loading ${this.name} with version ${this.versionFrom}...${this.versionTo}`;
+         const m = `Not implementing ${this.name} for ${this.versionFrom}...${this.versionTo}`;
          if (!PluginModule.debugMessagesRemoveLater.has(m)) {
             d(chalk.yellow(m));
             PluginModule.debugMessagesRemoveLater.add(m);
@@ -112,10 +108,14 @@ export class PluginModuleLoaded<Mod extends ModuleTypeMap = any> {
    ) {}
 
    public resolve<T extends keyof Mod>(className: T) {
-      const symbol = this.moduleSymbol.symbols.get(String(className));
+      const symbol = this.tryResolve(className);
       if (!symbol) throw new Error(`Unable to resolve ${String(className)}: symbol not found`);
 
       return symbol.getRuntimeValue(this.plugin.context) as Mod[T];
+   }
+
+   public tryResolve(className: keyof Mod) {
+      return this.moduleSymbol.symbols.get(String(className));
    }
 
    public construct<T extends keyof Constructables<Mod>>(className: T) {

@@ -1,23 +1,32 @@
-// VIRTUAL APIS CONFIG
-// import { Context } from '@bedrock-apis/virtual-apis';
-
-// Context.Configure({
-//    GetterRequireValidBound: true,
-//    StrictReturnTypes: false,
-// });
-
-// CORE PLUGINS ENTRYPOINT
+// Load plugins
 import '@bedrock-apis/core-plugin';
+import './plugin';
 
-// CONFIGURE CORE PLUGIN
-import { EventsPlugin } from '@bedrock-apis/core-plugin';
+// Configure
+import { EventsPlugin, SystemPlugin } from '@bedrock-apis/core-plugin';
+import { loadModules } from '@bedrock-apis/va-loader/node';
+import { Context } from '@bedrock-apis/virtual-apis';
+import { MyPlugin } from './plugin';
 
-new EventsPlugin().configure({
+const context = new Context();
+
+// Any plugins should be loaded before context configure
+context.configureAndLoadPlugins({
+   implementationEarlyExit: true,
+   disablePlugins: [SystemPlugin],
+});
+
+context.getPlugin(EventsPlugin).configure({
    warnIfEventIsNotImplemented: true,
 });
 
-// CUSTOM PLUGINS ENTRYPOINT
-import './plugin';
+context.getPlugin(MyPlugin).configure({
+   myConfigProperty: 6,
+});
 
-// SCRIPT API CODE ENTRYPOINT
-import '../scripts/index';
+await loadModules(context);
+
+// SCRIPT API CODE ENTRYPOINT SHOULD BE ASYNC
+// because otherwise it will be hoisted on top
+// and loaded when no plugins were enabled
+import('../scripts/index');

@@ -1,5 +1,6 @@
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import type { ItemStack, ItemType } from '@minecraft/server';
+import { ComponentsPlugin } from './components';
 import { items as itemsReport, localizationKeys } from './reports-provider';
 
 export class ItemTypesPlugin extends Plugin {
@@ -100,8 +101,16 @@ export class ItemStackPlugin extends Plugin {
             if ((this as ItemStack).maxAmount > 0) return false;
             return true;
          },
+
+         clone() {
+            // Con forgive me
+            return this.plugin.itemStack.create(JSON.parse(JSON.stringify(this.storage)));
+         },
       },
-      true,
    );
+
+   protected _ = this.server.onLoad.subscribe(mod => {
+      this.getPlugin(ComponentsPlugin).addComponents('ItemStack', {}, mod.resolve('ItemComponentTypes'));
+   });
 }
 ItemStackPlugin.register('itemStack');

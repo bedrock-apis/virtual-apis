@@ -1,5 +1,13 @@
-// TODO Plugin
-// import * as m from '@bedrock-apis/virtual-apis';
+import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 
-console.log('Custom plugin');
-// m.Context.GetModule('@minecraft/server', '2.0.0-beta').onInvocation('World::getDimension', (...e) => console.log(e));
+/** @typedef {myConfigProperty: number} Config */
+
+/** @extends {PluginWithConfig<Config>} */
+export class MyPlugin extends PluginWithConfig {
+   _ = this.server.implement('World', {
+      getDay() {
+         return this.plugin.config.myConfigProperty;
+      },
+   });
+}
+MyPlugin.register('myPlugin');

@@ -1,8 +1,21 @@
 import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
-import { ConstructableSymbol, MethodSymbol, ModuleSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
-import { SystemAfterEvents, SystemBeforeEvents, WorldAfterEvents, WorldBeforeEvents } from '@minecraft/server';
+import {
+   ConstructableSymbol,
+   ContextPluginLinkedStorage,
+   MethodSymbol,
+   ModuleSymbol,
+   PropertyGetterSymbol,
+} from '@bedrock-apis/virtual-apis';
+import {
+   PlayerLeaveBeforeEvent,
+   SystemAfterEvents,
+   SystemBeforeEvents,
+   WorldAfterEvents,
+   WorldBeforeEvents,
+} from '@minecraft/server';
 
 interface Config {
    warnIfEventIsNotImplemented: boolean;
@@ -53,17 +66,23 @@ export class EventsPlugin extends PluginWithConfig<Config> {
 
    public implementedEvents = new Set<string>();
 
-   public createTrigger<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(group: T, event: Event) {
-      const eventId = EventsPlugin.getEventId(groupsMap[group], String(event));
-      const privilege = group.includes('before') ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
-      this.implementedEvents.add(eventId);
+   public createTrigger<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(
+      loaded: PluginModuleLoaded<ServerModuleTypeMap>,
+      group: T,
+      event: Event,
+   ) {
+      const { eventClassName, privilege, eventId } = this.processTriggerMetadata<T, Event>(group, String(event));
+
       return (args: Events<Groups[T]>[Event]) => {
          const p = this.context.currentPrivilege;
          try {
+            const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
+            this.setStorageOf(argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+
             this.context.currentPrivilege = privilege;
             for (const listener of this.events.get(eventId)?.keys() ?? []) {
                // Im not sure how to properly call it here but uhh
-               listener(args);
+               listener(argsInstance);
             }
          } finally {
             this.context.currentPrivilege = p;
@@ -71,25 +90,47 @@ export class EventsPlugin extends PluginWithConfig<Config> {
       };
    }
 
+   private processTriggerMetadata<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(
+      group: T,
+      event: string,
+   ) {
+      const eventId = EventsPlugin.getEventId(groupsMap[group], event);
+      const before = group.includes('before');
+      const privilege = before ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
+      this.implementedEvents.add(eventId);
+
+      // Example: playerLeave -> PlayerLeaveBeforeEvent
+      const eventClassName =
+         event === 'startup'
+            ? 'StartupEvent' // special case
+            : `${event[0]?.toUpperCase()}${event.slice(1)}${before ? 'BeforeEvent' : 'AfterEvent'}`;
+      this.implementEventArgument(eventClassName);
+
+      return { eventClassName, privilege, eventId };
+   }
+
    public createTriggerWithFilter<T extends keyof Groups, Event extends keyof EventsWithFilters<Groups[T]>>(
+      loaded: PluginModuleLoaded<ServerModuleTypeMap>,
       group: T,
       event: Event,
    ) {
-      const eventId = EventsPlugin.getEventId(groupsMap[group], String(event));
-      const privilege = group.includes('before') ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
-      this.implementedEvents.add(eventId);
+      const { eventClassName, privilege, eventId } = this.processTriggerMetadata(group, String(event));
+
       return (
          filter: (v: EventsWithFilters<Groups[T]>[Event]['filter']) => boolean,
          args: EventsWithFilters<Groups[T]>[Event]['event'],
       ) => {
          const p = this.context.currentPrivilege;
          try {
+            const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
+            this.setStorageOf(argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+
             this.context.currentPrivilege = privilege;
             for (const [listener, filterData] of this.events.get(eventId)?.entries() ?? []) {
                if (!filter(filterData as EventsWithFilters<Groups[T]>[Event]['filter'])) continue;
 
                // Im not sure how to properly call it here but uhh
-               listener(args);
+               listener(argsInstance);
             }
          } finally {
             this.context.currentPrivilege = p;
@@ -97,6 +138,71 @@ export class EventsPlugin extends PluginWithConfig<Config> {
       };
    }
 
+   protected eventArgDataStorage = new ContextPluginLinkedStorage<Record<string, unknown>>(() => ({}));
+
+   public getStorageOf<
+      T extends ServerModuleTypeMap[Extract<
+         keyof ServerModuleTypeMap,
+         `${string}${'After' | 'Before'}Event`
+      >]['prototype'],
+   >(instance: T): Partial<Mutable<T>> {
+      return this.eventArgDataStorage.get(instance) as Partial<Mutable<T>>;
+   }
+
+   public setStorageOf<
+      T extends ServerModuleTypeMap[Extract<
+         keyof ServerModuleTypeMap,
+         `${string}${'After' | 'Before'}Event`
+      >]['prototype'],
+   >(instance: T, data: T): void {
+      const storage = this.eventArgDataStorage.get(instance);
+      Object.assign(storage, data);
+   }
+
+   protected implemenetedEventArguments = new Set<string>();
+
+   // Implement arguments
+   protected implementEventArgument(className: string) {
+      if (this.implemenetedEventArguments.has(className)) return; // Already implemented
+      this.implemenetedEventArguments.add(className);
+
+      this.server.onLoad.subscribe((_, versions) => {
+         for (const module of versions) {
+            const symbol = module.symbols.get(className);
+            if (!(symbol instanceof ConstructableSymbol))
+               throw new Error(`Symbol ${className} is not event constructable`);
+
+            for (const getter of symbol.prototypeFields.values()) {
+               if (getter instanceof PropertyGetterSymbol) {
+                  const name = getter.name;
+                  const setter = getter.setter;
+
+                  this.context.implement(
+                     module.nameVersion,
+                     getter.identifier,
+                     ctx => {
+                        ctx.result = this.eventArgDataStorage.get(ctx.thisObject ?? {})[name];
+                     },
+                     -1,
+                  );
+
+                  if (setter) {
+                     this.context.implement(
+                        module.nameVersion,
+                        setter.identifier,
+                        ctx => {
+                           this.eventArgDataStorage.get(ctx.thisObject ?? {})[name] = ctx.params[0];
+                        },
+                        -1,
+                     );
+                  }
+               }
+            }
+         }
+      });
+   }
+
+   // Implement subscribe/unsubscribe
    protected _ = this.server.onLoad.subscribe((_, versions) => {
       for (const module of versions) {
          for (const eventsGroup of module.symbols.values()) {

@@ -2,7 +2,13 @@ import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
-import { API_ERRORS_MESSAGES, CompileTimeError, NativeActionKind, NativeKind } from '../errorable';
+import {
+   API_ERRORS_MESSAGES,
+   CompileTimeError,
+   NativeActionKindShort,
+   NativeKind,
+   NativeKindShort,
+} from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
 import { InvocableSymbol } from './abstracts/invocable';
 import { ConstructableSymbol } from './constructable';
@@ -18,8 +24,9 @@ export class PropertySetterSymbol
       this.setParamsLength(1);
    }
 
-   public override kind: NativeKind = 'property';
-   public override actionKind: NativeActionKind = 'set';
+   public override kindShort: NativeKindShort = 'property';
+   public override kind: NativeActionKindShort = 'set';
+   public override actionKind: NativeKind = 'property setter';
    public readonly thisType!: ConstructableSymbol;
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       const symbol = this;
@@ -29,10 +36,10 @@ export class PropertySetterSymbol
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('property setter', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.actionKind, symbol.identifier));
 
          if (!symbol.privileges.includes(context.currentPrivilege))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('property setter', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege(symbol.actionKind, symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
 
@@ -71,8 +78,8 @@ export class PropertyGetterSymbol
       super();
       this.setParamsLength(0);
    }
-   public override kind: NativeKind = 'property';
-   public override actionKind: NativeActionKind = 'get';
+   public override kindShort: NativeKindShort = 'property';
+   public override kind: NativeActionKindShort = 'get';
    public readonly thisType!: ConstructableSymbol;
    public readonly setter?: PropertySetterSymbol;
    public readonly isRuntimeBaked: boolean = false;

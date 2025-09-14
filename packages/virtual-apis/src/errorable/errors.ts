@@ -46,9 +46,9 @@ export class NumberErrorFactory extends ErrorFactory {
 
 //#region Error Constants
 
-export type NativeKind = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
-export type NativeKindPrivilege = 'function' | 'property getter' | 'property setter' | 'constructor for' | 'property';
-export type NativeActionKind = 'call' | 'get' | 'set';
+export type NativeKind = 'function' | 'property getter' | 'property setter' | 'constructor for' | 'property';
+export type NativeKindShort = 'function' | 'getter' | 'setter' | 'constructor' | 'property';
+export type NativeActionKindShort = 'call' | 'get' | 'set';
 export type NativeTypeKind = 'optional type' | 'variant type' | 'type';
 
 export const ERROR_TYPE = Error;
@@ -74,9 +74,9 @@ export const QUICK_JS_ENV_ERROR_MESSAGES = {
 };
 export const API_ERRORS_MESSAGES = {
    NoConstructor: (id: string) => ErrorFactory.new(`No constructor for native class '${id}'.`, REFERENCE_ERROR_TYPE),
-   NoPrivilege: (kind: NativeKindPrivilege, id: string) =>
+   NoPrivilege: (kind: NativeKind, id: string) =>
       ErrorFactory.new(`Native ${kind} [${id.split(' ')[0]}] does not have required privileges.`, REFERENCE_ERROR_TYPE),
-   NativeBound: (kind: NativeKindPrivilege, id: string) =>
+   NativeBound: (kind: NativeKind, id: string) =>
       ErrorFactory.new(
          `Native ${kind} [${id.split(' ')[0]}] object bound to prototype does not exist.`,
          REFERENCE_ERROR_TYPE,
@@ -87,7 +87,7 @@ export const API_ERRORS_MESSAGES = {
    ObjectDidNotHaveHandle: () => ErrorFactory.new(`Object did not have a native handle.`, TYPE_ERROR_TYPE), // Type Error
    ArrayUnsupportedType: () => ErrorFactory.new(`Array contains unsupported type.`, TYPE_ERROR_TYPE), // Type Error
    ValueNotSupported: (value: string) => ErrorFactory.new(`${value} value is not supported.`, TYPE_ERROR_TYPE),
-   FailedTo: (action: NativeActionKind, kind: NativeKind, name: string) =>
+   FailedTo: (action: NativeActionKindShort, kind: NativeKindShort, name: string) =>
       ErrorFactory.new(`Failed to ${action} ${kind} '${name}'`, ERROR_TYPE),
    InvalidTimeOfDay: (min = 0, max = 23999) =>
       ErrorFactory.new(`timeOfDay must be between ${min} and ${max} (inclusive)`, TYPE_ERROR_TYPE),

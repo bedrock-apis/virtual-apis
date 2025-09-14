@@ -60,14 +60,14 @@ export interface PreparedImage {
    modules: PreparedModule[];
 }
 
-export class BinaryLoaderContext {
+export class BinaryImageLoader {
    public readonly stringAccessor: IndexedAccessor<string>;
    public readonly typeAccessor: IndexedAccessor<BinaryTypeStruct>;
    protected constructor(public readonly preparedImage: PreparedImage) {
       this.stringAccessor = this.preparedImage.stringSlices;
       this.typeAccessor = this.preparedImage.typeSlices;
    }
-   public static create(buffer: Uint8Array): BinaryLoaderContext {
+   public static loadFromBuffer(buffer: Uint8Array): BinaryImageLoader {
       return new this(this.getPreparedImageFromRaw(buffer));
    }
    public static getPreparedImageFromRaw(buffer: Uint8Array): PreparedImage {
@@ -88,7 +88,7 @@ export class BinaryLoaderContext {
    public readonly loadedModuleSymbols: Map<string, ModuleSymbol> = new Map();
 
    public async loadModules(versions: Map<string, string>, context: Context) {
-      d('loading modules', versions);
+      d('[BinaryImageLoader] loading modules', versions);
       const str = this.preparedImage.stringSlices.fromIndex;
 
       const modulesToLoad: PreparedModule[] = [];
@@ -136,7 +136,7 @@ export class BinaryLoaderContext {
 
       for (const mod of modulesToLoad) {
          const symbol = this.getSymbolForPreparedModule(mod);
-         d('loadModules loaded', symbol.name);
+         d('[BinaryImageLoader] loaded module', symbol.name, symbol.version);
 
          symbol.getRuntimeValue(context);
          context.modules.set(symbol.name, symbol);
@@ -171,7 +171,6 @@ export class BinaryLoaderContext {
       //#region Dependencies
       for (const dependency of prepared.metadata.dependencies) {
          const name = stringOf(dependency.name!);
-         d('dep name', name);
          if (this.loadedModuleSymbols.has(name)) {
             dependencies[name] = this.loadedModuleSymbols.get(name)!;
             continue;

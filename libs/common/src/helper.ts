@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 export async function fetchJson<T extends object>(link: string): Promise<T | null> {
    const response = await fetch(link).catch(_ => null);
    if (!response?.ok) return null;
@@ -27,7 +29,13 @@ export function compareVersions(a: string, b: string): number {
    return [aTag, bTag].sort()[0] == aTag ? 1 : -1;
 }
 
-export const d = console.log.bind(console, '[DEBUG]');
+let debugFn = console.log.bind(console, chalk.bold.yellow('[VIRTUAL-APIS DEBUG]'));
+
+export const d = (...args: unknown[]) => debugFn(...args);
+
+export function setDebugFunction(fn = debugFn) {
+   debugFn = fn;
+}
 
 export class MapWithDefaults<K, V> extends Map<K, V> {
    public getOrCreate(key: K, create: () => V) {

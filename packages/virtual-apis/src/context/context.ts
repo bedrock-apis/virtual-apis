@@ -1,8 +1,9 @@
 import { VirtualPrivilege } from '@bedrock-apis/binary';
-import { MapWithDefaults } from '@bedrock-apis/common';
+import { d, MapWithDefaults } from '@bedrock-apis/common';
 import { ErrorFactory, PANIC_ERROR_MESSAGES, ReportAsIs } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
+import { ContextConfig } from './config';
 import { InvocationInfo } from './invocation-info';
 import { ContextPlugin } from './plugin';
 
@@ -27,13 +28,7 @@ export class Context implements Disposable {
 
    public readonly runtimeId = Context.runtimeIdIncrementalVariable++;
    public constructor() {
-      Context.wasLoadedAtLeastOnce = true;
       Context.contexts.set(this.runtimeId, this);
-
-      // TODO Some kind of config to filter out unneded plugins
-      for (const plugin of ContextPlugin.plugins.values()) {
-         this.registerPlugin(plugin);
-      }
    }
 
    public currentPrivilege = VirtualPrivilege.None;
@@ -44,7 +39,7 @@ export class Context implements Disposable {
       return { [Symbol.dispose]: () => (this.currentPrivilege = before) };
    }
 
-   public readonly plugins = new Map<string, ContextPlugin>();
+   protected readonly plugins = new Map<string, ContextPlugin>();
    protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
 
    public readonly modules: Map<string, ModuleSymbol> = new Map();
@@ -52,7 +47,11 @@ export class Context implements Disposable {
    public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
       return this.symbols.get(id) ?? null;
    }
-   public registerPlugin<T extends typeof ContextPlugin>(pluginType: T): InstanceType<T> {
+
+   protected registerPlugin<T extends typeof ContextPlugin>(pluginType: T): InstanceType<T> {
+      const loaded = this.tryGetPlugin(pluginType);
+      if (loaded) return loaded;
+
       const plugin = pluginType.instantiate(this);
       this.plugins.set(pluginType.identifier, plugin);
       this.pluginTypes.set(pluginType, plugin);
@@ -63,18 +62,56 @@ export class Context implements Disposable {
    public tryGetPlugin<T extends typeof ContextPlugin>(plugin: T) {
       return this.pluginTypes.get(plugin) as InstanceType<T> | undefined;
    }
-   public getPlugin<T extends typeof ContextPlugin>(plugin: T, requiredFor: string) {
-      const instance = this.tryGetPlugin(plugin);
-      if (!instance) throw new Error(`${plugin.name} is required for ${requiredFor}`);
-      return instance;
+   public getPlugin<T extends typeof ContextPlugin>(pluginType: T, requiredFor = 'context') {
+      const plugin = this.tryGetPlugin(pluginType);
+      if (!plugin) {
+         if (this.config.disablePlugins.includes(pluginType)) {
+            throw new Error(`${pluginType.name} was disabled but is required for ${requiredFor}`);
+         } else {
+            throw new Error(`${pluginType.name} is required for ${requiredFor}`);
+         }
+      }
+      return plugin;
+   }
+
+   public config: ContextConfig = {
+      implementationEarlyExit: false,
+      disablePlugins: [],
+   };
+
+   public configureAndLoadPlugins(config: Partial<ContextConfig>) {
+      d('[Context] configured, loading plugins...');
+
+      Context.wasLoadedAtLeastOnce = true;
+
+      Object.assign(this.config, config);
+
+      for (const plugin of ContextPlugin.plugins.values()) {
+         if (this.config.disablePlugins.includes(plugin)) continue;
+         this.registerPlugin(plugin);
+      }
+   }
+
+   public getStats(moduleName: string) {
+      const mod = this.modules.get(moduleName)!;
+      const impls = this.implementations.get(mod.nameVersion)!;
+      return {
+         text: `${impls.size}/${mod.invocables.size} (${((impls.size / mod.invocables.size) * 100).toFixed(2)}%)`,
+         implementedSymbols: [...impls.keys()],
+         implementableSymbols: [...mod.invocables.keys()],
+         nonImplementedSymbols: [...new Set(mod.invocables.keys()).difference(new Set(impls.keys()))],
+      };
    }
 
    //#region NativeHandles
+   /** @internal */
    public readonly nativeHandles: WeakSet<object> = new WeakSet();
+   /** @internal */
    public isNativeHandle(value: unknown): boolean {
       //Returns if the value is native handle to the native class or not
       return this.nativeHandles.has(value as object);
    }
+   /** @internal */
    public createNativeHandle(): object {
       const handle = create(null);
       this.nativeHandles.add(handle);
@@ -87,6 +124,7 @@ export class Context implements Disposable {
    //#endregion
 
    //#region Actions
+   /** @internal */
    public onAfterModuleCompilation(moduleSymbol: ModuleSymbol): void {
       // Register symbols
       for (const symbol of moduleSymbol.symbols.values()) {
@@ -103,12 +141,16 @@ export class Context implements Disposable {
       }
    }
 
+   /** @internal */
    public onModulesLoaded() {
+      d('[Context] Emitting onModulesLoaded on plugins');
       for (const plugin of this.plugins.values()) plugin.onModulesLoaded();
    }
+   /** @internal */
    public onBeforeModuleCompilation(moduleSymbol: ModuleSymbol): void {
       for (const plugin of this.plugins.values()) plugin.onBeforeModuleCompilation(moduleSymbol);
    }
+   /** @internal */
    public onModuleRequested(name: string): ModuleSymbol {
       const module = this.modules.get(name);
       if (!module) throw new ReferenceError(`Module ${name} is not registered in context with id ${this.runtimeId}`);
@@ -124,11 +166,13 @@ export class Context implements Disposable {
       impls.sort((a, b) => b.priority - a.priority);
    }
 
+   /** @internal */
    public implementations = new MapWithDefaults<
       string,
       MapWithDefaults<string, { impl: SymbolImpl; priority: number }[]>
    >();
 
+   /** @internal */
    public onInvocation(invocation: InvocationInfo) {
       const implemetations = this.implementations
          .get(invocation.symbol.module.nameVersion)
@@ -155,6 +199,7 @@ export class Context implements Disposable {
    public [Symbol.dispose](): void {
       this.dispose();
    }
+   /** @internal */
    public dispose(): void {
       Context.contexts.delete(this.runtimeId);
       (this as Mutable<this>).nativeHandles = new WeakSet();

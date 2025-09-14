@@ -3,15 +3,17 @@ import { Plugin } from '@bedrock-apis/va-pluggable';
 import { EventsPlugin } from './events';
 
 export class EarlyExecutionPlugin extends Plugin {
-   protected _ = this.server_above_v2_0_0.onLoad.subscribe(() => {
+   protected _ = this.server_above_v2_0_0.onLoad.subscribe(mod => {
       this.context.currentPrivilege = VirtualPrivilege.EarlyExecution;
-      const worldLoad = this.getPlugin(EventsPlugin).createTrigger('worldAfter', 'worldLoad');
-      const startup = this.getPlugin(EventsPlugin).createTrigger('systemBefore', 'startup');
+      const worldLoad = this.getPlugin(EventsPlugin).createTrigger(mod, 'worldAfter', 'worldLoad');
+      const startup = this.getPlugin(EventsPlugin).createTrigger(mod, 'systemBefore', 'startup');
 
       setTimeout(() => {
          startup({
             blockComponentRegistry: this.blockComponentRegistry.create({}),
-            customCommandRegistry: this.customCommandRegistry.create({}),
+
+            // Beta, does not always exist
+            customCommandRegistry: this.customCommandRegistry.tryCreate({})!,
             itemComponentRegistry: this.itemComponentRegistry.create({}),
          });
          this.context.currentPrivilege = VirtualPrivilege.None;

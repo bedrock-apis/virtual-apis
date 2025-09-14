@@ -1,3 +1,4 @@
+import { d } from '@bedrock-apis/common';
 import { ConstructableSymbol, type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
 import { Context } from './context';
 
@@ -13,16 +14,11 @@ export class ContextPluginLinkedStorage<T extends object> {
    private readonly storages = new WeakMap<object, T>();
    protected readonly instances = new WeakMap<T, WeakRef<object>>();
 
-   public constructor(
-      protected readonly createStorage: (instance: object) => T,
-      protected strict = false,
-   ) {}
+   public constructor(protected readonly createStorage: (instance: object) => T) {}
 
    public get(instance: object) {
       const storage = this.storages.get(instance);
       if (storage) return storage;
-
-      if (this.strict) throw new Error('Unitialized storage');
       return this.create(instance);
    }
 
@@ -47,6 +43,7 @@ export abstract class ContextPlugin {
    public static plugins = new Map<string, typeof ContextPlugin>();
    public static identifier: string;
    public static register(identifier: string) {
+      d('[ContextPlugin] Register', identifier);
       if (Context.wasLoadedAtLeastOnce) {
          console.warn(
             'Plugin',

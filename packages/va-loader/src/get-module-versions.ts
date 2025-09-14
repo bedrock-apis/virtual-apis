@@ -65,7 +65,7 @@ export function getModuleVersions(cwd = process.cwd()) {
    );
 }
 
-export async function getImageFromNodeModules(binaryUrl?: string): Promise<Uint8Array<ArrayBufferLike>> {
+export async function readImageFromNodeModules(binaryUrl?: string): Promise<Uint8Array<ArrayBufferLike>> {
    try {
       // import.meta.resolve does not work in all contexts and we want to catch errors so
       if (!binaryUrl) binaryUrl = import.meta.resolve('@bedrock-apis/va-images');

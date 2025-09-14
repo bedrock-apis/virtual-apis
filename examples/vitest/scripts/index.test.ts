@@ -1,7 +1,14 @@
+import { VirtualPrivilege } from '@bedrock-apis/binary';
+import { context } from '@bedrock-apis/va-loader/vitest';
 import * as mc from '@minecraft/server';
 import { describe, expect, it } from 'vitest';
 
 describe('scripts', () => {
+   it('should return value from the config', () => {
+      using _ = context.temporaryPrivilege(VirtualPrivilege.None);
+      expect(mc.world.getDay()).toMatchInlineSnapshot(`6`);
+   });
+
    it('expects module', () => {
       expect(mc).toMatchInlineSnapshot(`
         {
@@ -760,3 +767,4 @@ describe('scripts', () => {
       `);
    });
 });
+

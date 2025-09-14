@@ -2,7 +2,13 @@ import { VirtualPrivilege } from '@bedrock-apis/binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';
-import { API_ERRORS_MESSAGES, CompileTimeError, NativeActionKind, NativeKind } from '../errorable';
+import {
+   API_ERRORS_MESSAGES,
+   CompileTimeError,
+   NativeActionKindShort,
+   NativeKind,
+   NativeKindShort,
+} from '../errorable';
 import { IBindableSymbol } from './abstracts/bindable';
 import { InvocableSymbol } from './abstracts/invocable';
 import type { ConstructableSymbol } from './constructable';
@@ -10,8 +16,9 @@ import type { ConstructableSymbol } from './constructable';
 export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unknown> implements IBindableSymbol {
    protected override readonly stackTrimEncapsulation: number = 2; // proxied
    public readonly thisType!: ConstructableSymbol;
-   public override actionKind: NativeActionKind = 'call';
-   public override kind: NativeKind = 'function';
+   public override kindShort: NativeKindShort = 'function';
+   public override actionKind: NativeKind = 'function';
+   public override kind: NativeActionKindShort = 'call';
    protected override compile(context: Context): (...params: unknown[]) => unknown {
       const symbol = this;
       function runnable(that: unknown, ...params: unknown[]): unknown {
@@ -20,13 +27,13 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
          const { diagnostics } = info;
 
          if (!context.isNativeHandle(that))
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('function', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.actionKind, symbol.identifier));
 
          if (
             context.currentPrivilege !== VirtualPrivilege.None &&
             !symbol.privileges.includes(context.currentPrivilege)
          )
-            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege('function', symbol.identifier));
+            diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege(symbol.actionKind, symbol.identifier));
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
 
