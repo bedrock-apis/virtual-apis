@@ -41,9 +41,7 @@ jobs:
            run: pnpm run build
 
          - name: 🧪 Run e2e tests
-           if: false
            run: pnpm run e2e
 
          - name: 🧪 Run examples tests
-           if: false
            run: pnpm run examples
