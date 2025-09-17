@@ -9,14 +9,6 @@ export interface ImageModuleData {
    exports: IndexId[];
 }
 
-export interface SerializableModuleStats {
-   uniqueTypes: number;
-   classes: number;
-   enums: number;
-   interfaces: number;
-   constants: number;
-}
-
 export interface SerializableModule extends WithEncapsulatedData {
    metadata: ModuleMetadata;
    data: ImageModuleData;

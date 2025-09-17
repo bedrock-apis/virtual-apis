@@ -5,7 +5,6 @@ import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType, readEnc
 const utf8Decoder = new TextDecoder();
 
 // Use LE always
-
 type ReaderKey = string;
 
 export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
