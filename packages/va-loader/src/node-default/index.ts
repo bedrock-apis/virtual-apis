@@ -1,4 +1,4 @@
-import { d } from '@bedrock-apis/common';
+import { d } from '@bedrock-apis/va-common';
 import { BinaryImageLoader } from '@bedrock-apis/va-image-loader';
 import { Context } from '@bedrock-apis/virtual-apis';
 import { getModuleVersions, readImageFromNodeModules } from '../get-module-versions';

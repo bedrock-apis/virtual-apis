@@ -1,4 +1,4 @@
-import { compareVersions, d, VaEventLoader } from '@bedrock-apis/common';
+import { compareVersions, d, VaEventLoader } from '@bedrock-apis/va-common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import chalk from 'chalk';
 import { Plugin } from './api';

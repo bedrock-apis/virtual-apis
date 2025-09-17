@@ -1,4 +1,4 @@
-import { VirtualPrivilege } from '@bedrock-apis/binary';
+import { VirtualPrivilege } from '@bedrock-apis/va-binary';
 import { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import { finalizeAsMethod, proxyifyFunction } from '../ecma-utils';

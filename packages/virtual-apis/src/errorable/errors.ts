@@ -1,4 +1,4 @@
-import type { Range } from '@bedrock-apis/types';
+import type { Range } from '@bedrock-apis/va-types';
 
 //#region Factory
 export type ErrorConstructor = new (message: string) => Error;

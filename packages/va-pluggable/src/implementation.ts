@@ -1,4 +1,4 @@
-import { identifiers } from '@bedrock-apis/common';
+import { identifiers } from '@bedrock-apis/va-common';
 import { ContextPluginLinkedStorage, InvocationInfo } from '@bedrock-apis/virtual-apis';
 import { Plugin } from './api';
 import { PluginModule, PluginModuleLoaded } from './module';

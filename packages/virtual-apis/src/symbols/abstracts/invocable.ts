@@ -1,4 +1,4 @@
-import { d } from '@bedrock-apis/common';
+import { d } from '@bedrock-apis/va-common';
 import chalk from 'chalk';
 import { inspect } from 'node:util';
 import { Context } from '../../context/context';

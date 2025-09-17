@@ -1,4 +1,4 @@
-import { Range } from '@bedrock-apis/types';
+import { Range } from '@bedrock-apis/va-types';
 import { API_ERRORS_MESSAGES, DiagnosticsStackReport, ErrorFactory, NumberErrorFactory, Report } from '../../errorable';
 import { RuntimeType, Type } from '../type';
 import { NumberType } from './number';
@@ -8,7 +8,7 @@ export const functionType: RuntimeType = {
    isValidValue(diagnostics: DiagnosticsStackReport, value: unknown) {
       if (typeof value !== 'function') {
          // TODO Closure: (ButtonPushAfterEvent) => void
-         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false;
+         return (diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false);
       }
       return true;
    },
@@ -23,7 +23,7 @@ export class ClosureType extends Type {
    }
    public override isValidValue(diagnostics: DiagnosticsStackReport, value: unknown): boolean {
       if (typeof value !== 'function') {
-         return diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false;
+         return (diagnostics.report(API_ERRORS_MESSAGES.NativeConversionFailed('type')), false);
       }
       return true;
    }

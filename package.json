@@ -7,7 +7,7 @@
    "private": true,
    "workspaces": [
       "packages/*",
-      "libs/*"
+      "packages/*"
    ],
    "type": "module",
    "repository": {
@@ -31,24 +31,22 @@
       "tabWidth": 3
    },
    "scripts": {
-      "repo:init": "pnpm install --frozen-lockfile && pnpm run build:src && pnpm run repo:paths",
-      "repo:paths": "node --enable-source-maps libs/tools/dist/paths",
-      "repo:todo": "node --enable-source-maps libs/tools/dist/todo",
-      "repo:git": "git submodule update --init",
+      "repo:init": "pnpm install --frozen-lockfile && pnpm run build:src",
+      "repo:todo": "node --enable-source-maps packages/internal-tool/dist/todo",
       " ": "",
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
-      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/va-loader/node ./packages/va-test/dist/run-compare",
+      "e2e": "pnpm run build:src && node --enable-source-maps ./packages/va-test/dist/run-compare",
       "e2e:dev": "pnpm build:src && pnpm dump:run && pnpm e2e",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
       "  ": "",
       "build:src": "rolldown -c rolldown.config.ts",
-      "build:packages": "node --enable-source-maps ./libs/va-image-generator",
+      "build:packages": "node --enable-source-maps ./packages/va-image-generator",
       "build": "pnpm run build:src && pnpm run build:packages",
       "   ": "",
-      "dump:run": "node --enable-source-maps ./libs/bds-dumps",
+      "dump:run": "node --enable-source-maps ./packages/va-bds-dumps",
       "    ": "",
       "test:coverage": "vitest --ui --coverage",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
@@ -57,13 +55,14 @@
       "examples": "pnpm run \"/^example:.*/\""
    },
    "dependencies": {
-      "@bedrock-apis/bds-dumps": "workspace:*",
-      "@bedrock-apis/binary": "workspace:*",
-      "@bedrock-apis/common": "workspace:*",
-      "@bedrock-apis/core-plugin": "workspace:*",
+      "@bedrock-apis/va-bds-dumps": "workspace:*",
+      "@bedrock-apis/va-binary": "workspace:*",
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-core-plugin": "workspace:*",
       "@bedrock-apis/internal-tool": "workspace:*",
       "@bedrock-apis/nbt-core": "0.0.1-alpha.2",
-      "@bedrock-apis/types": "workspace:*",
+      "@bedrock-apis/nbt": "0.0.1-alpha.3",
+      "@bedrock-apis/va-types": "workspace:*",
       "@bedrock-apis/va-image-generator": "workspace:*",
       "@bedrock-apis/va-image-loader": "workspace:*",
       "@bedrock-apis/va-images": "workspace:*",
@@ -73,7 +72,6 @@
       "@bedrock-apis/virtual-apis": "workspace:*"
    },
    "devDependencies": {
-      "@bedrock-apis/nbt": "0.0.1-alpha.3",
       "@eslint/js": "^9.35.0",
       "@minecraft/server": "2.4.0-beta.1.21.120-preview.22",
       "@minecraft/server-net": "1.0.0-beta.1.21.110-preview.25",

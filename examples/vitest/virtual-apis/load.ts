@@ -1,9 +1,9 @@
 // Load plugins
-import '@bedrock-apis/core-plugin';
+import '@bedrock-apis/va-core-plugin';
 import './plugin';
 
 // Configure
-import { EventsPlugin, SystemPlugin } from '@bedrock-apis/core-plugin';
+import { EventsPlugin, SystemPlugin } from '@bedrock-apis/va-core-plugin';
 import { context } from '@bedrock-apis/va-loader/vitest';
 import { MyPlugin } from './plugin';
 

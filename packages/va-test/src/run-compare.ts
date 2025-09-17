@@ -1,6 +1,6 @@
-import '@bedrock-apis/core-plugin';
+import '@bedrock-apis/va-core-plugin';
 
-import { readTestReport } from '@bedrock-apis/bds-dumps/api';
+import { readTestReport } from '@bedrock-apis/va-bds-dumps/api';
 import { loadModules } from '@bedrock-apis/va-loader/node';
 import { Context } from '@bedrock-apis/virtual-apis';
 import fs from 'node:fs/promises';

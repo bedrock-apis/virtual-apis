@@ -1,4 +1,4 @@
-import { d } from '@bedrock-apis/common';
+import { d } from '@bedrock-apis/va-common';
 import { type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
 import { Context } from './context';
 
