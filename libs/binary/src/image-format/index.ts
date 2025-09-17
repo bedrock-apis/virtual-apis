@@ -20,7 +20,7 @@ const { allOf: AllOf } = BitFlags;
 export class BinaryImageFormat {
    protected constructor() {}
 
-   public static write(data: SerializableMetadata, cursor: DataCursorView = DataCursorView.alloc(2 ** 16 * 10)) {
+   public static write(data: SerializableMetadata, cursor: DataCursorView = DataCursorView.alloc()) {
       data.version = 1;
 
       const io = new SafeBinaryIOWriter(cursor, data as object) as unknown as BinaryIO<SerializableMetadata>;

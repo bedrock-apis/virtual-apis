@@ -1,4 +1,4 @@
-import { ContextPlugin, ModuleSymbol } from '@bedrock-apis/virtual-apis';
+import { ContextPlugin } from '@bedrock-apis/virtual-apis';
 import { PluginModule } from './module';
 import { ServerModuleTypeMap } from './types';
 
@@ -31,10 +31,6 @@ export abstract class Plugin extends ContextPlugin {
       undefined,
       '1.17.0',
    );
-
-   public override onAfterModuleCompilation(symbol: ModuleSymbol): void {
-      for (const module of this.modules.values()) module.onAfterModuleCompilation(symbol);
-   }
 
    public override onModulesLoaded(): void {
       for (const module of this.modules.values()) module.onModulesLoaded();

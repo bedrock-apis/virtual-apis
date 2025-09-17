@@ -5,6 +5,7 @@ import { platform } from 'node:process';
 export const CACHE_BDS_DOWNLOAD = resolve(import.meta.dirname, './cache-bds-download');
 export const CACHE_BDS = resolve(import.meta.dirname, './cache-bds');
 export const CACHE_DUMP_OUTPUT = resolve(import.meta.dirname, './dump-output');
+export const CACHE_DUMP_OUTPUT_JS_MODULES = path.join(CACHE_DUMP_OUTPUT, 'js-modules');
 export const CACHE_DUMP_OUTPUT_ZIP = resolve(import.meta.dirname, '../dump-output.zip');
 export const SOURCE_DIR = resolve(import.meta.dirname, '../src/');
 export const CACHE_BDS_EXE_PATH = resolve(CACHE_BDS, platform === 'win32' ? 'bedrock_server.exe' : 'bedrock_server');

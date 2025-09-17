@@ -40,7 +40,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
       await fs.writeFile('INCOMPATIBILITY.md', header + result + `\n\`\`\``);
 
-      const stats = Context.getContext(0)!.getStats('@minecraft/server');
+      const stats = Context.getContext(0)!.getStats('@minecraft/server-bindings');
       console.log('Implemented symbols: ', stats.text);
    });
 }

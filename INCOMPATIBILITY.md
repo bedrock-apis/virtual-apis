@@ -45,7 +45,7 @@ Suite entity (chained):
   2: ✅
   3: ❌ Results mismatch: 
       
-      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
+      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:ageable"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"},{"typeId":"minecraft:is_baby"},{"typeId":"minecraft:scale"}]
       []
       
   
@@ -79,25 +79,26 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ✅
+  15: ❓ Expected error (Error: Dimension 'haha wrong' is invalid.), got: {}
   16: ✅
-  17: ❌ Error mismatch: 
+  17: ✅
+  18: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
       TypeError: Native type conversion failed.
       
-  18: ✅
   19: ✅
-  20: ❌ Error mismatch: TypeError: Native type conversion failed. != Error: Failed to set member
-  21: ❌ Error mismatch: 
+  20: ✅
+  21: ❌ Error mismatch: TypeError: Native type conversion failed. != Error: Failed to set member
+  22: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
       TypeError: Native type conversion failed.
       
-  22: ✅
-  23: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
-  24: ✅
+  23: ✅
+  24: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
   25: ✅
+  26: ✅
   
 
 

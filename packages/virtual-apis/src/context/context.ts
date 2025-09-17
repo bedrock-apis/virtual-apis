@@ -42,11 +42,20 @@ export class Context implements Disposable {
    protected readonly plugins = new Map<string, ContextPlugin>();
    protected readonly pluginTypes = new Map<typeof ContextPlugin, ContextPlugin>();
 
-   public readonly modules: Map<string, ModuleSymbol> = new Map();
+   /** @internal */
+   public registerModule(symbol: ModuleSymbol) {
+      symbol.getRuntimeValue(this);
+      const list = this.modules.getOrCreate(symbol.name, () => []);
+      list.push(symbol);
+   }
+   public readonly modules = new MapWithDefaults<string, ModuleSymbol[]>();
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
    public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
       return this.symbols.get(id) ?? null;
    }
+
+   /** Map of js module name to js code, used for bindings */
+   public jsModules = new Map<string, string>();
 
    protected registerPlugin<T extends typeof ContextPlugin>(pluginType: T): InstanceType<T> {
       const loaded = this.tryGetPlugin(pluginType);
@@ -93,7 +102,7 @@ export class Context implements Disposable {
    }
 
    public getStats(moduleName: string) {
-      const mod = this.modules.get(moduleName)!;
+      const mod = this.onModuleRequested(moduleName);
       const impls = this.implementations.get(mod.nameVersion)!;
       return {
          text: `${impls.size}/${mod.invocables.size} (${((impls.size / mod.invocables.size) * 100).toFixed(2)}%)`,
@@ -152,7 +161,7 @@ export class Context implements Disposable {
    }
    /** @internal */
    public onModuleRequested(name: string): ModuleSymbol {
-      const module = this.modules.get(name);
+      const module = this.modules.get(name)?.[0];
       if (!module) throw new ReferenceError(`Module ${name} is not registered in context with id ${this.runtimeId}`);
       return module;
    }

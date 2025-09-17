@@ -71,6 +71,30 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
    }
 
    public onModulesLoaded(): void {
+      for (const [name, versions] of this.plugin.context.modules.entries()) {
+         for (const originalSymbol of versions) {
+            const version = originalSymbol.version;
+
+            if (name !== this.name && name !== this.name + '-bindings') continue;
+
+            // Prefer bindings over regular modules
+            const binding = this.plugin.context.modules.get(name + '-bindings')?.[0];
+            const symobl = binding ?? originalSymbol;
+
+            if (this.moduleSymbols.some(e => e === symobl)) continue;
+
+            if (this.versionFrom && compareVersions(this.versionFrom, version) === 1) continue;
+            if (this.versionTo && compareVersions(this.versionTo, version) === -1) continue;
+
+            const last = this.moduleSymbols[0];
+            if (!last || compareVersions(last.version, version) === -1) {
+               this.moduleSymbols.unshift(symobl);
+            } else {
+               this.moduleSymbols.push(symobl);
+            }
+         }
+      }
+
       const mod = this.moduleSymbols[0];
       if (!mod) {
          const m = `Not implementing ${this.name} for ${this.versionFrom}...${this.versionTo}`;
@@ -80,20 +104,6 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
          }
       } else {
          this.onLoad.invoke(new PluginModuleLoaded(mod, this.plugin), this.moduleSymbols);
-      }
-   }
-
-   public onAfterModuleCompilation(module: ModuleSymbol): void {
-      if (module.name !== this.name) return;
-
-      if (this.versionFrom && compareVersions(this.versionFrom, module.version) === 1) return;
-      if (this.versionTo && compareVersions(this.versionTo, module.version) === -1) return;
-
-      const last = this.moduleSymbols[0];
-      if (!last || compareVersions(last.version, module.version) === -1) {
-         this.moduleSymbols.unshift(module);
-      } else {
-         this.moduleSymbols.push(module);
       }
    }
 
@@ -120,10 +130,15 @@ export class PluginModuleLoaded<Mod extends ModuleTypeMap = any> {
 
    public construct<T extends keyof Constructables<Mod>>(className: T) {
       const symbol = this.moduleSymbol.symbols.get(String(className));
-      if (!symbol) throw new Error(`Unable to construct ${String(className)}: symbol not found`);
+      if (!symbol)
+         throw new Error(
+            `Unable to construct ${String(className)}: symbol not found in ${this.moduleSymbol.nameVersion}`,
+         );
 
       if (!(symbol instanceof ConstructableSymbol))
-         throw new Error(`Unable to construct ${String(className)}: non constructable`);
+         throw new Error(
+            `Unable to construct ${String(className)} from ${this.moduleSymbol.nameVersion}: non constructable`,
+         );
 
       return symbol?.createRuntimeInstanceInternal(this.plugin.context) as Mod[T]['prototype'];
    }

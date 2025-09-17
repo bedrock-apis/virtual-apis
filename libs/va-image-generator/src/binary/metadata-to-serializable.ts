@@ -84,7 +84,19 @@ export class MetadataToSerializableTransformer {
          stringSlices: this.stringCollector.getArrayAndLock(),
       };
 
-      return { metadata, modules, jsModules: [] };
+      return { metadata, modules, jsModules: await this.getJsModules(metadataProvider) };
+   }
+
+   protected async getJsModules(metadataProvider: IMetadataProvider) {
+      const jsModules: SerializableMetadata['jsModules'] = [];
+      for await (const [filename, code] of metadataProvider.getJSModules()) {
+         jsModules.push({
+            code,
+            filename,
+            name: `@minecraft/${filename.match(/[^\\/]+$/)}`,
+         });
+      }
+      return jsModules;
    }
 
    protected transformDetails(e: MetadataFunctionArgumentDetailsDefinition): BinaryDetailsStruct {

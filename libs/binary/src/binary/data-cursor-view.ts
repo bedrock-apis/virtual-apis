@@ -1,7 +1,8 @@
 import { IDataCursor } from '@bedrock-apis/nbt-core';
 
 export class DataCursorView implements IDataCursor {
-   public static alloc(size: number): DataCursorView {
+   // 4 MB by default
+   public static alloc(size = 1 << 22): DataCursorView {
       return new this(new Uint8Array(size));
    }
    public readonly view: DataView;

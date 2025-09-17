@@ -15,9 +15,9 @@ describe('PluginModule', () => {
       const plugMod3 = new PluginModule(plugin, '@minecraft/server', '1.15.0', '1.19.0');
 
       function createModule(version: string) {
-         new ModuleSymbol()
-            .setMetadata({ version: version, name: '@minecraft/server', uuid: '0' })
-            .getRuntimeValue(context);
+         const symbol = new ModuleSymbol().setMetadata({ version: version, name: '@minecraft/server', uuid: '0' });
+
+         context.registerModule(symbol);
       }
 
       createModule('1.16.0');

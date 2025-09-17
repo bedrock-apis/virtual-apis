@@ -1,51 +1,52 @@
 import {
-   BinaryDetailsStruct,
-   BinaryImageFormat,
-   BinaryIO,
-   BinarySymbolStruct,
-   BinaryTypeStruct,
-   bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
-   ExportType,
-   ImageModuleData,
-   ModuleMetadata,
-   SerializableModule,
-   SpecificSymbolFlags,
-   SymbolBitFlags,
-   TypeBitFlagsU16,
+    BinaryDetailsStruct,
+    BinaryImageFormat,
+    BinaryIO,
+    BinarySymbolStruct,
+    BinaryTypeStruct,
+    bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
+    ExportType,
+    ImageModuleData,
+    ModuleMetadata,
+    SerializableMetadata,
+    SerializableModule,
+    SpecificSymbolFlags,
+    SymbolBitFlags,
+    TypeBitFlagsU16,
 } from '@bedrock-apis/binary';
 import { BitFlags, d, identifiers, IndexedAccessor } from '@bedrock-apis/common';
 import {
-   bigintType,
-   booleanType,
-   ClosureType,
-   CompilableSymbol,
-   ConstantValueSymbol,
-   ConstructableSymbol,
-   Context,
-   EnumerableAPISymbol,
-   FunctionArgumentType,
-   FunctionSymbol,
-   InterfaceSymbol,
-   InvocableSymbol,
-   MethodSymbol,
-   ModuleSymbol,
-   NumberType,
-   ObjectValueSymbol,
-   ParamsValidator,
-   PropertyGetterSymbol,
-   PropertySetterSymbol,
-   RuntimeType,
-   stringType,
+    bigintType,
+    booleanType,
+    ClosureType,
+    CompilableSymbol,
+    ConstantValueSymbol,
+    ConstructableSymbol,
+    Context,
+    EnumerableAPISymbol,
+    FunctionArgumentType,
+    FunctionSymbol,
+    InterfaceSymbol,
+    InvocableSymbol,
+    MethodSymbol,
+    ModuleSymbol,
+    NumberType,
+    ObjectValueSymbol,
+    ParamsValidator,
+    PropertyGetterSymbol,
+    PropertySetterSymbol,
+    RuntimeType,
+    stringType,
 } from '@bedrock-apis/virtual-apis';
 
 import {
-   ArrayType,
-   generatorObjectType,
-   MapType,
-   OptionalType,
-   promiseType,
-   VariantType,
-   voidType,
+    ArrayType,
+    generatorObjectType,
+    MapType,
+    OptionalType,
+    promiseType,
+    VariantType,
+    voidType,
 } from '@bedrock-apis/virtual-apis';
 
 interface PreparedModule {
@@ -58,6 +59,7 @@ export interface PreparedImage {
    typeSlices: IndexedAccessor<BinaryTypeStruct>;
    details: IndexedAccessor<BinaryDetailsStruct>;
    modules: PreparedModule[];
+   jsModules: SerializableMetadata['jsModules'];
 }
 
 export class BinaryImageLoader {
@@ -74,6 +76,7 @@ export class BinaryImageLoader {
       const {
          metadata: { stringSlices, types, details },
          modules,
+         jsModules,
       } = BinaryImageFormat.read(buffer);
       return {
          stringSlices: new IndexedAccessor(stringSlices),
@@ -83,6 +86,7 @@ export class BinaryImageLoader {
             read: () => (BinaryIO.readEncapsulatedData(_) as SerializableModule).data,
          })),
          details: new IndexedAccessor(details),
+         jsModules,
       } satisfies PreparedImage;
    }
    public readonly loadedModuleSymbols: Map<string, ModuleSymbol> = new Map();
@@ -93,53 +97,64 @@ export class BinaryImageLoader {
 
       const modulesToLoad: PreparedModule[] = [];
 
-      // JUST FOR SAKE OF TEST REMOVE LATER PLEASE
-      const commonLast = this.preparedImage.modules
-         .filter(
-            e => str(e.metadata.name) === '@minecraft/common' || str(e.metadata.name) === '@minecraft/server-admin',
-         )
-         .map(e => ({ version: str(e.metadata.version), e }))
-         .sort((a, b) => b.version.localeCompare(a.version));
-      modulesToLoad.push(commonLast[0]!.e);
+      // @minecraft/server-1.0.0.js -> @minecraft/server
+      const jsModulesToLoad = new Map<string, string>();
+
+      // Replace with peer deps once they added to stable
+      const preloadPeerDependency = (moduleName: string) => {
+         const commonLast = this.preparedImage.modules
+            .filter(e => str(e.metadata.name) === moduleName)
+            .map(prepared => ({ version: str(prepared.metadata.version), prepared }))
+            .sort((a, b) => b.version.localeCompare(a.version));
+
+         const prepared = commonLast[0]!.prepared;
+
+         modulesToLoad.push(orBinding(moduleName, str(prepared.metadata.version), prepared));
+      };
+
+      const orBinding = (moduleName: string, moduleVersion: string, mod: PreparedModule) => {
+         jsModulesToLoad.set(
+            `${moduleName}-${moduleVersion.endsWith('-beta') ? 'beta' : moduleVersion}.js`,
+            moduleName,
+         );
+
+         const binding = this.preparedImage.modules.find(
+            e => `${moduleName}-bindings` === str(e.metadata.name) && str(e.metadata.version) === moduleVersion,
+         );
+         if (binding) return binding;
+         else return mod;
+      };
+
+      preloadPeerDependency('@minecraft/common');
 
       // END
 
-      // d(
-      //    'deps',
-      //    this.preparedImage.modules.map(e => ({
-      //       name: str(e.metadata.name),
-      //       version: str(e.metadata.version),
-      //       deps: e.metadata.dependencies.map(e => [str(e.name ?? 0), ...(e.versions?.map(str) ?? [])]),
-      //    })),
-      // );
-
       for (const [name, version] of versions.entries()) {
-         const mod = this.preparedImage.modules.find(
+         const imageMod = this.preparedImage.modules.find(
             e => str(e.metadata.name) === name && str(e.metadata.version) === version,
          );
 
-         if (!mod) {
-            console.warn('not found module', name, version);
+         if (!imageMod) {
+            d('[BinaryImageLoader] not found module', name, version);
             continue;
          }
 
          if (name === '@minecraft/server-net') {
-            const adminLast = this.preparedImage.modules
-               .filter(e => str(e.metadata.name) === '@minecraft/server-admin')
-               .map(e => ({ version: str(e.metadata.version), e }))
-               .sort((a, b) => b.version.localeCompare(a.version));
-            modulesToLoad.push(adminLast[0]!.e);
+            preloadPeerDependency('@minecraft/server-admin');
          }
 
-         modulesToLoad.push(mod);
+         modulesToLoad.push(orBinding(name, version, imageMod));
       }
 
-      for (const mod of modulesToLoad) {
-         const symbol = this.getSymbolForPreparedModule(mod);
+      for (const imageModule of modulesToLoad) {
+         const symbol = this.getSymbolForPreparedModule(imageModule);
          d('[BinaryImageLoader] loaded module', symbol.name, symbol.version);
+         context.registerModule(symbol);
+      }
 
-         symbol.getRuntimeValue(context);
-         context.modules.set(symbol.name, symbol);
+      for (const jsModule of this.preparedImage.jsModules) {
+         const name = jsModulesToLoad.get(jsModule.name);
+         if (name) context.jsModules.set(name, jsModule.code);
       }
 
       context.onModulesLoaded();
@@ -175,14 +190,18 @@ export class BinaryImageLoader {
             dependencies[name] = this.loadedModuleSymbols.get(name)!;
             continue;
          }
-         if (!this.resolver) throw new ReferenceError('Resolver is required for loading images with dependencies');
+         if (!this.resolver) {
+            const depName = `${name} ${dependency.versions?.map(e => stringOf(e)).join(' | ')}`;
+            throw new ReferenceError(`Dependency of ${mod.nameVersion} is not loaded: ${depName}`);
+         }
+
          const { name: resolvedName, version } = this.resolver.call(null, name, dependency.versions?.map(stringOf));
 
          const prepared = this.preparedImage.modules.find(
             _ => stringOf(_.metadata.name) === resolvedName && stringOf(_.metadata.version) === version,
          );
          if (!prepared)
-            throw new ReferenceError('No such a module is available in current image: ' + resolvedName + '@' + version);
+            throw new ReferenceError(`No such a module is available in current image: ${resolvedName}@${version}`);
 
          dependencies[name] = this.getSymbolForPreparedModule(prepared);
       }

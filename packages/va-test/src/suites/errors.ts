@@ -31,6 +31,8 @@ TestSuite.simple('errors').tests([
    // more then max type
    () => world.setTimeOfDay(2147483649),
 
+   () => world.getDimension('haha wrong'),
+
    // @ts-expect-error
    () => world.setDifficulty('nonexistent'),
    () => set('value', spawnEntity('minecraft:cow')),

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
-import { CACHE_DUMP_OUTPUT } from './constants';
+import { CACHE_DUMP_OUTPUT, CACHE_DUMP_OUTPUT_JS_MODULES } from './constants';
 import { dump } from './dump';
 
 async function readAndMaybeRunBds(file: string): Promise<object> {
@@ -31,7 +31,7 @@ export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Pr
 // Dev mode only function. No need to be in provider
 export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
    const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
-   const jsModules = path.join(CACHE_DUMP_OUTPUT, 'js-modules');
+   const jsModules = CACHE_DUMP_OUTPUT_JS_MODULES;
    if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
    if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
 

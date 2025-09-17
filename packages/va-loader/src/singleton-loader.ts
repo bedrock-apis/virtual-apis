@@ -12,9 +12,13 @@ export class SingletonLoaderContext extends BaseResolverContext {
       // Minecraft modules can be loaded from anywhere
       return specifier.startsWith('@minecraft/');
    }
+   protected override getNativePackageCodeURL(name: string): string {
+      const jsMod = this.context.jsModules.get(name);
+      if (jsMod) return `data:application/javascript;utf8,${jsMod}`;
+
+      return super.getNativePackageCodeURL(name);
+   }
    protected override getPackageRuntimeData(name: string): object {
-      const mod = this.context.modules.get(name);
-      if (!mod) throw new ReferenceError(`Minecraft module is not available: '${name}'`);
-      return mod.getRuntimeValue(this.context);
+      return this.context.onModuleRequested(name).getRuntimeValue(this.context);
    }
 }

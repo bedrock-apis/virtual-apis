@@ -26,7 +26,7 @@ export class CoreInstanceGetterPlugin extends Plugin {
       });
    }
 
-   protected _ = this.server.onLoad.subscribe((_, versions) => {
+   protected _ = this.server.onLoad.subscribe((mod, versions) => {
       for (const module of versions) {
          for (const symbol of module.symbols.values()) {
             if (symbol instanceof ConstructableSymbol) {
@@ -38,10 +38,7 @@ export class CoreInstanceGetterPlugin extends Plugin {
 
                      const identifier = property.identifier;
                      this.setInstanceGetValue(module, identifier, () => {
-                        const symbol = this.context.modules.get('@minecraft/server')?.symbols.get(instanceClassId);
-                        if (!(symbol instanceof ConstructableSymbol)) throw new Error('Non constructable');
-
-                        return symbol?.createRuntimeInstanceInternal(this.context);
+                        return mod.construct(instanceClassId as 'ItemStack');
                      });
                   }
                }

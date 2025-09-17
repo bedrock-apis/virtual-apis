@@ -15,26 +15,26 @@ export async function internalVirtualApiLoad(imagePath?: string) {
 
 export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
    const vaImages = import.meta.resolve('@bedrock-apis/va-images');
-   const { versions, context } = await internalVirtualApiLoad(vaImages);
+   const { context } = await internalVirtualApiLoad(vaImages);
 
    const virtualPrefix = '/@virtual:bedrock-apis-virtual-apis/';
    return {
       name: 'bedrock-apis-virtual-apis',
       enforce: 'pre',
       resolveId(id) {
-         if (versions.has(id)) return virtualPrefix + id;
+         if (id.startsWith('@minecraft')) return virtualPrefix + id;
          return null;
       },
       load(id) {
          if (id.startsWith(virtualPrefix)) {
             id = id.slice(virtualPrefix.length);
-            const version = versions.get(id);
 
-            if (!version) throw new Error('No version found for module ' + id);
+            // Binding link
+            const jsModule = context.jsModules.get(id);
+            if (jsModule) return jsModule;
 
-            // import.meta.resolve does not work in that context so we pass value from there instead
             return createCodeURL(
-               context.modules.get(id)?.getRuntimeValue(context) ?? {},
+               context.onModuleRequested(id).getRuntimeValue(context),
                id,
                0,
                undefined,
