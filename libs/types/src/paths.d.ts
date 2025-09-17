@@ -97,7 +97,6 @@ export type F =
    | 'packages/va-test/src/environment/bds.ts'
    | 'packages/va-test/src/environment/environment.ts'
    | 'packages/va-test/src/environment/va.ts'
-   | 'packages/va-test/src/environment.ts'
    | 'packages/va-test/src/error-messages.ts'
    | 'packages/va-test/src/index.ts'
    | 'packages/va-test/src/main.ts'
@@ -107,6 +106,8 @@ export type F =
    | 'packages/va-test/src/suites/block.ts'
    | 'packages/va-test/src/suites/dynamic-properties.ts'
    | 'packages/va-test/src/suites/entity.ts'
+   | 'packages/va-test/src/suites/errors.ts'
+   | 'packages/va-test/src/suites/events.ts'
    | 'packages/va-test/src/suites/item.ts'
    | 'packages/va-test/src/types.ts'
    | 'packages/virtual-apis/package.json'
@@ -164,7 +165,6 @@ export type F =
    | 'eslint.config.js'
    | 'INCOMPATIBILITY.md'
    | 'LICENSE'
-   | 'original.json'
    | 'package.json'
    | 'pnpm-lock.yaml'
    | 'pnpm-workspace.yaml'
@@ -172,8 +172,7 @@ export type F =
    | 'rolldown.config.ts'
    | 'TODO.md'
    | 'tsconfig.json'
-   | 'vitest.config.ts'
-   | 'write.json';
+   | 'vitest.config.ts';
 
 export type D = 
    | 'libs/bds-dumps'

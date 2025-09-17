@@ -8,6 +8,9 @@ import { MetadataToSerializableTransformer } from './metadata-to-serializable';
 export async function main(metadataProvider: IMetadataProvider): Promise<number> {
    const startupTime = performance.now();
    const data = await new MetadataToSerializableTransformer().transform(metadataProvider);
+
+   // TODO Add files from BDS sources
+   data.jsModules = [];
    const buffer = BinaryImageFormat.write(data);
 
    writeFileSync(path.join(IMAGES_DIR, 'image.bin'), buffer);

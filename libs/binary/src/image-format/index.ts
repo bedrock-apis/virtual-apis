@@ -43,6 +43,7 @@ export class BinaryImageFormat {
       io.uint32('version');
       this.header(io.sub('metadata'));
       io.array8('modules', io => this.module(io));
+      io.array8('jsModules', io => this.jsModule(io));
    }
 
    protected static header(io: BinaryIO<ImageHeader>): void {
@@ -61,6 +62,11 @@ export class BinaryImageFormat {
          io.float64('maxValue');
          io.float64('minValue');
       }
+   }
+   protected static jsModule(io: BinaryIO<SerializableMetadata['jsModules'][number]>) {
+      io.string8('name');
+      io.string8('filename');
+      io.string16('code');
    }
 
    protected static module(io: BinaryIO<SerializableModule>): void {
