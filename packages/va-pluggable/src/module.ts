@@ -71,28 +71,13 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
    }
 
    public onModulesLoaded(): void {
-      for (const [name, versions] of this.plugin.context.modules.entries()) {
-         for (const originalSymbol of versions) {
-            const version = originalSymbol.version;
+      for (const symbol of this.plugin.context.getModuleSymbols(this.name)) {
+         const version = symbol.version;
 
-            if (name !== this.name && name !== this.name + '-bindings') continue;
+         if (this.versionFrom && compareVersions(this.versionFrom, version) === 1) continue;
+         if (this.versionTo && compareVersions(this.versionTo, version) === -1) continue;
 
-            // Prefer bindings over regular modules
-            const binding = this.plugin.context.modules.get(name + '-bindings')?.[0];
-            const symobl = binding ?? originalSymbol;
-
-            if (this.moduleSymbols.some(e => e === symobl)) continue;
-
-            if (this.versionFrom && compareVersions(this.versionFrom, version) === 1) continue;
-            if (this.versionTo && compareVersions(this.versionTo, version) === -1) continue;
-
-            const last = this.moduleSymbols[0];
-            if (!last || compareVersions(last.version, version) === -1) {
-               this.moduleSymbols.unshift(symobl);
-            } else {
-               this.moduleSymbols.push(symobl);
-            }
-         }
+         this.moduleSymbols.push(symbol);
       }
 
       const mod = this.moduleSymbols[0];

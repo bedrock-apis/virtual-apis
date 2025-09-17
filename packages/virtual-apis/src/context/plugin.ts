@@ -1,5 +1,5 @@
 import { d } from '@bedrock-apis/common';
-import { ConstructableSymbol, type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
+import { type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
 import { Context } from './context';
 
 // It's not Symbol(Symbol.vaIdentifier), bc it's not assigned to Symbol constructor it self
@@ -57,10 +57,6 @@ export abstract class ContextPlugin {
    }
    public constructor(public readonly context: Context) {}
    public identifier!: string;
-
-   // It's private we don't want a plugin to have direct access
-   private readonly bindings: WeakMap<object, object> = new WeakMap<object, object>();
-   private readonly bindingsInverted: WeakMap<object, object> = new WeakMap<object, object>();
    //
    public onBeforeModuleCompilation(module: ModuleSymbol): void {}
    public onAfterModuleCompilation(module: ModuleSymbol): void {}
@@ -70,31 +66,4 @@ export abstract class ContextPlugin {
    }
    public onInitialization(): void {}
    public onDispose(): void {}
-   public bindInstanceTo(handle: object, instance: object): void {
-      this.bindings.set(handle, instance);
-      this.bindingsInverted.set(instance, handle);
-   }
-   public tryGetHandleFor(instance: object): object | null {
-      return this.bindingsInverted.get(instance) ?? null;
-   }
-   public tryGetInstanceFor(handle: object): object | null {
-      return this.bindings.get(handle) ?? null;
-   }
-   public disposeHandle(handle: object): void {
-      const instance = this.bindings.get(handle);
-      this.bindings.delete(handle);
-      if (instance) this.bindingsInverted.delete(instance);
-   }
-   public resolveHandleFor(instance: object, ctor?: string): object {
-      const $ = this.tryGetHandleFor(instance);
-      if ($) return $;
-      const id = (instance as PluginInstanceStorageLike)[vaTypeIdentifier]?.() ?? ctor;
-      if (!id) throw new ReferenceError('Failed to resolve type of the storage instance');
-      const symbol = this.context.tryGetSymbolByIdentifier(id);
-      if (!symbol) throw new ReferenceError('Failed to resolve type of the storage instance, id of ' + id);
-      if (!(symbol instanceof ConstructableSymbol)) throw new ReferenceError('Symbol type must be class like symbol');
-      const handle = symbol.createHandleInternal(this.context);
-      this.bindInstanceTo(handle, instance);
-      return handle;
-   }
 }

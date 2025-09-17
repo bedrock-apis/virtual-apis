@@ -36,10 +36,10 @@ describe('PluginModule', () => {
           "2.1.0-beta",
           "2.0.0-beta",
           "2.0.0",
+          "1.19.0",
           "1.16.0",
           "1.15.0",
           "1.14.0",
-          "1.19.0",
         ]
       `);
 
@@ -49,18 +49,18 @@ describe('PluginModule', () => {
           "2.1.0-beta",
           "2.0.0-beta",
           "2.0.0",
+          "1.19.0",
           "1.16.0",
           "1.15.0",
-          "1.19.0",
         ]
       `);
 
       // @ts-expect-error huhah
       expect(plugMod3.moduleSymbols.map(e => e.version)).toMatchInlineSnapshot(`
         [
+          "1.19.0",
           "1.16.0",
           "1.15.0",
-          "1.19.0",
         ]
       `);
    });

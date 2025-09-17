@@ -1,5 +1,5 @@
 import { VirtualPrivilege } from '@bedrock-apis/binary';
-import { d, MapWithDefaults } from '@bedrock-apis/common';
+import { compareVersions, d, MapWithDefaults } from '@bedrock-apis/common';
 import { ErrorFactory, PANIC_ERROR_MESSAGES, ReportAsIs } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
@@ -47,12 +47,26 @@ export class Context implements Disposable {
       symbol.getRuntimeValue(this);
       const list = this.modules.getOrCreate(symbol.name, () => []);
       list.push(symbol);
+      list.sort((a, b) => compareVersions(b.version, a.version));
    }
-   public readonly modules = new MapWithDefaults<string, ModuleSymbol[]>();
+   public getModuleSymbols(specifier: string) {
+      const moduleSymbols: ModuleSymbol[] = [];
+      for (const [name, versions] of this.modules.entries()) {
+         for (const originalSymbol of versions) {
+            if (name !== specifier && name !== specifier + '-bindings') continue;
+
+            // Prefer bindings over regular modules
+            const binding = this.modules.get(name + '-bindings')?.[0];
+            const symbol = binding ?? originalSymbol;
+
+            if (moduleSymbols.some(e => e === symbol)) continue;
+            moduleSymbols.push(symbol);
+         }
+      }
+      return moduleSymbols;
+   }
+   protected readonly modules = new MapWithDefaults<string, ModuleSymbol[]>();
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
-   public tryGetSymbolByIdentifier(id: string): CompilableSymbol<unknown> | null {
-      return this.symbols.get(id) ?? null;
-   }
 
    /** Map of js module name to js code, used for bindings */
    public jsModules = new Map<string, string>();
@@ -127,9 +141,6 @@ export class Context implements Disposable {
       return handle;
    }
 
-   public objectBindToHandleInternal(handle: object, isObjectConstant: string) {
-      // Here it runs the binding
-   }
    //#endregion
 
    //#region Actions
@@ -209,7 +220,7 @@ export class Context implements Disposable {
       this.dispose();
    }
    /** @internal */
-   public dispose(): void {
+   protected dispose(): void {
       Context.contexts.delete(this.runtimeId);
       (this as Mutable<this>).nativeHandles = new WeakSet();
       for (const plugin of this.plugins.values()) plugin.onDispose();
