@@ -64,6 +64,8 @@ export async function getSource(): Promise<ReadableStream> {
       if (readable) return readable;
    }
 
+   const preview = !env.USE_STABLE;
+
    const latest = await fetchJson<{
       linux: { preview: string; stable: string };
       windows: { preview: string; stable: string };
@@ -73,10 +75,11 @@ export async function getSource(): Promise<ReadableStream> {
       if (readable) return readable;
       throw new ReferenceError('No source available, no cache, no internet');
    }
-   const version = platform === 'win32' ? latest.windows.stable : latest.linux.stable;
+   const key = preview ? 'preview' : 'stable';
+   const version = platform === 'win32' ? latest.windows[key] : latest.linux[key];
 
    const filename = `bedrock-server-${version}.zip`;
-   const url = `https://www.minecraft.net/bedrockdedicatedserver/bin-${platform === 'win32' ? 'win' : 'linux'}/${filename}`;
+   const url = `https://www.minecraft.net/bedrockdedicatedserver/bin-${platform === 'win32' ? 'win' : 'linux'}${preview ? '-preview' : ''}/${filename}`;
 
    const response = await fetch(url).catch(_ => null);
    if (!response) throw new ReferenceError('Something went wrong while requesting url: ' + url);
