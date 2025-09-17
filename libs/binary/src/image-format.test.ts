@@ -1,10 +1,10 @@
 import { getOrGenerateMetadataFilepaths } from '@bedrock-apis/bds-dumps/api';
 import { IndexedCollector } from '@bedrock-apis/common';
 import { MetadataType } from '@bedrock-apis/types';
-import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/binary/metadata-to-serializable';
 import { SystemFileMetadataProvider } from '@bedrock-apis/va-image-generator/src/metadata-provider';
+import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/metadata-to-serializable';
 import { describe, expect, it } from 'vitest';
-import { BinaryIO } from '../binary/io';
+import { BinaryIO } from './binary/io';
 import {
    BinaryImageFormat,
    BinaryIOReader,
@@ -12,7 +12,7 @@ import {
    DataCursorView,
    SafeBinaryIOWriter,
    SerializableMetadata,
-} from '../main';
+} from './main';
 
 class TestSerializer extends MetadataToSerializableTransformer {
    testTransformType = (m: MetadataType) => this.transformType(m, this.typeRef);

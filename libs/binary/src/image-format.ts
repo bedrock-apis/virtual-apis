@@ -1,7 +1,7 @@
 import { BitFlags } from '@bedrock-apis/common';
-import { BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from '../binary';
-import { BinaryIO } from '../binary/io';
-import { IMAGE_GENERAL_DATA_MAGIC } from '../constants';
+import { BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from './binary';
+import { BinaryIO } from './binary/io';
+import { IMAGE_GENERAL_DATA_MAGIC } from './constants';
 import {
    BinaryDetailsStruct,
    BinaryDetailsType,
@@ -10,9 +10,9 @@ import {
    ImageHeader,
    ImageModuleData,
    SymbolBitFlags,
-} from '../types';
-import { SerializableMetadata, SerializableModule } from '../types/module-data';
-import { BinaryTypeStruct, TypeBitFlagsU16 } from '../types/types';
+} from './types';
+import { SerializableMetadata, SerializableModule } from './types/module-data';
+import { BinaryTypeStruct, TypeBitFlagsU16 } from './types/types';
 
 const { allOf: AllOf } = BitFlags;
 

@@ -25,7 +25,7 @@ import {
    MetadataType,
    Privilege,
 } from '@bedrock-apis/types';
-import { IMetadataProvider, StrippedMetadataModuleDefinition } from '../metadata-provider';
+import { IMetadataProvider, StrippedMetadataModuleDefinition } from './metadata-provider';
 
 export class MetadataToSerializableTransformer {
    protected readonly stringCollector = new IndexedCollector<string>();

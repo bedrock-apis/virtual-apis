@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MetadataToSerializableTransformer } from './metadata-to-serializable';
+import { MetadataToSerializableTransformer } from '../metadata-to-serializable';
 
 describe('metadata to serializable', () => {
    it('should preserve indexes', async () => {
@@ -30,4 +30,3 @@ describe('metadata to serializable', () => {
       `);
    });
 });
-

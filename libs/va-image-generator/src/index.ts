@@ -3,7 +3,7 @@ import { IMAGES_DIR } from '@bedrock-apis/common';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { IMetadataProvider } from '../metadata-provider';
+import { IMetadataProvider } from './metadata-provider';
 import { MetadataToSerializableTransformer } from './metadata-to-serializable';
 
 export async function main(metadataProvider: IMetadataProvider): Promise<number> {
