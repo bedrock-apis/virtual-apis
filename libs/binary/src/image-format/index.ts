@@ -20,11 +20,10 @@ const { allOf: AllOf } = BitFlags;
 export class BinaryImageFormat {
    protected constructor() {}
 
-   public static write(data: SerializableMetadata) {
-      const buffer = DataCursorView.alloc(2 ** 16 * 10); // 196608 bytes -> 192 kb
+   public static write(data: SerializableMetadata, cursor: DataCursorView = DataCursorView.alloc(2 ** 16 * 10)) {
       data.version = 1;
 
-      const io = new SafeBinaryIOWriter(buffer, data as object) as unknown as BinaryIO<SerializableMetadata>;
+      const io = new SafeBinaryIOWriter(cursor, data as object) as unknown as BinaryIO<SerializableMetadata>;
       this.marshal(io);
 
       return io.data.getBuffer();
@@ -66,7 +65,7 @@ export class BinaryImageFormat {
    protected static jsModule(io: BinaryIO<SerializableMetadata['jsModules'][number]>) {
       io.string8('name');
       io.string8('filename');
-      io.string16('code');
+      io.string32('code');
    }
 
    protected static module(io: BinaryIO<SerializableModule>): void {

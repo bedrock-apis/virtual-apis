@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import { spawn } from 'node:child_process';
-import { createReadStream } from 'node:fs';
-import { chmod, cp, rm } from 'node:fs/promises';
+import { createReadStream, existsSync } from 'node:fs';
+import { chmod, cp, mkdir, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import {
    CACHE_BDS,
@@ -15,6 +15,7 @@ import { prepareBdsAndCacheFolders, unzip } from './make-ready';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
 
+console.log(process.argv, '\n');
 export async function dump() {
    const { platform } = process;
    const gha = process.env.GITHUB_ACTION;
@@ -55,8 +56,23 @@ async function dumpSupported() {
 
    await promise;
 
-   await rm(join(CACHE_DUMP_OUTPUT, 'docs'), { recursive: true, force: true });
+   await rm(join(CACHE_DUMP_OUTPUT, 'docs'), { recursive: true, force: true }).catch(_ => null);
    await cp(join(CACHE_BDS, 'docs'), join(CACHE_DUMP_OUTPUT, 'docs'), { recursive: true });
+   await rm(join(CACHE_DUMP_OUTPUT, 'js-modules'), { recursive: true, force: true }).catch(_ => null);
+   await mkdir(join(CACHE_DUMP_OUTPUT, 'js-modules'));
+   for (const moduleNames of ['@minecraft/server', '@minecraft/server-ui', '@minecraft/server-editor']) {
+      const [, name] = moduleNames.split('/');
+      if (!name) throw new SyntaxError('Unexpected error please fix your damn code!');
+
+      const path = join(CACHE_BDS, `.\\behavior_packs\\${name.replace('-', '_')}_library\\scripts`);
+      if (!existsSync(path)) {
+         console.log("❌\tJS Module wasn't found. '" + moduleNames + "'");
+         continue;
+      }
+
+      await cp(path, join(CACHE_DUMP_OUTPUT, 'js-modules', name.replace('-', '_')), { recursive: true });
+      //libs\bds-dumps\dist\cache-bds\behavior_packs\server_editor_library\scripts
+   }
 
    const zip = new AdmZip();
    await zip.addLocalFolderPromise(CACHE_DUMP_OUTPUT, {});

@@ -5,4 +5,5 @@ export type StrippedMetadataModuleDefinition = Omit<MetadataModuleDefinition, 't
 
 export interface IMetadataProvider {
    getMetadataModules(): AsyncIterable<StrippedMetadataModuleDefinition>;
+   getJSModules(): AsyncIterable<[string, string]>;
 }

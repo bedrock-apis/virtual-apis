@@ -39,16 +39,16 @@
       "typecheck": "tsc --pretty --noEmit",
       "lint": "eslint",
       "test": "vitest --run",
-      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/core-plugin --import @bedrock-apis/va-loader/node ./packages/va-test/dist/run-compare",
+      "e2e": "pnpm run build:src && node --enable-source-maps --import @bedrock-apis/va-loader/node ./packages/va-test/dist/run-compare",
       "e2e:dev": "pnpm build:src && pnpm dump:run && pnpm e2e",
       "tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
       "check": "pnpm run repo:paths && pnpm run build && pnpm run tlt && pnpm run examples",
       "  ": "",
       "build:src": "rolldown -c rolldown.config.ts",
-      "build:packages": "node --enable-source-maps --import @bedrock-apis/va-image-generator \"--eval=console.log('Loading...')\"",
+      "build:packages": "node --enable-source-maps ./libs/va-image-generator/dist/main.js",
       "build": "pnpm run build:src && pnpm run build:packages",
       "   ": "",
-      "dump:run": "node --enable-source-maps --import @bedrock-apis/bds-dumps/run \"--eval=0;\"",
+      "dump:run": "node --enable-source-maps ./libs/bds-dump/dist/main.js",
       "    ": "",
       "test:coverage": "vitest --ui --coverage",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
@@ -75,9 +75,9 @@
    "devDependencies": {
       "@bedrock-apis/nbt": "0.0.1-alpha.3",
       "@eslint/js": "^9.27.0",
-      "@minecraft/server": "2.2.0-beta.1.21.100-stable",
-      "@minecraft/server-net": "1.0.0-beta.1.21.100-stable",
-      "@minecraft/server-ui": "2.1.0-beta.1.21.100-stable",
+      "@minecraft/server": "2.3.0-beta.1.21.110-preview.25",
+      "@minecraft/server-net": "1.0.0-beta.1.21.110-preview.25",
+      "@minecraft/server-ui": "2.1.0-beta.1.21.110-preview.25",
       "@types/adm-zip": "^0.5.7",
       "@types/node": "^24.0.0",
       "@vitest/coverage-istanbul": "3.1.4",
@@ -89,7 +89,7 @@
       "oxc-parser": "^0.45.0",
       "prettier": "^3.5.3",
       "prettier-plugin-jsdoc": "^1.3.2",
-      "rolldown": "1.0.0-beta.37",
+      "rolldown": "1.0.0-beta.32",
       "rollup": "^4.41.1",
       "typescript": "^5.8.3",
       "typescript-eslint": "^8.33.0",
@@ -101,4 +101,3 @@
       "node": ">=20.x.x"
    }
 }
-

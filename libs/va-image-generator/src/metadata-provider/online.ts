@@ -1,5 +1,5 @@
-import type { MetadataModuleDefinition } from '@bedrock-apis/types';
 import { compareVersions, fetchJson } from '@bedrock-apis/common';
+import type { MetadataModuleDefinition } from '@bedrock-apis/types';
 import { IMetadataProvider } from './general';
 
 const BASE_LINK = `https://raw.githubusercontent.com/Bedrock-APIs/bds-docs`;
@@ -10,6 +10,9 @@ export class OnlineMetadataProvider implements IMetadataProvider {
    public data: ExistJson | null = null;
    public constructor(branchTarget: 'stable' | 'preview') {
       this.branch = branchTarget;
+   }
+   public getJSModules(): AsyncIterable<[string, string]> {
+      throw new Error('Method not implemented.');
    }
    // TODO Return ALL versions
    public async *getMetadataModules(): AsyncIterable<MetadataModuleDefinition> {

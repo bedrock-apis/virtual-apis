@@ -29,10 +29,11 @@ export const readLocalizationReport = readReport.bind(
 export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
 
 // Dev mode only function. No need to be in provider
-export async function getOrGenerateMetadataFilepath(): Promise<string> {
+export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
    const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
-   if (!existsSync(metadata)) await dump();
+   const jsModules = path.join(CACHE_DUMP_OUTPUT, 'js-modules');
+   if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
    if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
 
-   return metadata;
+   return [metadata, jsModules];
 }

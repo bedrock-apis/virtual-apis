@@ -84,7 +84,7 @@ export class MetadataToSerializableTransformer {
          stringSlices: this.stringCollector.getArrayAndLock(),
       };
 
-      return { metadata, modules };
+      return { metadata, modules, jsModules: [] };
    }
 
    protected transformDetails(e: MetadataFunctionArgumentDetailsDefinition): BinaryDetailsStruct {
