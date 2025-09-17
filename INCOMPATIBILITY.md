@@ -45,7 +45,7 @@ Suite entity (chained):
   2: ✅
   3: ❌ Results mismatch: 
       
-      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:ageable"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"},{"typeId":"minecraft:is_baby"},{"typeId":"minecraft:scale"}]
+      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
       []
       
   

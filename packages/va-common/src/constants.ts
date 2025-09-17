@@ -1,1 +1,1 @@
-export const IMAGES_DIR = 'packages/va-images' satisfies ProjectDirectoryPath;
+export const IMAGES_DIR = 'packages/va-images';
