@@ -16,7 +16,7 @@ for (const entry of await readdir(folder, { withFileTypes: true })) {
    if (isNaN(Number(minor))) throw new Error('Nan: ' + patch);
 
    // Only minor for now
-   const newVersion = `${major}${Number(minor) + 1}${Number(patch)}${other}`;
+   const newVersion = `${major}.${Number(minor) + 1}.${Number(patch)}${other}`;
    packageJson.version = newVersion;
 
    await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2).replaceAll('\n', '\r\n') + '\r\n');
