@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-images",
-   "version": "0.0.0-alpha",
+   "version": "0.0.1-alpha",
    "main": "image.bin",
    "files": [
       "image.bin",
