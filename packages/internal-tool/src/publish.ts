@@ -19,7 +19,7 @@ for (const entry of await readdir(folder, { withFileTypes: true })) {
    const newVersion = `${major}.${Number(minor) + 1}.${Number(patch)}${other}`;
    packageJson.version = newVersion;
 
-   await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2).replaceAll('\n', '\r\n') + '\r\n');
+   await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 3).replaceAll('\n', '\r\n') + '\r\n');
 }
 
 interface ModulePackageJson {
