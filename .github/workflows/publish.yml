@@ -13,17 +13,16 @@ jobs:
       steps:
          - name: 🏗 Checkout repository
            uses: actions/checkout@v5
-           with:
-              submodules: true
 
+         - name: 🏗 Enable corepack
+           run: corepack enable
+            
          - name: 🏗 Setup Node.js
            uses: actions/setup-node@v5
            with:
               node-version: '24'
+              cache: pnpm
               registry-url: 'https://registry.npmjs.org'
-
-         - name: 🏗 Install pnpm
-           run: corepack enable && corepack use pnpm
 
          - name: 🏗 Install dependencies with pnpm
            run: pnpm run repo:init
