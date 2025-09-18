@@ -51,6 +51,12 @@ jobs:
          - name: 🏗 Bundle types
            run: PUBLISH=1 pnpm build:src
 
+         - name: 🏗 Update versions
+           run: pnpm repo:publish
+
          - uses: stefanzweifel/git-auto-commit-action@v6
            with:
               commit_message: Update package.json versions
+
+         - name: Publish changes
+           run: pnpm --recurse publish --dry-run
