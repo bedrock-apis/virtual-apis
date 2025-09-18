@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-image-loader",
-   "version": "0.0.1-alpha",
+   "version": "0.0.2-alpha",
    "type": "module",
    "dependencies": {
       "@bedrock-apis/va-binary": "workspace:*",
