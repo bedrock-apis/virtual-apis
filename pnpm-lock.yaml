@@ -98,6 +98,12 @@ importers:
 
   examples/custom-bds-software:
     dependencies:
+      '@bedrock-apis/va-loader':
+        specifier: workspace:^
+        version: link:../../packages/va-loader
+      '@bedrock-apis/va-pluggable':
+        specifier: workspace:^
+        version: link:../../packages/va-pluggable
       '@bedrock-apis/virtual-apis':
         specifier: workspace:x.x.x
         version: link:../../packages/virtual-apis
@@ -107,6 +113,12 @@ importers:
 
   examples/custom-bds-software-ts:
     dependencies:
+      '@bedrock-apis/va-loader':
+        specifier: workspace:^
+        version: link:../../packages/va-loader
+      '@bedrock-apis/va-pluggable':
+        specifier: workspace:^
+        version: link:../../packages/va-pluggable
       '@bedrock-apis/virtual-apis':
         specifier: workspace:x.x.x
         version: link:../../packages/virtual-apis
@@ -122,6 +134,9 @@ importers:
       '@bedrock-apis/va-loader':
         specifier: workspace:^
         version: link:../../packages/va-loader
+      '@bedrock-apis/va-pluggable':
+        specifier: workspace:^
+        version: link:../../packages/va-pluggable
       '@bedrock-apis/virtual-apis':
         specifier: workspace:^
         version: link:../../packages/virtual-apis

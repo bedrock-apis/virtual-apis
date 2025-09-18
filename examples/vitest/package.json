@@ -12,6 +12,7 @@
    "license": "Apache-2.0",
    "dependencies": {
       "@bedrock-apis/va-loader": "workspace:^",
+      "@bedrock-apis/va-pluggable": "workspace:^",
       "@bedrock-apis/virtual-apis": "workspace:^",
       "@minecraft/server": "2.0.0",
       "vitest": "^3.1.4"
