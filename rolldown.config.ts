@@ -1,34 +1,39 @@
 import { existsSync } from 'node:fs';
-import { glob, readFile, readdir, rm } from 'node:fs/promises';
+import { glob, readdir, readFile, rm } from 'node:fs/promises';
 import path, { resolve } from 'node:path';
 import type { RolldownOptions } from 'rolldown';
+import { dts } from 'rolldown-plugin-dts';
 import { devDependencies } from './package.json' with { type: 'json' };
 
 const folder = 'packages';
 
 const external = [new RegExp(`^(node:|chalk|adm-zip|unzip-web-stream|${Object.keys(devDependencies).join('|')}|@)`)];
 const options: RolldownOptions[] = [];
+const plugins: RolldownOptions['plugins'] = process.env.PUBLISH ? [dts()] : [];
 
 for (const entry of await readdir(folder, { withFileTypes: true })) {
    const packagePath = `./${folder}/${entry.name}`;
    if (!existsSync(`${packagePath}/package.json`)) continue;
 
+   const dist = `${packagePath}/dist/`;
    const packageJson = JSON.parse(await readFile(`${packagePath}/package.json`, 'utf-8')) as ModulePackageJson;
+
    if (packageJson.main && packageJson.types) {
       const input = resolve(packagePath, packageJson.types);
       if (existsSync(input)) {
          options.push({
             external,
+            plugins,
             input,
-            output: { file: resolve(packagePath, packageJson.main), sourcemap: 'inline' },
+            output: { dir: dist, sourcemap: 'inline' },
          });
       }
    }
 
    if (packageJson.exports) {
-      const dist = `${packagePath}/dist/`;
       const option = {
          external,
+         plugins,
          input: [] as string[],
          output: { dir: dist, sourcemap: 'inline' },
       } satisfies RolldownOptions;

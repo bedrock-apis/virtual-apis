@@ -1,0 +1,56 @@
+name: Publish
+
+on: workflow_dispatch
+
+permissions:
+   # Give the default GITHUB_TOKEN write permission to commit and push the
+   # added or changed files to the repository.
+   contents: write
+
+jobs:
+   build:
+      runs-on: ubuntu-latest
+      steps:
+         - name: 🏗 Checkout repository
+           uses: actions/checkout@v4
+           with:
+              submodules: true
+
+         - name: 🏗 Setup Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: '24'
+
+         - name: 🏗 Install pnpm
+           run: corepack enable && corepack use pnpm
+
+         - name: 🏗 Install dependencies with pnpm
+           run: pnpm run repo:init
+
+         - name: ✔ Check TypeScript types
+           run: pnpm run typecheck
+
+         - name: 🚧 Lint
+           run: pnpm run lint
+
+         - name: ⚙️ Dump BDS Docs
+           run: pnpm run dump:run
+
+         - name: 🧪 Run project tests
+           run: pnpm run test
+
+         - name: 🏗 Build images
+           run: pnpm run build
+
+         - name: 🧪 Run e2e tests
+           run: pnpm run e2e
+
+         - name: 🧪 Run examples tests
+           run: pnpm run examples
+
+         - name: 🏗 Bundle types
+           run: PUBLISH=1 pnpm build:src
+
+         - uses: stefanzweifel/git-auto-commit-action@v6
+           with:
+              commit_message: Update package.json versions

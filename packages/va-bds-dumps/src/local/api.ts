@@ -4,6 +4,7 @@ import path from 'node:path';
 import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
 import { CACHE_DUMP_OUTPUT, CACHE_DUMP_OUTPUT_JS_MODULES } from './constants';
 import { dump } from './dump';
+export * from '../shared';
 
 async function readAndMaybeRunBds(file: string): Promise<object> {
    const filepath = path.join(CACHE_DUMP_OUTPUT, file);

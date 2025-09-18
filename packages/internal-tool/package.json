@@ -13,6 +13,11 @@
          "default": "./dist/run-compare.js",
          "types": "./src/run-compare.ts",
          "rolldown": null
+      },
+      "./publish": {
+         "default": "./dist/publish.js",
+         "types": "./src/publish.ts",
+         "rolldown": null
       }
    },
    "dependencies": {
