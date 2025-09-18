@@ -19,7 +19,7 @@ import { setupScriptAPI } from './setup-script-api';
 export async function dump() {
    const { platform } = process;
    const gha = process.env.GITHUB_ACTION;
-   const noBds = process.env.NO_BDS;
+   const noBds = process.env.NO_BDS ?? true; // enable by default for now cuz we publishing
    if (!noBds && (platform === 'win32' || (platform === 'linux' && !gha))) {
       await dumpSupported();
    } else {

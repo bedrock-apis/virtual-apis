@@ -59,6 +59,6 @@ jobs:
               commit_message: Update package.json versions
 
          - name: Publish changes
-           run: pnpm --recursive --access public publish --dry-run
+           run: pnpm -r publish
            env:
               NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/internal-tool",
-   "version": "0.1.1-alpha",
+   "version": "0.0.0-alpha",
    "private": true,
    "type": "module",
    "dependencies": {

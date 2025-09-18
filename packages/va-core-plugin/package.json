@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-core-plugin",
-   "version": "0.1.1-alpha",
+   "version": "0.0.0-alpha",
    "type": "module",
    "dependencies": {
       "@bedrock-apis/va-bds-dumps": "workspace:*",
