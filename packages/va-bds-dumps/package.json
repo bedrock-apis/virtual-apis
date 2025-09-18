@@ -24,6 +24,9 @@
    },
    "files": [
       "dist",
-      "dump-output.zip"
+      "dump-output.zip",
+      "!dist/cache-bds",
+      "!dist/dump-output",
+      "!dist/cache-bds-download"
    ]
 }
