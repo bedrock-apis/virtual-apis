@@ -74,7 +74,10 @@ export class Context implements Disposable {
       const loaded = this.tryGetPlugin(pluginType);
       if (loaded) return loaded;
 
-      const plugin = pluginType.instantiate(this);
+      const plugin = ContextPlugin.instantiate.call(
+         pluginType as unknown as new (context: Context) => ContextPlugin,
+         this,
+      );
       this.plugins.set(pluginType.identifier, plugin);
       this.pluginTypes.set(pluginType, plugin);
       plugin.onInitialization();
@@ -193,18 +196,18 @@ export class Context implements Disposable {
 
    /** @internal */
    public onInvocation(invocation: InvocationInfo) {
-      const implemetations = this.implementations
+      const implementations = this.implementations
          .get(invocation.symbol.module.nameVersion)
          ?.get(invocation.symbol.identifier);
 
-      if (!implemetations?.length) {
+      if (!implementations?.length) {
          invocation.diagnostics.errors.report(
             new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation(invocation.symbol.identifier)),
          );
          return;
       }
 
-      for (const { impl } of implemetations) {
+      for (const { impl } of implementations) {
          try {
             impl(invocation, ...invocation.params);
          } catch (error) {

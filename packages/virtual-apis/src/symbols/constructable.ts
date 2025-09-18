@@ -37,6 +37,7 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    //This is not solve yet, but required for objects to work yet
    public createRuntimeInstanceInternal(context: Context) {
       const $ = this.createHandleInternal(context);
+      //This should be safe as prototype property is baked with value and should be impossible to change
       setPrototypeOf($, this.getRuntimeValue(context).prototype);
       return $;
    }
