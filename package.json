@@ -74,6 +74,10 @@
    "engines": {
       "node": ">=20.x.x"
    },
+   "files": [
+      "dist",
+      "dump-output.zip"
+   ],
    "prettier": {
       "arrowParens": "avoid",
       "endOfLine": "crlf",
