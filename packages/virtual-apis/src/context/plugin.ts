@@ -36,10 +36,7 @@ export class ContextPluginLinkedStorage<T extends object> {
 
 // Low level plugin system
 export abstract class ContextPlugin {
-   public static instantiate<T extends typeof ContextPlugin, S extends ContextPlugin>(this: T, context: Context): S {
-      // @ts-expect-error Abstract bypass
-      return new this(context);
-   }
+   //#region Static
    public static plugins = new Map<string, typeof ContextPlugin>();
    public static identifier: string;
    public static register(identifier: string) {
@@ -55,6 +52,13 @@ export abstract class ContextPlugin {
       this.prototype.identifier = identifier;
       this.plugins.set(this.prototype.identifier, this);
    }
+   public static instantiate<S extends ContextPlugin, T extends new (context: Context) => S>(
+      this: T,
+      context: Context,
+   ): S {
+      return new this(context);
+   }
+   //#endregion
    public constructor(public readonly context: Context) {}
    public identifier!: string;
    //
