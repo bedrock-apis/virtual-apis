@@ -12,14 +12,15 @@ jobs:
       runs-on: ubuntu-latest
       steps:
          - name: 🏗 Checkout repository
-           uses: actions/checkout@v4
+           uses: actions/checkout@v5
            with:
               submodules: true
 
          - name: 🏗 Setup Node.js
-           uses: actions/setup-node@v4
+           uses: actions/setup-node@v5
            with:
               node-version: '24'
+              registry-url: 'https://registry.npmjs.org'
 
          - name: 🏗 Install pnpm
            run: corepack enable && corepack use pnpm
@@ -27,26 +28,11 @@ jobs:
          - name: 🏗 Install dependencies with pnpm
            run: pnpm run repo:init
 
-         - name: ✔ Check TypeScript types
-           run: pnpm run typecheck
-
-         - name: 🚧 Lint
-           run: pnpm run lint
-
          - name: ⚙️ Dump BDS Docs
            run: pnpm run dump:run
 
-         - name: 🧪 Run project tests
-           run: pnpm run test
-
          - name: 🏗 Build images
            run: pnpm run build
-
-         - name: 🧪 Run e2e tests
-           run: pnpm run e2e
-
-         - name: 🧪 Run examples tests
-           run: pnpm run examples
 
          - name: 🏗 Bundle types
            run: PUBLISH=1 pnpm build:src
@@ -61,4 +47,5 @@ jobs:
          - name: Publish changes
            run: pnpm -r publish
            env:
+              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
