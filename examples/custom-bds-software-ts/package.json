@@ -1,20 +1,20 @@
 {
    "name": "custom-bds-software-ts",
-   "version": "1.0.0",
    "description": "",
-   "main": "index.js",
+   "version": "1.0.0",
+   "author": "",
+   "license": "Apache-2.0",
+   "keywords": [],
+   "type": "module",
    "scripts": {
       "start": "tsx ./virtual-apis/load.ts"
    },
-   "keywords": [],
-   "author": "",
-   "license": "Apache-2.0",
    "dependencies": {
-      "@bedrock-apis/virtual-apis": "workspace:x.x.x",
       "@bedrock-apis/va-loader": "workspace:^",
       "@bedrock-apis/va-pluggable": "workspace:^",
+      "@bedrock-apis/virtual-apis": "workspace:x.x.x",
       "@minecraft/server": "2.0.0",
       "tsx": "^4.19.2"
    },
-   "type": "module"
+   "main": "index.js"
 }

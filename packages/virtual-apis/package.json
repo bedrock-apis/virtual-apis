@@ -1,12 +1,15 @@
 {
    "name": "@bedrock-apis/virtual-apis",
    "version": "0.1.1-alpha",
-   "types": "./src/main.ts",
-   "main": "./dist/main.js",
    "type": "module",
    "dependencies": {
+      "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
-      "@bedrock-apis/va-types": "workspace:*",
-      "@bedrock-apis/va-binary": "workspace:*"
-   }
+      "@bedrock-apis/va-types": "workspace:*"
+   },
+   "main": "./dist/main.js",
+   "types": "./src/main.ts",
+   "files": [
+      "dist"
+   ]
 }

@@ -1,12 +1,15 @@
 {
    "name": "@bedrock-apis/va-image-loader",
    "version": "0.1.1-alpha",
-   "main": "./dist/main.js",
-   "types": "./src/main.ts",
    "type": "module",
    "dependencies": {
-      "@bedrock-apis/virtual-apis": "workspace:*",
       "@bedrock-apis/va-binary": "workspace:*",
-      "@bedrock-apis/va-common": "workspace:*"
-   }
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/virtual-apis": "workspace:*"
+   },
+   "main": "./dist/main.js",
+   "types": "./src/main.ts",
+   "files": [
+      "dist"
+   ]
 }

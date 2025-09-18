@@ -4,6 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@bedrock-apis/nbt':
+      specifier: 0.0.1-alpha.3
+      version: 0.0.1-alpha.3
+    '@bedrock-apis/nbt-core':
+      specifier: 0.0.1-alpha.2
+      version: 0.0.1-alpha.2
+    adm-zip:
+      specifier: ^0.5.16
+      version: 0.5.16
+    chalk:
+      specifier: ^5.6.2
+      version: 5.6.2
+    unzip-web-stream:
+      specifier: 0.0.0-alpha.1
+      version: 0.0.0-alpha.1
+
 importers:
 
   .:
@@ -62,6 +80,9 @@ importers:
       prettier-plugin-jsdoc:
         specifier: ^1.3.3
         version: 1.3.3(prettier@3.6.2)
+      prettier-plugin-pkg:
+        specifier: ^0.21.2
+        version: 0.21.2(prettier@3.6.2)
       rolldown:
         specifier: 1.0.0-beta.38
         version: 1.0.0-beta.38
@@ -1604,6 +1625,12 @@ packages:
     engines: {node: '>=14.13.1 || >=16.0.0'}
     peerDependencies:
       prettier: ^3.0.0
+
+  prettier-plugin-pkg@0.21.2:
+    resolution: {integrity: sha512-CSlM5+51B7yTKcoRWT4M3ImcdFHD5NUz0Xu2t8J03B761zu6J3BjSo/XleKp2kB0tH49K7oG5Uuqn6ldI5LRLg==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      prettier: ^3.0.3
 
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
@@ -3187,6 +3214,10 @@ snapshots:
       prettier: 3.6.2
     transitivePeerDependencies:
       - supports-color
+
+  prettier-plugin-pkg@0.21.2(prettier@3.6.2):
+    dependencies:
+      prettier: 3.6.2
 
   prettier@3.6.2: {}
 

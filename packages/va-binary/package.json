@@ -1,16 +1,19 @@
 {
    "name": "@bedrock-apis/va-binary",
    "version": "0.1.1-alpha",
-   "main": "./dist/main.js",
    "type": "module",
+   "dependencies": {
+      "@bedrock-apis/nbt": "catalog:",
+      "@bedrock-apis/nbt-core": "catalog:",
+      "@bedrock-apis/va-common": "workspace:*"
+   },
+   "main": "./dist/main.js",
    "types": "./src/main.ts",
    "exports": {
       "default": "./dist/main.js",
       "types": "./src/main.ts"
    },
-   "dependencies": {
-      "@bedrock-apis/nbt": "catalog:",
-      "@bedrock-apis/nbt-core": "catalog:",
-      "@bedrock-apis/va-common": "workspace:*"
-   }
+   "files": [
+      "dist"
+   ]
 }

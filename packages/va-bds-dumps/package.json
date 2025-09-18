@@ -2,6 +2,12 @@
    "name": "@bedrock-apis/va-bds-dumps",
    "version": "0.1.1-alpha",
    "type": "module",
+   "dependencies": {
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-test": "workspace:*",
+      "adm-zip": "catalog:",
+      "unzip-web-stream": "catalog:"
+   },
    "main": "./dist/main.js",
    "types": "./src/local/main.ts",
    "exports": {
@@ -16,10 +22,8 @@
          "rolldown": null
       }
    },
-   "dependencies": {
-      "@bedrock-apis/va-test": "workspace:*",
-      "@bedrock-apis/va-common": "workspace:*",
-      "adm-zip": "catalog:",
-      "unzip-web-stream": "catalog:"
-   }
+   "files": [
+      "dist",
+      "dump-output.zip"
+   ]
 }

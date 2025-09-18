@@ -28,5 +28,8 @@
          "types": "./src/vitest-plugin/vitest.ts",
          "rolldown": null
       }
-   }
+   },
+   "files": [
+      "dist"
+   ]
 }

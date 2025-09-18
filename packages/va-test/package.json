@@ -3,8 +3,8 @@
    "version": "0.1.1-alpha",
    "type": "module",
    "dependencies": {
-      "@bedrock-apis/va-loader": "workspace:*",
-      "@bedrock-apis/va-common": "workspace:*"
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-loader": "workspace:*"
    },
    "exports": {
       ".": {
