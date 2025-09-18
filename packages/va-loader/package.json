@@ -2,10 +2,20 @@
    "name": "@bedrock-apis/va-loader",
    "version": "0.0.1-alpha",
    "type": "module",
+   "dependencies": {
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-image-loader": "workspace:*",
+      "@bedrock-apis/virtual-apis": "workspace:*"
+   },
    "exports": {
       "./api": {
          "default": "./dist/api.js",
          "types": "./src/api.ts",
+         "rolldown": null
+      },
+      "./node/no-config": {
+         "default": "./dist/no-config.js",
+         "types": "./src/node-default/no-config.ts",
          "rolldown": null
       },
       "./node": {

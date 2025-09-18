@@ -12,7 +12,7 @@ import {
    removeBdsTestConfig,
    writeBdsTestConfig,
 } from './constants';
-import { prepareBdsAndCacheFolders, unzip } from './make-ready';
+import { prepareBdsAndCacheFolders, unzip } from './prepare-bds';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
 

@@ -15,5 +15,11 @@
          "types": "./src/local/main.ts",
          "rolldown": null
       }
+   },
+   "dependencies": {
+      "@bedrock-apis/va-test": "workspace:*",
+      "@bedrock-apis/va-common": "workspace:*",
+      "adm-zip": "catalog:",
+      "unzip-web-stream": "catalog:"
    }
 }

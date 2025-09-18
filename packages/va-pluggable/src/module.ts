@@ -1,6 +1,5 @@
-import { compareVersions, d, VaEventLoader } from '@bedrock-apis/va-common';
+import { compareVersions, dwarn, VaEventLoader } from '@bedrock-apis/va-common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
-import chalk from 'chalk';
 import { Plugin } from './api';
 import { Impl, ImplStatic, ImplStoraged } from './implementation';
 import { ModuleTypeMap, PartialParts, StorageThis, ThisContext } from './types';
@@ -84,7 +83,7 @@ export class PluginModule<Mod extends ModuleTypeMap = any, P extends Plugin = Pl
       if (!mod) {
          const m = `Not implementing ${this.name} for ${this.versionFrom}...${this.versionTo}`;
          if (!PluginModule.debugMessagesRemoveLater.has(m)) {
-            d(chalk.yellow(m));
+            dwarn(m);
             PluginModule.debugMessagesRemoveLater.add(m);
          }
       } else {

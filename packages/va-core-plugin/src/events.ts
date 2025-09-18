@@ -1,4 +1,4 @@
-import { VirtualPrivilege } from '@bedrock-apis/va-binary';
+import { VirtualPrivilege } from '@bedrock-apis/va-common';
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';

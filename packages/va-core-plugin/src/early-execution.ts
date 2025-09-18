@@ -1,4 +1,4 @@
-import { VirtualPrivilege } from '@bedrock-apis/va-binary';
+import { VirtualPrivilege } from '@bedrock-apis/va-common';
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import { EventsPlugin } from './events';
 

@@ -1,7 +1,15 @@
 packages:
    - packages/*
-   - libs/*
    - examples/**
+
 onlyBuiltDependencies:
    - esbuild
+
 ignoreWorkspaceRootCheck: true
+
+catalog:
+   '@bedrock-apis/nbt': '0.0.1-alpha.3'
+   '@bedrock-apis/nbt-core': '0.0.1-alpha.2'
+   adm-zip: '^0.5.16'
+   chalk: '^5.6.2'
+   unzip-web-stream: '0.0.0-alpha.1'

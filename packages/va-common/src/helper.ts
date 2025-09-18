@@ -33,6 +33,8 @@ let debugFn = console.log.bind(console, chalk.bold.yellow('[VIRTUAL-APIS DEBUG]'
 
 export const d = (...args: unknown[]) => debugFn(...args);
 
+export const dwarn = (...args: unknown[]) => debugFn(...args.map(e => chalk.yellow(e)));
+
 export function setDebugFunction(fn = debugFn) {
    debugFn = fn;
 }
@@ -43,4 +45,10 @@ export class MapWithDefaults<K, V> extends Map<K, V> {
       if (typeof value === 'undefined') this.set(key, (value = create()));
       return value;
    }
+}
+
+export enum VirtualPrivilege {
+   ReadOnly = 'read_only',
+   None = 'none',
+   EarlyExecution = 'early_execution',
 }

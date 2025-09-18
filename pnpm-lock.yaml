@@ -4,56 +4,46 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@bedrock-apis/nbt':
+      specifier: 0.0.1-alpha.3
+      version: 0.0.1-alpha.3
+    '@bedrock-apis/nbt-core':
+      specifier: 0.0.1-alpha.2
+      version: 0.0.1-alpha.2
+    adm-zip:
+      specifier: ^0.5.16
+      version: 0.5.16
+    chalk:
+      specifier: ^5.6.2
+      version: 5.6.2
+    unzip-web-stream:
+      specifier: 0.0.0-alpha.1
+      version: 0.0.0-alpha.1
+
 importers:
 
   .:
-    dependencies:
-      '@bedrock-apis/internal-tool':
-        specifier: workspace:*
-        version: link:packages/internal-tool
-      '@bedrock-apis/nbt':
-        specifier: 0.0.1-alpha.3
-        version: 0.0.1-alpha.3
-      '@bedrock-apis/nbt-core':
-        specifier: 0.0.1-alpha.2
-        version: 0.0.1-alpha.2
+    devDependencies:
       '@bedrock-apis/va-bds-dumps':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:packages/va-bds-dumps
-      '@bedrock-apis/va-binary':
-        specifier: workspace:*
-        version: link:packages/va-binary
-      '@bedrock-apis/va-common':
-        specifier: workspace:*
-        version: link:packages/va-common
       '@bedrock-apis/va-core-plugin':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:packages/va-core-plugin
       '@bedrock-apis/va-image-generator':
         specifier: workspace:*
         version: link:packages/va-image-generator
-      '@bedrock-apis/va-image-loader':
-        specifier: workspace:*
-        version: link:packages/va-image-loader
       '@bedrock-apis/va-images':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:packages/va-images
       '@bedrock-apis/va-loader':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:packages/va-loader
-      '@bedrock-apis/va-pluggable':
-        specifier: workspace:*
-        version: link:packages/va-pluggable
-      '@bedrock-apis/va-test':
-        specifier: workspace:*
-        version: link:packages/va-test
       '@bedrock-apis/va-types':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:packages/va-types
-      '@bedrock-apis/virtual-apis':
-        specifier: workspace:*
-        version: link:packages/virtual-apis
-    devDependencies:
       '@eslint/js':
         specifier: ^9.35.0
         version: 9.35.0
@@ -78,18 +68,9 @@ importers:
       '@vitest/ui':
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4)
-      adm-zip:
-        specifier: ^0.5.16
-        version: 0.5.16
-      chalk:
-        specifier: ^5.6.2
-        version: 5.6.2
       eslint:
         specifier: ^9.35.0
         version: 9.35.0(jiti@2.4.2)
-      exitzero:
-        specifier: ^1.0.1
-        version: 1.0.1
       oxc-parser:
         specifier: ^0.89.0
         version: 0.89.0
@@ -111,9 +92,6 @@ importers:
       typescript-eslint:
         specifier: ^8.44.0
         version: 8.44.0(eslint@9.35.0(jiti@2.4.2))(typescript@5.9.2)
-      unzip-web-stream:
-        specifier: 0.0.0-alpha.1
-        version: 0.0.0-alpha.1
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.5.1)(@vitest/ui@3.2.4)(jiti@2.4.2)(tsx@4.19.4)
@@ -154,31 +132,144 @@ importers:
         specifier: ^3.1.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.5.1)(@vitest/ui@3.2.4)(jiti@2.4.2)(tsx@4.19.4)
 
-  packages/internal-tool: {}
+  packages/internal-tool:
+    dependencies:
+      '@bedrock-apis/va-bds-dumps':
+        specifier: workspace:*
+        version: link:../va-bds-dumps
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-test':
+        specifier: workspace:*
+        version: link:../va-test
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
+      chalk:
+        specifier: 'catalog:'
+        version: 5.6.2
 
-  packages/va-bds-dumps: {}
+  packages/va-bds-dumps:
+    dependencies:
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-test':
+        specifier: workspace:*
+        version: link:../va-test
+      adm-zip:
+        specifier: 'catalog:'
+        version: 0.5.16
+      unzip-web-stream:
+        specifier: 'catalog:'
+        version: 0.0.0-alpha.1
 
-  packages/va-binary: {}
+  packages/va-binary:
+    dependencies:
+      '@bedrock-apis/nbt':
+        specifier: 'catalog:'
+        version: 0.0.1-alpha.3
+      '@bedrock-apis/nbt-core':
+        specifier: 'catalog:'
+        version: 0.0.1-alpha.2
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
 
-  packages/va-common: {}
+  packages/va-common:
+    dependencies:
+      chalk:
+        specifier: 'catalog:'
+        version: 5.6.2
 
-  packages/va-core-plugin: {}
+  packages/va-core-plugin:
+    dependencies:
+      '@bedrock-apis/va-bds-dumps':
+        specifier: workspace:*
+        version: link:../va-bds-dumps
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-pluggable':
+        specifier: workspace:*
+        version: link:../va-pluggable
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
 
-  packages/va-image-generator: {}
+  packages/va-image-generator:
+    dependencies:
+      '@bedrock-apis/va-bds-dumps':
+        specifier: workspace:*
+        version: link:../va-bds-dumps
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-types':
+        specifier: workspace:*
+        version: link:../va-types
 
-  packages/va-image-loader: {}
+  packages/va-image-loader:
+    dependencies:
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
 
   packages/va-images: {}
 
-  packages/va-loader: {}
+  packages/va-loader:
+    dependencies:
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-image-loader':
+        specifier: workspace:*
+        version: link:../va-image-loader
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
 
-  packages/va-pluggable: {}
+  packages/va-pluggable:
+    dependencies:
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
 
-  packages/va-test: {}
+  packages/va-test:
+    dependencies:
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-loader':
+        specifier: workspace:*
+        version: link:../va-loader
 
   packages/va-types: {}
 
-  packages/virtual-apis: {}
+  packages/virtual-apis:
+    dependencies:
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
+      '@bedrock-apis/va-common':
+        specifier: workspace:*
+        version: link:../va-common
+      '@bedrock-apis/va-types':
+        specifier: workspace:*
+        version: link:../va-types
 
 packages:
 
@@ -1286,10 +1377,6 @@ packages:
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
-
-  exitzero@1.0.1:
-    resolution: {integrity: sha512-TFqfd0V9fE7rsDlAX2V5VpyLjAT3n3x4pJqZur7dm2pDTLlx8rGpv4fS0UqSn5ur/hMyqIVss4yps5EfMt+FBA==}
-    hasBin: true
 
   expect-type@1.2.2:
     resolution: {integrity: sha512-JhFGDVJ7tmDJItKhYgJCGLOWjuK9vPxiXoUFLwLDc99NlmklilbiQJwoctZtt13+xMw91MCk/REan6MWHqDjyA==}
@@ -2866,8 +2953,6 @@ snapshots:
       '@types/estree': 1.0.8
 
   esutils@2.0.3: {}
-
-  exitzero@1.0.1: {}
 
   expect-type@1.2.2: {}
 

@@ -18,7 +18,10 @@ function readJsonFileSafely(pathToFile: string) {
 export function getModuleVersions(cwd = process.cwd()) {
    const modules: Map<string, string> = new Map();
 
-   const packageJson = readJsonFileSafely(path.join(cwd, 'package.json')) as typeof import('../../../package.json');
+   const packageJson = readJsonFileSafely(path.join(cwd, 'package.json')) as {
+      devDependencies: Record<string, string>;
+      dependencies: Record<string, string>;
+   };
 
    if (packageJson) {
       const deps = { ...packageJson.devDependencies, ...packageJson.dependencies };

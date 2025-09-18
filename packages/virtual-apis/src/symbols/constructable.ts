@@ -1,7 +1,7 @@
 import { finalizeAsConstructable } from '../ecma-utils';
 import { InvocableSymbol } from './abstracts';
 
-import { VirtualPrivilege } from '@bedrock-apis/va-binary';
+import { VirtualPrivilege } from '@bedrock-apis/va-common';
 import type { Context } from '../context/context';
 import { InvocationInfo } from '../context/invocation-info';
 import {

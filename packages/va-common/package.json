@@ -16,5 +16,8 @@
          "types": "./src/vector.ts",
          "rolldown": null
       }
+   },
+   "dependencies": {
+      "chalk": "catalog:"
    }
 }

@@ -5,5 +5,8 @@
    "main": "./dist/main.js",
    "type": "module",
    "types": "./src/main.ts",
-   "dependencies": {}
+   "dependencies": {
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/virtual-apis": "workspace:*"
+   }
 }

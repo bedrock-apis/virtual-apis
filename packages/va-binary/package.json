@@ -7,5 +7,10 @@
    "exports": {
       "default": "./dist/main.js",
       "types": "./src/main.ts"
+   },
+   "dependencies": {
+      "@bedrock-apis/nbt": "catalog:",
+      "@bedrock-apis/nbt-core": "catalog:",
+      "@bedrock-apis/va-common": "workspace:*"
    }
 }

@@ -2,15 +2,14 @@
    "name": "@bedrock-apis/va-test",
    "version": "0.0.1-alpha",
    "type": "module",
+   "dependencies": {
+      "@bedrock-apis/va-loader": "workspace:*",
+      "@bedrock-apis/va-common": "workspace:*"
+   },
    "exports": {
       ".": {
          "default": "./dist/main.js",
          "types": "./src/main.ts",
-         "rolldown": null
-      },
-      "./run-compare": {
-         "default": "./dist/run-compare.js",
-         "types": "./src/run-compare.ts",
          "rolldown": null
       },
       "./suites": {

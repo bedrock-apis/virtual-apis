@@ -77,9 +77,3 @@ export interface BinarySymbolStruct {
    functionArgumentsDetails?: IndexId[];
    setterPrivileges?: IndexId[];
 }
-
-export enum VirtualPrivilege {
-   ReadOnly = 'read_only',
-   None = 'none',
-   EarlyExecution = 'early_execution',
-}

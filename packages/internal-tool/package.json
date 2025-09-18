@@ -8,6 +8,18 @@
          "default": "./dist/todo.js",
          "types": "./src/todo.ts",
          "rolldown": null
+      },
+      "./run-compare": {
+         "default": "./dist/run-compare.js",
+         "types": "./src/run-compare.ts",
+         "rolldown": null
       }
+   },
+   "dependencies": {
+      "chalk": "catalog:",
+      "@bedrock-apis/virtual-apis": "workspace:*",
+      "@bedrock-apis/va-test": "workspace:*",
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-bds-dumps": "workspace:*"
    }
 }

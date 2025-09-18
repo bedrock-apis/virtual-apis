@@ -1,42 +1,58 @@
 import { existsSync } from 'node:fs';
-import { readFile, readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { glob, readFile, readdir, rm } from 'node:fs/promises';
+import path, { resolve } from 'node:path';
 import type { RolldownOptions } from 'rolldown';
-import { devDependencies, workspaces } from './package.json' with { type: 'json' };
+import { devDependencies } from './package.json' with { type: 'json' };
 
-const external = [new RegExp(`^(node:|${Object.keys(devDependencies).join('|')}|@bedrock-apis|@minecraft)`)];
+const folder = 'packages';
+
+const external = [new RegExp(`^(node:|chalk|adm-zip|unzip-web-stream|${Object.keys(devDependencies).join('|')}|@)`)];
 const options: RolldownOptions[] = [];
 
-for (const workspace of workspaces) {
-   const folderName = workspace.replace(/[/*]+$/, '');
-   for (const entry of await readdir(folderName, { withFileTypes: true })) {
-      const path = `./${folderName}/${entry.name}/`;
-      if (existsSync(`${path}/package.json`)) {
-         const buffer = await readFile(`${path}/package.json`);
-         const { types, main, exports } = JSON.parse(buffer.toString()) as ModulePackageJson;
-         if (main && types) {
-            const input = resolve(path, types);
-            if (existsSync(input))
-               options.push({ external, input, output: { file: resolve(path, main), sourcemap: 'inline' } });
-         }
+for (const entry of await readdir(folder, { withFileTypes: true })) {
+   const packagePath = `./${folder}/${entry.name}`;
+   if (!existsSync(`${packagePath}/package.json`)) continue;
 
-         if (exports) {
-            const option = {
-               external,
-               input: [] as string[],
-               output: { dir: path + 'dist/', sourcemap: 'inline' },
-            } satisfies RolldownOptions;
+   const packageJson = JSON.parse(await readFile(`${packagePath}/package.json`, 'utf-8')) as ModulePackageJson;
+   if (packageJson.main && packageJson.types) {
+      const input = resolve(packagePath, packageJson.types);
+      if (existsSync(input)) {
+         options.push({
+            external,
+            input,
+            output: { file: resolve(packagePath, packageJson.main), sourcemap: 'inline' },
+         });
+      }
+   }
 
-            for (const name of Object.keys(exports)) {
-               const obj = exports[name];
-               if (typeof obj === 'object' && obj.rolldown === null && obj.default && obj.types)
-                  option.input.push(resolve(path, obj.types));
+   if (packageJson.exports) {
+      const dist = `${packagePath}/dist/`;
+      const option = {
+         external,
+         input: [] as string[],
+         output: { dir: dist, sourcemap: 'inline' },
+      } satisfies RolldownOptions;
+
+      for (const name of Object.keys(packageJson.exports)) {
+         const obj = packageJson.exports[name];
+         if (typeof obj === 'object' && obj.rolldown === null && obj.default && obj.types) {
+            const expected = `./dist/${path.parse(obj.types).name}.js`;
+            if (expected !== obj.default) {
+               console.warn(
+                  `${packagePath}/package.json: ${obj.default} must be ${expected}. Custom .js file names are not supported`,
+               );
             }
-            if (option.input.length) options.push(option);
+
+            option.input.push(resolve(packagePath, obj.types));
          }
+      }
+      if (option.input.length) {
+         options.push(option);
+         for await (const file of glob(dist + '*.js')) await rm(file, { force: true, recursive: true });
       }
    }
 }
+
 interface ModulePackageJson {
    name: string;
    main?: string;

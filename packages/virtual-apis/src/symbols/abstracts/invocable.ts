@@ -1,5 +1,4 @@
-import { d } from '@bedrock-apis/va-common';
-import chalk from 'chalk';
+import { dwarn } from '@bedrock-apis/va-common';
 import { inspect } from 'node:util';
 import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';
@@ -38,11 +37,7 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
 
       // We want to warn that plugin probably returned mismatched type
       if (!this.returnType.isValidValue(diagnostics.warns, info.result)) {
-         d(
-            chalk.yellow(
-               `${this.identifier} returned wrong type: ${inspect(info.result)}, expected ${this.returnType.name}`,
-            ),
-         );
+         dwarn(`${this.identifier} returned wrong type: ${inspect(info.result)}, expected ${this.returnType.name}`);
       }
 
       // Checks 2

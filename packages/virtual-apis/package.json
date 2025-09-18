@@ -3,5 +3,10 @@
    "version": "0.0.1-alpha",
    "types": "./src/main.ts",
    "main": "./dist/main.js",
-   "type": "module"
+   "type": "module",
+   "dependencies": {
+      "@bedrock-apis/va-common": "workspace:*",
+      "@bedrock-apis/va-types": "workspace:*",
+      "@bedrock-apis/va-binary": "workspace:*"
+   }
 }

@@ -1,6 +1,6 @@
 import { fetchJson } from '@bedrock-apis/va-common';
 import { createReadStream, createWriteStream, existsSync, rmSync } from 'node:fs';
-import { appendFile, mkdir, readdir, rm } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path, { dirname, resolve } from 'node:path';
 import { env, platform } from 'node:process';
 import { Readable } from 'node:stream';
@@ -54,7 +54,11 @@ export async function prepareBdsAndCacheFolders(): Promise<void> {
    else if (existsSync(CACHE_BDS_EXE_PATH)) return void console.log('⌚\tCache found . . .');
 
    await unzip(await getSource(), CACHE_BDS);
-   await appendFile(path.join(CACHE_BDS, 'server.properties'), '\n\nemit-server-telemetry=true\n');
+   const propertiesFilePath = path.join(CACHE_BDS, 'server.properties');
+   let properties = await readFile(propertiesFilePath, 'utf8');
+   properties.replace('online-mode=true', 'online-mode=false');
+   properties += '\n\nemit-server-telemetry=true\n';
+   await writeFile(propertiesFilePath, properties);
    console.log('📌\tSuccessfully installed . . .');
 }
 

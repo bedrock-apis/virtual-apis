@@ -1,5 +1,5 @@
-import { VirtualPrivilege } from '@bedrock-apis/va-binary';
 import { context } from '@bedrock-apis/va-loader/vitest';
+import { VirtualPrivilege } from '@bedrock-apis/virtual-apis';
 import * as mc from '@minecraft/server';
 import { describe, expect, it } from 'vitest';
 

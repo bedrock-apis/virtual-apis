@@ -1,5 +1,4 @@
-import { VirtualPrivilege } from '@bedrock-apis/va-binary';
-import { compareVersions, d, MapWithDefaults } from '@bedrock-apis/va-common';
+import { compareVersions, d, MapWithDefaults, VirtualPrivilege } from '@bedrock-apis/va-common';
 import { ErrorFactory, PANIC_ERROR_MESSAGES, ReportAsIs } from '../errorable';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
