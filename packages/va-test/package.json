@@ -17,5 +17,8 @@
          "types": "./src/suites/all.ts",
          "rolldown": null
       }
-   }
+   },
+   "files": [
+      "dist"
+   ]
 }
