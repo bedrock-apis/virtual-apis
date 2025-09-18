@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-binary",
-   "version": "0.0.1-alpha",
+   "version": "0.1.1-alpha",
    "main": "./dist/main.js",
    "type": "module",
    "types": "./src/main.ts",

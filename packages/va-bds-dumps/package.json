@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-bds-dumps",
-   "version": "0.0.1-alpha",
+   "version": "0.1.1-alpha",
    "type": "module",
    "main": "./dist/main.js",
    "types": "./src/local/main.ts",

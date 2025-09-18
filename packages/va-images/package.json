@@ -1,5 +1,5 @@
 {
    "name": "@bedrock-apis/va-images",
-   "version": "0.0.1-alpha",
+   "version": "0.1.1-alpha",
    "main": "image.bin"
 }

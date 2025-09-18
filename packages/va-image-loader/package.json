@@ -1,6 +1,6 @@
 {
    "name": "@bedrock-apis/va-image-loader",
-   "version": "0.0.1-alpha",
+   "version": "0.1.1-alpha",
    "main": "./dist/main.js",
    "types": "./src/main.ts",
    "type": "module",
