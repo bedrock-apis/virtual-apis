@@ -149,15 +149,13 @@ export class BinaryImageLoader {
       for (const imageModule of modulesToLoad) {
          const symbol = this.getSymbolForPreparedModule(imageModule);
          d('[BinaryImageLoader] loaded module', symbol.name, symbol.version);
-         context.registerModule(symbol);
+         context.addModuleSymbolInternal(symbol);
       }
 
       for (const jsModule of this.preparedImage.jsModules) {
          const name = jsModulesToLoad.get(jsModule.name);
          if (name) context.jsModules.set(name, jsModule.code);
       }
-
-      context.onModulesLoaded();
    }
    public getSymbolForPreparedModule(prepared: PreparedModule): ModuleSymbol {
       const name = this.stringAccessor.fromIndex(prepared.metadata.name);
@@ -221,7 +219,7 @@ export class BinaryImageLoader {
          let s: CompilableSymbol<unknown>;
          switch (symbol.bitFlags & SymbolBitFlags.ExportTypeMask) {
             case ExportType.Class:
-               s = new ConstructableSymbol().setIdentifier(stringOf(symbol.name), mod);
+               s = new ConstructableSymbol().setIdentifier(stringOf(symbol.name));
                break;
             case ExportType.Constant:
                s = new ConstantValueSymbol().setValue(symbol.hasValue);
@@ -325,7 +323,6 @@ export class BinaryImageLoader {
             cls[isStatic ? 'staticFields' : 'prototypeFields'].set(stringOf(symbol.name), s);
             s.setIdentifier(
                (isStatic ? identifiers.static.method : identifiers.method)(cls.name, stringOf(symbol.name)),
-               mod,
             );
          },
          [SpecificSymbolFlags.ConstructorInformation](flags, symbol) {
@@ -361,7 +358,7 @@ export class BinaryImageLoader {
             getter.setReturnType(type);
             getter.setParams(new ParamsValidator([type]));
             getter.setIsRuntimeBaked(BitFlags.anyOf(flags, SymbolBitFlags.IsBakedProperty));
-            getter.setIdentifier(identifiers.getter(cls.name, selfName), mod);
+            getter.setIdentifier(identifiers.getter(cls.name, selfName));
             if (symbol.invocablePrivileges) getter.setPrivileges(symbol.invocablePrivileges.map(_ => stringOf(_)));
             registry.set(selfName, getter);
 
@@ -372,7 +369,7 @@ export class BinaryImageLoader {
                getter.setSetter(setter);
                setter.setParams(new ParamsValidator([type]));
                setter.setReturnType(voidType);
-               setter.setIdentifier(identifiers.setter(cls.name, selfName), mod);
+               setter.setIdentifier(identifiers.setter(cls.name, selfName));
                if (symbol.setterPrivileges) setter.setPrivileges(symbol.setterPrivileges.map(_ => stringOf(_)));
             }
          },

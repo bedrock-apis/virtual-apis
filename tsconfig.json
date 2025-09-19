@@ -1,7 +1,9 @@
 {
    "compilerOptions": {
       "target": "esnext",
-      "lib": ["ESNext"],
+      "lib": [
+         "ESNext"
+      ],
       "module": "ESNext",
       "moduleResolution": "bundler",
       "resolveJsonModule": true,
@@ -13,8 +15,16 @@
       "noUncheckedIndexedAccess": true,
       "noUncheckedSideEffectImports": true,
       "skipLibCheck": true,
-      "noImplicitOverride": true
+      "noImplicitOverride": true,
+      "experimentalDecorators": true,
    },
-   "include": ["./packages/**/*.ts", "*.config.ts"],
-   "exclude": ["**/bin/**/*", "**/dist/**/*", "**/node_modules/**"]
+   "include": [
+      "./packages/**/*.ts",
+      "*.config.ts"
+   ],
+   "exclude": [
+      "**/bin/**/*",
+      "**/dist/**/*",
+      "**/node_modules/**"
+   ]
 }

@@ -9,7 +9,9 @@ const folder = 'packages';
 
 const external = [new RegExp(`^(node:|chalk|adm-zip|unzip-web-stream|${Object.keys(devDependencies).join('|')}|@)`)];
 const options: RolldownOptions[] = [];
-const plugins: RolldownOptions['plugins'] = process.env.PUBLISH ? [dts()] : [];
+const plugins: RolldownOptions['plugins'] = process.env.PUBLISH
+   ? [dts({ compilerOptions: { stripInternal: true } })]
+   : [];
 
 for (const entry of await readdir(folder, { withFileTypes: true })) {
    const packagePath = `./${folder}/${entry.name}`;
@@ -32,6 +34,11 @@ for (const entry of await readdir(folder, { withFileTypes: true })) {
 
    if (packageJson.exports) {
       const option = {
+         transform: {
+            decorator: {
+               legacy: true,
+            },
+         },
          external,
          plugins,
          input: [] as string[],

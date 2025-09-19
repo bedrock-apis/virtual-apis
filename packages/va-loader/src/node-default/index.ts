@@ -8,6 +8,7 @@ export async function loadModules(context: Context, versions = getModuleVersions
    const start = Date.now();
    d('[NodeLoader] loading modules...');
    await BinaryImageLoader.loadFromBuffer(await readImageFromNodeModules()).loadModules(versions, context);
+   context.ready();
    const loader = new SingletonLoaderContext(context);
    d(`[NodLoader] loaded in ${Date.now() - start}ms`);
 

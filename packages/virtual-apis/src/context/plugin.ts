@@ -1,73 +1,62 @@
-import { d } from '@bedrock-apis/va-common';
-import { type ModuleSymbol, type ObjectValueSymbol } from '../symbols';
-import { Context } from './context';
+import type { ConstructableSymbol, ModuleSymbol, ObjectValueSymbol } from '../symbols';
+import type { Context } from './context';
+import type { PluginManager } from './plugin-manager';
 
-// It's not Symbol(Symbol.vaIdentifier), bc it's not assigned to Symbol constructor it self
-export const vaTypeIdentifier: unique symbol = Symbol('Symbol(vaTypeIdentifier)');
-export const vaIdentifier: unique symbol = Symbol('Symbol(vaIdentifier)');
-export interface PluginInstanceStorageLike {
-   [vaTypeIdentifier]?(): string;
-   [vaIdentifier]?(): string;
-}
-
-export class ContextPluginLinkedStorage<T extends object> {
-   private readonly storages = new WeakMap<object, T>();
-   protected readonly instances = new WeakMap<T, WeakRef<object>>();
-
-   public constructor(protected readonly createStorage: (instance: object) => T) {}
-
-   public get(instance: object) {
-      const storage = this.storages.get(instance);
-      if (storage) return storage;
-      return this.create(instance);
-   }
-
-   public create(instance: object) {
-      const createdStorage = this.createStorage(instance);
-      this.storages.set(instance, createdStorage);
-      this.instances.set(createdStorage, new WeakRef(instance));
-      return createdStorage;
-   }
-
-   public getInstance(storage: T) {
-      return this.instances.get(storage)?.deref();
-   }
-}
-
-// Low level plugin system
+export type ContextPluginType<T extends ContextPlugin> = {
+   new (context: Context): T;
+   readonly prototype: T;
+};
 export abstract class ContextPlugin {
-   //#region Static
-   public static plugins = new Map<string, typeof ContextPlugin>();
-   public static identifier: string;
-   public static register(identifier: string) {
-      d('[ContextPlugin] Register', identifier);
-      if (Context.wasLoadedAtLeastOnce) {
-         console.warn(
-            'Plugin',
-            identifier,
-            'wont be loaded by all contexts because some of them have already been initialized. Plugin loading should happen before context loading',
-         );
-      }
-      this.identifier = identifier;
-      this.prototype.identifier = identifier;
-      this.plugins.set(this.prototype.identifier, this);
+   public constructor(public readonly context: Context) {
+      this.manager = context.pluginManager;
    }
-   public static instantiate<S extends ContextPlugin, T extends new (context: Context) => S>(
-      this: T,
-      context: Context,
-   ): S {
+   public readonly manager: PluginManager;
+   public readonly handleToStorage: WeakMap<object, object> = new WeakMap();
+   public readonly storageToHandle: WeakMap<object, object> = new WeakMap();
+   public abstract readonly identifier: string;
+   public static instantiate<S extends ContextPlugin, T extends ContextPluginType<S>>(this: T, context: Context): S {
       return new this(context);
    }
-   //#endregion
-   public constructor(public readonly context: Context) {}
-   public identifier!: string;
-   //
-   public onBeforeModuleCompilation(module: ModuleSymbol): void {}
-   public onAfterModuleCompilation(module: ModuleSymbol): void {}
-   public onModulesLoaded(): void {}
-   public getStaticInstanceBinding(symbol: ObjectValueSymbol): object | null {
-      return null;
+   public static getInstance<S extends ContextPlugin, T extends ContextPluginType<S>>(this: T, context: Context): S {
+      return context.pluginManager.plugin as S;
    }
-   public onInitialization(): void {}
+   public onBeforeModuleCompilation(_: ModuleSymbol): void {}
+   public onBeforeReady(): void {}
+   public onAfterModuleCompilation(_: ModuleSymbol): void {}
+   public onAfterReady(): void {}
+   public onRegistration(): void {}
    public onDispose(): void {}
+   public bindStorageWithObject(object: ObjectValueSymbol, storage: object): void {
+      this.bindStorageWithHandle(object.getRuntimeValue(this.context), storage);
+   }
+   public bindStorageWithHandle(handle: object, storage: object): void {
+      this.handleToStorage.set(handle, storage);
+      this.storageToHandle.set(storage, handle);
+   }
+   public getCreateHandleFor(storage: object, fallback: ConstructableSymbol): object {
+      let maybeHandle = this.storageToHandle.get(storage);
+      if (!maybeHandle) {
+         maybeHandle = fallback.createRuntimeInstanceInternal(this.context);
+         this.bindStorageWithHandle(maybeHandle, storage);
+      }
+      return maybeHandle;
+   }
+   public getStorage(handle: object): object | null {
+      return this.handleToStorage.get(handle) ?? null;
+   }
+   public dispose(storageOrHandle: object): boolean {
+      if (this.storageToHandle.has(storageOrHandle)) {
+         const handle = this.storageToHandle.get(storageOrHandle);
+         this.storageToHandle.delete(storageOrHandle);
+         this.handleToStorage.delete(handle!);
+         return this.context.disposeHandleInternal(handle!);
+      }
+      if (this.handleToStorage.has(storageOrHandle)) {
+         const storage = this.storageToHandle.get(storageOrHandle);
+         this.storageToHandle.delete(storage!);
+         this.handleToStorage.delete(storageOrHandle);
+         return this.context.disposeHandleInternal(storageOrHandle);
+      }
+      return false;
+   }
 }

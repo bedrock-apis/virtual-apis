@@ -26,7 +26,7 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
          const info = new InvocationInfo(context, symbol, params, that);
          const { diagnostics } = info;
 
-         if (!context.isNativeHandle(that))
+         if (!context.isNativeHandleInternal(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.actionKind, symbol.identifier));
 
          if (
@@ -37,7 +37,7 @@ export class MethodSymbol extends InvocableSymbol<(...params: unknown[]) => unkn
 
          symbol.params.isValidValue(diagnostics.errors, info.params);
 
-         return symbol.runtimeGetResult(info);
+         return symbol.runtimeInvocationGetResult(info);
       }
       const executable = proxyifyFunction(runnable);
       finalizeAsMethod(executable, this.paramsLength);
