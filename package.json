@@ -104,5 +104,10 @@
          "exports",
          "files"
       ]
-   }
+   },
+   "pnpm": {
+    "overrides": {
+      "vite": "npm:rolldown-vite@latest"
+    }
+  }
 }
