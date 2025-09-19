@@ -2,10 +2,10 @@
    "name": "custom-bds-software",
    "description": "",
    "version": "1.0.0",
-   "private": true,
    "author": "",
    "license": "Apache-2.0",
    "keywords": [],
+   "private": true,
    "type": "module",
    "scripts": {
       "start": "node --import @bedrock-apis/va-loader/node ./virtual-apis/load.js"

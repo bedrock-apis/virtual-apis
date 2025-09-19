@@ -1,12 +1,12 @@
 // Load plugins
 import '@bedrock-apis/va-core-plugin';
-import './plugin';
+import './plugin.ts';
 
 // Configure
 import { EventsPlugin, SystemPlugin } from '@bedrock-apis/va-core-plugin';
 import { loadModules } from '@bedrock-apis/va-loader/node';
 import { Context } from '@bedrock-apis/virtual-apis';
-import { MyPlugin } from './plugin';
+import { MyPlugin } from './plugin.ts';
 
 const context = new Context();
 
@@ -29,4 +29,4 @@ await loadModules(context);
 // SCRIPT API CODE ENTRYPOINT SHOULD BE ASYNC
 // because otherwise it will be hoisted on top
 // and loaded when no plugins were enabled
-import('../scripts/index');
+import('../scripts/index.ts');

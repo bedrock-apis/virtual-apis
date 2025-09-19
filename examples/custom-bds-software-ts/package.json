@@ -3,19 +3,18 @@
    "description": "",
    "version": "1.0.0",
    "author": "",
-   "private": true,
    "license": "Apache-2.0",
    "keywords": [],
+   "private": true,
    "type": "module",
    "scripts": {
-      "start": "tsx ./virtual-apis/load.ts"
+      "start": "node --experimental-strip-types ./virtual-apis/load.ts"
    },
    "dependencies": {
       "@bedrock-apis/va-loader": "workspace:^",
       "@bedrock-apis/va-pluggable": "workspace:^",
       "@bedrock-apis/virtual-apis": "workspace:x.x.x",
-      "@minecraft/server": "2.0.0",
-      "tsx": "^4.19.2"
+      "@minecraft/server": "2.0.0"
    },
    "main": "index.js"
 }
