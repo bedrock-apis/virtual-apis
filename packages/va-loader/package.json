@@ -4,7 +4,6 @@
    "type": "module",
    "dependencies": {
       "@bedrock-apis/va-common": "workspace:*",
-      "@bedrock-apis/va-image-loader": "workspace:*",
       "@bedrock-apis/virtual-apis": "workspace:*"
    },
    "exports": {

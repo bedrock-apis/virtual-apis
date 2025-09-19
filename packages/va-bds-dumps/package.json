@@ -3,6 +3,7 @@
    "version": "0.0.2-alpha",
    "type": "module",
    "dependencies": {
+      "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
       "@bedrock-apis/va-test": "workspace:*",
       "adm-zip": "catalog:",
@@ -26,7 +27,7 @@
       "dist",
       "dump-output.zip",
       "!dist/cache-bds",
-      "!dist/dump-output",
-      "!dist/cache-bds-download"
+      "!dist/cache-bds-download",
+      "!dist/dump-output"
    ]
 }

@@ -1,13 +1,13 @@
 import AdmZip from 'adm-zip';
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { chmod, cp, mkdir, readdir, rm } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { chmod } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { DumpProvider } from './api';
 import {
    CACHE_BDS,
    CACHE_BDS_EXE_PATH,
    CACHE_DUMP_OUTPUT,
-   CACHE_DUMP_OUTPUT_JS_MODULES,
    CACHE_DUMP_OUTPUT_ZIP,
    removeBdsTestConfig,
    writeBdsTestConfig,
@@ -16,29 +16,34 @@ import { prepareBdsAndCacheFolders, unzip } from './prepare-bds';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
 
-export async function dump() {
+export async function dump(providers: DumpProvider[]) {
    const { platform } = process;
    const gha = process.env.GITHUB_ACTION;
    const noBds = process.env.NO_BDS ?? true; // enable by default for now cuz we publishing
    if (!noBds && (platform === 'win32' || (platform === 'linux' && !gha))) {
-      await dumpSupported();
+      await dumpSupported(providers);
    } else {
-      await dumpUnsupported();
+      await dumpUnsupported(providers);
    }
 }
 
-async function dumpUnsupported() {
+async function dumpUnsupported(providers: DumpProvider[]) {
    const stream = ReadableStream.from(createReadStream(CACHE_DUMP_OUTPUT_ZIP).iterator());
    await unzip(stream, CACHE_DUMP_OUTPUT);
+
+   for (const provider of providers) {
+      provider.writeImage(CACHE_DUMP_OUTPUT);
+   }
 }
 
-async function dumpSupported() {
+async function dumpSupported(providers: DumpProvider[]) {
    const start = Date.now();
 
    await prepareBdsAndCacheFolders();
    await setupScriptAPI();
 
    await writeBdsTestConfig();
+   if (process.platform !== 'win32') await chmod(CACHE_BDS_EXE_PATH, 0o755);
    await executeBds().promise;
    await removeBdsTestConfig();
 
@@ -50,26 +55,11 @@ async function dumpSupported() {
    });
    server.server.unref();
 
-   if (process.platform !== 'win32') await chmod(CACHE_BDS_EXE_PATH, 0o755);
-
    const { child, promise } = executeBds();
-
    await promise;
 
-   await rm(join(CACHE_DUMP_OUTPUT, 'docs'), { recursive: true, force: true }).catch(_ => null);
-   await cp(join(CACHE_BDS, 'docs'), join(CACHE_DUMP_OUTPUT, 'docs'), { recursive: true });
-   await rm(CACHE_DUMP_OUTPUT_JS_MODULES, { recursive: true, force: true }).catch(_ => null);
-
-   await mkdir(CACHE_DUMP_OUTPUT_JS_MODULES);
-   for (const folder of await readdir(join(CACHE_BDS, 'behavior_packs'), { withFileTypes: true })) {
-      if (!folder.isDirectory()) continue;
-      const name = folder.name.replace(/_library$/, '');
-      if (name === folder.name) continue; //not a module
-
-      //libs\va-bds-dumps\dist\cache-bds\behavior_packs\server_editor_library\scripts
-      await cp(join(folder.parentPath, folder.name, 'scripts'), join(CACHE_DUMP_OUTPUT_JS_MODULES, name), {
-         recursive: true,
-      });
+   for (const provider of providers) {
+      await provider.afterBdsDump(CACHE_BDS, CACHE_DUMP_OUTPUT);
    }
 
    const zip = new AdmZip();

@@ -1,8 +1,11 @@
+import { MarshalFormat, Marshaller } from '@bedrock-apis/va-binary';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
-import path from 'node:path';
+import path, { resolve } from 'node:path';
+import { promisify } from 'node:util';
+import zlib from 'node:zlib';
 import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
-import { CACHE_DUMP_OUTPUT, CACHE_DUMP_OUTPUT_JS_MODULES } from './constants';
+import { CACHE_DUMP_OUTPUT } from './constants';
 import { dump } from './dump';
 export * from '../shared';
 
@@ -30,87 +33,85 @@ export const readLocalizationReport = readReport.bind(
 export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
 
 // Dev mode only function. No need to be in provider
-export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
-   const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
-   const jsModules = CACHE_DUMP_OUTPUT_JS_MODULES;
-   if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
-   if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
+// export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
+//    const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
+//    const jsModules = CACHE_DUMP_OUTPUT_JS_MODULES;
+//    if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
+//    if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
 
-   return [metadata, jsModules];
+//    return [metadata, jsModules];
+// }
+
+export class DumpProvider<T extends MarshalFormat = MarshalFormat> {
+   public constructor(
+      public readonly id: string,
+      public readonly afterBdsDump: (bdsFolder: string, outputFolder: string) => Promise<void>,
+      public readonly onExtract: (folder: string) => Promise<T>,
+      public readonly marshaller: Marshaller<T>,
+   ) {}
+
+   protected getImagePath(basePath = import.meta.url) {
+      return resolve(basePath, this.id + '.gz');
+   }
+
+   public async writeImage(output: string, imagePath = this.getImagePath()): Promise<void> {
+      const startupTime = performance.now();
+      const image = this.marshaller.write(await this.onExtract(output));
+      const gzipped = await promisify(zlib.gzip)(image);
+      await fs.writeFile(imagePath, gzipped);
+
+      console.log(
+         `📦 Write ${this.id} Size: ->`,
+         Number((image.length / 1024).toFixed(2)),
+         'kb, Gzip: ->',
+         Number((gzipped.length / 1024).toFixed(2)),
+         'kb, ⌚ Time:',
+         ~~(performance.now() - startupTime),
+         'ms',
+      );
+      return;
+   }
+
+   public async read(path = this.getImagePath()): Promise<T> {
+      return this.marshaller.read(await promisify(zlib.gunzip)(await fs.readFile(path)));
+   }
 }
 
-// export class DumpProvider<T> {
-//    public constructor(
-//       public readonly id: string,
-//       public readonly afterBdsDump: (bdsFolder: string, outputFolder: string) => void,
-//       public readonly onExtract: (folder: string) => Promise<T>,
-//       public readonly marshaller: { marshal(io: BinaryIO<T>): void },
-//    ) {}
+class DumpProviderScriptApi<T extends MarshalFormat> extends DumpProvider<T> {
+   public constructor(id: string, scriptApiCodePath: string, marshaller: Marshaller<T>) {
+      super(
+         id,
+         (bds, output) => {
+            // mv reports/id -> output/reports/id
+         },
+         async output => {
+            // return readFile(output/reports/id)
+            return 0 as T;
+         },
+         marshaller,
+      );
+   }
+}
 
-//    protected defaultImagePath = resolve(import.meta.url, 'image.gz');
+new DumpProviderScriptApi('tests', './test-run-mc.ts', {
+   marshal(io) {},
+});
 
-//    public async write(output: string): Promise<void> {
-//       // const image = marshal.marshal(writer(onExtract(output)))
-//       // writeFile(image.gz, image)
-//       return;
-//    }
+function bdsDumpSupported(needBds: string, providers: DumpProvider<MarshalFormat>[]) {
+   if (installedBds !== needBds) installBds();
+   runBds(bdsFolder);
+   for (const provider of providers) {
+      provider.afterBdsDump(bdsFolder, outputFolder);
+   }
+   zipOutput();
+   for (const provider of providers) {
+      provider.writeImage(outputFolder);
+   }
+}
 
-//    public async read(path = this.defaultImagePath): Promise<T> {
-//       // return marshal.marshal(reader(readFile(path)))
-//       return undefined as T;
-//    }
-// }
-
-// new DumpProvider(
-//    'modules',
-//    async (bds, output) => {
-//       // mv 'docs/script_modules' -> output/script_metadata
-//       // mv behavior packs libraries -> output/js_modules
-//    },
-//    async output => {
-//       // return MetadataToSerializable(provider(output/script_metadata, output/js_modules))
-//       return 0;
-//    },
-//    {
-//       marshal(io) {}, // image format
-//    },
-// );
-
-// class DumpProviderScriptApi<T> extends DumpProvider<T> {
-//    public constructor(id: string, scriptApiCodePath: string, marshaller: { marshal(io: BinaryIO<T>): void }) {
-//       super(
-//          id,
-//          (bds, output) => {
-//             // mv reports/id -> output/reports/id
-//          },
-//          async output => {
-//             // return readFile(output/reports/id)
-//             return 0 as T;
-//          },
-//          marshaller,
-//       );
-//    }
-// }
-
-// new DumpProviderScriptApi('tests', './test-run-mc.ts', {
-//    marshal(io) {},
-// });
-
-// function bdsDumpSupported(needBds:string) {
-//    if (installedBds !== needBds) installBds()
-//    runBds(bdsFolder);
-//    for (const provider of providers) {
-//       provider.afterBdsRun(bdsFolder, outputFolder);
-//    }
-//    zipOutput()
-//    for (const provider of providers) {
-//       provider.write(outputFolder);
-//    }
-// }
-
-// function bdsDumpUnsupported() {
-//    unzipOutput()
-//    for (const provider of providers) {
-//       provider.write(outputFolder);
-//    }
-// }
+function bdsDumpUnsupported() {
+   unzipOutput();
+   for (const provider of providers) {
+      provider.write(outputFolder);
+   }
+}

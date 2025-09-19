@@ -1,19 +1,4 @@
-import {
-   BinaryDetailsStruct,
-   BinaryImageFormat,
-   BinaryIO,
-   BinarySymbolStruct,
-   BinaryTypeStruct,
-   bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
-   ExportType,
-   ImageModuleData,
-   ModuleMetadata,
-   SerializableMetadata,
-   SerializableModule,
-   SpecificSymbolFlags,
-   SymbolBitFlags,
-   TypeBitFlagsU16,
-} from '@bedrock-apis/va-binary';
+import { BinaryIO } from '@bedrock-apis/va-binary';
 import { BitFlags, d, identifiers, IndexedAccessor } from '@bedrock-apis/va-common';
 import {
    bigintType,
@@ -48,6 +33,20 @@ import {
    VariantType,
    voidType,
 } from '@bedrock-apis/virtual-apis';
+import {
+   BinaryDetailsStruct,
+   BinarySymbolStruct,
+   BinaryTypeStruct,
+   bitMaskExactMatchForSpecificSymbolFlagsOnlyInternalUseBecauseWhyNot,
+   ExportType,
+   ImageModuleData,
+   ModuleMetadata,
+   SerializableMetadata,
+   SerializableModule,
+   SpecificSymbolFlags,
+   SymbolBitFlags,
+   TypeBitFlagsU16,
+} from './dump-provider/types';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;
@@ -69,15 +68,15 @@ export class BinaryImageLoader {
       this.stringAccessor = this.preparedImage.stringSlices;
       this.typeAccessor = this.preparedImage.typeSlices;
    }
-   public static loadFromBuffer(buffer: Uint8Array): BinaryImageLoader {
-      return new this(this.getPreparedImageFromRaw(buffer));
+   public static loadFromData(data: SerializableMetadata): BinaryImageLoader {
+      return new this(this.getPreparedImageFromRaw(data));
    }
-   public static getPreparedImageFromRaw(buffer: Uint8Array): PreparedImage {
+   public static getPreparedImageFromRaw(data: SerializableMetadata): PreparedImage {
       const {
          metadata: { stringSlices, types, details },
          modules,
          jsModules,
-      } = BinaryImageFormat.read(buffer);
+      } = data;
       return {
          stringSlices: new IndexedAccessor(stringSlices),
          typeSlices: new IndexedAccessor(types),

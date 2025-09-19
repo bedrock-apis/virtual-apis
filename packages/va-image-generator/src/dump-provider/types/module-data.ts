@@ -1,4 +1,4 @@
-import { WithEncapsulatedData } from '../binary/io';
+import { WithEncapsulatedData } from '@bedrock-apis/va-binary';
 import { IndexId } from './general';
 import { ImageHeader } from './image-header';
 import { ModuleMetadata } from './metadata';

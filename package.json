@@ -39,7 +39,6 @@
       "@bedrock-apis/va-bds-dumps": "workspace:^",
       "@bedrock-apis/va-core-plugin": "workspace:^",
       "@bedrock-apis/va-image-generator": "workspace:*",
-      "@bedrock-apis/va-images": "workspace:^",
       "@bedrock-apis/va-loader": "workspace:^",
       "@bedrock-apis/va-types": "workspace:^",
       "@eslint/js": "^9.35.0",
@@ -73,6 +72,11 @@
    "engines": {
       "node": ">=20.x.x"
    },
+   "pnpm": {
+      "overrides": {
+         "vite": "npm:rolldown-vite@latest"
+      }
+   },
    "prettier": {
       "arrowParens": "avoid",
       "endOfLine": "crlf",
@@ -103,10 +107,5 @@
          "exports",
          "files"
       ]
-   },
-   "pnpm": {
-      "overrides": {
-         "vite": "npm:rolldown-vite@latest"
-      }
    }
 }
