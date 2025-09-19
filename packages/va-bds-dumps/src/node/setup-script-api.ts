@@ -12,7 +12,7 @@ export async function setupScriptAPI(): Promise<void> {
    const editorFile = resolve(CACHE_BDS, './behavior_packs/editor/scripts/Main.js');
    await prepareManifest();
 
-   const addonEntry = resolve(SOURCE_DIR, './client/main.ts');
+   const addonEntry = resolve(SOURCE_DIR, './mc/main.ts');
    if (!existsSync(addonEntry)) throw new ReferenceError('Failed to found addon entry');
 
    const output = await build({ input: addonEntry, external: [/^@minecraft.+/] });

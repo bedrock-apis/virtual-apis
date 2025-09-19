@@ -13,12 +13,12 @@
    "exports": {
       "./api": {
          "default": "./dist/api.js",
-         "types": "./src/local/api.ts",
+         "types": "./src/node/api.ts",
          "rolldown": null
       },
       "./run": {
          "default": "./dist/main.js",
-         "types": "./src/local/main.ts",
+         "types": "./src/node/main.ts",
          "rolldown": null
       }
    },
