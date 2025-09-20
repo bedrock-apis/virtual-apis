@@ -16,7 +16,7 @@ jobs:
 
          - name: 🏗 Enable corepack
            run: corepack enable
-            
+
          - name: 🏗 Setup Node.js
            uses: actions/setup-node@v5
            with:
@@ -28,13 +28,10 @@ jobs:
            run: pnpm run repo:init
 
          - name: ⚙️ Dump BDS Docs
-           run: pnpm run dump:run
+           run: pnpm run repo:dump
 
-         - name: 🏗 Build images
-           run: pnpm run build
-
-         - name: 🏗 Bundle types
-           run: PUBLISH=1 pnpm build:src
+         - name: 🏗 Bundle
+           run: PUBLISH=1 pnpm build
 
          - name: 🏗 Update versions
            run: pnpm repo:publish

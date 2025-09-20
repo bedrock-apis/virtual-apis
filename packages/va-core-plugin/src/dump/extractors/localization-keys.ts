@@ -1,18 +1,24 @@
-import { loadChunk } from '@bedrock-apis/va-test';
+import { loadChunk } from '@bedrock-apis/va-bds-dumps/mc-api';
+import { runThreadAsync } from '@bedrock-apis/va-common/async-thread';
 import {
    Block,
    BlockTypes,
    EntityTypes,
    ItemStack,
    ItemTypes,
+   system,
    VanillaEntityIdentifier,
    world,
 } from '@minecraft/server';
-import { LocalizationKeysReport } from '../../shared';
+import type { LocalizationKeysReport } from '../provider';
 
-export function* localizationKeysResolver(): Generator<Promise<unknown> | undefined, LocalizationKeysReport, Block> {
+export async function langReporter(): Promise<LocalizationKeysReport> {
+   return runThreadAsync(localizationKeysJob(), system.runJob.bind(system));
+}
+
+function* localizationKeysJob() {
    const dimension = world.getDimension('overworld');
-   const block: Block = yield loadChunk({ x: 0, y: 0, z: 0 }, 'localizationKey');
+   const block = (yield loadChunk({ x: 0, y: 0, z: 0 }, 'localizationKey')) as Block;
 
    const data: LocalizationKeysReport = {
       blocks: {},

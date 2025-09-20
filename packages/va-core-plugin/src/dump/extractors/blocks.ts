@@ -1,9 +1,14 @@
+import { runThread } from '@bedrock-apis/va-bds-dumps/mc-api';
 import { BlockPermutation, BlockTypes } from '@minecraft/server';
-import { BlocksDataReport } from '../../shared';
+import type { BlocksDataReport } from '../provider';
 
 type BlockData = BlocksDataReport['blocks'][string];
 
-export function* blockResolver(): Generator<undefined, BlocksDataReport, unknown> {
+export function blocksReport() {
+   return runThread(blockReportJob());
+}
+
+function* blockReportJob() {
    let lastIndex = 0;
    const map = new Map<string, number>();
    const blocks: Record<string, BlockData> = {};
@@ -19,5 +24,5 @@ export function* blockResolver(): Generator<undefined, BlocksDataReport, unknown
       }
       yield;
    }
-   return { tags: Array.from(map.keys()), blocks };
+   return { tags: Array.from(map.keys()), blocks } satisfies BlocksDataReport;
 }

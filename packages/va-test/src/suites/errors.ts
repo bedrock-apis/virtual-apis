@@ -31,7 +31,7 @@ TestSuite.simple('errors').tests([
    // more then max type
    () => world.setTimeOfDay(2147483649),
 
-   () => world.getDimension('haha wrong'),
+   () => world.getDimension('ha ha wrong'),
 
    // @ts-expect-error
    () => world.setDifficulty('nonexistent'),
@@ -49,12 +49,26 @@ TestSuite.simple('errors').tests([
    () => (invalidEntity().scoreboardIdentity = ScoreboardIdentity.prototype),
    // @ts-expect-error
    () => (invalidEntity().isValid = true),
+
+   () =>
+      world
+         .getDimension('minecraft:overworld')
+         .setBlockType(Object.setPrototypeOf({ x: 654654 }, { y: 55, z: 6 }), 'bedrock'),
+
+   // @ts-expect-error
+   () => world.beforeEvents.playerBreakBlock.subscribe(() => {}, { blockTypes: [new ItemStack('stick')] }),
+   // @ts-expect-error
+   () => world.beforeEvents.playerBreakBlock.subscribe(() => {}, { blockTypes: [new String('Yes')] }),
+   // @ts-expect-error
+   () => world.beforeEvents.playerBreakBlock.subscribe(() => {}, { blockTypes: [new Promise(() => {})] }),
+   // @ts-expect-error
+   () => world.beforeEvents.playerBreakBlock.subscribe(() => {}, { blockTypes: [{}] }),
 ]);
 
-function set(v: unknown, reciever: unknown) {
+function set(v: unknown, receiver: unknown) {
    const t = spawnEntity('minecraft:cow');
    const prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(t), 'nameTag');
-   return prop?.set?.call(reciever, v);
+   return prop?.set?.call(receiver, v);
 }
 
 function invalidEntity() {

@@ -1,16 +1,3 @@
-import {
-   BinaryDetailsStruct,
-   BinaryDetailsType,
-   BinarySymbolStruct,
-   BinaryTypeStruct,
-   ExportType,
-   ImageHeader,
-   IndexId,
-   SerializableMetadata,
-   SerializableModule,
-   SymbolBitFlags,
-   TypeBitFlagsU16,
-} from '@bedrock-apis/va-binary';
 import { BitFlags, IndexedCollector } from '@bedrock-apis/va-common';
 import {
    MetadataClassDefinition,
@@ -26,6 +13,19 @@ import {
    Privilege,
 } from '@bedrock-apis/va-types';
 import { IMetadataProvider, StrippedMetadataModuleDefinition } from './metadata-provider';
+import {
+   BinaryDetailsStruct,
+   BinaryDetailsType,
+   BinarySymbolStruct,
+   BinaryTypeStruct,
+   ExportType,
+   ImageHeader,
+   IndexId,
+   SerializableMetadata,
+   SerializableModule,
+   SymbolBitFlags,
+   TypeBitFlagsU16,
+} from './types';
 
 export class MetadataToSerializableTransformer {
    protected readonly stringCollector = new IndexedCollector<string>();

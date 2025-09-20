@@ -4,12 +4,28 @@
    "type": "module",
    "dependencies": {
       "@bedrock-apis/va-bds-dumps": "workspace:*",
+      "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
       "@bedrock-apis/va-pluggable": "workspace:*",
       "@bedrock-apis/virtual-apis": "workspace:*"
    },
-   "main": "./dist/main.js",
-   "types": "./src/main.ts",
+   "exports": {
+      ".": {
+         "default": "./dist/main.js",
+         "types": "./src/main.ts",
+         "rolldown": null
+      },
+      "./dump/provider": {
+         "default": "./dist/provider.js",
+         "types": "./src/dump/provider.ts",
+         "rolldown": null
+      },
+      "./dump/bds": {
+         "default": "./dist/bds.js",
+         "types": "./src/dump/bds.ts",
+         "rolldown": null
+      }
+   },
    "files": [
       "dist"
    ]

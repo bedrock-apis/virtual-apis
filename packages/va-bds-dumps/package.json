@@ -3,17 +3,20 @@
    "version": "0.0.2-alpha",
    "type": "module",
    "dependencies": {
+      "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
-      "@bedrock-apis/va-test": "workspace:*",
       "adm-zip": "catalog:",
       "unzip-web-stream": "catalog:"
    },
-   "main": "./dist/main.js",
-   "types": "./src/local/main.ts",
    "exports": {
       "./api": {
          "default": "./dist/api.js",
          "types": "./src/node/api.ts",
+         "rolldown": null
+      },
+      "./mc-api": {
+         "default": "./dist/mc-api.js",
+         "types": "./src/mc/mc-api.ts",
          "rolldown": null
       },
       "./run": {
@@ -24,9 +27,8 @@
    },
    "files": [
       "dist",
-      "dump-output.zip",
       "!dist/cache-bds",
-      "!dist/dump-output",
-      "!dist/cache-bds-download"
+      "!dist/cache-bds-download",
+      "!dist/dump-output"
    ]
 }

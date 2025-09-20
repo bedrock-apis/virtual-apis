@@ -1,7 +1,7 @@
 // TODO Somehow figure out how it would read reporst when bundled
 
-import { readBlocksReport, readItemsReport, readLocalizationReport } from '@bedrock-apis/va-bds-dumps/api';
+import { corePluginVanillaDataProvider } from './dump/provider';
 
-export const items = await readItemsReport();
-export const localizationKeys = await readLocalizationReport();
-export const blocks = await readBlocksReport();
+export const items = corePluginVanillaDataProvider.data?.items;
+export const localizationKeys = corePluginVanillaDataProvider.data?.localizationKeys;
+export const blocks = corePluginVanillaDataProvider.data?.blocks;

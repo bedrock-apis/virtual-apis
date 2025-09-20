@@ -3,8 +3,9 @@
    "version": "0.0.2-alpha",
    "type": "module",
    "dependencies": {
+      "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
-      "@bedrock-apis/va-loader": "workspace:*"
+      "@bedrock-apis/virtual-apis": "workspace:*"
    },
    "exports": {
       ".": {
@@ -15,6 +16,21 @@
       "./suites": {
          "default": "./dist/all.js",
          "types": "./src/suites/all.ts",
+         "rolldown": null
+      },
+      "./dump/provider": {
+         "default": "./dist/provider.js",
+         "types": "./src/dump/provider.ts",
+         "rolldown": null
+      },
+      "./dump/bds": {
+         "default": "./dist/bds.js",
+         "types": "./src/dump/bds.ts",
+         "rolldown": null
+      },
+      "./run": {
+         "default": "./dist/va.js",
+         "types": "./src/runners/va.ts",
          "rolldown": null
       }
    },

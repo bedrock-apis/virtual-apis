@@ -5,8 +5,6 @@
    "dependencies": {
       "chalk": "catalog:"
    },
-   "main": "./dist/main.js",
-   "types": "./src/main.ts",
    "exports": {
       ".": {
          "default": "./dist/main.js",
@@ -16,6 +14,11 @@
       "./vector": {
          "default": "./dist/vector.js",
          "types": "./src/vector.ts",
+         "rolldown": null
+      },
+      "./async-thread": {
+         "default": "./dist/async-thread.js",
+         "types": "./src/async-thread.ts",
          "rolldown": null
       }
    },

@@ -1,30 +1,22 @@
-import { getOrGenerateMetadataFilepaths } from '@bedrock-apis/va-bds-dumps/api';
+import { BinaryIO, BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from '@bedrock-apis/va-binary';
 import { IndexedCollector } from '@bedrock-apis/va-common';
-import { SystemFileMetadataProvider } from '@bedrock-apis/va-image-generator/src/metadata-provider';
-import { MetadataToSerializableTransformer } from '@bedrock-apis/va-image-generator/src/metadata-to-serializable';
 import { MetadataType } from '@bedrock-apis/va-types';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BinaryIO } from './binary/io';
-import {
-   BinaryImageFormat,
-   BinaryIOReader,
-   BinarySymbolStruct,
-   DataCursorView,
-   SafeBinaryIOWriter,
-   SerializableMetadata,
-} from './main';
+import { modulesProvider } from './dump-provider';
+import { BinaryImageFormat } from './image-format';
+import { MetadataToSerializableTransformer } from './metadata-to-serializable';
+import { BinarySymbolStruct, SerializableMetadata } from './types';
 
 class TestSerializer extends MetadataToSerializableTransformer {
    testTransformType = (m: MetadataType) => this.transformType(m, this.typeRef);
 }
 
-class TestBinaryImageFormat extends BinaryImageFormat {
-   static testType = this.type;
-
-   static testSymbol = this.symbol;
-
-   static testModuleData = this.moduleData;
-}
+const imageFormat = new (class TestBinaryImageFormat extends BinaryImageFormat {
+   testType = this.type;
+   testSymbol = this.symbol;
+   testModuleData = this.moduleData;
+})();
 
 const view = DataCursorView.alloc(1024 * 1024 * 1024);
 function testMarshal<T extends object>(expected: T, marshal: (m: BinaryIO<T>) => void) {
@@ -43,20 +35,23 @@ let cache: SerializableMetadata | undefined;
 
 async function getTestData() {
    if (cache) return cache;
-   const provider = new SystemFileMetadataProvider(...(await getOrGenerateMetadataFilepaths()));
-   cache = await new MetadataToSerializableTransformer().transform(provider);
-   return cache;
+   cache = await modulesProvider.read(path.resolve(import.meta.dirname, '../dist'));
+   cache.modules.forEach(e => BinaryIO.readEncapsulatedData(e));
+   return cache!;
 }
 
 describe('io test', () => {
    it('serialize symbols', { timeout: 5000 }, async () => {
       const data = await getTestData();
       const collector = new IndexedCollector<BinarySymbolStruct>(JSON.stringify);
-      for (const module of data.modules) for (let symbol of module.data.symbols) collector.getIndexFor(symbol);
+      for (const module of data.modules) {
+         for (let symbol of module.data.symbols) collector.getIndexFor(symbol);
+      }
+
       const symbols = collector.getArrayAndLock();
 
       for (const symbol of symbols) {
-         const a = testMarshal(symbol, m => TestBinaryImageFormat.testSymbol(m));
+         const a = testMarshal(symbol, m => imageFormat.testSymbol(m));
          expect(a.actual).toEqual((a.expected as any)?.toJSON?.() ?? a.expected);
       }
    });
@@ -64,16 +59,10 @@ describe('io test', () => {
    it('serialize module', { timeout: 5000 }, async () => {
       const data = await getTestData();
       data.modules = data.modules.slice(0, 10);
-      const reread = BinaryImageFormat.read(BinaryImageFormat.write(data));
-      const actual = { modules: reread.modules.map(e => BinaryIO.readEncapsulatedData(e)), metadata: reread.metadata };
-      const { modules, metadata } = data;
-      expect(actual).toEqual({
-         modules: modules.map(e => ({
-            ...e,
-            data: { ...e.data, symbols: e.data.symbols.map(e => (e as unknown as { toJSON(): object }).toJSON()) },
-         })),
-         metadata,
-      });
+      const reread = imageFormat.read(imageFormat.write(data));
+
+      expect(reread.metadata).toEqual(data.metadata);
+      expect(reread.modules.map(e => BinaryIO.readEncapsulatedData(e))).toEqual(data.modules);
    });
 
    it.each([
@@ -145,7 +134,7 @@ describe('io test', () => {
       },
    ])('serialize types', e => {
       const s = new TestSerializer().testTransformType(e as unknown as MetadataType);
-      const a = testMarshal(s, io => TestBinaryImageFormat.testType(io));
+      const a = testMarshal(s, io => imageFormat.testType(io));
       expect(a.actual).toEqual(a.expected);
    });
 });

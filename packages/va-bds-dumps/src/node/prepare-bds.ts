@@ -57,7 +57,7 @@ export async function prepareBdsAndCacheFolders(): Promise<void> {
    const propertiesFilePath = path.join(CACHE_BDS, 'server.properties');
    let properties = await readFile(propertiesFilePath, 'utf8');
    properties.replace('online-mode=true', 'online-mode=false');
-   properties += '\n\nemit-server-telemetry=true\n';
+   properties += '\n\nemit-server-telemetry=true\ncontent-log-console-output-enabled=true\n';
    await writeFile(propertiesFilePath, properties);
    console.log('📌\tSuccessfully installed . . .');
 }

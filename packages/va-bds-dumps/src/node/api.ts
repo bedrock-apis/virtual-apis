@@ -1,116 +1,83 @@
-import { existsSync } from 'node:fs';
+import { Marshaller } from '@bedrock-apis/va-binary';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
-import { CACHE_DUMP_OUTPUT, CACHE_DUMP_OUTPUT_JS_MODULES } from './constants';
-import { dump } from './dump';
-export * from '../shared';
+import util from 'node:util';
+import zlib from 'node:zlib';
 
-async function readAndMaybeRunBds(file: string): Promise<object> {
-   const filepath = path.join(CACHE_DUMP_OUTPUT, file);
-   if (!existsSync(filepath)) await dump();
-
-   if (!existsSync(filepath)) {
-      throw new Error('No file generated at ' + file + ' even after bds dump');
+export class DumpProvider<T = object> {
+   public static async saveResultToOutputFolder(providers: DumpProvider[], bdsFolder: string, outputFolder: string) {
+      for (const provider of providers) {
+         await provider.saveResultToOutputFolder(bdsFolder, outputFolder);
+      }
    }
 
-   return JSON.parse(await fs.readFile(filepath, 'utf-8'));
+   public constructor(
+      public readonly id: string,
+      protected readonly importMetaDirname: string,
+      protected readonly saveResultToOutputFolder: (bdsFolder: string, outputFolder: string) => Promise<void>,
+      protected readonly onExtract: (folder: string) => Promise<T>,
+      protected readonly marshaller: Marshaller<T>,
+   ) {}
+
+   protected getImagePath(basePath = this.importMetaDirname) {
+      return path.resolve(basePath, this.id + '.gz');
+   }
+
+   public data?: T;
+
+   public async writeImage(output: string, imagesFolder?: string): Promise<void> {
+      const startupTime = performance.now();
+      const image = this.marshaller.write(await this.onExtract(output));
+      const gzipped = await util.promisify(zlib.gzip)(image);
+      await fs.writeFile(this.getImagePath(imagesFolder), gzipped);
+
+      console.log(
+         `✅ Write report ${this.id}\n📦 Size: ->`,
+         Number((image.length / 1024).toFixed(2)),
+         'kb\n📦 Gzip: ->',
+         Number((gzipped.length / 1024).toFixed(2)),
+         'kb\n⌚ Time:',
+         ~~(performance.now() - startupTime),
+         'ms\n',
+      );
+      return;
+   }
+
+   public async read(imagesFolder?: string): Promise<T> {
+      const gzipped = await fs.readFile(this.getImagePath(imagesFolder));
+      const binary = await util.promisify(zlib.gunzip)(gzipped);
+      console.log(gzipped.length, binary.length);
+      this.data = this.marshaller.read(binary);
+      return this.data;
+   }
 }
 
-async function readReport(name: string) {
-   return readAndMaybeRunBds(path.join('report', name));
+export class DumpProviderScriptApi<T extends Record<string, object> = Record<string, object>> extends DumpProvider<T> {
+   public constructor(
+      id: string,
+      importMetaDirname: string,
+      protected readonly reports: (keyof T)[],
+      public readonly scriptApiCodePath: string,
+      marshaller: Marshaller<T>,
+   ) {
+      super(
+         id,
+         importMetaDirname,
+         async () => {
+            // mv reports/id -> output/reports/id
+            // reports are already written to the output dir
+         },
+         async output => {
+            // return readFile(output/reports/id)
+            const obj = {} as Record<keyof T, object>;
+            for (const report of reports) {
+               obj[report] = JSON.parse(
+                  await fs.readFile(path.join(output, 'report', `${report as string}.json`), 'utf8'),
+               );
+            }
+            return obj as T;
+         },
+         marshaller,
+      );
+   }
 }
-
-export const readTestReport = readReport.bind(null, 'tests.json') as () => Promise<TestsReport>;
-export const readItemsReport = readReport.bind(null, 'items.json') as () => Promise<ItemsDataReport>;
-export const readLocalizationReport = readReport.bind(
-   null,
-   'localization.json',
-) as () => Promise<LocalizationKeysReport>;
-export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
-
-// Dev mode only function. No need to be in provider
-export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
-   const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
-   const jsModules = CACHE_DUMP_OUTPUT_JS_MODULES;
-   if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
-   if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
-
-   return [metadata, jsModules];
-}
-
-// export class DumpProvider<T> {
-//    public constructor(
-//       public readonly id: string,
-//       public readonly afterBdsDump: (bdsFolder: string, outputFolder: string) => void,
-//       public readonly onExtract: (folder: string) => Promise<T>,
-//       public readonly marshaller: { marshal(io: BinaryIO<T>): void },
-//    ) {}
-
-//    protected defaultImagePath = resolve(import.meta.url, 'image.gz');
-
-//    public async write(output: string): Promise<void> {
-//       // const image = marshal.marshal(writer(onExtract(output)))
-//       // writeFile(image.gz, image)
-//       return;
-//    }
-
-//    public async read(path = this.defaultImagePath): Promise<T> {
-//       // return marshal.marshal(reader(readFile(path)))
-//       return undefined as T;
-//    }
-// }
-
-// new DumpProvider(
-//    'modules',
-//    async (bds, output) => {
-//       // mv 'docs/script_modules' -> output/script_metadata
-//       // mv behavior packs libraries -> output/js_modules
-//    },
-//    async output => {
-//       // return MetadataToSerializable(provider(output/script_metadata, output/js_modules))
-//       return 0;
-//    },
-//    {
-//       marshal(io) {}, // image format
-//    },
-// );
-
-// class DumpProviderScriptApi<T> extends DumpProvider<T> {
-//    public constructor(id: string, scriptApiCodePath: string, marshaller: { marshal(io: BinaryIO<T>): void }) {
-//       super(
-//          id,
-//          (bds, output) => {
-//             // mv reports/id -> output/reports/id
-//          },
-//          async output => {
-//             // return readFile(output/reports/id)
-//             return 0 as T;
-//          },
-//          marshaller,
-//       );
-//    }
-// }
-
-// new DumpProviderScriptApi('tests', './test-run-mc.ts', {
-//    marshal(io) {},
-// });
-
-// function bdsDumpSupported(needBds:string) {
-//    if (installedBds !== needBds) installBds()
-//    runBds(bdsFolder);
-//    for (const provider of providers) {
-//       provider.afterBdsRun(bdsFolder, outputFolder);
-//    }
-//    zipOutput()
-//    for (const provider of providers) {
-//       provider.write(outputFolder);
-//    }
-// }
-
-// function bdsDumpUnsupported() {
-//    unzipOutput()
-//    for (const provider of providers) {
-//       provider.write(outputFolder);
-//    }
-// }
