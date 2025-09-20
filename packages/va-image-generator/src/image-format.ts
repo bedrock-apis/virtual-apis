@@ -1,6 +1,5 @@
+import { BinaryIO, BinaryMarshaller } from '@bedrock-apis/va-binary';
 import { BitFlags } from '@bedrock-apis/va-common';
-import { BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from './binary';
-import { BinaryIO } from './binary/io';
 import { IMAGE_GENERAL_DATA_MAGIC } from './constants';
 import {
    BinaryDetailsStruct,
@@ -17,42 +16,25 @@ import { BinaryTypeStruct, TypeBitFlagsU16 } from './types/types';
 const { allOf: AllOf } = BitFlags;
 
 // Keep Strict Order of the Binary Writer methods
-export class BinaryImageFormat {
-   protected constructor() {}
+export class BinaryImageFormat extends BinaryMarshaller<SerializableMetadata> {
+   protected override version = 1;
 
-   public static write(data: SerializableMetadata, cursor: DataCursorView = DataCursorView.alloc()) {
-      data.version = 1;
+   protected override magic = IMAGE_GENERAL_DATA_MAGIC;
 
-      const io = new SafeBinaryIOWriter(cursor, data as object) as unknown as BinaryIO<SerializableMetadata>;
-      this.marshal(io);
-
-      return io.data.getBuffer();
-   }
-
-   public static read(source: Uint8Array<ArrayBufferLike>) {
-      const buffer = new DataCursorView(source);
-      buffer.pointer = 0;
-      const io = new BinaryIOReader(buffer, {}) as unknown as BinaryIO<SerializableMetadata>;
-      this.marshal(io);
-      return io.storage;
-   }
-
-   protected static marshal(io: BinaryIO<SerializableMetadata>): void {
-      io.magic(IMAGE_GENERAL_DATA_MAGIC);
-      io.uint32('version');
+   protected marshal(io: BinaryIO<SerializableMetadata>): void {
       this.header(io.sub('metadata'));
       io.array8('modules', io => this.module(io));
       io.array8('jsModules', io => this.jsModule(io));
    }
 
-   protected static header(io: BinaryIO<ImageHeader>): void {
+   protected header(io: BinaryIO<ImageHeader>): void {
       io.dynamic('metadata');
       io.string8Array16('stringSlices');
       io.array16('details', io => this.details(io));
       io.array16('types', io => this.type(io));
    }
 
-   protected static details(io: BinaryIO<BinaryDetailsStruct>) {
+   protected details(io: BinaryIO<BinaryDetailsStruct>) {
       io.uint8('type');
       if (io.storage.type === BinaryDetailsType.Empty) return;
 
@@ -62,13 +44,13 @@ export class BinaryImageFormat {
          io.float64('minValue');
       }
    }
-   protected static jsModule(io: BinaryIO<SerializableMetadata['jsModules'][number]>) {
+   protected jsModule(io: BinaryIO<SerializableMetadata['jsModules'][number]>) {
       io.string8('name');
       io.string8('filename');
       io.string32('code');
    }
 
-   protected static module(io: BinaryIO<SerializableModule>): void {
+   protected module(io: BinaryIO<SerializableModule>): void {
       // const start = io.data.pointer;
 
       this.moduleHeader(io.sub('metadata'));
@@ -79,7 +61,7 @@ export class BinaryImageFormat {
       // );
    }
 
-   protected static moduleHeader(io: BinaryIO<SerializableModule['metadata']>): void {
+   protected moduleHeader(io: BinaryIO<SerializableModule['metadata']>): void {
       io.index('name');
       io.index('uuid');
       io.index('version');
@@ -91,12 +73,12 @@ export class BinaryImageFormat {
       });
    }
 
-   protected static moduleData(io: BinaryIO<ImageModuleData>): void {
+   protected moduleData(io: BinaryIO<ImageModuleData>): void {
       io.array16('symbols', io => this.symbol(io));
       io.uint16Array16('exports');
    }
 
-   protected static type(io: BinaryIO<BinaryTypeStruct>): void {
+   protected type(io: BinaryIO<BinaryTypeStruct>): void {
       io.uint16('flags');
 
       // No return because combines with other extended refs
@@ -125,7 +107,7 @@ export class BinaryImageFormat {
       }
    }
 
-   protected static symbol(io: BinaryIO<BinarySymbolStruct>): void {
+   protected symbol(io: BinaryIO<BinarySymbolStruct>): void {
       io.uint32('bitFlags');
       io.index('name');
 
@@ -157,12 +139,12 @@ export class BinaryImageFormat {
       if (AllOf(io.storage.bitFlags, SymbolBitFlags.IsBound)) io.index('boundTo');
    }
 
-   protected static interfaceData(io: BinaryIO<NonNullable<BinarySymbolStruct['isInterfaceData']>>): void {
+   protected interfaceData(io: BinaryIO<NonNullable<BinarySymbolStruct['isInterfaceData']>>): void {
       io.uint16Array8('keys');
       io.uint16Array8('types');
    }
 
-   protected static enumData(io: BinaryIO<NonNullable<BinarySymbolStruct['isEnumData']>>): void {
+   protected enumData(io: BinaryIO<NonNullable<BinarySymbolStruct['isEnumData']>>): void {
       io.bool('isNumerical');
       io.uint16Array16('keys');
       io.uint16Array16('values');

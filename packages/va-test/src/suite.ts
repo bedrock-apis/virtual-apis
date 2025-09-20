@@ -1,4 +1,4 @@
-import { defaultThreadRunner, RunThreadAsync, ThreadRunner } from './async-generator';
+import { defaultThreadRunner, runThreadAsync, ThreadRunner } from '@bedrock-apis/va-common/async-thread';
 import { setEnvironment, TestEnvironment } from './environment/environment';
 import { TestReport } from './types';
 
@@ -23,7 +23,7 @@ export class TestSuite<T> {
    }
 
    public static runThread(Environment: TestEnvironment, runner: ThreadRunner = defaultThreadRunner) {
-      return RunThreadAsync(this.run(Environment), runner);
+      return runThreadAsync(this.run(Environment), runner);
    }
 
    public static *run(Environment: TestEnvironment): Generator<Promise<void> | unknown, TestReport.Run, unknown> {

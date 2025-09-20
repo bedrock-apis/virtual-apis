@@ -1,13 +1,13 @@
 import '@bedrock-apis/va-test/suites';
 
-import { readTestReport } from '@bedrock-apis/va-bds-dumps/api';
 import { runAndCompare, VirtualApiEnvironment } from '@bedrock-apis/va-test';
 import { Context, ContextUtils } from '@bedrock-apis/virtual-apis';
 import { world } from '@minecraft/server';
 import fs from 'node:fs/promises';
+import { testsResultProvider } from '../dump/provider';
 
 world.afterEvents.worldLoad.subscribe(async () => {
-   const bdsReports = await readTestReport();
+   const bdsReports = (await testsResultProvider.read()).tests;
    const result = await runAndCompare(bdsReports, new VirtualApiEnvironment());
 
    console.log('\n\n');
@@ -26,7 +26,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 `;
 
-   await fs.writeFile('INCOMPATIBILITY.md', header + result + `\n\`\`\``);
+   await fs.writeFile(process.env.REPORT_PATH ?? process.argv[3] ?? 'INCOMPATIBILITY.md', header + result + `\n\`\`\``);
 
    const context = Context.getContext(0);
    const stats = ContextUtils.getStats(context!, context!.getModuleSymbol('@minecraft/server-bindings')!);

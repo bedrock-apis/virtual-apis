@@ -1,21 +1,27 @@
-import { BinaryImageLoader } from '@bedrock-apis/va-image-loader';
+import { corePluginVanillaDataProvider } from '@bedrock-apis/va-core-plugin/dump/provider';
+import { BinaryImageLoader } from '@bedrock-apis/va-image-generator';
+import { modulesProvider } from '@bedrock-apis/va-image-generator/dump/provider';
 import { Context } from '@bedrock-apis/virtual-apis';
 import { createCodeURL } from '../create-code-url';
-import { getModuleVersions, readImageFromNodeModules } from '../get-module-versions';
+import { getModuleVersions } from '../get-module-versions';
 
 export const context = new Context();
 
 /** @internal */
-export async function internalVirtualApiLoad(imagePath?: string) {
+export async function internalVirtualApiLoad(imagesFolder?: string, loadProviders = false) {
    const versions = getModuleVersions();
-   await BinaryImageLoader.loadFromBuffer(await readImageFromNodeModules(imagePath)).loadModules(versions, context);
+   await BinaryImageLoader.loadFrom(await modulesProvider.read(imagesFolder)).loadModules(versions, context);
+
+   if (loadProviders) {
+      const providers = [corePluginVanillaDataProvider];
+      for (const provider of providers) await provider.read(imagesFolder);
+   }
    context.ready();
 
    return { versions, context };
 }
 
-export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
-   const vaImages = import.meta.resolve('@bedrock-apis/va-images');
+export async function virtualApi(vaImages?: string): Promise<import('vitest/node').Vite.Plugin> {
    const { context } = await internalVirtualApiLoad(vaImages);
 
    const virtualPrefix = '/@virtual:bedrock-apis-virtual-apis/';
@@ -48,7 +54,7 @@ export async function virtualApi(): Promise<import('vitest/node').Vite.Plugin> {
                `
    import { internalVirtualApiLoad } from '@bedrock-apis/va-loader/vitest';
    if (!globalThis.VIRTUAL_APIS_VITEST_CONTEXT) {
-      await internalVirtualApiLoad("${vaImages}")
+      await internalVirtualApiLoad("${vaImages}", true)
       globalThis.VIRTUAL_APIS_VITEST_CONTEXT = true
    }
    

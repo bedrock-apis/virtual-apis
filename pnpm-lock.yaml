@@ -4,6 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@bedrock-apis/nbt':
+      specifier: 0.0.1-alpha.3
+      version: 0.0.1-alpha.3
+    '@bedrock-apis/nbt-core':
+      specifier: 0.0.1-alpha.2
+      version: 0.0.1-alpha.2
+    adm-zip:
+      specifier: ^0.5.16
+      version: 0.5.16
+    chalk:
+      specifier: ^5.6.2
+      version: 5.6.2
+    unzip-web-stream:
+      specifier: 0.0.0-alpha.1
+      version: 0.0.0-alpha.1
+
 overrides:
   vite: npm:rolldown-vite@latest
 
@@ -20,9 +38,6 @@ importers:
       '@bedrock-apis/va-image-generator':
         specifier: workspace:*
         version: link:packages/va-image-generator
-      '@bedrock-apis/va-images':
-        specifier: workspace:^
-        version: link:packages/va-images
       '@bedrock-apis/va-loader':
         specifier: workspace:^
         version: link:packages/va-loader
@@ -140,6 +155,9 @@ importers:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
+      '@bedrock-apis/va-image-generator':
+        specifier: workspace:*
+        version: link:../va-image-generator
       '@bedrock-apis/va-test':
         specifier: workspace:*
         version: link:../va-test
@@ -152,12 +170,12 @@ importers:
 
   packages/va-bds-dumps:
     dependencies:
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
-      '@bedrock-apis/va-test':
-        specifier: workspace:*
-        version: link:../va-test
       adm-zip:
         specifier: 'catalog:'
         version: 0.5.16
@@ -188,6 +206,9 @@ importers:
       '@bedrock-apis/va-bds-dumps':
         specifier: workspace:*
         version: link:../va-bds-dumps
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
@@ -212,29 +233,18 @@ importers:
       '@bedrock-apis/va-types':
         specifier: workspace:*
         version: link:../va-types
-
-  packages/va-image-loader:
-    dependencies:
-      '@bedrock-apis/va-binary':
-        specifier: workspace:*
-        version: link:../va-binary
-      '@bedrock-apis/va-common':
-        specifier: workspace:*
-        version: link:../va-common
       '@bedrock-apis/virtual-apis':
         specifier: workspace:*
         version: link:../virtual-apis
-
-  packages/va-images: {}
 
   packages/va-loader:
     dependencies:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
-      '@bedrock-apis/va-image-loader':
+      '@bedrock-apis/va-image-generator':
         specifier: workspace:*
-        version: link:../va-image-loader
+        version: link:../va-image-generator
       '@bedrock-apis/virtual-apis':
         specifier: workspace:*
         version: link:../virtual-apis
@@ -250,12 +260,15 @@ importers:
 
   packages/va-test:
     dependencies:
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
-      '@bedrock-apis/va-loader':
+      '@bedrock-apis/virtual-apis':
         specifier: workspace:*
-        version: link:../va-loader
+        version: link:../virtual-apis
 
   packages/va-types: {}
 

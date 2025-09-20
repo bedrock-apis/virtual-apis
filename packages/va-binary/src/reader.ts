@@ -1,6 +1,13 @@
 import { TagType } from '@bedrock-apis/nbt-core';
 import { TextDecoder } from 'node:util';
-import { BinaryIO, Filter, MarshalSerializable, MarshalSerializableType, readEncapsulatedDataSymbol } from './io';
+import {
+   BinaryIO,
+   Filter,
+   MarshalSerializable,
+   MarshalSerializableType,
+   readEncapsulatedDataSymbol,
+   WithEncapsulatedData,
+} from './io';
 
 const utf8Decoder = new TextDecoder();
 
@@ -38,12 +45,12 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    }
 
    public override bool(key: ReaderKey): this {
-      return (this.storage[key] = this.readUint8() !== 0), this;
+      return ((this.storage[key] = this.readUint8() !== 0), this);
    }
 
    public override dynamic(key: string): this {
       const type = this.nbtFormatReader.readType(this.data);
-      if (type === 0) return (this.storage[key] = undefined), this; // special case
+      if (type === 0) return ((this.storage[key] = undefined), this); // special case
 
       this.storage[key] = this.nbtFormatReader[type as TagType.Byte](this.data);
       if (type === TagType.Byte) this.storage[key] = !!this.storage[key]; // nbt reads bool as 1 or 0
@@ -60,7 +67,7 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
       const length = this.readUint16();
       const start = this.data.pointer;
       this.data.pointer += length; // skip data for now
-      (this.storage as { [readEncapsulatedDataSymbol]: unknown })[readEncapsulatedDataSymbol] = () => {
+      (this.storage as WithEncapsulatedData)[readEncapsulatedDataSymbol] = () => {
          const prev = this.data.pointer;
          this.data.pointer = start;
          io();
@@ -71,15 +78,15 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    }
 
    public uint8(key: ReaderKey) {
-      return (this.storage[key] = this.readUint8()), this;
+      return ((this.storage[key] = this.readUint8()), this);
    }
 
    public uint16(key: ReaderKey) {
-      return (this.storage[key] = this.readUint16()), this;
+      return ((this.storage[key] = this.readUint16()), this);
    }
 
    public uint32(key: ReaderKey) {
-      return (this.storage[key] = this.readUint32()), this;
+      return ((this.storage[key] = this.readUint32()), this);
    }
 
    // Memory efficient but not as fast, has to be benchmarked on real-world samples
@@ -111,7 +118,7 @@ export class BinaryIOReader extends BinaryIO<Record<ReaderKey, unknown>> {
    }
 
    protected string(key: string, length: number): this {
-      return (this.storage[key] = this.readString(length)), this;
+      return ((this.storage[key] = this.readString(length)), this);
    }
 
    protected uint16Array(key: string, length: number): this {
