@@ -7,7 +7,12 @@ export interface MarshalFormat {
    version?: number;
 }
 
-export abstract class Marshaller<T extends MarshalFormat> {
+export interface Marshaller<T> {
+   write(data: T): Uint8Array<ArrayBufferLike>;
+   read(source: Uint8Array<ArrayBufferLike>): T;
+}
+
+export abstract class BinaryMarshaller<T extends MarshalFormat> implements Marshaller<T> {
    protected size?: number;
 
    protected abstract version: number;
@@ -37,4 +42,13 @@ export abstract class Marshaller<T extends MarshalFormat> {
    }
 
    protected abstract marshal(io: BinaryIO<T>): void;
+}
+
+export class JsonMarshaller<T> implements Marshaller<T> {
+   public write(data: T): Uint8Array<ArrayBufferLike> {
+      return new Uint8Array(Buffer.from(JSON.stringify(data)));
+   }
+   public read(source: Uint8Array<ArrayBufferLike>): T {
+      return JSON.parse(source.toString());
+   }
 }

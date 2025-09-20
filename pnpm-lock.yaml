@@ -254,12 +254,12 @@ importers:
 
   packages/va-test:
     dependencies:
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
-      '@bedrock-apis/va-loader':
-        specifier: workspace:*
-        version: link:../va-loader
 
   packages/va-types: {}
 

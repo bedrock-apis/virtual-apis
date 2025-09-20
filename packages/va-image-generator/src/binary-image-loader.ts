@@ -46,7 +46,7 @@ import {
    SpecificSymbolFlags,
    SymbolBitFlags,
    TypeBitFlagsU16,
-} from './dump-provider/types';
+} from './types';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;

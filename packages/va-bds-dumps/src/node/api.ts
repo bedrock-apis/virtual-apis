@@ -1,4 +1,4 @@
-import { MarshalFormat, Marshaller } from '@bedrock-apis/va-binary';
+import { Marshaller } from '@bedrock-apis/va-binary';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path, { resolve } from 'node:path';
@@ -42,7 +42,7 @@ export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Pr
 //    return [metadata, jsModules];
 // }
 
-export class DumpProvider<T extends MarshalFormat = MarshalFormat> {
+export class DumpProvider<T = object> {
    public constructor(
       public readonly id: string,
       public readonly afterBdsDump: (bdsFolder: string, outputFolder: string) => Promise<void>,
@@ -53,6 +53,8 @@ export class DumpProvider<T extends MarshalFormat = MarshalFormat> {
    protected getImagePath(basePath = import.meta.url) {
       return resolve(basePath, this.id + '.gz');
    }
+
+   public data?: T;
 
    public async writeImage(output: string, imagePath = this.getImagePath()): Promise<void> {
       const startupTime = performance.now();
@@ -73,16 +75,18 @@ export class DumpProvider<T extends MarshalFormat = MarshalFormat> {
    }
 
    public async read(path = this.getImagePath()): Promise<T> {
-      return this.marshaller.read(await promisify(zlib.gunzip)(await fs.readFile(path)));
+      this.data = this.marshaller.read(await promisify(zlib.gunzip)(await fs.readFile(path)));
+      return this.data;
    }
 }
 
-class DumpProviderScriptApi<T extends MarshalFormat> extends DumpProvider<T> {
-   public constructor(id: string, scriptApiCodePath: string, marshaller: Marshaller<T>) {
+export class DumpProviderScriptApi<T> extends DumpProvider<T> {
+   public constructor(id: string, reports: (keyof T)[], scriptApiCodePath: string, marshaller: Marshaller<T>) {
       super(
          id,
-         (bds, output) => {
+         async (bds, output) => {
             // mv reports/id -> output/reports/id
+            // reports are already written to the output dir
          },
          async output => {
             // return readFile(output/reports/id)
@@ -90,28 +94,5 @@ class DumpProviderScriptApi<T extends MarshalFormat> extends DumpProvider<T> {
          },
          marshaller,
       );
-   }
-}
-
-new DumpProviderScriptApi('tests', './test-run-mc.ts', {
-   marshal(io) {},
-});
-
-function bdsDumpSupported(needBds: string, providers: DumpProvider<MarshalFormat>[]) {
-   if (installedBds !== needBds) installBds();
-   runBds(bdsFolder);
-   for (const provider of providers) {
-      provider.afterBdsDump(bdsFolder, outputFolder);
-   }
-   zipOutput();
-   for (const provider of providers) {
-      provider.writeImage(outputFolder);
-   }
-}
-
-function bdsDumpUnsupported() {
-   unzipOutput();
-   for (const provider of providers) {
-      provider.write(outputFolder);
    }
 }

@@ -1,4 +1,4 @@
-import { BinaryIO, Marshaller } from '@bedrock-apis/va-binary';
+import { BinaryIO, BinaryMarshaller } from '@bedrock-apis/va-binary';
 import { BitFlags } from '@bedrock-apis/va-common';
 import { IMAGE_GENERAL_DATA_MAGIC } from './constants';
 import {
@@ -16,7 +16,7 @@ import { BinaryTypeStruct, TypeBitFlagsU16 } from './types/types';
 const { allOf: AllOf } = BitFlags;
 
 // Keep Strict Order of the Binary Writer methods
-export class BinaryImageFormat extends Marshaller<SerializableMetadata> {
+export class BinaryImageFormat extends BinaryMarshaller<SerializableMetadata> {
    protected override version = 1;
 
    protected override magic = IMAGE_GENERAL_DATA_MAGIC;

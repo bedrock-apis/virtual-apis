@@ -16,29 +16,40 @@ import { prepareBdsAndCacheFolders, unzip } from './prepare-bds';
 import { HTTPServer } from './serve';
 import { setupScriptAPI } from './setup-script-api';
 
-export async function dump(providers: DumpProvider[]) {
+export interface DumpArguments {
+   providers: DumpProvider[];
+   imagesPath: string;
+   version: string;
+}
+
+export async function dump(args: DumpArguments) {
    const { platform } = process;
    const gha = process.env.GITHUB_ACTION;
    const noBds = process.env.NO_BDS ?? true; // enable by default for now cuz we publishing
    if (!noBds && (platform === 'win32' || (platform === 'linux' && !gha))) {
-      await dumpSupported(providers);
+      await dumpSupported(args);
    } else {
-      await dumpUnsupported(providers);
+      await dumpUnsupported(args);
    }
 }
 
-async function dumpUnsupported(providers: DumpProvider[]) {
+async function dumpUnsupported(args: DumpArguments) {
    const stream = ReadableStream.from(createReadStream(CACHE_DUMP_OUTPUT_ZIP).iterator());
    await unzip(stream, CACHE_DUMP_OUTPUT);
 
-   for (const provider of providers) {
-      provider.writeImage(CACHE_DUMP_OUTPUT);
+   await writeImages(args);
+}
+
+async function writeImages(args: DumpArguments) {
+   for (const provider of args.providers) {
+      await provider.writeImage(CACHE_DUMP_OUTPUT, args.imagesPath);
    }
 }
 
-async function dumpSupported(providers: DumpProvider[]) {
+async function dumpSupported(args: DumpArguments) {
    const start = Date.now();
 
+   // TODO Make it download version from args
    await prepareBdsAndCacheFolders();
    await setupScriptAPI();
 
@@ -58,13 +69,15 @@ async function dumpSupported(providers: DumpProvider[]) {
    const { child, promise } = executeBds();
    await promise;
 
-   for (const provider of providers) {
+   for (const provider of args.providers) {
       await provider.afterBdsDump(CACHE_BDS, CACHE_DUMP_OUTPUT);
    }
 
    const zip = new AdmZip();
    await zip.addLocalFolderPromise(CACHE_DUMP_OUTPUT, {});
    await zip.writeZipPromise(CACHE_DUMP_OUTPUT_ZIP);
+
+   await writeImages(args);
 
    console.log(`✅\tBDS dump finished in ${((Date.now() - start) / 1000).toFixed(2)}s`);
 }
