@@ -1,11 +1,4 @@
-export * from './block';
-export * from './dimension';
-export * from './dynamic-properties';
-export * from './early-execution';
-export * from './entity';
-export * from './events';
-export * from './instance-getter';
-export * from './item-stack';
-export * from './system';
-export * from './validity';
-export * from './world';
+import { CorePlugin } from './core-plugin';
+
+CorePlugin.registryModuleObjectVariable('@minecraft/server::world', new Object());
+export { CorePlugin };

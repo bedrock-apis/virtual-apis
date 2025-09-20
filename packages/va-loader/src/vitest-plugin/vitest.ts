@@ -17,6 +17,7 @@ export async function internalVirtualApiLoad(imagesFolder?: string, loadProvider
          await provider.read(imagesFolder);
       }
    }
+   context.ready();
 
    return { versions, context };
 }
@@ -29,6 +30,12 @@ export async function virtualApi(vaImages?: string): Promise<import('vitest/node
       name: 'bedrock-apis-virtual-apis',
       enforce: 'pre',
       resolveId(id) {
+         /**
+          * TODO: Test if by any chance we could have this file as valid path in addon
+          *
+          * - Index.js
+          * - @minecraft/custom-module.js
+          */
          if (id.startsWith('@minecraft')) return virtualPrefix + id;
          return null;
       },
@@ -41,7 +48,7 @@ export async function virtualApi(vaImages?: string): Promise<import('vitest/node
             if (jsModule) return jsModule;
 
             return createCodeURL(
-               context.onModuleRequested(id).getRuntimeValue(context),
+               Context.getRuntimeModule(context.getRuntimeId(), id),
                id,
                0,
                undefined,

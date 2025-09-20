@@ -3,5 +3,6 @@ import { Context } from '@bedrock-apis/virtual-apis';
 import { loadModules } from './index';
 
 const context = new Context();
-context.configureAndLoadPlugins({});
+context.setup({});
 await loadModules(context, { providers: [corePluginVanillaDataProvider] });
+context.ready();

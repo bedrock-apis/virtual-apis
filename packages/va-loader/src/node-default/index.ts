@@ -18,6 +18,7 @@ export async function loadModules(
    d('[NodeLoader] loading modules...');
    for (const provider of providers) await provider.read(imagesFolder);
    await BinaryImageLoader.loadFrom(await modulesProvider.read(imagesFolder)).loadModules(versions, context);
+   context.ready();
    const loader = new SingletonLoaderContext(context);
    d(`[NodLoader] loaded in ${Date.now() - start}ms`);
 

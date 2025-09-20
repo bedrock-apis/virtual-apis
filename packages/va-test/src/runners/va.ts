@@ -1,7 +1,7 @@
 import '@bedrock-apis/va-test/suites';
 
 import { runAndCompare, VirtualApiEnvironment } from '@bedrock-apis/va-test';
-import { Context } from '@bedrock-apis/virtual-apis';
+import { Context, ContextUtils } from '@bedrock-apis/virtual-apis';
 import { world } from '@minecraft/server';
 import fs from 'node:fs/promises';
 import { testsResultProvider } from '../dump/provider';
@@ -28,6 +28,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
    await fs.writeFile(process.env.REPORT_PATH ?? process.argv[3] ?? 'INCOMPATIBILITY.md', header + result + `\n\`\`\``);
 
-   const stats = Context.getContext(0)!.getStats('@minecraft/server-bindings');
+   const context = Context.getContext(0);
+   const stats = ContextUtils.getStats(context!, context!.getModuleSymbol('@minecraft/server-bindings')!);
    console.log('Implemented symbols: ', stats.text);
 });

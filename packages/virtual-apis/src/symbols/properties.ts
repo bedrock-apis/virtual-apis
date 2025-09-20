@@ -35,7 +35,7 @@ export class PropertySetterSymbol
          const info = new InvocationInfo(context, symbol, [params[0]], that);
          const { diagnostics } = info;
 
-         if (!context.isNativeHandle(that))
+         if (!context.isNativeHandleInternal(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound(symbol.actionKind, symbol.identifier));
 
          if (!symbol.privileges.includes(context.currentPrivilege))
@@ -49,7 +49,7 @@ export class PropertySetterSymbol
          //     - SubError: Type mismatch for "this" value
          symbol.thisType.isValidValue(diagnostics.errors, that);
 
-         return symbol.runtimeGetResult(info);
+         return symbol.runtimeInvocationGetResult(info);
       }
       const executable = proxyifyFunction(runnable);
       finalizeAsMethod(executable, this.paramsLength);
@@ -91,7 +91,7 @@ export class PropertyGetterSymbol
          const { diagnostics } = info;
 
          // If Config["Getter Require Valid Handle"] return undefined, without throwing
-         if (!context.isNativeHandle(that))
+         if (!context.isNativeHandleInternal(that))
             diagnostics.errors.report(API_ERRORS_MESSAGES.NativeBound('property getter', symbol.identifier));
 
          if (
@@ -103,7 +103,7 @@ export class PropertyGetterSymbol
          //This check can be omitted as always results as successful
          //symbol.params.isValidValue(diagnostics.errors, info.params);
 
-         return symbol.runtimeGetResult(info);
+         return symbol.runtimeInvocationGetResult(info);
       }
       const executable = proxyifyFunction(runnable);
       finalizeAsMethod(executable, this.paramsLength);

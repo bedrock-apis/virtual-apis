@@ -1,5 +1,4 @@
 import { world, WorldLoadAfterEvent } from '@minecraft/server';
-
 world.afterEvents.worldLoad.subscribe(event => {
    console.log('event is instance', event instanceof WorldLoadAfterEvent);
 

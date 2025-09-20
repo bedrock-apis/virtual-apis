@@ -80,7 +80,7 @@ export class ValidityPlugin extends PluginWithConfig<Config> {
                   10,
                );
                if (symbol.name !== 'isValid') {
-                  // Since we implement method guard, we need to explicily mark this as not
+                  // Since we implement method guard, we need to explicitly mark this as not
                   // implemented in case of return type mismatch
                   this.context.implement(
                      version.nameVersion,

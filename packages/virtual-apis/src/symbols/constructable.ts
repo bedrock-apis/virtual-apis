@@ -29,12 +29,16 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public override actionKind: NativeKind = 'constructor for';
    public readonly isConstructable: boolean = false;
    public createHandleInternal(context: Context): object {
-      const handle = this.parent?.createHandleInternal(context) ?? context.createNativeHandle();
+      const handle = this.parent?.createHandleInternal(context) ?? context.createHandleInternal();
       this.handles.add(handle);
       return handle;
    }
 
-   //This is not solve yet, but required for objects to work yet
+   /**
+    * This method is used for ObjectSymbols and
+    *
+    * @internal
+    */
    public createRuntimeInstanceInternal(context: Context) {
       const $ = this.createHandleInternal(context);
       //This should be safe as prototype property is baked with value and should be impossible to change
@@ -72,7 +76,7 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
             diagnostics.errors.report(API_ERRORS_MESSAGES.NoPrivilege(symbol.actionKind, symbol.identifier));
 
          return setPrototypeOf(
-            symbol.runtimeGetResult(info),
+            symbol.runtimeInvocationGetResult(info),
             (new.target as () => unknown)?.prototype ?? constructor.prototype,
          );
       }

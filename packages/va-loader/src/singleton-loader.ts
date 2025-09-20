@@ -1,3 +1,4 @@
+import { Context } from '@bedrock-apis/virtual-apis';
 import { ResolveFnOutput, ResolveHookContext } from 'module';
 import { BaseResolverContext } from './api';
 
@@ -19,6 +20,6 @@ export class SingletonLoaderContext extends BaseResolverContext {
       return super.getNativePackageCodeURL(name);
    }
    protected override getPackageRuntimeData(name: string): object {
-      return this.context.onModuleRequested(name).getRuntimeValue(this.context);
+      return Context.getRuntimeModule(this.context.getRuntimeId(), name);
    }
 }

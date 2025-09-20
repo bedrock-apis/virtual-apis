@@ -10,10 +10,12 @@ export class ModuleSymbol extends CompilableSymbol<object> {
    public readonly publicSymbols = new Map<string, CompilableSymbol<unknown>>();
 
    protected override compile(context: Context): object {
-      context.onBeforeModuleCompilation(this);
       // Pre compile, for correct order
       // For example interface is not exported value so its not considered as public symbol
-      for (const symbol of this.symbols.values()) symbol.getRuntimeValue(context);
+      for (const symbol of this.symbols.values()) {
+         symbol.getRuntimeValue(context);
+         if (symbol instanceof InvocableSymbol) this.invocables.set(symbol.identifier, symbol);
+      }
 
       const moduleObject = create(null);
       for (const symbol of this.publicSymbols.values())
@@ -25,7 +27,6 @@ export class ModuleSymbol extends CompilableSymbol<object> {
                value: symbol.getRuntimeValue(context),
             });
 
-      context.onAfterModuleCompilation(this);
       return moduleObject;
    }
 

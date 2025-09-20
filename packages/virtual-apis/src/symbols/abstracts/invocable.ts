@@ -5,9 +5,9 @@ import { InvocationInfo } from '../../context/invocation-info';
 import { CompileTimeError, NativeActionKindShort, NativeKind, NativeKindShort } from '../../errorable';
 import { RuntimeType } from '../../runtime-types';
 import type { ParamsValidator } from '../../runtime-types/params-validator';
-import { ModuleSymbol } from '../module';
 import { CompilableSymbol } from './compilable';
 
+type Privilege = 'read_only' | 'none' | 'early_execution' | `${string}`;
 export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly returnType!: RuntimeType;
    public readonly params!: ParamsValidator;
@@ -16,9 +16,9 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public readonly kind?: NativeActionKindShort;
    public readonly kindShort?: NativeKindShort;
    public readonly actionKind?: NativeKind;
-   public readonly privileges: ('read_only' | 'none' | 'early_execution')[] = [];
+   public readonly privileges: Privilege[] = [];
    protected readonly stackTrimEncapsulation: number = 1;
-   protected runtimeGetResult(info: InvocationInfo): unknown {
+   protected runtimeInvocationGetResult(info: InvocationInfo): unknown {
       const diagnostics = info.diagnostics;
 
       // Checks Before
@@ -49,15 +49,17 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       return info.result;
    }
    protected invoke(info: InvocationInfo) {
-      info.context.onInvocation(info);
+      info.context.pluginManager.invoke(info);
    }
    //#region  SetMethods
    public setPrivileges(privileges: string[]): this {
+      /*
       if (privileges.some(_ => _ !== 'read_only' && _ !== 'none' && _ !== 'early_execution')) {
          console.warn('Unknown privileges for', this.name, privileges);
       } else {
-         (this as Mutable<this>).privileges = privileges as this['privileges'];
-      }
+          as this['privileges'];
+      }*/
+      (this as Mutable<this>).privileges = privileges;
       return this;
    }
    public setReturnType(type: RuntimeType): this {
@@ -72,11 +74,8 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       (this as Mutable<this>).paramsLength = length;
       return this;
    }
-   public module!: ModuleSymbol;
-   public setIdentifier(identifier: string, module: ModuleSymbol): this {
+   public setIdentifier(identifier: string): this {
       (this as Mutable<this>).identifier = identifier;
-      module.invocables.set(identifier, this);
-      this.module = module;
       return this;
    }
    public override precompileChecks(_: Context): void {

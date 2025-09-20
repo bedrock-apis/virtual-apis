@@ -3,14 +3,14 @@ import '@bedrock-apis/va-core-plugin';
 import './plugin.ts';
 
 // Configure
-import { EventsPlugin, SystemPlugin } from '@bedrock-apis/va-core-plugin';
-import { loadModules } from '@bedrock-apis/va-loader/node';
+import { CorePlugin } from '@bedrock-apis/va-core-plugin';
 import { Context } from '@bedrock-apis/virtual-apis';
-import { MyPlugin } from './plugin.ts';
 
 const context = new Context();
+context.pluginManager.use(CorePlugin);
 
 // Any plugins should be loaded before context configure
+/*
 context.configureAndLoadPlugins({
    implementationEarlyExit: true,
    disablePlugins: [SystemPlugin],
@@ -24,7 +24,7 @@ context.getPlugin(MyPlugin).configure({
    myConfigProperty: 6,
 });
 
-await loadModules(context);
+await loadModules(context);*/
 
 // SCRIPT API CODE ENTRYPOINT SHOULD BE ASYNC
 // because otherwise it will be hoisted on top

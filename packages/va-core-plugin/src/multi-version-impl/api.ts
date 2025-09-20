@@ -32,7 +32,7 @@ export abstract class Plugin extends ContextPlugin {
       '1.17.0',
    );
 
-   public override onModulesLoaded(): void {
+   public override onAfterReady(): void {
       for (const module of this.modules.values()) module.onModulesLoaded();
    }
 
