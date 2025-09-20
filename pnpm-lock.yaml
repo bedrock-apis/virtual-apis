@@ -155,6 +155,9 @@ importers:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
+      '@bedrock-apis/va-image-generator':
+        specifier: workspace:*
+        version: link:../va-image-generator
       '@bedrock-apis/va-test':
         specifier: workspace:*
         version: link:../va-test
@@ -173,9 +176,6 @@ importers:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
-      '@bedrock-apis/va-test':
-        specifier: workspace:*
-        version: link:../va-test
       adm-zip:
         specifier: 'catalog:'
         version: 0.5.16
@@ -206,6 +206,9 @@ importers:
       '@bedrock-apis/va-bds-dumps':
         specifier: workspace:*
         version: link:../va-bds-dumps
+      '@bedrock-apis/va-binary':
+        specifier: workspace:*
+        version: link:../va-binary
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
@@ -239,6 +242,9 @@ importers:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
+      '@bedrock-apis/va-image-generator':
+        specifier: workspace:*
+        version: link:../va-image-generator
       '@bedrock-apis/virtual-apis':
         specifier: workspace:*
         version: link:../virtual-apis
@@ -260,6 +266,9 @@ importers:
       '@bedrock-apis/va-common':
         specifier: workspace:*
         version: link:../va-common
+      '@bedrock-apis/virtual-apis':
+        specifier: workspace:*
+        version: link:../virtual-apis
 
   packages/va-types: {}
 

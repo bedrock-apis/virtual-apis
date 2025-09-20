@@ -33,6 +33,7 @@ import {
    VariantType,
    voidType,
 } from '@bedrock-apis/virtual-apis';
+
 import {
    BinaryDetailsStruct,
    BinarySymbolStruct,
@@ -68,7 +69,7 @@ export class BinaryImageLoader {
       this.stringAccessor = this.preparedImage.stringSlices;
       this.typeAccessor = this.preparedImage.typeSlices;
    }
-   public static loadFromData(data: SerializableMetadata): BinaryImageLoader {
+   public static loadFrom(data: SerializableMetadata): BinaryImageLoader {
       return new this(this.getPreparedImageFromRaw(data));
    }
    public static getPreparedImageFromRaw(data: SerializableMetadata): PreparedImage {

@@ -1,27 +1,6 @@
-import { Block, Entity, system, VanillaEntityIdentifier, Vector3, world } from '@minecraft/server';
+import { loadChunk } from '@bedrock-apis/va-bds-dumps/mc-api';
+import { Block, Entity, VanillaEntityIdentifier, world } from '@minecraft/server';
 import { TestEnvironment } from './environment';
-
-export async function loadChunk(location: Vector3, tickingareaName: string) {
-   const dimension = world.getDimension('overworld');
-   dimension.runCommand(`tickingarea add circle ${location.x} ${location.y} ${location.z} 4 ${tickingareaName}`);
-
-   let runs = 0;
-   let block;
-   do {
-      runs++;
-      if (runs >= 100) throw new TypeError('Loading took too long');
-
-      try {
-         dimension.setBlockType(location, 'minecraft:bedrock');
-         block = dimension.getBlock(location);
-      } catch {
-         /* empty */
-      }
-      if (!block?.isValid) await system.waitTicks(10);
-   } while (!block?.isValid);
-
-   return block;
-}
 
 export class BedrockDedicatedServerEnvironment extends TestEnvironment {
    public async onSetup(): Promise<void> {

@@ -5,12 +5,9 @@
    "dependencies": {
       "@bedrock-apis/va-binary": "workspace:*",
       "@bedrock-apis/va-common": "workspace:*",
-      "@bedrock-apis/va-test": "workspace:*",
       "adm-zip": "catalog:",
       "unzip-web-stream": "catalog:"
    },
-   "main": "./dist/main.js",
-   "types": "./src/local/main.ts",
    "exports": {
       "./api": {
          "default": "./dist/api.js",
@@ -30,7 +27,6 @@
    },
    "files": [
       "dist",
-      "dump-output.zip",
       "!dist/cache-bds",
       "!dist/cache-bds-download",
       "!dist/dump-output"

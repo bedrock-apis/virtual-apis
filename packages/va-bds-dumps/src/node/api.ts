@@ -1,70 +1,52 @@
 import { Marshaller } from '@bedrock-apis/va-binary';
-import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
-import path, { resolve } from 'node:path';
-import { promisify } from 'node:util';
+import path from 'node:path';
+import util from 'node:util';
 import zlib from 'node:zlib';
-import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
-import { CACHE_DUMP_OUTPUT } from './constants';
-export * from '../shared';
-
-async function readAndMaybeRunBds(file: string): Promise<object> {
-   const filepath = path.join(CACHE_DUMP_OUTPUT, file);
-   //if (!existsSync(filepath)) await dump();
-
-   if (!existsSync(filepath)) {
-      throw new Error('No file generated at ' + file + ' even after bds dump');
-   }
-
-   return JSON.parse(await fs.readFile(filepath, 'utf-8'));
-}
-
-async function readReport(name: string) {
-   return readAndMaybeRunBds(path.join('report', name));
-}
-
-export const readTestReport = readReport.bind(null, 'tests.json') as () => Promise<TestsReport>;
-export const readItemsReport = readReport.bind(null, 'items.json') as () => Promise<ItemsDataReport>;
-export const readLocalizationReport = readReport.bind(
-   null,
-   'localization.json',
-) as () => Promise<LocalizationKeysReport>;
-export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
 
 export class DumpProvider<T = object> {
+   public static async saveResultToOutputFolder(providers: DumpProvider[], bdsFolder: string, outputFolder: string) {
+      for (const provider of providers) {
+         await provider.saveResultToOutputFolder(bdsFolder, outputFolder);
+      }
+   }
+
    public constructor(
       public readonly id: string,
-      public readonly afterBdsDump: (bdsFolder: string, outputFolder: string) => Promise<void>,
-      public readonly onExtract: (folder: string) => Promise<T>,
-      public readonly marshaller: Marshaller<T>,
+      protected readonly importMetaDirname: string,
+      protected readonly saveResultToOutputFolder: (bdsFolder: string, outputFolder: string) => Promise<void>,
+      protected readonly onExtract: (folder: string) => Promise<T>,
+      protected readonly marshaller: Marshaller<T>,
    ) {}
 
-   protected getImagePath(basePath = import.meta.url) {
-      return resolve(basePath, this.id + '.gz');
+   protected getImagePath(basePath = this.importMetaDirname) {
+      return path.resolve(basePath, this.id + '.gz');
    }
 
    public data?: T;
 
-   public async writeImage(output: string, imagePath = this.getImagePath()): Promise<void> {
+   public async writeImage(output: string, imagesFolder?: string): Promise<void> {
       const startupTime = performance.now();
       const image = this.marshaller.write(await this.onExtract(output));
-      const gzipped = await promisify(zlib.gzip)(image);
-      await fs.writeFile(imagePath, gzipped);
+      const gzipped = await util.promisify(zlib.gzip)(image);
+      await fs.writeFile(this.getImagePath(imagesFolder), gzipped);
 
       console.log(
-         `📦 Write ${this.id} Size: ->`,
+         `✅ Write report ${this.id}\n📦 Size: ->`,
          Number((image.length / 1024).toFixed(2)),
-         'kb, Gzip: ->',
+         'kb\n📦 Gzip: ->',
          Number((gzipped.length / 1024).toFixed(2)),
-         'kb, ⌚ Time:',
+         'kb\n⌚ Time:',
          ~~(performance.now() - startupTime),
-         'ms',
+         'ms\n',
       );
       return;
    }
 
-   public async read(path = this.getImagePath()): Promise<T> {
-      this.data = this.marshaller.read(await promisify(zlib.gunzip)(await fs.readFile(path)));
+   public async read(imagesFolder?: string): Promise<T> {
+      const gzipped = await fs.readFile(this.getImagePath(imagesFolder));
+      const binary = await util.promisify(zlib.gunzip)(gzipped);
+      this.data = this.marshaller.read(binary);
       return this.data;
    }
 }
@@ -72,12 +54,14 @@ export class DumpProvider<T = object> {
 export class DumpProviderScriptApi<T extends Record<string, object> = Record<string, object>> extends DumpProvider<T> {
    public constructor(
       id: string,
-      public readonly reports: (keyof T)[],
+      importMetaDirname: string,
+      protected readonly reports: (keyof T)[],
       public readonly scriptApiCodePath: string,
       marshaller: Marshaller<T>,
    ) {
       super(
          id,
+         importMetaDirname,
          async () => {
             // mv reports/id -> output/reports/id
             // reports are already written to the output dir
@@ -86,7 +70,9 @@ export class DumpProviderScriptApi<T extends Record<string, object> = Record<str
             // return readFile(output/reports/id)
             const obj = {} as Record<keyof T, object>;
             for (const report of reports) {
-               obj[report] = JSON.parse(await fs.readFile(path.join(output, 'reports', report as string), 'utf8'));
+               obj[report] = JSON.parse(
+                  await fs.readFile(path.join(output, 'report', `${report as string}.json`), 'utf8'),
+               );
             }
             return obj as T;
          },

@@ -9,8 +9,18 @@
       "@bedrock-apis/va-types": "workspace:*",
       "@bedrock-apis/virtual-apis": "workspace:*"
    },
-   "main": "./dist/main.js",
-   "types": "./src/main.ts",
+   "exports": {
+      ".": {
+         "default": "./dist/main.js",
+         "types": "./src/main.ts",
+         "rolldown": null
+      },
+      "./dump/provider": {
+         "default": "./dist/dump-provider.js",
+         "types": "./src/dump-provider.ts",
+         "rolldown": null
+      }
+   },
    "files": [
       "dist"
    ]

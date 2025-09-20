@@ -18,14 +18,14 @@ import { setupScriptAPI } from './setup-script-api';
 
 export interface DumpArguments {
    providers: DumpProvider[];
-   imagesPath: string;
+   imagesFolder?: string;
    version: string;
 }
 
 export async function dump(args: DumpArguments) {
    const { platform } = process;
    const gha = process.env.GITHUB_ACTION;
-   const noBds = process.env.NO_BDS ?? true; // enable by default for now cuz we publishing
+   const noBds = process.env.NO_BDS; // enable by default for now cuz we publishing
    if (!noBds && (platform === 'win32' || (platform === 'linux' && !gha))) {
       await dumpSupported(args);
    } else {
@@ -42,7 +42,7 @@ async function dumpUnsupported(args: DumpArguments) {
 
 async function writeImages(args: DumpArguments) {
    for (const provider of args.providers) {
-      await provider.writeImage(CACHE_DUMP_OUTPUT, args.imagesPath);
+      await provider.writeImage(CACHE_DUMP_OUTPUT, args.imagesFolder);
    }
 }
 
@@ -51,7 +51,7 @@ async function dumpSupported(args: DumpArguments) {
 
    // TODO Make it download version from args
    await prepareBdsAndCacheFolders();
-   await setupScriptAPI();
+   await setupScriptAPI(args.providers);
 
    await writeBdsTestConfig();
    if (process.platform !== 'win32') await chmod(CACHE_BDS_EXE_PATH, 0o755);
@@ -69,9 +69,7 @@ async function dumpSupported(args: DumpArguments) {
    const { child, promise } = executeBds();
    await promise;
 
-   for (const provider of args.providers) {
-      await provider.afterBdsDump(CACHE_BDS, CACHE_DUMP_OUTPUT);
-   }
+   await DumpProvider.saveResultToOutputFolder(args.providers, CACHE_BDS, CACHE_DUMP_OUTPUT);
 
    const zip = new AdmZip();
    await zip.addLocalFolderPromise(CACHE_DUMP_OUTPUT, {});

@@ -3,12 +3,13 @@ import { BinaryImageFormat } from './image-format';
 
 export const modulesProvider = new DumpProvider(
    'modules',
+   import.meta.dirname,
    async (bds, output) => {
       // Save bds run results into the output directory to zip
       const { join } = await import('node:path');
       const { cp, mkdir, readdir } = await import('node:fs/promises');
 
-      await cp(join(bds, 'docs/script_modules'), join(output, 'script_metadata'));
+      await cp(join(bds, 'docs/script_modules'), join(output, 'script_metadata'), { recursive: true });
 
       const jsModules = join(output, 'js_modules');
       await mkdir(jsModules);

@@ -1,9 +1,14 @@
+import { runThread } from '@bedrock-apis/va-bds-dumps/mc-api';
 import { ItemStack, ItemTypes } from '@minecraft/server';
-import { ItemsDataReport } from '../../shared';
+import type { ItemsDataReport } from '../provider';
 
 type ItemData = ItemsDataReport['items'][string];
 
-export function* itemStackResolver(): Generator<undefined, ItemsDataReport, unknown> {
+export function itemsReport() {
+   return runThread(itemStackJob());
+}
+
+function* itemStackJob() {
    let lastIndex = 0;
    const map = new Map<string, number>();
    const items: Record<string, ItemData> = {};
@@ -32,5 +37,5 @@ export function* itemStackResolver(): Generator<undefined, ItemsDataReport, unkn
       }
       yield;
    }
-   return { tags: Array.from(map.keys()), items };
+   return { tags: Array.from(map.keys()), items } satisfies ItemsDataReport;
 }

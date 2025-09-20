@@ -9,10 +9,6 @@
    },
    "main": "./dist/main.js",
    "types": "./src/main.ts",
-   "exports": {
-      "default": "./dist/main.js",
-      "types": "./src/main.ts"
-   },
    "files": [
       "dist"
    ]

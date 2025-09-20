@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// TODO Move to va-common
 
 type Resolve<T> = (value: T) => void;
 type Reject = (error: any) => void;
@@ -25,10 +22,10 @@ interface RunThreadAsyncContext<T> {
    runner: ThreadRunner;
 }
 
-export function RunThreadAsync<T>(generator: Generator<unknown | Promise<void>, T, any>, runner: ThreadRunner) {
+export function runThreadAsync<T>(generator: Generator<unknown | Promise<void>, T, any>, runner: ThreadRunner) {
    return new Promise<T>((resolve, reject) => {
       try {
-         SessionContinue({
+         sessionContinue({
             resolve,
             reject,
             generator,
@@ -41,24 +38,24 @@ export function RunThreadAsync<T>(generator: Generator<unknown | Promise<void>, 
       }
    });
 }
-function SessionContinue<T>(ctx: RunThreadAsyncContext<T>) {
-   ctx.runner(SessionRunner(ctx));
+function sessionContinue<T>(ctx: RunThreadAsyncContext<T>) {
+   ctx.runner(sessionRunner(ctx));
 }
-function ThrowContinue<T>(ctx: RunThreadAsyncContext<T>, error: Error) {
+function throwContinue<T>(ctx: RunThreadAsyncContext<T>, error: Error) {
    try {
       ctx.generator.throw(error);
-      SessionContinue(ctx);
+      sessionContinue(ctx);
    } catch (error) {
       ctx.reject(error);
    }
 }
-function* SessionRunner<T>(ctx: RunThreadAsyncContext<T>) {
+function* sessionRunner<T>(ctx: RunThreadAsyncContext<T>) {
    const { generator, resolve, reject } = ctx;
    try {
       ctx.result = generator.next(ctx.nextParam);
       yield;
       while (!ctx.result.done) {
-         if (ctx.result.value !== undefined) if (ProcessCore(ctx)) return;
+         if (ctx.result.value !== undefined) if (processCore(ctx)) return;
          ctx.result = generator.next(ctx.nextParam);
          yield;
       }
@@ -67,16 +64,16 @@ function* SessionRunner<T>(ctx: RunThreadAsyncContext<T>) {
       reject(error);
    }
 }
-function ProcessCore<T>(ctx: RunThreadAsyncContext<T>) {
+function processCore<T>(ctx: RunThreadAsyncContext<T>) {
    const v = ctx.result.value as null | PromiseLike<T>;
 
    if (v && typeof v['then'] === 'function') {
       Promise.resolve(v).then(
          promiseV => {
             ctx.nextParam = promiseV;
-            SessionContinue(ctx);
+            sessionContinue(ctx);
          },
-         e => ThrowContinue(ctx, e),
+         e => throwContinue(ctx, e),
       );
       return true;
    }

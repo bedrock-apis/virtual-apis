@@ -1,10 +1,12 @@
-import { system } from '@minecraft/server';
+import { system, Vector3, world } from '@minecraft/server';
 import { http, HttpRequest, HttpRequestMethod } from '@minecraft/server-net';
 
-const dumpReporters: Record<string, () => Promise<object>>[] = [];
+type Reporter<T extends object = object> = () => Promise<T>;
+
+const dumpReporters: Record<string, Reporter>[] = [];
 
 export function registerScriptApiDumpReporters<T extends Record<string, object>>(reporters: {
-   [K in keyof T]: () => Promise<T[K]>;
+   [K in keyof T]: Reporter<T[K]>;
 }) {
    dumpReporters.push(reporters);
 }
@@ -54,4 +56,26 @@ async function exit() {
    request.setMethod(HttpRequestMethod.Post);
    request.setBody(JSON.stringify({}));
    await http.request(request);
+}
+
+export async function loadChunk(location: Vector3, tickingareaName: string) {
+   const dimension = world.getDimension('overworld');
+   dimension.runCommand(`tickingarea add circle ${location.x} ${location.y} ${location.z} 4 ${tickingareaName}`);
+
+   let runs = 0;
+   let block;
+   do {
+      runs++;
+      if (runs >= 100) throw new TypeError('Loading took too long');
+
+      try {
+         dimension.setBlockType(location, 'minecraft:bedrock');
+         block = dimension.getBlock(location);
+      } catch {
+         /* empty */
+      }
+      if (!block?.isValid) await system.waitTicks(10);
+   } while (!block?.isValid);
+
+   return block;
 }

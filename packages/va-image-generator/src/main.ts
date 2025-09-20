@@ -9,3 +9,5 @@
 //       process.exit(-1);
 //    },
 // );
+
+export * from './binary-image-loader'

@@ -12,6 +12,7 @@ import {
    MetadataType,
    Privilege,
 } from '@bedrock-apis/va-types';
+import { IMetadataProvider, StrippedMetadataModuleDefinition } from './metadata-provider';
 import {
    BinaryDetailsStruct,
    BinaryDetailsType,
@@ -24,8 +25,7 @@ import {
    SerializableModule,
    SymbolBitFlags,
    TypeBitFlagsU16,
-} from './dump-provider/types';
-import { IMetadataProvider, StrippedMetadataModuleDefinition } from './metadata-provider';
+} from './types';
 
 export class MetadataToSerializableTransformer {
    protected readonly stringCollector = new IndexedCollector<string>();

@@ -13,10 +13,12 @@ const plugins: RolldownOptions['plugins'] = process.env.PUBLISH ? [dts()] : [];
 
 for (const entry of await readdir(folder, { withFileTypes: true })) {
    const packagePath = `./${folder}/${entry.name}`;
-   if (!existsSync(`${packagePath}/package.json`)) continue;
+   const packageJsonPath = `${packagePath}/package.json`;
+
+   if (!existsSync(packageJsonPath)) continue;
 
    const dist = `${packagePath}/dist/`;
-   const packageJson = JSON.parse(await readFile(`${packagePath}/package.json`, 'utf-8')) as ModulePackageJson;
+   const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8')) as ModulePackageJson;
 
    if (packageJson.main && packageJson.types) {
       const input = resolve(packagePath, packageJson.types);
@@ -31,6 +33,8 @@ for (const entry of await readdir(folder, { withFileTypes: true })) {
    }
 
    if (packageJson.exports) {
+      if (packageJson.main || packageJson.types) console.warn('Mixed exports & main fields in', packageJsonPath);
+
       const option = {
          external,
          plugins,

@@ -31,13 +31,10 @@ jobs:
            run: pnpm run lint
 
          - name: ⚙️ Dump BDS Docs
-           run: pnpm run dump:run
+           run: pnpm run repo:dump
 
          - name: 🧪 Run project tests
            run: pnpm run test
-
-         - name: 🏗 Build images
-           run: pnpm run build
 
          - name: 🧪 Run e2e tests
            run: pnpm run e2e
