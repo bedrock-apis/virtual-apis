@@ -17,6 +17,11 @@
          "types": "./src/node/api.ts",
          "rolldown": null
       },
+      "./mc-api": {
+         "default": "./dist/mc-api.js",
+         "types": "./src/mc/mc-api.ts",
+         "rolldown": null
+      },
       "./run": {
          "default": "./dist/main.js",
          "types": "./src/node/main.ts",

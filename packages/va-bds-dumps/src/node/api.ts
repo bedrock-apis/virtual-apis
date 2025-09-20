@@ -6,12 +6,11 @@ import { promisify } from 'node:util';
 import zlib from 'node:zlib';
 import { BlocksDataReport, ItemsDataReport, LocalizationKeysReport, TestsReport } from '../shared';
 import { CACHE_DUMP_OUTPUT } from './constants';
-import { dump } from './dump';
 export * from '../shared';
 
 async function readAndMaybeRunBds(file: string): Promise<object> {
    const filepath = path.join(CACHE_DUMP_OUTPUT, file);
-   if (!existsSync(filepath)) await dump();
+   //if (!existsSync(filepath)) await dump();
 
    if (!existsSync(filepath)) {
       throw new Error('No file generated at ' + file + ' even after bds dump');
@@ -31,16 +30,6 @@ export const readLocalizationReport = readReport.bind(
    'localization.json',
 ) as () => Promise<LocalizationKeysReport>;
 export const readBlocksReport = readReport.bind(null, 'blocks.json') as () => Promise<BlocksDataReport>;
-
-// Dev mode only function. No need to be in provider
-// export async function getOrGenerateMetadataFilepaths(): Promise<[string, string]> {
-//    const metadata = path.join(CACHE_DUMP_OUTPUT, 'docs/script_modules');
-//    const jsModules = CACHE_DUMP_OUTPUT_JS_MODULES;
-//    if (!existsSync(metadata) || !existsSync(jsModules)) await dump();
-//    if (!existsSync(metadata)) throw new Error('Unable to get metadata at ' + metadata);
-
-//    return [metadata, jsModules];
-// }
 
 export class DumpProvider<T = object> {
    public constructor(
@@ -80,17 +69,26 @@ export class DumpProvider<T = object> {
    }
 }
 
-export class DumpProviderScriptApi<T> extends DumpProvider<T> {
-   public constructor(id: string, reports: (keyof T)[], scriptApiCodePath: string, marshaller: Marshaller<T>) {
+export class DumpProviderScriptApi<T extends Record<string, object> = Record<string, object>> extends DumpProvider<T> {
+   public constructor(
+      id: string,
+      public readonly reports: (keyof T)[],
+      public readonly scriptApiCodePath: string,
+      marshaller: Marshaller<T>,
+   ) {
       super(
          id,
-         async (bds, output) => {
+         async () => {
             // mv reports/id -> output/reports/id
             // reports are already written to the output dir
          },
          async output => {
             // return readFile(output/reports/id)
-            return 0 as T;
+            const obj = {} as Record<keyof T, object>;
+            for (const report of reports) {
+               obj[report] = JSON.parse(await fs.readFile(path.join(output, 'reports', report as string), 'utf8'));
+            }
+            return obj as T;
          },
          marshaller,
       );

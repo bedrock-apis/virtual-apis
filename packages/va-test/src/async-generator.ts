@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+// TODO Move to va-common
+
 type Resolve<T> = (value: T) => void;
 type Reject = (error: any) => void;
 
