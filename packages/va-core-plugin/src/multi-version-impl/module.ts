@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck This file is not needed anymore
+
 import { compareVersions, dwarn, VaEventLoader } from '@bedrock-apis/va-common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { Plugin } from './api';

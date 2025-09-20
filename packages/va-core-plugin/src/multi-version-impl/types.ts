@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck This file is not needed anymore
+
 import { ContextPlugin, InvocationInfo } from '@bedrock-apis/virtual-apis';
 import type * as mc from '@minecraft/server';
 import { Plugin } from './api';

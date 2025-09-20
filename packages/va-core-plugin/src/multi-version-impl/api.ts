@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck This file is not needed anymore
+
 import { ContextPlugin } from '@bedrock-apis/virtual-apis';
 import { PluginModule } from './module';
 import { ServerModuleTypeMap } from './types';

@@ -1,10 +1,11 @@
 import { BinaryIO, BinaryIOReader, DataCursorView, SafeBinaryIOWriter } from '@bedrock-apis/va-binary';
 import { IndexedCollector } from '@bedrock-apis/va-common';
 import { MetadataType } from '@bedrock-apis/va-types';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MetadataToSerializableTransformer } from '../metadata-to-serializable';
 import { modulesProvider } from './dump-provider';
 import { BinaryImageFormat } from './image-format';
+import { MetadataToSerializableTransformer } from './metadata-to-serializable';
 import { BinarySymbolStruct, SerializableMetadata } from './types';
 
 class TestSerializer extends MetadataToSerializableTransformer {
@@ -34,7 +35,8 @@ let cache: SerializableMetadata | undefined;
 
 async function getTestData() {
    if (cache) return cache;
-   cache = await modulesProvider.read();
+   cache = await modulesProvider.read(path.resolve(import.meta.dirname, '../dist'));
+   cache.modules.forEach(e => BinaryIO.readEncapsulatedData(e));
    return cache!;
 }
 
@@ -42,7 +44,10 @@ describe('io test', () => {
    it('serialize symbols', { timeout: 5000 }, async () => {
       const data = await getTestData();
       const collector = new IndexedCollector<BinarySymbolStruct>(JSON.stringify);
-      for (const module of data.modules) for (let symbol of module.data.symbols) collector.getIndexFor(symbol);
+      for (const module of data.modules) {
+         for (let symbol of module.data.symbols) collector.getIndexFor(symbol);
+      }
+
       const symbols = collector.getArrayAndLock();
 
       for (const symbol of symbols) {
@@ -55,15 +60,9 @@ describe('io test', () => {
       const data = await getTestData();
       data.modules = data.modules.slice(0, 10);
       const reread = imageFormat.read(imageFormat.write(data));
-      const actual = { modules: reread.modules.map(e => BinaryIO.readEncapsulatedData(e)), metadata: reread.metadata };
-      const { modules, metadata } = data;
-      expect(actual).toEqual({
-         modules: modules.map(e => ({
-            ...e,
-            data: { ...e.data, symbols: e.data.symbols.map(e => (e as unknown as { toJSON(): object }).toJSON()) },
-         })),
-         metadata,
-      });
+
+      expect(reread.metadata).toEqual(data.metadata);
+      expect(reread.modules.map(e => BinaryIO.readEncapsulatedData(e))).toEqual(data.modules);
    });
 
    it.each([

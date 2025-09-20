@@ -13,9 +13,8 @@ export async function internalVirtualApiLoad(imagesFolder?: string, loadProvider
    await BinaryImageLoader.loadFrom(await modulesProvider.read(imagesFolder)).loadModules(versions, context);
 
    if (loadProviders) {
-      for (const provider of [corePluginVanillaDataProvider]) {
-         await provider.read(imagesFolder);
-      }
+      const providers = [corePluginVanillaDataProvider];
+      for (const provider of providers) await provider.read(imagesFolder);
    }
    context.ready();
 

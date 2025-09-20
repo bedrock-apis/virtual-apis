@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck This file is not needed anymore
+
 import { identifiers } from '@bedrock-apis/va-common';
 import { ContextPluginLinkedStorage, InvocationInfo } from '@bedrock-apis/virtual-apis';
 import { Plugin } from './api';
