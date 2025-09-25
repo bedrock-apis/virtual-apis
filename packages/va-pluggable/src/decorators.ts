@@ -1,7 +1,11 @@
 import { Pluggable, PluginFeature } from './main';
+import { PluginModule } from './module';
 import { ModuleTypeMap, ServerModuleTypeMap } from './types';
 
 const onReadySymbol = Symbol('onReady');
+
+// Used by types only
+const handleType = Symbol('handleType');
 
 export class DecoratorsFeature extends PluginFeature {
    public decorators = new Decorators(this);
@@ -17,30 +21,29 @@ export type Constructable<T extends ModuleTypeMap> = {
    [K in keyof T as T[K] extends Cls ? K : never]: T[K] extends Cls ? object : never;
 };
 
+class DecoratedClass<T extends object> {
+   public [handleType]!: T;
+}
+
+type PartialClass<T> = T extends Cls ? { new (): Partial<T['prototype']> & { [handleType]: T['prototype'] } } : T;
+
 class ModuleDecorator<T extends ModuleTypeMap> {
-   public class<K extends keyof Constructable<T>>(id: K): { new (): { impl: T[K] } } {
-      // @ts-expect-error TODO Implement
-      return;
+   public class<K extends keyof Constructable<T>>(id: K) {
+      return class D extends DecoratedClass<T[K]> {} as PartialClass<T[K]>;
    }
 
    public constant() {}
 
    public function() {}
+
+   public [onReadySymbol](module: PluginModule) {}
 }
 
 export type PickMatchReverse<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? never : K]: T[K] };
 
 export type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
 
-type GetNativeObject<T> = T extends {
-   impl: {
-      prototype: infer A;
-   };
-}
-   ? A extends object
-      ? A
-      : never
-   : never;
+type HandleType<T> = T extends { [handleType]: infer A } ? (A extends object ? A : never) : never;
 
 type TypeToString<T> = T extends true
    ? 'boolean'
@@ -78,8 +81,7 @@ class Decorators {
 
    // Symbol to keep api clean
    public [onReadySymbol](plugin: Pluggable) {
-      // TODO Pass data from plugin.server using symbol to keep api clean
-      // this.server;
+      this.server[onReadySymbol](plugin.server);
    }
 
    public server = new ModuleDecorator<ServerModuleTypeMap>();
@@ -87,14 +89,14 @@ class Decorators {
    public getter<
       Target,
       PropertyKey extends keyof Target,
-      NativeObject extends GetNativeObject<Target>,
-      Id extends keyof GetterProperties<NativeObject>,
+      Handle extends HandleType<Target>,
+      Id extends keyof GetterProperties<Handle>,
    >(
       id: Id,
-   ): Target[PropertyKey] extends NativeObject[Id]
+   ): Target[PropertyKey] extends Handle[Id]
       ? (target: Target, propertyKey: PropertyKey) => void
       : {
-           error: `${Id} should be ${TypeToString<NativeObject[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
+           error: `${Id} should be ${TypeToString<Handle[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
         } {
       // @ts-expect-error TODO Implement
       return;
@@ -103,14 +105,14 @@ class Decorators {
    public property<
       Target,
       PropertyKey extends keyof Target,
-      NativeObject extends GetNativeObject<Target>,
-      Id extends keyof SetterProperties<NativeObject>,
+      Handle extends HandleType<Target>,
+      Id extends keyof SetterProperties<Handle>,
    >(
       id: Id,
-   ): Target[PropertyKey] extends NativeObject[Id]
+   ): Target[PropertyKey] extends Handle[Id]
       ? (target: Target, propertyKey: PropertyKey) => void
       : {
-           error: `${TypeToString<Id>} should be ${TypeToString<NativeObject[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
+           error: `${TypeToString<Id>} should be ${TypeToString<Handle[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
         } {
       // @ts-expect-error TODO Implement
       return;
@@ -119,15 +121,15 @@ class Decorators {
    public method<
       Target,
       PropertyKey extends keyof Target,
-      NativeObject extends GetNativeObject<Target>,
-      Id extends keyof FunctionProperties<NativeObject>,
+      Handle extends HandleType<Target>,
+      Id extends keyof FunctionProperties<Handle>,
    >(
       id: Id,
    ): (
       target: Target,
       propertyKey: PropertyKey,
-      descriptor: TypedPropertyDescriptor<NativeObject[Id]>,
-   ) => TypedPropertyDescriptor<NativeObject[Id]> {
+      descriptor: TypedPropertyDescriptor<Handle[Id]>,
+   ) => TypedPropertyDescriptor<Handle[Id]> {
       // @ts-expect-error TODO Implement
       return;
    }
