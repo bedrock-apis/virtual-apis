@@ -1,4 +1,5 @@
 import { Pluggable } from '@bedrock-apis/va-pluggable';
+import { DecoratorsFeature } from '@bedrock-apis/va-pluggable/src/decorators';
 import { ObjectValueSymbol } from '@bedrock-apis/virtual-apis';
 
 export const typeToSymbolMapSymbol: unique symbol = Symbol('TypeToSymbolMap');
@@ -65,3 +66,6 @@ export class CorePlugin extends Pluggable {
       }
    }
 }
+
+export const coreDecoratorsFeature = new DecoratorsFeature();
+export const va = coreDecoratorsFeature.decorators;
