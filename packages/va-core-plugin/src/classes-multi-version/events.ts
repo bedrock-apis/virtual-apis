@@ -1,14 +1,8 @@
-import { VirtualPrivilege } from '@bedrock-apis/va-common';
-import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { dwarn, VirtualPrivilege } from '@bedrock-apis/va-common';
+import { PluginFeatureWithConfig } from '@bedrock-apis/va-pluggable';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
-import {
-   ConstructableSymbol,
-   ContextPluginLinkedStorage,
-   MethodSymbol,
-   ModuleSymbol,
-   PropertyGetterSymbol,
-} from '@bedrock-apis/virtual-apis';
+import { ConstructableSymbol, MethodSymbol, ModuleSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
 import {
    PlayerLeaveBeforeEvent,
    SystemAfterEvents,
@@ -16,6 +10,7 @@ import {
    WorldAfterEvents,
    WorldBeforeEvents,
 } from '@minecraft/server';
+import { CorePlugin } from '../core-plugin';
 
 interface Config {
    warnIfEventIsNotImplemented: boolean;
@@ -53,7 +48,7 @@ type EventsWithFilters<T extends SystemAfterEvents | SystemBeforeEvents | WorldB
 
 type BaseListener = (...args: unknown[]) => unknown;
 
-export class EventsPlugin extends PluginWithConfig<Config> {
+export class EventsPlugin extends PluginFeatureWithConfig<Config> {
    protected static getEventId(group: string, event: string) {
       return `${group}::${event}`;
    }
@@ -67,33 +62,31 @@ export class EventsPlugin extends PluginWithConfig<Config> {
    public implementedEvents = new Set<string>();
 
    public createTrigger<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(
+      plugin: CorePlugin,
       loaded: PluginModuleLoaded<ServerModuleTypeMap>,
       group: T,
       event: Event,
    ) {
-      const { eventClassName, privilege, eventId } = this.processTriggerMetadata<T, Event>(group, String(event));
+      const { eventClassName, privilege, eventId } = this.processTriggerMetadata(plugin, group, String(event));
 
       return (args: Events<Groups[T]>[Event]) => {
-         const p = this.context.currentPrivilege;
+         const p = plugin.context.currentPrivilege;
          try {
             const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
-            this.setStorageOf(argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+            this.setStorageOf(plugin, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
 
-            this.context.currentPrivilege = privilege;
+            plugin.context.currentPrivilege = privilege;
             for (const listener of this.events.get(eventId)?.keys() ?? []) {
                // Im not sure how to properly call it here but uhh
                listener(argsInstance);
             }
          } finally {
-            this.context.currentPrivilege = p;
+            plugin.context.currentPrivilege = p;
          }
       };
    }
 
-   private processTriggerMetadata<T extends keyof Groups, Event extends keyof Events<Groups[T]>>(
-      group: T,
-      event: string,
-   ) {
+   private processTriggerMetadata(plugin: CorePlugin, group: keyof Groups, event: string) {
       const eventId = EventsPlugin.getEventId(groupsMap[group], event);
       const before = group.includes('before');
       const privilege = before ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
@@ -104,28 +97,29 @@ export class EventsPlugin extends PluginWithConfig<Config> {
          event === 'startup'
             ? 'StartupEvent' // special case
             : `${event[0]?.toUpperCase()}${event.slice(1)}${before ? 'BeforeEvent' : 'AfterEvent'}`;
-      this.implementEventArgument(eventClassName);
+      this.implementEventArgument(plugin, eventClassName);
 
       return { eventClassName, privilege, eventId };
    }
 
    public createTriggerWithFilter<T extends keyof Groups, Event extends keyof EventsWithFilters<Groups[T]>>(
+      plugin: CorePlugin,
       loaded: PluginModuleLoaded<ServerModuleTypeMap>,
       group: T,
       event: Event,
    ) {
-      const { eventClassName, privilege, eventId } = this.processTriggerMetadata(group, String(event));
+      const { eventClassName, privilege, eventId } = this.processTriggerMetadata(plugin, group, String(event));
 
       return (
          filter: (v: EventsWithFilters<Groups[T]>[Event]['filter']) => boolean,
          args: EventsWithFilters<Groups[T]>[Event]['event'],
       ) => {
-         const p = this.context.currentPrivilege;
+         const p = plugin.context.currentPrivilege;
          try {
             const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
-            this.setStorageOf(argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+            this.setStorageOf(plugin, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
 
-            this.context.currentPrivilege = privilege;
+            plugin.context.currentPrivilege = privilege;
             for (const [listener, filterData] of this.events.get(eventId)?.entries() ?? []) {
                if (!filter(filterData as EventsWithFilters<Groups[T]>[Event]['filter'])) continue;
 
@@ -133,20 +127,18 @@ export class EventsPlugin extends PluginWithConfig<Config> {
                listener(argsInstance);
             }
          } finally {
-            this.context.currentPrivilege = p;
+            plugin.context.currentPrivilege = p;
          }
       };
    }
-
-   protected eventArgDataStorage = new ContextPluginLinkedStorage<Record<string, unknown>>(() => ({}));
 
    public getStorageOf<
       T extends ServerModuleTypeMap[Extract<
          keyof ServerModuleTypeMap,
          `${string}${'After' | 'Before'}Event`
       >]['prototype'],
-   >(instance: T): Partial<Mutable<T>> {
-      return this.eventArgDataStorage.get(instance) as Partial<Mutable<T>>;
+   >(plugin: CorePlugin, instance: T): Partial<Mutable<T>> {
+      return plugin.getStorage(instance) as Partial<Mutable<T>>;
    }
 
    public setStorageOf<
@@ -154,48 +146,42 @@ export class EventsPlugin extends PluginWithConfig<Config> {
          keyof ServerModuleTypeMap,
          `${string}${'After' | 'Before'}Event`
       >]['prototype'],
-   >(instance: T, data: T): void {
-      const storage = this.eventArgDataStorage.get(instance);
-      Object.assign(storage, data);
+   >(plugin: CorePlugin, instance: T, data: T): void {
+      const storage = plugin.getStorage(instance);
+      if (storage) {
+         Object.assign(storage, data);
+      } else plugin.bindStorageWithHandle(instance, data);
    }
 
-   protected implemenetedEventArguments = new Set<string>();
+   protected implementedEventArguments = new Set<string>();
 
    // Implement arguments
-   protected implementEventArgument(className: string) {
-      if (this.implemenetedEventArguments.has(className)) return; // Already implemented
-      this.implemenetedEventArguments.add(className);
+   protected implementEventArgument(plugin: CorePlugin, className: string) {
+      if (this.implementedEventArguments.has(className)) return; // Already implemented
+      this.implementedEventArguments.add(className);
 
-      this.server.onLoad.subscribe((_, versions) => {
-         for (const module of versions) {
-            const symbol = module.symbols.get(className);
-            if (!(symbol instanceof ConstructableSymbol))
-               throw new Error(`Symbol ${className} is not event constructable`);
+      plugin.server.onLoad.subscribe((_, module) => {
+         const symbol = module.symbols.get(className);
+         if (!(symbol instanceof ConstructableSymbol))
+            throw new Error(`Symbol ${className} is not event constructable`);
 
-            for (const getter of symbol.prototypeFields.values()) {
-               if (getter instanceof PropertyGetterSymbol) {
-                  const name = getter.name;
-                  const setter = getter.setter;
+         for (const getter of symbol.prototypeFields.values()) {
+            if (getter instanceof PropertyGetterSymbol) {
+               const name = getter.name;
+               const setter = getter.setter;
 
-                  this.context.implement(
-                     module.nameVersion,
-                     getter.identifier,
-                     ctx => {
-                        ctx.result = this.eventArgDataStorage.get(ctx.thisObject ?? {})[name];
-                     },
-                     -1,
-                  );
+               plugin.registerCallback(getter, ctx => {
+                  const storage = plugin.getStorage(ctx.thisObject ?? {});
+                  if (!storage) throw new Error('Event data has no storage');
+                  ctx.result = (storage as Record<string, unknown>)[name];
+               });
 
-                  if (setter) {
-                     this.context.implement(
-                        module.nameVersion,
-                        setter.identifier,
-                        ctx => {
-                           this.eventArgDataStorage.get(ctx.thisObject ?? {})[name] = ctx.params[0];
-                        },
-                        -1,
-                     );
-                  }
+               if (setter) {
+                  plugin.registerCallback(setter, ctx => {
+                     const storage = plugin.getStorage(ctx.thisObject ?? {});
+                     if (!storage) throw new Error('Event data has no storage');
+                     (storage as Record<string, unknown>)[name] = ctx.params[0];
+                  });
                }
             }
          }
@@ -203,17 +189,17 @@ export class EventsPlugin extends PluginWithConfig<Config> {
    }
 
    // Implement subscribe/unsubscribe
-   protected _ = this.server.onLoad.subscribe((_, versions) => {
-      for (const module of versions) {
+   public override onReady(plugin: CorePlugin) {
+      plugin.server.onLoad.subscribe((_, module) => {
          for (const eventsGroup of module.symbols.values()) {
             if (eventsGroup instanceof ConstructableSymbol && eventsGroup.name.endsWith('Events')) {
-               this.implementForGroup(eventsGroup, module);
+               this.implementForGroup(plugin, eventsGroup, module);
             }
          }
-      }
-   });
+      });
+   }
 
-   private implementForGroup(eventsGroup: ConstructableSymbol, module: ModuleSymbol) {
+   private implementForGroup(plugin: CorePlugin, eventsGroup: ConstructableSymbol, module: ModuleSymbol) {
       for (const eventSignalGetter of eventsGroup.prototypeFields.values()) {
          if (eventSignalGetter instanceof PropertyGetterSymbol) {
             const eventSignal = eventSignalGetter.returnType;
@@ -226,27 +212,35 @@ export class EventsPlugin extends PluginWithConfig<Config> {
 
             const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignalGetter.name);
 
-            this.context.implement(module.nameVersion, subscribe.identifier, ctx => {
-               if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
-                  console.warn(`Event ${eventId} is not implemented`);
-               }
+            plugin.implement(
+               subscribe,
+               ctx => {
+                  if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
+                     dwarn(`Event ${eventId} is not implemented`);
+                  }
 
-               const listener = ctx.params[0];
-               const filter = ctx.params[1] ?? {};
+                  const listener = ctx.params[0];
+                  const filter = ctx.params[1] ?? {};
 
-               let listeners = this.events.get(eventId);
-               if (!listeners) this.events.set(eventId, (listeners = new Map()));
-               listeners.set(listener as BaseListener, filter);
+                  let listeners = this.events.get(eventId);
+                  if (!listeners) this.events.set(eventId, (listeners = new Map()));
+                  listeners.set(listener as BaseListener, filter);
 
-               ctx.result = ctx.params[0];
-            });
+                  ctx.result = ctx.params[0];
+               },
+               -1,
+            );
 
-            this.context.implement(module.nameVersion, unsubscribe.identifier, ctx => {
-               this.events.get(eventId)?.delete(ctx.params[0] as BaseListener);
-            });
+            plugin.implement(
+               unsubscribe,
+               ctx => {
+                  this.events.get(eventId)?.delete(ctx.params[0] as BaseListener);
+               },
+               -1,
+            );
          }
       }
    }
 }
 
-EventsPlugin.register('events');
+CorePlugin.registerDefaultFeature(EventsPlugin);

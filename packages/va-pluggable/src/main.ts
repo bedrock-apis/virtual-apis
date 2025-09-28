@@ -8,11 +8,19 @@ export class PluginFeature {
    public onReady(plugin: Pluggable) {}
 }
 
+export class PluginFeatureWithConfig<T extends object> extends PluginFeature {}
+
 export abstract class Pluggable extends ContextPlugin {
    protected static features: PluginFeature[] = [];
 
    public static registerFeature(feature: PluginFeature) {
       this.features.push(feature);
+   }
+
+   public getFeature<T extends typeof PluginFeature>(t: T) {
+      const feature = Pluggable.features.find(e => e instanceof t);
+      if (!feature) throw new Error('no feature');
+      return feature as InstanceType<T>;
    }
 
    public override onRegistration(): void {

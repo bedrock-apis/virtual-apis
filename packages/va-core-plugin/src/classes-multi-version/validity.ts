@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Needs rewrite
+
 import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
 import {
    ConstructableSymbol,

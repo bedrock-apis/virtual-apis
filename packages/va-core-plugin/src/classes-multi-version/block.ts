@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Needs rewrite
+
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import { BlockPermutation, BlockType, Dimension, Vector3 } from '@minecraft/server';
 import { blocks, localizationKeys } from './reports-provider';

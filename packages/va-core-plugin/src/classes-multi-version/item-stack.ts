@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Needs rewrite
+
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import type { ItemStack, ItemType } from '@minecraft/server';
 import { ComponentsPlugin } from './components';

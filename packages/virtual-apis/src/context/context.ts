@@ -2,7 +2,7 @@ import { MapWithDefaults, VirtualPrivilege } from '@bedrock-apis/va-common';
 import { CompilableSymbol, InvocableSymbol } from '../symbols';
 import { ModuleSymbol } from '../symbols/module';
 import { ContextConfig } from './config';
-import { PluginManager } from './plugin-manager';
+import { ContextPlugin } from './plugin';
 
 const { create } = Object;
 
@@ -29,7 +29,6 @@ export class Context implements Disposable {
    protected readonly runtimeId = Context.runtimeIdIncrementalVariable++;
    public readonly symbols: Map<string, CompilableSymbol<unknown>> = new Map();
    public readonly jsModules = new Map<string, string>();
-   public readonly pluginManager = new PluginManager(this);
    public currentPrivilege: string = VirtualPrivilege.None;
    public constructor() {
       Context.contexts.set(this.runtimeId, this);
@@ -42,6 +41,12 @@ export class Context implements Disposable {
    //#region APIs
    public setup(config: Partial<ContextConfig>): void {
       Object.assign(this.config, config);
+   }
+
+   public readonly plugin!: ContextPlugin;
+   public use(pluginConstructor: new (context: Context) => ContextPlugin) {
+      (this as Mutable<this>).plugin = new pluginConstructor(this);
+      this.plugin.onRegistration();
    }
    public getRuntimeId(): number {
       return this.runtimeId;
@@ -80,7 +85,7 @@ export class Context implements Disposable {
       return this.nativeHandles.delete(handle);
    }
    protected compileModuleInternal(m: ModuleSymbol) {
-      this.pluginManager.onBeforeModuleCompilation(m);
+      this.plugin.onBeforeModuleCompilation(m);
       m.getRuntimeValue(this);
       for (const symbol of m.symbols.values()) {
          const key = `${m.name}::${(symbol as InvocableSymbol<unknown>).identifier ?? symbol.name}`;
@@ -88,17 +93,17 @@ export class Context implements Disposable {
 
          this.symbols.set(key, symbol);
       }
-      this.pluginManager.onAfterModuleCompilation(m);
+      this.plugin.onAfterModuleCompilation(m);
    }
 
    public ready() {
-      this.pluginManager.onBeforeReady();
+      this.plugin.onBeforeReady();
       for (const m of this.modules.values()) this.compileModuleInternal(m);
-      this.pluginManager.onAfterReady();
+      this.plugin.onAfterReady();
    }
    protected dispose(): void {
       Context.contexts.delete(this.runtimeId);
-      this.pluginManager.dispose();
+      this.plugin.onDispose();
    }
    //Internal IDisposable
    public [Symbol.dispose](): void {
@@ -109,10 +114,10 @@ export class Context implements Disposable {
 export class ContextUtils {
    public static getStats(context: Context, mSymbol: ModuleSymbol) {
       const inv = new Set(mSymbol.invocables.values());
-      const impls = new Set(context.pluginManager.implementations.keys()).intersection(inv);
+      const is = new Set(context.plugin.implementations.keys()).intersection(inv);
       return {
-         text: `${impls.size}/${inv.size} (${((impls.size / inv.size) * 100).toFixed(2)}%)`,
-         implementedSymbols: impls
+         text: `${is.size}/${inv.size} (${((is.size / inv.size) * 100).toFixed(2)}%)`,
+         implementedSymbols: is
             .values()
             .map(e => e.identifier ?? e.name)
             .toArray(),
@@ -120,19 +125,19 @@ export class ContextUtils {
             .values()
             .map(e => e.identifier ?? e.name)
             .toArray(),
-         nonImplementedSymbols: inv.difference(impls).values().toArray(),
+         nonImplementedSymbols: inv.difference(is).values().toArray(),
       };
    }
 }
 
 /*
    public implement(moduleNameVersion: string, identifier: string, impl: SymbolCallback, priority = 0) {
-      const impls = this.implementations
+      const is = this.implementations
          .getOrCreate(moduleNameVersion, () => new MapWithDefaults())
          .getOrCreate(identifier, () => []);
 
-      impls.push({ impl, priority });
-      impls.sort((a, b) => b.priority - a.priority);
+      is.push({ impl, priority });
+      is.sort((a, b) => b.priority - a.priority);
    }*/
 
 /*

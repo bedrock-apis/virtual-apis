@@ -49,7 +49,7 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
       return info.result;
    }
    protected invoke(info: InvocationInfo) {
-      info.context.pluginManager.invoke(info);
+      info.context.plugin.invoke(info);
    }
    //#region  SetMethods
    public setPrivileges(privileges: string[]): this {

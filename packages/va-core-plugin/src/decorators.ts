@@ -1,11 +1,13 @@
-import { Pluggable, PluginFeature } from './main';
-import { PluginModule } from './module';
-import { ModuleTypeMap, ServerModuleTypeMap } from './types';
+import { Pluggable, PluginFeature } from '@bedrock-apis/va-pluggable';
+import { PluginModule } from '@bedrock-apis/va-pluggable/src/module';
+import { ModuleTypeMap, ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
 
 const onReadySymbol = Symbol('onReady');
 
 // Used by types only
-const handleType = Symbol('handleType');
+export const handleType = Symbol('handleType');
+const staticType = Symbol('staticType');
+export const handleId = Symbol('handleId');
 
 export class DecoratorsFeature extends PluginFeature {
    public decorators = new Decorators(this);
@@ -15,21 +17,25 @@ export class DecoratorsFeature extends PluginFeature {
    }
 }
 
-type Cls = { prototype: object };
+type Prototyped = { prototype: object };
 
-export type Constructable<T extends ModuleTypeMap> = {
-   [K in keyof T as T[K] extends Cls ? K : never]: T[K] extends Cls ? object : never;
-};
+type Constructable<T extends ModuleTypeMap> = PickMatch<T, Prototyped>;
 
 class DecoratedClass<T extends object> {
    public [handleType]!: T;
+   public [handleId]!: string;
 }
 
-type PartialClass<T> = T extends Cls ? { new (): Partial<T['prototype']> & { [handleType]: T['prototype'] } } : T;
+type PartialClass<T> = T extends Prototyped ? { new (): T['prototype'] & { [handleType]: T['prototype'] } } : T;
 
 class ModuleDecorator<T extends ModuleTypeMap> {
    public class<K extends keyof Constructable<T>>(id: K) {
-      return class D extends DecoratedClass<T[K]> {} as PartialClass<T[K]>;
+      return class D extends DecoratedClass<
+         T[K]['prototype'] extends object ? T[K]['prototype'] : { error: 'prototype is not an object' }
+      > {
+         public static [staticType]: Omit<T[K], keyof CallableFunction>;
+         public override [handleId] = id;
+      };
    }
 
    public constant() {}
@@ -39,25 +45,22 @@ class ModuleDecorator<T extends ModuleTypeMap> {
    public [onReadySymbol](module: PluginModule) {}
 }
 
-export type PickMatchReverse<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? never : K]: T[K] };
+type PickMatchReverse<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? never : K]: T[K] };
 
-export type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
+type PickMatch<T extends object, Filter> = { [K in keyof T as T[K] extends Filter ? K : never]: T[K] };
 
 type HandleType<T> = T extends { [handleType]: infer A } ? (A extends object ? A : never) : never;
+type StaticHandleType<T> = T extends { [staticType]: infer A } ? (A extends object ? A : never) : never;
 
-type TypeToString<T> = T extends true
-   ? 'boolean'
-   : T extends false
-     ? 'boolean'
-     : T extends number
-       ? T
-       : T extends string
-         ? 'string'
-         : T extends { name: infer Name }
-           ? Name extends string
-              ? `{ name: ${Name}}`
-              : 'complex type'
-           : 'complex type';
+type Primitive = string | number | bigint | undefined | null | boolean;
+
+type TypeToString<T> = T extends Primitive
+   ? T
+   : T extends { name: infer Name }
+     ? Name extends string
+        ? `{ name: ${Name}}`
+        : 'complex type'
+     : 'complex type';
 
 type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B;
 
@@ -75,6 +78,8 @@ type GetterProperties<T extends object> = ReadonlyPick<PickMatchReverse<T, Calla
 
 type FunctionProperties<T extends object> = PickMatch<T, CallableFunction>;
 
+type AllowNative<T> = T extends (infer A)[] ? AllowNative<A>[] : T | { [handleType]: T };
+
 // New class = clean api
 class Decorators {
    public constructor(protected feature: PluginFeature) {}
@@ -86,6 +91,10 @@ class Decorators {
 
    public server = new ModuleDecorator<ServerModuleTypeMap>();
 
+   public asHandle<T>(value: T) {
+      return value as HandleType<T>;
+   }
+
    public getter<
       Target,
       PropertyKey extends keyof Target,
@@ -93,7 +102,7 @@ class Decorators {
       Id extends keyof GetterProperties<Handle>,
    >(
       id: Id,
-   ): Target[PropertyKey] extends Handle[Id]
+   ): Target[PropertyKey] extends AllowNative<Handle[Id]>
       ? (target: Target, propertyKey: PropertyKey) => void
       : {
            error: `${Id} should be ${TypeToString<Handle[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
@@ -122,6 +131,42 @@ class Decorators {
       Target,
       PropertyKey extends keyof Target,
       Handle extends HandleType<Target>,
+      Id extends keyof FunctionProperties<Handle>,
+   >(
+      id: Id,
+   ): (
+      target: Target,
+      propertyKey: PropertyKey,
+      descriptor: TypedPropertyDescriptor<Handle[Id]>,
+   ) => TypedPropertyDescriptor<Handle[Id]> {
+      // @ts-expect-error TODO Implement
+      return;
+   }
+
+   public static = new StaticDecorators();
+}
+
+class StaticDecorators {
+   public getter<
+      Target,
+      PropertyKey extends keyof Target,
+      Handle extends StaticHandleType<Target>,
+      Id extends keyof GetterProperties<Handle>,
+   >(
+      id: Id,
+   ): Target[PropertyKey] extends AllowNative<Handle[Id]>
+      ? (target: Target, propertyKey: PropertyKey) => void
+      : {
+           error: `${Id} should be ${TypeToString<Handle[Id]>}, got ${TypeToString<Target[PropertyKey]>}`;
+        } {
+      // @ts-expect-error TODO Implement
+      return;
+   }
+
+   public method<
+      Target,
+      PropertyKey extends keyof Target,
+      Handle extends StaticHandleType<Target>,
       Id extends keyof FunctionProperties<Handle>,
    >(
       id: Id,

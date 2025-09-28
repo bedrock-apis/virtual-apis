@@ -1,6 +1,15 @@
-import { Pluggable } from '@bedrock-apis/va-pluggable';
-import { DecoratorsFeature } from '@bedrock-apis/va-pluggable/src/decorators';
-import { ObjectValueSymbol } from '@bedrock-apis/virtual-apis';
+import { Pluggable, PluginFeature } from '@bedrock-apis/va-pluggable';
+import {
+   ErrorFactory,
+   InvocableSymbol,
+   InvocationInfo,
+   MapWithDefaults,
+   ObjectValueSymbol,
+   PANIC_ERROR_MESSAGES,
+   ReportAsIs,
+   SymbolCallback,
+} from '@bedrock-apis/virtual-apis';
+import { DecoratorsFeature } from './decorators';
 
 export const typeToSymbolMapSymbol: unique symbol = Symbol('TypeToSymbolMap');
 export enum FieldType {
@@ -10,6 +19,8 @@ export enum FieldType {
    Constructor,
 }
 export class CorePlugin extends Pluggable {
+   public static registerDefaultFeature(feature: typeof PluginFeature) {}
+
    public override readonly identifier = 'virtual_apis:core_plugin';
    private static readonly objectsMap = new Map<string, object>();
    private static readonly implementations = new Map<
@@ -34,14 +45,14 @@ export class CorePlugin extends Pluggable {
    public override onAfterReady(): void {
       // Registry Objects
       for (const [key, meta] of CorePlugin.implementations.entries()) {
-         const symbol = this.manager.getInvocableSymbolFor(key);
+         const symbol = this.getInvocableSymbolFor(key);
          if (!symbol) {
             console.warn('unknown symbol: ' + key);
             continue;
          }
          switch (meta.kind) {
             case FieldType.Get:
-               this.manager.registerCallback(symbol, ctx => {
+               this.registerCallback(symbol, ctx => {
                   ctx.result = Reflect.get(meta.prototype, meta.property, this.getStorage(ctx.thisObject as object));
 
                   // This should resolve the class symbol it self but its not that simple i know
@@ -63,6 +74,43 @@ export class CorePlugin extends Pluggable {
          }
 
          this.bindStorageWithObject(symbol, CorePlugin.objectsMap.get(key)!);
+      }
+   }
+
+   public readonly coreCallbacks = new MapWithDefaults<
+      InvocableSymbol<unknown>,
+      { impl: SymbolCallback; priority: number }[]
+   >();
+
+   public override registerCallback(symbol: InvocableSymbol<unknown>, impl: SymbolCallback): void {
+      this.implement(symbol, impl);
+   }
+
+   public implement(symbol: InvocableSymbol<unknown>, impl: SymbolCallback, priority = 0) {
+      const is = this.coreCallbacks.getOrCreate(symbol, () => []);
+
+      is.push({ impl, priority });
+      is.sort((a, b) => b.priority - a.priority);
+   }
+
+   // Anyone can invoke the callbacks but in most cases its from user addon context
+   public override invoke(invocation: InvocationInfo) {
+      const callbacks = this.coreCallbacks.get(invocation.symbol);
+
+      if (!callbacks?.length) {
+         invocation.diagnostics.errors.report(
+            new ErrorFactory(PANIC_ERROR_MESSAGES.NoImplementation(invocation.symbol.identifier)),
+         );
+         return;
+      }
+
+      for (let i = 0; i < callbacks.length; i++) {
+         const callback = callbacks[i];
+         try {
+            callback?.impl(invocation);
+         } catch (error) {
+            invocation.diagnostics.errors.report(new ReportAsIs(error as Error));
+         }
       }
    }
 }

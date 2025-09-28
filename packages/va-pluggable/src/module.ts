@@ -1,10 +1,19 @@
 import { compareVersions, dwarn, VaEventLoader } from '@bedrock-apis/va-common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
-import { Impl, ImplStatic } from './implementation';
+import { Impl, ImplStatic, ImplStorage } from './implementation';
 import { Pluggable } from './main';
-import { ModuleTypeMap, PartialParts, ThisContext } from './types';
+import { ModuleTypeMap, PartialParts, StorageThis, ThisContext } from './types';
 
 type Version = `${number}.${number}.${number}`;
+
+export type ConstructorImpl<This, Mod extends ModuleTypeMap, T extends keyof Mod> = Mod[T] extends new (
+   ...args: infer T
+) => unknown
+   ? {
+        // eslint-disable-next-line @typescript-eslint/no-misused-new
+        constructor(this: This, ...args: T): void;
+     }
+   : object;
 
 type Prototyped = { prototype: object };
 
@@ -39,6 +48,25 @@ export class PluginModule<Mod extends ModuleTypeMap = any> {
       implementation: PartialParts<Mod[T], ThisContext<Mod[T], Mod>>,
    ) {
       new ImplStatic(this, className as string, implementation);
+   }
+
+   public implementWithStorage<T extends keyof Mod, Storage extends object>(
+      className: T,
+      createStorage: (implementation: Mod[T]['prototype'], mod: PluginModuleLoaded<Mod>) => Storage,
+      implementation: { storage?: Storage } & PartialParts<
+         Mod[T]['prototype'],
+         StorageThis<Mod[T]['prototype'], Mod, Storage>
+      > &
+         ConstructorImpl<StorageThis<Mod[T]['prototype'], Mod, Storage>, Mod, T>,
+   ) {
+      type Native = Mod[T]['prototype'];
+
+      return new ImplStorage<Storage, Native extends object ? Native : object>(
+         this,
+         className as string,
+         implementation,
+         createStorage as unknown as (n: object, m: PluginModuleLoaded) => Storage,
+      );
    }
 
    protected onModulesLoaded(): void {

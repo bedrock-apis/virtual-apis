@@ -1,13 +1,16 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Needs rewrite
+
 import { MapWithDefaults } from '@bedrock-apis/va-common';
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import { ImplStoraged } from '@bedrock-apis/va-pluggable/src/implementation';
+import { ImplStorage } from '@bedrock-apis/va-pluggable/src/implementation';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { type Block, type Dimension, type Vector3, type VectorXZ } from '@minecraft/server';
 import { BlockPlugin } from './block';
 import { EntityPlugin } from './entity';
 
 export class DimensionPlugin extends Plugin {
-   public dimension: ImplStoraged<{ id: string }, Dimension> = this.server.implementWithStorage(
+   public dimension: ImplStorage<{ id: string }, Dimension> = this.server.implementWithStorage(
       'Dimension',
       (_, mod, plugin) => ({
          id: '',

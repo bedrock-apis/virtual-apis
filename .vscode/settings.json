@@ -35,6 +35,7 @@
       "Errorable",
       "esbuild",
       "gametest",
+      "invocables",
       "overworld",
       "proxyify",
       "Rolldown",

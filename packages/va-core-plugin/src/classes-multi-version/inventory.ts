@@ -1,6 +1,6 @@
 import { MapWithDefaults } from '@bedrock-apis/va-common';
 import { Plugin } from '@bedrock-apis/va-pluggable';
-import { Impl, ImplStoraged } from '@bedrock-apis/va-pluggable/src/implementation';
+import { Impl, ImplStorage } from '@bedrock-apis/va-pluggable/src/implementation';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { Container, ContainerSlot, ItemStack } from '@minecraft/server';
 import { ItemStackPlugin } from './item-stack';
@@ -57,7 +57,7 @@ class InventoryPlugin extends Plugin {
    );
 
    // We take storage and implementation of the ItemStack and apply them to the container slot
-   protected _ = new (class ProxyImpl extends ImplStoraged<object, object> {
+   protected _ = new (class ProxyImpl extends ImplStorage<object, object> {
       protected itemPlugin: ItemStackPlugin;
       public constructor(containerSlot: Impl) {
          const itemPlugin = containerSlot.module.plugin.context.getPlugin(ItemStackPlugin, 'containerSlot');

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Needs rewrite
+
 import { Plugin } from '@bedrock-apis/va-pluggable';
 
 // ConMaster forgive me its stub don't stab me with knife for this

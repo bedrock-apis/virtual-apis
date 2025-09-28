@@ -1,49 +1,40 @@
 import { VirtualPrivilege } from '@bedrock-apis/va-common';
-import { Plugin } from '@bedrock-apis/va-pluggable';
+import { PluginFeature } from '@bedrock-apis/va-pluggable';
+import { CorePlugin } from '../core-plugin';
 import { EventsPlugin } from './events';
 
-export class EarlyExecutionPlugin extends Plugin {
-   protected _ = this.server_above_v2_0_0.onLoad.subscribe(mod => {
-      this.context.currentPrivilege = VirtualPrivilege.EarlyExecution;
-      const worldLoad = this.getPlugin(EventsPlugin).createTrigger(mod, 'worldAfter', 'worldLoad');
-      const startup = this.getPlugin(EventsPlugin).createTrigger(mod, 'systemBefore', 'startup');
+export class EarlyExecutionPlugin extends PluginFeature {
+   public override onReady(plugin: CorePlugin): void {
+      plugin.server_v2_0_0.onLoad.subscribe(mod => {
+         plugin.context.currentPrivilege = VirtualPrivilege.EarlyExecution;
+         const worldLoad = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'worldAfter', 'worldLoad');
+         const startup = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'systemBefore', 'startup');
 
-      setTimeout(() => {
-         startup({
-            blockComponentRegistry: this.blockComponentRegistry.create({}),
+         setTimeout(() => {
+            startup({
+               blockComponentRegistry: blockComponentRegistry.create({}),
 
-            // Beta, does not always exist
-            customCommandRegistry: this.customCommandRegistry.tryCreate({})!,
-            itemComponentRegistry: this.itemComponentRegistry.create({}),
-         });
-         this.context.currentPrivilege = VirtualPrivilege.None;
-         worldLoad({});
-      }, 1000);
-   });
+               // Beta, does not always exist
+               customCommandRegistry: customCommandRegistry.tryCreate({})!,
+               itemComponentRegistry: itemComponentRegistry.create({}),
+            });
+            plugin.context.currentPrivilege = VirtualPrivilege.None;
+            worldLoad({});
+         }, 1000);
+      });
 
-   protected blockComponentRegistry = this.server_above_v2_0_0.implementWithStorage(
-      'BlockComponentRegistry',
-      () => ({}),
-      {
+      const blockComponentRegistry = plugin.server_v2_0_0.implementWithStorage('BlockComponentRegistry', () => ({}), {
          registerCustomComponent(name, customComponent) {},
-      },
-   );
+      });
 
-   protected customCommandRegistry = this.server_above_v2_0_0.implementWithStorage(
-      'CustomCommandRegistry',
-      () => ({}),
-      {
+      const customCommandRegistry = plugin.server_v2_0_0.implementWithStorage('CustomCommandRegistry', () => ({}), {
          registerEnum(name, values) {},
          registerCommand(customCommand, callback) {},
-      },
-   );
+      });
 
-   protected itemComponentRegistry = this.server_above_v2_0_0.implementWithStorage(
-      'ItemComponentRegistry',
-      () => ({}),
-      {
+      const itemComponentRegistry = plugin.server_v2_0_0.implementWithStorage('ItemComponentRegistry', () => ({}), {
          registerCustomComponent(name, itemCustomComponent) {},
-      },
-   );
+      });
+   }
 }
-EarlyExecutionPlugin.register('earlyExecution');
+CorePlugin.registerDefaultFeature(EarlyExecutionPlugin);
