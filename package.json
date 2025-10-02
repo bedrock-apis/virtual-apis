@@ -101,5 +101,8 @@
          "exports",
          "files"
       ]
+   },
+   "dependencies": {
+      "@oxc-project/runtime": "^0.93.0"
    }
 }

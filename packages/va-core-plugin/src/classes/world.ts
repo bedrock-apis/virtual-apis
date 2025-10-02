@@ -15,6 +15,10 @@ export class World extends va.server.class('World') {
    public getTimeOfDay() {
       return this.timeOfDay;
    }
+
+   @va.method('getDay') public getDay() {
+      return 11512;
+   }
 }
 
 export const world = new World();

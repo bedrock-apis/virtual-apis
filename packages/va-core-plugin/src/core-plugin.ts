@@ -31,18 +31,19 @@ export class CorePlugin extends Pluggable {
       this.objectsMap.set(symbol, storage);
    }
    // This is decorator so i prefer the naming convention with CamelCase
-   public static Class(id: string) {
+   public static class(id: string) {
       return (target: { new (...params: unknown[]): unknown }) => {
          target.prototype[typeToSymbolMapSymbol] = id;
       };
    }
    // This is decorator so i prefer the naming convention with CamelCase
-   public static Get(id: string, nativeResult = true) {
+   public static get(id: string, nativeResult = true) {
       return (prototype: object, property: string) => {
          this.implementations.set(id, { prototype, property, kind: FieldType.Get, nativeResult });
       };
    }
    public override onAfterReady(): void {
+      super.onAfterReady();
       // Registry Objects
       for (const [key, meta] of CorePlugin.implementations.entries()) {
          const symbol = this.getInvocableSymbolFor(key);
@@ -117,3 +118,4 @@ export class CorePlugin extends Pluggable {
 
 export const coreDecoratorsFeature = new DecoratorsFeature();
 export const va = coreDecoratorsFeature.decorators;
+CorePlugin.registerFeature(coreDecoratorsFeature); // TODO Remove later to make user decide

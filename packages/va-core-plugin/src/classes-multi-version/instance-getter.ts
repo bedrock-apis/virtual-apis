@@ -2,6 +2,9 @@ import { PluginFeature } from '@bedrock-apis/va-pluggable';
 import { ConstructableSymbol, InvocableSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
 import { CorePlugin } from '../core-plugin';
 
+// TODO Fix. it uses global storage in the wrong way. Maybe creating local storage will be better
+// TODO Fix. it will not work with multi-context
+
 export class CoreInstanceGetterPlugin extends PluginFeature {
    public readonly ignoredInstanceClassIds = ['ItemStack', 'Player', 'Entity', 'Dimension', 'Block'];
 

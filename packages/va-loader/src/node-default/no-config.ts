@@ -5,5 +5,5 @@ import { loadModules } from './index';
 
 const context = new Context();
 context.setup({});
-context.plugin.use(CorePlugin);
+context.use(CorePlugin);
 await loadModules(context, { providers: [corePluginVanillaDataProvider] });
