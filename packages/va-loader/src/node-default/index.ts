@@ -1,5 +1,6 @@
 import { DumpProvider } from '@bedrock-apis/va-bds-dumps/api';
-import { d } from '@bedrock-apis/va-common';
+import { d } from '@bedrock-apis/va-common/node';
+
 import { BinaryImageLoader } from '@bedrock-apis/va-image-generator';
 import { modulesProvider } from '@bedrock-apis/va-image-generator/dump/provider';
 import { Context } from '@bedrock-apis/virtual-apis';

@@ -12,8 +12,8 @@ Suite block (chained): ❓ Unexpected setup error: Error: Dimension::setBlockTyp
 
 
 Suite dynamic properties (chained): 
-  0: ❓ Unexpected error: Error: World::getDynamicPropertyIds is not implemented
-  1: 0: ❓ Unexpected error: Error: World::setDynamicProperty is not implemented
+  0: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'keys')
+  1: 0: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'set')
     1: ❓ No result, expected false
     2: ❓ No result, expected ""
     3: ❓ No result, expected "string"
@@ -25,16 +25,11 @@ Suite dynamic properties (chained):
   
 
 
-Suite entity (chained): 
-  0: ✅
-  1: ✅
-  2: ❓ Unexpected error: Error: Entity::localizationKey getter is not implemented
-  3: ❓ Unexpected error: Error: Entity::getComponents is not implemented
-  
+Suite entity (chained): ❓ Unexpected setup error: Error: Invalid entity identifier minecraft:cow
 
 
 Suite disposal (chained): 
-  0: 0: ❓ Unexpected error: Error: Entity::isValid getter is not implemented
+  0: 0: ❓ Unexpected error: Error: Invalid entity identifier minecraft:cow
     1: ❓ No result, expected false
     2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
     
@@ -43,13 +38,13 @@ Suite disposal (chained):
 
 Suite errors (chained): 
   0: ✅
-  1: ❌ Error mismatch: Error: ItemStack is not implemented != Error: Invalid item identifier 'Yes'.
+  1: ❌ Error mismatch: Error: Invalid item identifier Yes != Error: Invalid item identifier 'Yes'.
   2: ✅
   3: ✅
   4: ✅
   5: ✅
-  6: ❓ Unexpected error: Error: ItemStack is not implemented
-  7: ❓ Unexpected error: Error: ItemStack is not implemented
+  6: ✅
+  7: ✅
   8: ✅
   9: ✅
   10: ✅
@@ -57,16 +52,24 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❌ Error mismatch: Error: unknown dimension ha ha wrong != Error: Dimension 'ha ha wrong' is invalid.
+  15: ❌ Error mismatch: Error: Dimension ha ha wrong is invalid. != Error: Dimension 'ha ha wrong' is invalid.
   16: ✅
-  17: ✅
+  17: ❓ Unexpected error: Error: Invalid entity identifier minecraft:cow
   18: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
-      TypeError: Native type conversion failed.
+      Error: Invalid entity identifier minecraft:cow
       
-  19: ✅
-  20: ✅
+  19: ❌ Error mismatch: 
+      
+      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
+      Error: Invalid entity identifier minecraft:cow
+      
+  20: ❌ Error mismatch: 
+      
+      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
+      Error: Invalid entity identifier minecraft:cow
+      
   21: ❌ Error mismatch: Error: Dimension::setBlockType is not implemented != Error: Failed to set member
   22: ❌ Error mismatch: 
       
@@ -76,15 +79,15 @@ Suite errors (chained):
   23: ❌ Error mismatch: 
       
       InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
-      Error: Entity::remove is not implemented
+      Error: Invalid entity identifier minecraft:cow
       
   24: ❌ Error mismatch: 
       
       InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).
-      Error: Entity::remove is not implemented
+      Error: Invalid entity identifier minecraft:cow
       
-  25: ❌ Error mismatch: Error: Entity::remove is not implemented != TypeError: 'scoreboardIdentity' is read-only
-  26: ❌ Error mismatch: Error: Entity::remove is not implemented != TypeError: 'isValid' is read-only
+  25: ❌ Error mismatch: Error: Invalid entity identifier minecraft:cow != TypeError: 'scoreboardIdentity' is read-only
+  26: ❌ Error mismatch: Error: Invalid entity identifier minecraft:cow != TypeError: 'isValid' is read-only
   27: ❌ Error mismatch: 
       
       LocationInUnloadedChunkError: Trying to access location (654654.0, 55.0, 6.0) which is not in a chunk currently loaded and ticking.
@@ -93,7 +96,7 @@ Suite errors (chained):
   28: ❌ Error mismatch: 
       
       TypeError: Array contains unsupported type. Array element [0] expected type: string (failed parsing array to Interface property ['blockTypes'], failed parsing interface to Function argument [1]).
-      Error: ItemStack is not implemented
+      TypeError: Native optional type conversion failed. Function argument [1] expected type: BlockEventOptions | undefined
       
   29: ❌ Error mismatch: 
       
@@ -115,11 +118,22 @@ Suite errors (chained):
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ❓ Unexpected error: Error: ItemTypes::get static is not implemented
+  1: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'types')
   
 
 
-Suite item (chained): ❓ Unexpected setup error: Error: ItemStack is not implemented
+Suite item (chained): 
+  0: ✅
+  1: ✅
+  2: ✅
+  3: ✅
+  4: ❓ Unexpected error: Error: ItemStack::clone is not implemented
+  5: ❓ Unexpected error: Error: ItemStack::getCanDestroy is not implemented
+  6: ❓ Unexpected error: Error: ItemStack::getComponents is not implemented
+  7: 0: ✅
+    1: ✅
+    
+  
 
 
 Suite privileges (chained): 

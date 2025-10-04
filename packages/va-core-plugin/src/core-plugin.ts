@@ -24,6 +24,11 @@ export class CorePlugin extends Pluggable {
       implementations.push({ impl, priority });
       implementations.sort((a, b) => b.priority - a.priority);
    }
+
+   public static addNamespace(identifier: string) {
+      if (identifier.includes(':')) return identifier;
+      return `minecraft:${identifier}`;
+   }
 }
 
 export const coreDecoratorsFeature = new TypedDecoratorsFeature();

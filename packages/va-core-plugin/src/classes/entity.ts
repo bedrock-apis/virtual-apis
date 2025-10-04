@@ -1,57 +1,77 @@
-import { Vector2, Vector3 } from '@minecraft/server';
-import { va } from '../core-plugin';
+import { IndexedAccessor } from '@bedrock-apis/va-common';
+import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable';
+import { VanillaEntityIdentifier, Vector2, Vector3 } from '@minecraft/server';
+import { CorePlugin, va } from '../core-plugin';
+import { corePluginVanillaDataProvider } from '../dump/provider';
 import { Dimension } from './dimension';
+import { DynamicProperties } from './dynamic-properties';
+import { validityGuard } from './validity';
 
-// TODO Common methods for object with types like entities, dimensions, blocks and items
-class EntityType extends va.server.class('EntityType') {
+type EntityComponentGroup = Readonly<Record<string, object>>;
+
+export class EntityType extends va.server.class('EntityType') {
    @va.getter('id') public id: string;
 
-   public constructor(id: string) {
+   public constructor(
+      id: string,
+      public readonly entityData: Readonly<{
+         identifier: string;
+         properties: object;
+         localizationKey: string;
+         components: EntityComponentGroup;
+         componentsGroups: Map<string, EntityComponentGroup>;
+      }>,
+   ) {
       super();
       this.id = id;
    }
 }
 
-// TODO Common methods for object with types like entities, dimensions, blocks and items
 export class EntityTypes extends va.server.class('EntityTypes') {
    public static types: EntityType[] = [];
 
    @va.static.method('getAll') public static getAll() {
       return this.types.map(e => va.asHandle(e));
    }
+
+   @va.static.method('get') public static get(id: string | VanillaEntityIdentifier) {
+      id = CorePlugin.addNamespace(id as string);
+      const result = this.types.find(e => e.id === id);
+      return result ? va.asHandle(result) : result;
+   }
 }
 
-type EntityComponentGroup = Record<string, object>;
-
-interface EntityData {
-   identifier: string;
-   properties: object;
-   components: EntityComponentGroup;
-   componentsGroups: Map<string, EntityComponentGroup>;
-}
-
-// TODO Move to CorePlugin static property
-const entityDataSource = new Map<string, EntityData>();
-
-entityDataSource.set('minecraft:cow', {
-   identifier: 'minecraft:cow',
-   properties: {},
-   components: {},
-   componentsGroups: new Map(),
+corePluginVanillaDataProvider.onRead.subscribe(({ entities: { components, entities } }) => {
+   const componentAcc = new IndexedAccessor(components);
+   for (const [typeId, entity] of Object.entries(entities)) {
+      const type = new EntityType(typeId, {
+         identifier: typeId,
+         properties: {},
+         localizationKey: entity.localizationKey,
+         components: Object.fromEntries(
+            entity.components.map(e => componentAcc.fromIndex(e)).map(e => [e.typeId, e.data]),
+         ),
+         componentsGroups: new Map(),
+      });
+      EntityTypes.types.push(type);
+   }
 });
 
-export class Entity extends va.server.class('Entity') {
+export class Entity extends va.server.class('Entity', DynamicProperties) {
    public constructor(
-      typeId: string,
+      identifier: string | ServerModuleTypeMap['EntityType']['prototype'],
       location: Vector3,
       dimension: Dimension,
       spawnOptions?: { event?: string; rotation?: Vector2 },
    ) {
       super();
+      const typeId = typeof identifier === 'string' ? CorePlugin.addNamespace(identifier) : identifier.id;
+      const type = EntityTypes.types.find(e => e.id === typeId);
 
-      const data = entityDataSource.get(typeId);
-      if (!data) throw new Error(`Unknown entity type ${typeId}`);
+      if (!type) throw new Error(`Invalid entity identifier ${typeId}`);
+
       this.typeId = typeId;
+      this.localizationKey = type.entityData.localizationKey;
 
       this.location = location;
       this.dimension = dimension;
@@ -68,6 +88,7 @@ export class Entity extends va.server.class('Entity') {
       this.rotation = r;
    }
 
+   @va.getter('localizationKey') public localizationKey: string;
    @va.property('isSneaking') public isSneaking = false;
    @va.property('nameTag') public nameTag = '';
    @va.getter('dimension') public dimension: Dimension;
@@ -87,4 +108,12 @@ export class Entity extends va.server.class('Entity') {
    @va.getter('isSleeping') public get isSleeping() {
       return true;
    }
+
+   @validityGuard.isValid({
+      ignore: ['typeId'],
+      error: class InvalidActorError extends Error {
+         public override name = 'InvalidActorError';
+      } as typeof Error,
+   })
+   public isValid = true;
 }

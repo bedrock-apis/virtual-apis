@@ -1,4 +1,4 @@
-import { fetchJson } from '@bedrock-apis/va-common';
+import { fetchJson } from '@bedrock-apis/va-common/node';
 import { createReadStream, createWriteStream, existsSync, rmSync } from 'node:fs';
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path, { dirname, resolve } from 'node:path';

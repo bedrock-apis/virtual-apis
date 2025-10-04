@@ -1,4 +1,4 @@
-import { dwarn } from '@bedrock-apis/va-common';
+import { dwarn } from '@bedrock-apis/va-common/node';
 import { inspect } from 'node:util';
 import { Context } from '../../context/context';
 import { InvocationInfo } from '../../context/invocation-info';

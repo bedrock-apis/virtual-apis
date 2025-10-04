@@ -1,4 +1,5 @@
-import { compareVersions, dwarn, VaEventLoader } from '@bedrock-apis/va-common';
+import { compareVersions, VaEventLoader } from '@bedrock-apis/va-common';
+import { dwarn } from '@bedrock-apis/va-common/node';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { Impl, ImplStatic, ImplStorage } from './implementation';
 import { Pluggable } from './pluggable';

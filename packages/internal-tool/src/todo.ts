@@ -1,4 +1,4 @@
-import { getFilesRecursive } from '@bedrock-apis/va-common';
+import { getFilesRecursive } from '@bedrock-apis/va-common/node';
 import chalk from 'chalk';
 import { readFile } from 'node:fs/promises';
 import { parseSync } from 'oxc-parser';

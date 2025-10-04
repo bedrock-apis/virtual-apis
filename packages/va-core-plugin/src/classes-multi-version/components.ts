@@ -3,7 +3,7 @@
 
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import type { Entity, EntityComponent, ItemComponent, ItemStack } from '@minecraft/server';
-import { ValidityPlugin } from './validity';
+import { ValidityPlugin } from '../classes/validity';
 
 // TODO Implement it to use system like EventsPlugin.implementEventArgument
 

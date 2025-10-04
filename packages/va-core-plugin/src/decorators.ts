@@ -24,10 +24,14 @@ class ModuleDecorator<T extends ModuleTypeMap> extends VirtualFeatureDecorators 
       super(feature);
    }
 
-   public class<K extends keyof Constructable<T>>(id: K) {
+   public utilityClass<K extends keyof Constructable<T>>(ids: K[]) {
       const version = this.nameVersion;
       function virtualClass() {}
-      this.assignMetadata(virtualClass, id as string, version);
+
+      this.assignMetadata(
+         virtualClass,
+         ids.map(e => ({ classId: e as string, moduleNameVersion: version })),
+      );
 
       type Handle = T[K]['prototype'] extends object ? T[K]['prototype'] : { error: 'prototype is not an object' };
       type Static = Omit<T[K], keyof CallableFunction>;
@@ -36,6 +40,25 @@ class ModuleDecorator<T extends ModuleTypeMap> extends VirtualFeatureDecorators 
          new (): { [handleType]: Handle };
          [staticType]: Static;
       };
+   }
+
+   public class<K extends keyof Constructable<T>, P extends Prototyped>(id: K, parent?: P) {
+      const version = this.nameVersion;
+      function virtualClass() {}
+      if (parent) {
+         Object.setPrototypeOf(virtualClass, parent);
+         Object.setPrototypeOf(virtualClass['prototype'], parent['prototype']);
+      }
+
+      this.assignMetadata(virtualClass, [{ classId: id as string, moduleNameVersion: version }]);
+
+      type Handle = T[K]['prototype'] extends object ? T[K]['prototype'] : { error: 'prototype is not an object' };
+      type Static = Omit<T[K], keyof CallableFunction>;
+
+      return virtualClass as unknown as {
+         new (): { [handleType]: Handle } & P['prototype'];
+         [staticType]: Static;
+      } & Omit<P, keyof CallableFunction>;
    }
 
    public constant(name: string, storage: object) {
@@ -97,6 +120,12 @@ class PrototypeDecorators extends withGeneratedModules<
 
    public asHandle<T>(value: T) {
       return value as HandleType<T>;
+   }
+
+   public constructable(): ClassDecorator {
+      return target => {
+         this.registerConstructable(target as unknown as new (...args: unknown[]) => object);
+      };
    }
 
    public getter<

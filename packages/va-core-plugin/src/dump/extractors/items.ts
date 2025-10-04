@@ -1,4 +1,5 @@
 import { runThread } from '@bedrock-apis/va-bds-dumps/mc-api';
+import { IndexedCollector } from '@bedrock-apis/va-common';
 import { ItemStack, ItemTypes } from '@minecraft/server';
 import type { ItemsDataReport } from '../provider';
 
@@ -9,8 +10,8 @@ export function itemsReport() {
 }
 
 function* itemStackJob() {
-   let lastIndex = 0;
-   const map = new Map<string, number>();
+   const tags = new IndexedCollector<string>(k => k);
+   const componentsCollector = new IndexedCollector<{ typeId: string; data: object }>(JSON.stringify);
    const items: Record<string, ItemData> = {};
    for (const { id } of ItemTypes.getAll()) {
       if (id === 'minecraft:air') {
@@ -18,24 +19,23 @@ function* itemStackJob() {
          continue;
       }
       const itemStack = new ItemStack(id);
-      const components: ItemData['components'] = {};
+      const components: ItemData['components'] = [];
       for (const { typeId } of itemStack.getComponents()) {
-         components[typeId] = {};
+         components.push(componentsCollector.getIndexFor({ typeId, data: {} }));
       }
-      const data: ItemData = (items[id] = {
-         tags: [],
-         maxStack: itemStack.maxAmount,
+
+      items[id] = {
+         tags: itemStack.getTags().map(e => tags.getIndexFor(e)),
+         maxAmount: itemStack.maxAmount,
+         localizationKey: itemStack.localizationKey,
+         weight: itemStack.weight,
          components: components,
-      });
-      // Tags
-      for (const tag of itemStack.getTags()) {
-         let index = map.get(tag) ?? null;
-         if (index === null) {
-            map.set(tag, (index = lastIndex++));
-         }
-         data.tags.push(index);
-      }
+      };
       yield;
    }
-   return { tags: Array.from(map.keys()), items } satisfies ItemsDataReport;
+   return {
+      tags: tags.getArrayAndLock(),
+      components: componentsCollector.getArrayAndLock(),
+      items,
+   } satisfies ItemsDataReport;
 }

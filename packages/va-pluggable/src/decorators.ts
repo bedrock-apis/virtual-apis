@@ -14,54 +14,59 @@ import util from 'node:util';
 import { PluginFeature } from './feature';
 import { Pluggable } from './pluggable';
 
+// Usually used as array to support inheritance
 export interface DecoratedMetadata {
    classId: string;
    moduleNameVersion: string;
    static: boolean;
 }
 
+const staticMetaSymbol = Symbol('virtualApis::staticMetadata');
+const prototypeMetaSymbol = Symbol('virtualApis::prototypeMetadata');
+
 export class VirtualFeatureDecorators {
-   private static staticMetaSymbol = Symbol('virtualApis::staticMetadata');
-   private static prototypeMetaSymbol = Symbol('virtualApis::prototypeMetadata');
-   private getMeta(symbol: symbol, target: object): DecoratedMetadata {
-      const meta = symbol in target ? (target as Record<symbol, DecoratedMetadata>)[symbol] : undefined;
-      if (!meta)
-         throw new Error('No metadata for ' + symbol.toString() + ' in ' + util.inspect(target, true, 20, true));
+   private getMeta(symbol: symbol, target: object): DecoratedMetadata[] {
+      const meta = symbol in target ? (target as Record<symbol, DecoratedMetadata[]>)[symbol] : undefined;
+      // Error is so detailed for debug only. Remove later
+      if (!meta) throw new Error(`No metadata for ${symbol.toString()} in ${util.inspect(target, true, 20, true)}`);
+
       return meta;
    }
 
-   protected getStaticMeta = this.getMeta.bind(this, VirtualFeatureDecorators.staticMetaSymbol);
-   protected getPrototypeMeta = this.getMeta.bind(this, VirtualFeatureDecorators.prototypeMetaSymbol);
+   protected getStaticMeta = this.getMeta.bind(this, staticMetaSymbol);
+   protected getPrototypeMeta = this.getMeta.bind(this, prototypeMetaSymbol);
 
    protected createMethodDecorator(
       nativeId: string,
-      getMeta: (target: object) => DecoratedMetadata,
+      getMeta: (target: object) => DecoratedMetadata[],
       symbolType: new () => InvocableSymbol<unknown>,
    ): MethodDecorator {
       return (target, _, descriptor) => {
-         const classMeta = getMeta(target as object);
+         const metaArray = getMeta(target as object);
 
-         this.registerImplementation(classMeta, nativeId, symbolType, (symbol, plugin) => {
-            const fn = descriptor.value as (...args: unknown[]) => void;
+         for (const meta of metaArray) {
+            this.registerImplementation(meta, nativeId, symbolType, (symbol, plugin) => {
+               const fn = descriptor.value as (...args: unknown[]) => void;
 
-            if (this.isComplexType(symbol.returnType)) {
-               plugin.registerCallback(
-                  symbol,
-                  ctx =>
-                     (ctx.result = this.autoToHandle(
-                        symbol.returnType,
-                        fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params),
-                        ctx.context,
-                        ctx.thisObject as object,
-                     )),
-               );
-            } else {
-               plugin.registerCallback(
-                  symbol,
-                  ctx => (ctx.result = fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params)),
-               );
-            }
-         });
+               if (this.isComplexType(symbol.returnType)) {
+                  plugin.registerCallback(
+                     symbol,
+                     ctx =>
+                        (ctx.result = this.autoToHandle(
+                           symbol.returnType,
+                           fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params),
+                           ctx.context,
+                           ctx.thisObject as object,
+                        )),
+                  );
+               } else {
+                  plugin.registerCallback(
+                     symbol,
+                     ctx => (ctx.result = fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params)),
+                  );
+               }
+            });
+         }
 
          return descriptor;
       };
@@ -69,49 +74,76 @@ export class VirtualFeatureDecorators {
 
    protected createPropertyDecorator(
       nativeId: string,
-      getMeta: (target: object) => DecoratedMetadata,
+      getMeta: (target: object) => DecoratedMetadata[],
    ): PropertyDecorator {
       return (target, propertyKey) => {
-         const classMeta = getMeta(target as object);
+         const metaArray = getMeta(target as object);
 
-         this.registerImplementation(classMeta, nativeId, PropertyGetterSymbol, (symbol, plugin) => {
-            if (this.isComplexType(symbol.returnType)) {
-               plugin.registerCallback(symbol, ctx => {
-                  const self = plugin.getStorage(ctx.thisObject as object);
-                  ctx.result = this.autoToHandle(
-                     ctx.symbol.returnType,
-                     Reflect.get(self as object, propertyKey, self),
-                     ctx.context,
-                     ctx.thisObject as object,
-                  );
-               });
-            } else {
-               plugin.registerCallback(symbol, ctx => {
-                  const self = plugin.getStorage(ctx.thisObject as object);
-                  ctx.result = Reflect.get(self as object, propertyKey, self);
-               });
-            }
-
-            if (symbol.setter) {
+         for (const meta of metaArray) {
+            this.registerImplementation(meta, nativeId, PropertyGetterSymbol, (symbol, plugin) => {
                if (this.isComplexType(symbol.returnType)) {
-                  plugin.registerCallback(symbol.setter, ctx => {
+                  plugin.registerCallback(symbol, ctx => {
                      const self = plugin.getStorage(ctx.thisObject as object);
-                     return Reflect.set(
-                        self as object,
-                        propertyKey,
-                        this.autoFromHandle(symbol.returnType, ctx.params[0], ctx.context),
-                        self,
+                     ctx.result = this.autoToHandle(
+                        ctx.symbol.returnType,
+                        Reflect.get(self as object, propertyKey, self),
+                        ctx.context,
+                        ctx.thisObject as object,
                      );
                   });
                } else {
-                  plugin.registerCallback(symbol.setter, ctx => {
+                  plugin.registerCallback(symbol, ctx => {
                      const self = plugin.getStorage(ctx.thisObject as object);
-                     return Reflect.set(self as object, propertyKey, ctx.params[0], self);
+                     ctx.result = Reflect.get(self as object, propertyKey, self);
                   });
                }
-            }
-         });
+
+               if (symbol.setter) {
+                  if (this.isComplexType(symbol.returnType)) {
+                     plugin.registerCallback(symbol.setter, ctx => {
+                        const self = plugin.getStorage(ctx.thisObject as object);
+                        return Reflect.set(
+                           self as object,
+                           propertyKey,
+                           this.autoFromHandle(symbol.returnType, ctx.params[0], ctx.context),
+                           self,
+                        );
+                     });
+                  } else {
+                     plugin.registerCallback(symbol.setter, ctx => {
+                        const self = plugin.getStorage(ctx.thisObject as object);
+                        return Reflect.set(self as object, propertyKey, ctx.params[0], self);
+                     });
+                  }
+               }
+            });
+         }
       };
+   }
+
+   protected onClassLoad(meta: DecoratedMetadata, callback: (s: ConstructableSymbol, plugin: Pluggable) => void) {
+      this.implementations
+         .getOrCreate(meta.moduleNameVersion, () => new MapWithDefaults())
+         .getOrCreate(meta.classId, () => [])
+         .push((s, plugin) => {
+            if (!(s instanceof ConstructableSymbol)) throw new Error(`Not a class: ${s.name}`);
+
+            callback(s, plugin);
+         });
+   }
+
+   protected registerConstructable(target: new (...args: unknown[]) => object) {
+      const metaArray = this.getStaticMeta(target);
+      const meta = metaArray.at(-1)!; // Only latest one
+      this.onClassLoad(meta, (s, plugin) => {
+         plugin.registerCallback(s, ctx => {
+            const storage = new target(...ctx.params);
+
+            // We use ctx.result here because ctx.thisObject is not a native handle
+            // which results in different storages between constructor and methods
+            plugin.bindStorageWithHandle(ctx.result as object, storage);
+         });
+      });
    }
 
    // TODO(performance) Make it compileComplexTypeTransformer, basically the same but it will return from and to functions instead of boolean
@@ -125,7 +157,7 @@ export class VirtualFeatureDecorators {
    }
 
    protected autoToHandle(type: RuntimeType, storage: unknown, context: Context, thisObject: object): unknown {
-      if (type instanceof ConstructableSymbol) return this.toHandle(storage, context, type, thisObject);
+      if (type instanceof ConstructableSymbol) return this.toHandle(storage, context, type);
       if (type instanceof ArrayType) {
          return (storage as unknown[]).map(e => this.autoToHandle(type.valueType, e, context, thisObject));
       }
@@ -156,11 +188,8 @@ export class VirtualFeatureDecorators {
       return context.plugin.getStorage(value);
    }
 
-   protected toHandle(storage: unknown, context: Context, symbol: InvocableSymbol<unknown>, thisObject: object) {
+   protected toHandle(storage: unknown, context: Context, symbol: InvocableSymbol<unknown>) {
       if (typeof storage !== 'object' || !storage) return storage;
-
-      const meta = this.getPrototypeMeta(storage);
-      if (!meta) return storage;
 
       const returnType = symbol.returnType;
       if (!(returnType instanceof ConstructableSymbol)) return storage;
@@ -168,12 +197,15 @@ export class VirtualFeatureDecorators {
       return context.plugin.getCreateHandleFor(storage, returnType);
    }
 
-   protected assignMetadata(virtualClass: { prototype: object }, classId: string, moduleNameVersion: string) {
-      const prototypeVa = virtualClass.prototype as Record<symbol, DecoratedMetadata>;
-      prototypeVa[VirtualFeatureDecorators.prototypeMetaSymbol] = { classId, moduleNameVersion, static: false };
+   protected assignMetadata(
+      virtualClass: { prototype: object },
+      meta: { classId: string; moduleNameVersion: string }[],
+   ) {
+      const prototypeVa = virtualClass.prototype as Record<symbol, DecoratedMetadata[]>;
+      prototypeVa[prototypeMetaSymbol] = meta.map(e => ({ ...e, static: false }));
 
-      const staticVa = virtualClass as unknown as Record<symbol, DecoratedMetadata>;
-      staticVa[VirtualFeatureDecorators.staticMetaSymbol] = { classId, moduleNameVersion, static: true };
+      const staticVa = virtualClass as unknown as Record<symbol, DecoratedMetadata[]>;
+      staticVa[staticMetaSymbol] = meta.map(e => ({ ...e, static: true }));
    }
 
    public constructor(feature: PluginFeature) {
@@ -203,20 +235,15 @@ export class VirtualFeatureDecorators {
       symbolType: T,
       onReady: (symbol: InstanceType<T>, plugin: Pluggable) => void,
    ) {
-      this.implementations
-         .getOrCreate(meta.moduleNameVersion, () => new MapWithDefaults())
-         .getOrCreate(meta.classId, () => [])
-         .push((s, plugin) => {
-            if (!(s instanceof ConstructableSymbol)) throw new Error(`Not a class: ${s.name}`);
+      this.onClassLoad(meta, (s, plugin) => {
+         const property = (meta.static ? s.staticFields : s.prototypeFields).get(propertyKey);
+         if (!(property instanceof symbolType))
+            throw new Error(
+               `Unknown ${meta.classId}::${propertyKey} type: ${property?.constructor.name} expected ${symbolType.name}`,
+            );
 
-            const property = (meta.static ? s.staticFields : s.prototypeFields).get(propertyKey);
-            if (!(property instanceof symbolType))
-               throw new Error(
-                  `Unknown ${propertyKey} type: ${property?.constructor.name} expected ${symbolType.name}`,
-               );
-
-            onReady(property as InstanceType<T>, plugin);
-         });
+         onReady(property as InstanceType<T>, plugin);
+      });
    }
 
    protected registerConstant(moduleNameVersion: string, id: string, storage: object) {

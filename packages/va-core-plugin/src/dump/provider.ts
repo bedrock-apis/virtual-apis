@@ -4,37 +4,53 @@ import { resolve } from 'node:path';
 
 export interface BlocksDataReport {
    tags: string[];
-   blocks: Record<string, { tags: number[] }>;
-}
-
-export interface ItemsDataReport {
-   tags: string[];
-   items: Record<
+   components: { typeId: string; data: object }[];
+   blocks: Record<
       string,
       {
          tags: number[];
-         maxStack: number;
-         components: Record<string, unknown>;
+         localizationKey: string;
+         components: number[];
       }
    >;
 }
 
-export interface LocalizationKeysReport {
-   entities: Record<string, string>;
-   items: Record<string, string>;
-   blocks: Record<string, string>;
+export interface ItemsDataReport {
+   tags: string[];
+   components: { typeId: string; data: object }[];
+   items: Record<
+      string,
+      {
+         tags: number[];
+         maxAmount: number;
+         components: number[];
+         localizationKey: string;
+         weight: number;
+      }
+   >;
+}
+
+export interface EntitiesDataReport {
+   components: { typeId: string; data: object }[];
+   entities: Record<
+      string,
+      {
+         localizationKey: string;
+         components: number[];
+      }
+   >;
 }
 
 export type CorePluginVanillaDataReport = {
-   localizationKeys: LocalizationKeysReport;
    items: ItemsDataReport;
    blocks: BlocksDataReport;
+   entities: EntitiesDataReport;
 };
 
 export const corePluginVanillaDataProvider = new DumpProviderScriptApi<CorePluginVanillaDataReport>(
    'core-plugin-vanilla-data',
    import.meta.dirname,
-   ['blocks', 'items', 'localizationKeys'],
+   ['blocks', 'items', 'entities'],
    resolve(import.meta.dirname, './bds.js'),
    new JsonMarshaller(),
 );

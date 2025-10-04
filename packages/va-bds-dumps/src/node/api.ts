@@ -1,10 +1,12 @@
 import { Marshaller } from '@bedrock-apis/va-binary';
+import { VaEventEmitter } from '@bedrock-apis/va-common';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import util from 'node:util';
 import zlib from 'node:zlib';
 
-export class DumpProvider<T = object> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class DumpProvider<T = any> {
    public static async saveResultToOutputFolder(providers: DumpProvider[], bdsFolder: string, outputFolder: string) {
       for (const provider of providers) {
          await provider.saveResultToOutputFolder(bdsFolder, outputFolder);
@@ -23,7 +25,7 @@ export class DumpProvider<T = object> {
       return path.resolve(basePath, this.id + '.gz');
    }
 
-   public data?: T;
+   public onRead = new VaEventEmitter<[T]>();
 
    public async writeImage(output: string, imagesFolder?: string): Promise<void> {
       const startupTime = performance.now();
@@ -46,8 +48,9 @@ export class DumpProvider<T = object> {
    public async read(imagesFolder?: string): Promise<T> {
       const gzipped = await fs.readFile(this.getImagePath(imagesFolder));
       const binary = await util.promisify(zlib.gunzip)(gzipped);
-      this.data = this.marshaller.read(binary);
-      return this.data;
+      const data = this.marshaller.read(binary);
+      this.onRead.invoke(data);
+      return data;
    }
 }
 

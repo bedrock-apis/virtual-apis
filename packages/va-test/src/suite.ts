@@ -1,4 +1,4 @@
-import { defaultThreadRunner, runThreadAsync, ThreadRunner } from '@bedrock-apis/va-common/async-thread';
+import { defaultThreadRunner, runThreadAsync, ThreadRunner } from '@bedrock-apis/va-common';
 import { setEnvironment, TestEnvironment } from './environment/environment';
 import { TestReport } from './types';
 

@@ -1,4 +1,4 @@
-import { Vec } from '@bedrock-apis/va-common/vector';
+import { Vec } from '@bedrock-apis/va-common';
 import { spawnEntity } from '../environment/environment';
 import { TestSuite } from '../suite';
 

@@ -1,4 +1,5 @@
-import { dwarn, VirtualPrivilege } from '@bedrock-apis/va-common';
+import { VirtualPrivilege } from '@bedrock-apis/va-common';
+import { dwarn } from '@bedrock-apis/va-common/node';
 import { ContextPluginLinkedStorage, PluginFeatureWithConfig } from '@bedrock-apis/va-pluggable';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';

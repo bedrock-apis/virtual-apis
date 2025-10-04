@@ -11,14 +11,9 @@
          "types": "./src/main.ts",
          "rolldown": null
       },
-      "./vector": {
-         "default": "./dist/vector.js",
-         "types": "./src/vector.ts",
-         "rolldown": null
-      },
-      "./async-thread": {
-         "default": "./dist/async-thread.js",
-         "types": "./src/async-thread.ts",
+      "./node": {
+         "default": "./dist/node.js",
+         "types": "./src/node/node.ts",
          "rolldown": null
       }
    },

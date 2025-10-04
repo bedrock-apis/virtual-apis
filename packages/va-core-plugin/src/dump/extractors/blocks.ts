@@ -1,28 +1,33 @@
-import { runThread } from '@bedrock-apis/va-bds-dumps/mc-api';
-import { BlockPermutation, BlockTypes } from '@minecraft/server';
+import { loadChunk } from '@bedrock-apis/va-bds-dumps/mc-api';
+import { IndexedCollector, runThreadAsync } from '@bedrock-apis/va-common';
+import { Block, BlockPermutation, BlockTypes, system } from '@minecraft/server';
 import type { BlocksDataReport } from '../provider';
 
 type BlockData = BlocksDataReport['blocks'][string];
 
 export function blocksReport() {
-   return runThread(blockReportJob());
+   return runThreadAsync(blockReportJob(), system.runJob.bind(system));
 }
 
 function* blockReportJob() {
-   let lastIndex = 0;
+   const tags = new IndexedCollector<string>(k => k);
+   const components = new IndexedCollector<{ typeId: string; data: object }>();
    const map = new Map<string, number>();
+
+   const block = (yield loadChunk({ x: 0, y: 0, z: 0 }, 'localizationKey')) as Block;
+
    const blocks: Record<string, BlockData> = {};
+
    for (const { id } of BlockTypes.getAll()) {
       const permutation = BlockPermutation.resolve(id);
-      const data: BlockData = (blocks[id] = { tags: [] });
-      for (const tag of permutation.getTags()) {
-         let index = map.get(tag) ?? null;
-         if (index === null) {
-            map.set(tag, (index = lastIndex++));
-         }
-         data.tags.push(index);
-      }
+      block.setPermutation(permutation);
+
+      blocks[id] = {
+         tags: permutation.getTags().map(e => tags.getIndexFor(e)),
+         components: [],
+         localizationKey: block.localizationKey,
+      };
       yield;
    }
-   return { tags: Array.from(map.keys()), blocks } satisfies BlocksDataReport;
+   return { tags: Array.from(map.keys()), components: components.getArrayAndLock(), blocks } satisfies BlocksDataReport;
 }

@@ -1,5 +1,5 @@
 import { BinaryIO } from '@bedrock-apis/va-binary';
-import { BitFlags, d, identifiers, IndexedAccessor } from '@bedrock-apis/va-common';
+import { BitFlags, identifiers, IndexedAccessor } from '@bedrock-apis/va-common';
 import {
    bigintType,
    booleanType,
@@ -48,6 +48,7 @@ import {
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from './types';
+import { d } from '@bedrock-apis/va-common/node';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;

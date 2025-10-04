@@ -1,4 +1,5 @@
-import { Context, ContextPlugin, d, VaEventLoader } from '@bedrock-apis/virtual-apis';
+import { d } from '@bedrock-apis/va-common/node';
+import { Context, ContextPlugin, VaEventLoader } from '@bedrock-apis/virtual-apis';
 import { PluginFeature } from './feature';
 import { generatedModules, GeneratedModuleTypes, withGeneratedModules } from './main';
 import { PluginModule } from './module';

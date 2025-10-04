@@ -1,4 +1,5 @@
-import { compareVersions, fetchJson } from '@bedrock-apis/va-common';
+import { compareVersions } from '@bedrock-apis/va-common';
+import { fetchJson } from '@bedrock-apis/va-common/node';
 import type { MetadataModuleDefinition } from '@bedrock-apis/va-types';
 import { IMetadataProvider } from './general';
 

@@ -3,8 +3,8 @@
 
 import { Plugin } from '@bedrock-apis/va-pluggable';
 import { BlockPermutation, BlockType, Dimension, Vector3 } from '@minecraft/server';
+import { ValidityPlugin } from '../classes/validity';
 import { blocks, localizationKeys } from './reports-provider';
-import { ValidityPlugin } from './validity';
 
 export class BlockTypesPlugin extends Plugin {
    public source = blocks;
