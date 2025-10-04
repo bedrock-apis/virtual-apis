@@ -116,4 +116,23 @@ export class Entity extends va.server.class('Entity', DynamicProperties) {
       } as typeof Error,
    })
    public isValid = true;
+
+   protected tags = new Set<string>();
+   @va.method('getTags') public getTags() {
+      return [...this.tags];
+   }
+
+   @va.method('addTag') public addTag(tag: string) {
+      if (this.tags.has(tag)) return false;
+      this.tags.add(tag);
+      return true;
+   }
+
+   @va.method('hasTag') public hasTag(tag: string) {
+      return this.tags.has(tag);
+   }
+
+   @va.method('remove') public remove() {
+      this.isValid = false;
+   }
 }

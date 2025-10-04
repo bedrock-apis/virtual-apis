@@ -39,8 +39,8 @@ export class VaEventEmitter<Args extends unknown[] = unknown[]> {
 }
 
 /**
- * Similiar to {@link VaEventEmitter} but can be invoced only once. Once it was invoced any new calls to the subscribe
- * will call method immediatly with the last incoce params
+ * Similar to {@link VaEventEmitter} but can be invoked only once. Once it was invoked any new calls to the subscribe
+ * will call method immediately with the last invoke params
  */
 export class VaEventLoader<Args extends unknown[] = unknown[]> extends VaEventEmitter<Args> {
    public loaded = false;

@@ -16,6 +16,17 @@ type Prototyped = { prototype: object };
 
 type Constructable<T extends ModuleTypeMap> = PickMatch<T, Prototyped>;
 
+const base = Object.getPrototypeOf(class Fake {});
+const basePrototype = Object.getPrototypeOf(class Fake {}['prototype']);
+
+function beforeDefault(start: object, to: object = base) {
+   while (Object.getPrototypeOf(start) !== to) start = Object.getPrototypeOf(start);
+   return start;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+
 class ModuleDecorator<T extends ModuleTypeMap> extends VirtualFeatureDecorators {
    public constructor(
       protected feature: PluginFeature,
@@ -42,12 +53,17 @@ class ModuleDecorator<T extends ModuleTypeMap> extends VirtualFeatureDecorators 
       };
    }
 
-   public class<K extends keyof Constructable<T>, P extends Prototyped>(id: K, parent?: P) {
+   public class<K extends keyof Constructable<T>, P extends Prototyped[]>(id: K, ...parents: P) {
       const version = this.nameVersion;
-      function virtualClass() {}
-      if (parent) {
-         Object.setPrototypeOf(virtualClass, parent);
-         Object.setPrototypeOf(virtualClass['prototype'], parent['prototype']);
+      function virtualClass(this: object) {
+         for (const parent of parents.toReversed()) {
+            Object.assign(this, new (parent as unknown as new () => object)());
+         }
+      }
+
+      for (const parent of parents) {
+         Object.setPrototypeOf(beforeDefault(virtualClass, base), parent);
+         Object.setPrototypeOf(beforeDefault(virtualClass['prototype'], basePrototype), parent['prototype']);
       }
 
       this.assignMetadata(virtualClass, [{ classId: id as string, moduleNameVersion: version }]);
@@ -56,9 +72,11 @@ class ModuleDecorator<T extends ModuleTypeMap> extends VirtualFeatureDecorators 
       type Static = Omit<T[K], keyof CallableFunction>;
 
       return virtualClass as unknown as {
-         new (): { [handleType]: Handle } & P['prototype'];
+         new (): { [handleType]: Handle } & (UnionToIntersection<P[number]> extends Prototyped
+            ? UnionToIntersection<P[number]>['prototype']
+            : object);
          [staticType]: Static;
-      } & Omit<P, keyof CallableFunction>;
+      } & Omit<UnionToIntersection<P[number]>, keyof CallableFunction>;
    }
 
    public constant(name: string, storage: object) {

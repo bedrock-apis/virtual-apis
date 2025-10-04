@@ -12,33 +12,42 @@ Suite block (chained): ❓ Unexpected setup error: Error: Dimension::setBlockTyp
 
 
 Suite dynamic properties (chained): 
-  0: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'keys')
-  1: 0: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'set')
-    1: ❓ No result, expected false
-    2: ❓ No result, expected ""
-    3: ❓ No result, expected "string"
-    4: ❓ No result, expected 1
-    5: ❓ No result, expected 0
-    6: ❓ No result, expected -1
-    7: ❓ No result, expected TypeError: Native variant type conversion failed.
+  0: ✅
+  1: 0: ✅
+    1: ✅
+    2: ✅
+    3: ✅
+    4: ✅
+    5: ✅
+    6: ✅
+    7: ❌ Error mismatch: 
+        
+        TypeError: Native variant type conversion failed.
+        TypeError: Native optional type conversion failed. Function argument [1] expected type: boolean | number | number | string | Vector3 | undefined
+        
     
   
 
 
-Suite entity (chained): ❓ Unexpected setup error: Error: Invalid entity identifier minecraft:cow
+Suite entity (chained): 
+  0: ✅
+  1: ✅
+  2: ✅
+  3: ❓ Unexpected error: ValidityPluginError: Entity::getComponents is not implemented
+  
 
 
 Suite disposal (chained): 
-  0: 0: ❓ Unexpected error: Error: Invalid entity identifier minecraft:cow
-    1: ❓ No result, expected false
-    2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
+  0: 0: ✅
+    1: ✅
+    2: ✅
     
   
 
 
 Suite errors (chained): 
   0: ✅
-  1: ❌ Error mismatch: Error: Invalid item identifier Yes != Error: Invalid item identifier 'Yes'.
+  1: ✅
   2: ✅
   3: ✅
   4: ✅
@@ -52,42 +61,26 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❌ Error mismatch: Error: Dimension ha ha wrong is invalid. != Error: Dimension 'ha ha wrong' is invalid.
+  15: ✅
   16: ✅
-  17: ❓ Unexpected error: Error: Invalid entity identifier minecraft:cow
+  17: ✅
   18: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
-      Error: Invalid entity identifier minecraft:cow
+      TypeError: Native type conversion failed.
       
-  19: ❌ Error mismatch: 
-      
-      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
-      Error: Invalid entity identifier minecraft:cow
-      
-  20: ❌ Error mismatch: 
-      
-      ReferenceError: Native property setter [Entity::nameTag] object bound to prototype does not exist.
-      Error: Invalid entity identifier minecraft:cow
-      
+  19: ✅
+  20: ✅
   21: ❌ Error mismatch: Error: Dimension::setBlockType is not implemented != Error: Failed to set member
   22: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
       Error: Dimension::setBlockType is not implemented
       
-  23: ❌ Error mismatch: 
-      
-      InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
-      Error: Invalid entity identifier minecraft:cow
-      
-  24: ❌ Error mismatch: 
-      
-      InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).
-      Error: Invalid entity identifier minecraft:cow
-      
-  25: ❌ Error mismatch: Error: Invalid entity identifier minecraft:cow != TypeError: 'scoreboardIdentity' is read-only
-  26: ❌ Error mismatch: Error: Invalid entity identifier minecraft:cow != TypeError: 'isValid' is read-only
+  23: ✅
+  24: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
+  25: ✅
+  26: ✅
   27: ❌ Error mismatch: 
       
       LocationInUnloadedChunkError: Trying to access location (654654.0, 55.0, 6.0) which is not in a chunk currently loaded and ticking.

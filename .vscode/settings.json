@@ -36,6 +36,7 @@
       "esbuild",
       "gametest",
       "invocables",
+      "molang",
       "overworld",
       "proxyify",
       "rawtext",

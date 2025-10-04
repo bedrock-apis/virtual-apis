@@ -58,7 +58,7 @@ export class ItemStack extends va.server.class('ItemStack', DynamicProperties) {
       const typeId = typeof identifier === 'string' ? CorePlugin.addNamespace(identifier) : identifier.id;
       const type = ItemTypes.types.find(e => e.id === typeId);
 
-      if (!type) throw new Error(`Invalid item identifier ${identifier}`);
+      if (!type) throw new Error(`Invalid item identifier '${identifier}'.`);
 
       this.amount = amount;
       this.type = type;

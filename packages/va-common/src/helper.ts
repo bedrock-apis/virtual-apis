@@ -2,12 +2,12 @@ export function compareVersions(a: string, b: string): number {
    const [aVersion, aTag] = a.split('-');
    const [bVersion, bTag] = b.split('-');
 
-   const aNums = (aVersion ?? '').split('.').map(Number);
-   const bNums = (bVersion ?? '').split('.').map(Number);
+   const aNumbers = (aVersion ?? '').split('.').map(Number);
+   const bNumbers = (bVersion ?? '').split('.').map(Number);
 
-   for (let i = 0; i < aNums.length || i < bNums.length; i++) {
-      const a = aNums[i] ?? 0;
-      const b = bNums[i] ?? 0;
+   for (let i = 0; i < aNumbers.length || i < bNumbers.length; i++) {
+      const a = aNumbers[i] ?? 0;
+      const b = bNumbers[i] ?? 0;
       if (a !== b) return a - b;
    }
 

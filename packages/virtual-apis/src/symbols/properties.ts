@@ -119,7 +119,7 @@ export class PropertyGetterSymbol
       descriptor.set =
          this.setter?.getRuntimeValue(context) ??
          (() => {
-            // Special case. Maybe need all that proxifyFunction, finalizeAsMethod and stack trimming stuff too
+            // Special case. Maybe need all that proxyifyFunction, finalizeAsMethod and stack trimming stuff too
             throw new TypeError(`'${this.name}' is read-only`);
          });
 

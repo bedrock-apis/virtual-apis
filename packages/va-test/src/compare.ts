@@ -85,10 +85,10 @@ function compareResults(need: TestReport.Result, got: TestReport.Result): string
    return '✅';
 }
 
-function compareMultipleResults(needs: TestReport.Result[], gots: TestReport.Result[]): string {
+function compareMultipleResults(needs: TestReport.Result[], gets: TestReport.Result[]): string {
    let report = '';
    for (const [i, need] of needs.entries()) {
-      const got = gots[i];
+      const got = gets[i];
       if (typeof got === 'undefined') {
          report += `${i}: ❓ No result, expected ${resultToString(need)}\n`;
          continue;
