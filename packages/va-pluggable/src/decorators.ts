@@ -50,7 +50,7 @@ export class VirtualFeatureDecorators {
                   ctx =>
                      (ctx.result = this.autoToHandle(
                         symbol.returnType,
-                        fn.call(plugin.getStorage(ctx.thisObject ?? {}), ...ctx.params),
+                        fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params),
                         ctx.context,
                         ctx.thisObject as object,
                      )),
@@ -58,7 +58,7 @@ export class VirtualFeatureDecorators {
             } else {
                plugin.registerCallback(
                   symbol,
-                  ctx => (ctx.result = fn.call(plugin.getStorage(ctx.thisObject ?? {}), ...ctx.params)),
+                  ctx => (ctx.result = fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params)),
                );
             }
          });
@@ -137,14 +137,14 @@ export class VirtualFeatureDecorators {
       throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
    }
 
-   protected autoFromHandle(type: RuntimeType, value: unknown, context: Context): unknown | undefined {
-      if (type instanceof ConstructableSymbol) return this.fromHandle(value, context);
+   protected autoFromHandle(type: RuntimeType, handle: unknown, context: Context): unknown | undefined {
+      if (type instanceof ConstructableSymbol) return this.fromHandle(handle, context);
       if (type instanceof ArrayType) {
-         return (value as unknown[]).map(e => this.autoFromHandle(type.valueType, e, context));
+         return (handle as unknown[]).map(e => this.autoFromHandle(type.valueType, e, context));
       }
       if (type instanceof OptionalType) {
-         if (!value) return value; // empty optional
-         return this.autoFromHandle(type.type, value, context);
+         if (!handle) return handle; // empty optional
+         return this.autoFromHandle(type.type, handle, context);
       }
 
       throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
