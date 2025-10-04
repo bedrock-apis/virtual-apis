@@ -2,6 +2,7 @@ import { Vector2, Vector3 } from '@minecraft/server';
 import { va } from '../core-plugin';
 import { Dimension } from './dimension';
 
+// TODO Common methods for object with types like entities, dimensions, blocks and items
 class EntityType extends va.server.class('EntityType') {
    @va.getter('id') public id: string;
 
@@ -11,6 +12,7 @@ class EntityType extends va.server.class('EntityType') {
    }
 }
 
+// TODO Common methods for object with types like entities, dimensions, blocks and items
 export class EntityTypes extends va.server.class('EntityTypes') {
    public static types: EntityType[] = [];
 

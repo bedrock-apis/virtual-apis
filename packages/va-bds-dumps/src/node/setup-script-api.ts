@@ -13,7 +13,7 @@ export async function setupScriptAPI(providers: DumpProvider[]): Promise<void> {
    const editorFile = resolve(CACHE_BDS, './behavior_packs/editor/scripts/Main.js');
    await prepareManifest();
 
-   const providerEntries: string[] = [];
+   const providerEntries: string[] = ['./mc-api-run.js'];
    for (const provider of providers) {
       if (!(provider instanceof DumpProviderScriptApi)) continue;
       if (!existsSync(provider.scriptApiCodePath))

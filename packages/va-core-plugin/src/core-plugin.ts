@@ -3,7 +3,9 @@ import { InvocableSymbol, InvocationInfo, MapWithDefaults, SymbolCallback } from
 import { TypedDecoratorsFeature } from './decorators';
 
 export class CorePlugin extends Pluggable {
-   public static registerDefaultFeature(feature: typeof PluginFeature) {}
+   public static registerDefaultFeature(feature: typeof PluginFeature) {
+      this.registerFeature(new feature());
+   }
 
    public override readonly identifier = 'virtual_apis:core_plugin';
 

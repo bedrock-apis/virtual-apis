@@ -14,7 +14,7 @@
       "build": "rolldown -c rolldown.config.ts",
       "ci-check": "pnpm run build && pnpm run ci-tlt && pnpm run e2e && pnpm run examples",
       "ci-tlt": "pnpm run typecheck && pnpm run lint && pnpm run test",
-      "e2e": "pnpm run build && node --enable-source-maps --import @bedrock-apis/va-core-plugin --import @bedrock-apis/va-loader/node/no-config ./packages/internal-tool/dist/run-compare",
+      "e2e": "pnpm run build && node --enable-source-maps --import @bedrock-apis/va-core-plugin --import @bedrock-apis/va-loader/node/no-config ./packages/va-test/dist/va",
       "e2e:dev": "pnpm build && pnpm repo:dump && pnpm e2e",
       "example:custom-bds-software": "cd examples/custom-bds-software && pnpm run start",
       "example:custom-bds-software-ts": "cd examples/custom-bds-software-ts && pnpm run start",
@@ -28,6 +28,9 @@
       "test": "vitest --run",
       "test:coverage": "vitest --ui --coverage",
       "typecheck": "tsc --pretty --noEmit"
+   },
+   "dependencies": {
+      "@oxc-project/runtime": "^0.93.0"
    },
    "devDependencies": {
       "@bedrock-apis/va-bds-dumps": "workspace:^",
@@ -101,8 +104,6 @@
          "exports",
          "files"
       ]
-   },
-   "dependencies": {
-      "@oxc-project/runtime": "^0.93.0"
    }
 }
+

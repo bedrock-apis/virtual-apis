@@ -8,33 +8,19 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block (chained): 
-  0: ✅
-  1: ❌ Results mismatch: {} != {"id":"minecraft:stone"}
-  2: ✅
-  3: ✅
-  4: ✅
-  5: ✅
-  6: 0: ❓ Unexpected error: Error: BlockPermutation::getAllStates is not implemented
-    1: ❓ No result, expected {"type":{"id":"minecraft:stone"},"states":{"stone_type":"stone"}}
-    
-  
+Suite block (chained): ❓ Unexpected setup error: Error: Dimension::setBlockType is not implemented
 
 
 Suite dynamic properties (chained): 
-  0: ✅
-  1: 0: ✅
-    1: ✅
-    2: ✅
-    3: ✅
-    4: ✅
-    5: ✅
-    6: ✅
-    7: ❌ Error mismatch: 
-        
-        TypeError: Native variant type conversion failed. Function argument [1] expected type: number | number | boolean | string | Vector3 | undefined
-        TypeError: Native optional type conversion failed. Function argument [1] expected type: boolean | number | number | string | Vector3 | undefined
-        
+  0: ❓ Unexpected error: Error: World::getDynamicPropertyIds is not implemented
+  1: 0: ❓ Unexpected error: Error: World::setDynamicProperty is not implemented
+    1: ❓ No result, expected false
+    2: ❓ No result, expected ""
+    3: ❓ No result, expected "string"
+    4: ❓ No result, expected 1
+    5: ❓ No result, expected 0
+    6: ❓ No result, expected -1
+    7: ❓ No result, expected TypeError: Native variant type conversion failed.
     
   
 
@@ -42,36 +28,28 @@ Suite dynamic properties (chained):
 Suite entity (chained): 
   0: ✅
   1: ✅
-  2: ✅
-  3: ❌ Results mismatch: 
-      
-      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
-      []
-      
+  2: ❓ Unexpected error: Error: Entity::localizationKey getter is not implemented
+  3: ❓ Unexpected error: Error: Entity::getComponents is not implemented
   
 
 
 Suite disposal (chained): 
-  0: 0: ✅
-    1: ✅
-    2: ✅
+  0: 0: ❓ Unexpected error: Error: Entity::isValid getter is not implemented
+    1: ❓ No result, expected false
+    2: ❓ No result, expected InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
     
   
 
 
 Suite errors (chained): 
   0: ✅
-  1: ✅
+  1: ❌ Error mismatch: Error: ItemStack is not implemented != Error: Invalid item identifier 'Yes'.
   2: ✅
-  3: ❌ Error mismatch: 
-      
-      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3 Function argument [1] expected type: number
-      TypeError: Incorrect number of arguments to function. Expected 1-2, received 3
-      
+  3: ✅
   4: ✅
   5: ✅
-  6: ✅
-  7: ✅
+  6: ❓ Unexpected error: Error: ItemStack is not implemented
+  7: ❓ Unexpected error: Error: ItemStack is not implemented
   8: ✅
   9: ✅
   10: ✅
@@ -79,7 +57,7 @@ Suite errors (chained):
   12: ✅
   13: ✅
   14: ✅
-  15: ❓ Expected error (Error: Dimension 'haha wrong' is invalid.), got: {}
+  15: ❌ Error mismatch: Error: unknown dimension ha ha wrong != Error: Dimension 'ha ha wrong' is invalid.
   16: ✅
   17: ✅
   18: ❌ Error mismatch: 
@@ -89,37 +67,59 @@ Suite errors (chained):
       
   19: ✅
   20: ✅
-  21: ❌ Error mismatch: TypeError: Native type conversion failed. != Error: Failed to set member
+  21: ❌ Error mismatch: Error: Dimension::setBlockType is not implemented != Error: Failed to set member
   22: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
-      TypeError: Native type conversion failed.
+      Error: Dimension::setBlockType is not implemented
       
-  23: ✅
-  24: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
-  25: ✅
-  26: ✅
+  23: ❌ Error mismatch: 
+      
+      InvalidActorError: Failed to call function 'addTag' due to Entity being invalid (has the Entity been removed?).
+      Error: Entity::remove is not implemented
+      
+  24: ❌ Error mismatch: 
+      
+      InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).
+      Error: Entity::remove is not implemented
+      
+  25: ❌ Error mismatch: Error: Entity::remove is not implemented != TypeError: 'scoreboardIdentity' is read-only
+  26: ❌ Error mismatch: Error: Entity::remove is not implemented != TypeError: 'isValid' is read-only
+  27: ❌ Error mismatch: 
+      
+      LocationInUnloadedChunkError: Trying to access location (654654.0, 55.0, 6.0) which is not in a chunk currently loaded and ticking.
+      Error: Dimension::setBlockType is not implemented
+      
+  28: ❌ Error mismatch: 
+      
+      TypeError: Array contains unsupported type. Array element [0] expected type: string (failed parsing array to Interface property ['blockTypes'], failed parsing interface to Function argument [1]).
+      Error: ItemStack is not implemented
+      
+  29: ❌ Error mismatch: 
+      
+      TypeError: Object has an invalid native handle. Array element [0] expected type: string (failed parsing array to Interface property ['blockTypes'], failed parsing interface to Function argument [1]).
+      TypeError: Native optional type conversion failed. Function argument [1] expected type: BlockEventOptions | undefined
+      
+  30: ❌ Error mismatch: 
+      
+      TypeError: Native type conversion failed. Array element [0] expected type: string (failed parsing array to Interface property ['blockTypes'], failed parsing interface to Function argument [1]).
+      TypeError: Native optional type conversion failed. Function argument [1] expected type: BlockEventOptions | undefined
+      
+  31: ❌ Error mismatch: 
+      
+      TypeError: Object did not have a native handle. Array element [0] expected type: string (failed parsing array to Interface property ['blockTypes'], failed parsing interface to Function argument [1]).
+      TypeError: Native optional type conversion failed. Function argument [1] expected type: BlockEventOptions | undefined
+      
   
 
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ❌ Results mismatch: undefined != "minecraft:apple"
+  1: ❓ Unexpected error: Error: ItemTypes::get static is not implemented
   
 
 
-Suite item (chained): 
-  0: ✅
-  1: ✅
-  2: ✅
-  3: ✅
-  4: ✅
-  5: ✅
-  6: ❌ Results mismatch: [] != [{"typeId":"minecraft:food"},{"typeId":"minecraft:compostable"}]
-  7: 0: ✅
-    1: ✅
-    
-  
+Suite item (chained): ❓ Unexpected setup error: Error: ItemStack is not implemented
 
 
 Suite privileges (chained): 

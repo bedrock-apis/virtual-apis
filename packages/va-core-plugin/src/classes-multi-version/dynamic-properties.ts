@@ -1,16 +1,17 @@
-import { Plugin } from '@bedrock-apis/va-pluggable';
+import { Pluggable, PluginFeature } from '@bedrock-apis/va-pluggable';
 import { ServerModuleTypeMap, StorageThis } from '@bedrock-apis/va-pluggable/src/types';
 import type { Entity, ItemStack, Player, Vector3, World } from '@minecraft/server';
 
 type Storage = Map<string, string | number | boolean | Vector3 | undefined>;
-type This = StorageThis<Entity | ItemStack | Player | World, DynamicPropertiesPlugin, ServerModuleTypeMap, Storage>;
+type This = StorageThis<Entity | ItemStack | Player | World, ServerModuleTypeMap, Storage>;
 
-export class DynamicPropertiesPlugin extends Plugin {
+export class DynamicPropertiesPlugin extends PluginFeature {
    public implementDynamicProperties(
+      plugin: Pluggable,
       target: 'World' | 'Entity' | 'Player' | 'ItemStack',
       guard?: (native: This) => void,
    ) {
-      return this.server.implementWithStorage(target, () => new Map() as Storage, {
+      return plugin.server.implementWithStorage(target, () => new Map() as Storage, {
          getDynamicProperty(identifier) {
             guard?.(this);
             return this.storage.get(identifier);
@@ -45,11 +46,10 @@ export class DynamicPropertiesPlugin extends Plugin {
       });
    }
 
-   public world = this.implementDynamicProperties('World');
-   public entity = this.implementDynamicProperties('Entity');
-   public player = this.implementDynamicProperties('Player');
-   public item = this.implementDynamicProperties('ItemStack', ctx => {
-      if ((ctx.instance as ItemStack).maxAmount > 1) throw new Error('Dynamic props are not supported');
-   });
+   // public world = this.implementDynamicProperties('World');
+   // public entity = this.implementDynamicProperties('Entity');
+   // public player = this.implementDynamicProperties('Player');
+   // public item = this.implementDynamicProperties('ItemStack', ctx => {
+   //    if ((ctx.instance as ItemStack).maxAmount > 1) throw new Error('Dynamic props are not supported');
+   // });
 }
-DynamicPropertiesPlugin.register('dynamicProperties');

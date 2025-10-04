@@ -46,7 +46,6 @@ export class DumpProvider<T = object> {
    public async read(imagesFolder?: string): Promise<T> {
       const gzipped = await fs.readFile(this.getImagePath(imagesFolder));
       const binary = await util.promisify(zlib.gunzip)(gzipped);
-      console.log(gzipped.length, binary.length);
       this.data = this.marshaller.read(binary);
       return this.data;
    }

@@ -2,4 +2,5 @@ import { CorePlugin } from './core-plugin';
 
 export { CorePlugin };
 
-import './classes/world';
+import './classes/index';
+import './features/index';

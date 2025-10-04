@@ -25,8 +25,9 @@ export class World extends va.server.class('World') {
    protected dimensions = new MapWithDefaults<string, Dimension>();
 
    @va.method('getDimension') public getDimension(id: string) {
-      const type = DimensionTypes.types.find(e => e.typeId === id);
-      if (!type) throw new Error('unknown dimension ' + id);
+      // TODO Common methods for object with types like entities, dimensions, blocks and items
+      const type = DimensionTypes.types.find(e => e.typeId === id || e.typeId === 'minecraft:' + id);
+      if (!type) throw new Error(`Dimension ${id} is invalid.`);
       return va.asHandle(this.dimensions.getOrCreate(id, () => new Dimension(type)));
    }
 }

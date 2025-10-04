@@ -55,7 +55,7 @@ export abstract class InvocableSymbol<T> extends CompilableSymbol<T> {
    public setPrivileges(privileges: string[]): this {
       /*
       if (privileges.some(_ => _ !== 'read_only' && _ !== 'none' && _ !== 'early_execution')) {
-         console.warn('Unknown privileges for', this.name, privileges);
+         dwarn('Unknown privileges for', this.name, privileges);
       } else {
           as this['privileges'];
       }*/

@@ -1,4 +1,4 @@
-import { ThreadRunner } from './async-generator';
+import { ThreadRunner } from '@bedrock-apis/va-common/async-thread';
 import { TestEnvironment } from './environment/environment';
 import { TestSuite } from './suite';
 import { TestReport } from './types';
@@ -10,7 +10,7 @@ export async function runAndCompare(
 ) {
    const result = await TestSuite.runThread(Environment, runner);
 
-   if (!Array.isArray(minecraftResults)) {
+   if (!Array.isArray(minecraftResults) || !minecraftResults.length) {
       return 'Bds docs Environment setup failed, skipping...';
    }
 
