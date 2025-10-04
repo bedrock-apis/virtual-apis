@@ -1,8 +1,14 @@
 import { dwarn, VirtualPrivilege } from '@bedrock-apis/va-common';
-import { PluginFeatureWithConfig } from '@bedrock-apis/va-pluggable';
+import { ContextPluginLinkedStorage, PluginFeatureWithConfig } from '@bedrock-apis/va-pluggable';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
-import { ConstructableSymbol, MethodSymbol, ModuleSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
+import {
+   ConstructableSymbol,
+   Context,
+   MethodSymbol,
+   ModuleSymbol,
+   PropertyGetterSymbol,
+} from '@bedrock-apis/virtual-apis';
 import {
    PlayerLeaveBeforeEvent,
    SystemAfterEvents,
@@ -73,7 +79,7 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
          const p = plugin.context.currentPrivilege;
          try {
             const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
-            this.setStorageOf(plugin, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+            this.setStorageOf(plugin.context, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
 
             plugin.context.currentPrivilege = privilege;
             for (const listener of this.events.get(eventId)?.keys() ?? []) {
@@ -117,7 +123,7 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
          const p = plugin.context.currentPrivilege;
          try {
             const argsInstance = loaded.construct(eventClassName as 'PlayerLeaveBeforeEvent');
-            this.setStorageOf(plugin, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
+            this.setStorageOf(plugin.context, argsInstance, args as unknown as PlayerLeaveBeforeEvent);
 
             plugin.context.currentPrivilege = privilege;
             for (const [listener, filterData] of this.events.get(eventId)?.entries() ?? []) {
@@ -132,13 +138,15 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
       };
    }
 
+   protected eventArgDataStorage = new ContextPluginLinkedStorage<Record<string, unknown>>(() => ({}));
+
    public getStorageOf<
       T extends ServerModuleTypeMap[Extract<
          keyof ServerModuleTypeMap,
          `${string}${'After' | 'Before'}Event`
       >]['prototype'],
-   >(plugin: CorePlugin, instance: T): Partial<Mutable<T>> {
-      return plugin.getStorage(instance) as Partial<Mutable<T>>;
+   >(context: Context, instance: T): Partial<Mutable<T>> {
+      return this.eventArgDataStorage.get(instance, context) as Partial<Mutable<T>>;
    }
 
    public setStorageOf<
@@ -146,11 +154,9 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
          keyof ServerModuleTypeMap,
          `${string}${'After' | 'Before'}Event`
       >]['prototype'],
-   >(plugin: CorePlugin, instance: T, data: T): void {
-      const storage = plugin.getStorage(instance);
-      if (storage) {
-         Object.assign(storage, data);
-      } else plugin.bindStorageWithHandle(instance, data);
+   >(context: Context, instance: T, data: T): void {
+      const storage = this.eventArgDataStorage.get(instance, context);
+      Object.assign(storage, data);
    }
 
    protected implementedEventArguments = new Set<string>();
@@ -171,16 +177,12 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
                const setter = getter.setter;
 
                plugin.registerCallback(getter, ctx => {
-                  const storage = plugin.getStorage(ctx.thisObject ?? {});
-                  if (!storage) throw new Error('Event data has no storage');
-                  ctx.result = (storage as Record<string, unknown>)[name];
+                  ctx.result = this.eventArgDataStorage.get(ctx.thisObject!, ctx.context)[name];
                });
 
                if (setter) {
                   plugin.registerCallback(setter, ctx => {
-                     const storage = plugin.getStorage(ctx.thisObject ?? {});
-                     if (!storage) throw new Error('Event data has no storage');
-                     (storage as Record<string, unknown>)[name] = ctx.params[0];
+                     this.eventArgDataStorage.get(ctx.thisObject!, ctx.context)[name] = ctx.params[0];
                   });
                }
             }
@@ -212,7 +214,7 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
 
             const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignalGetter.name);
 
-            plugin.implement(
+            plugin.registerCallback(
                subscribe,
                ctx => {
                   if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
@@ -231,7 +233,7 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
                -1,
             );
 
-            plugin.implement(
+            plugin.registerCallback(
                unsubscribe,
                ctx => {
                   this.events.get(eventId)?.delete(ctx.params[0] as BaseListener);

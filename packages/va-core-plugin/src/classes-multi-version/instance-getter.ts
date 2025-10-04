@@ -1,31 +1,27 @@
-import { PluginFeature } from '@bedrock-apis/va-pluggable';
-import { ConstructableSymbol, InvocableSymbol, PropertyGetterSymbol } from '@bedrock-apis/virtual-apis';
+import { ContextPluginLinkedStorage, PluginFeature } from '@bedrock-apis/va-pluggable';
+import {
+   ConstructableSymbol,
+   InvocableSymbol,
+   MapWithDefaults,
+   PropertyGetterSymbol,
+} from '@bedrock-apis/virtual-apis';
 import { CorePlugin } from '../core-plugin';
-
-// TODO Fix. it uses global storage in the wrong way. Maybe creating local storage will be better
-// TODO Fix. it will not work with multi-context
 
 export class CoreInstanceGetterPlugin extends PluginFeature {
    public readonly ignoredInstanceClassIds = ['ItemStack', 'Player', 'Entity', 'Dimension', 'Block'];
 
-   protected setInstanceGetValue(
-      plugin: CorePlugin,
-      symbol: InvocableSymbol<unknown>,
-      instance: object | (() => object),
-   ) {
-      plugin.implement(symbol, ctx => {
+   protected storage = new ContextPluginLinkedStorage<{
+      properties: MapWithDefaults<string, unknown>;
+      parent?: WeakRef<object>;
+   }>(() => ({ properties: new MapWithDefaults() }));
+
+   protected setInstanceGetValue(plugin: CorePlugin, symbol: InvocableSymbol<unknown>, instance: () => object) {
+      plugin.registerCallback(symbol, ctx => {
          if (!ctx.thisObject) throw new Error('Implementation requires thisObject to work');
 
-         const storage = plugin.getOrCreateStorage<{
-            properties: Map<string, unknown>;
-            parent?: WeakRef<object>;
-         }>(ctx.thisObject, () => ({ properties: new Map() }));
-
-         const key = ctx.symbol.identifier;
-         let value = storage.properties.get(key);
-         if (!value) storage.properties.set(key, (value = typeof instance === 'function' ? instance() : instance));
-
-         ctx.result = value;
+         ctx.result = this.storage
+            .get(ctx.thisObject, ctx.context)
+            .properties.getOrCreate(ctx.symbol.identifier, instance);
       });
    }
 

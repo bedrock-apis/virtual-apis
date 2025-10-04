@@ -129,31 +129,3 @@ export class ContextUtils {
       };
    }
 }
-
-/*
-   public implement(moduleNameVersion: string, identifier: string, impl: SymbolCallback, priority = 0) {
-      const is = this.implementations
-         .getOrCreate(moduleNameVersion, () => new MapWithDefaults())
-         .getOrCreate(identifier, () => []);
-
-      is.push({ impl, priority });
-      is.sort((a, b) => b.priority - a.priority);
-   }*/
-
-/*
-   public getModuleSymbols(specifier: string) {
-      const moduleSymbols: ModuleSymbol[] = [];
-      for (const [name, versions] of this.modules.entries()) {
-         for (const originalSymbol of versions) {
-            if (name !== specifier && name !== specifier + '-bindings') continue;
-
-            // Prefer bindings over regular modules
-            const binding = this.modules.get(name + '-bindings')?.[0];
-            const symbol = binding ?? originalSymbol;
-
-            if (moduleSymbols.some(e => e === symbol)) continue;
-            moduleSymbols.push(symbol);
-         }
-      }
-      return moduleSymbols;
-   }*/

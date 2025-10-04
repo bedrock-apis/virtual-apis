@@ -1,16 +1,11 @@
 import { InvocationInfo } from '@bedrock-apis/virtual-apis';
 import type * as mc from '@minecraft/server';
-import { Pluggable } from './main';
 import { PluginModuleLoaded } from './module';
+import { Pluggable } from './pluggable';
 
 type ModuleTypeValue =
-   | {
-        new (...args: unknown[]): void;
-        prototype: object;
-     }
-   | {
-        prototype: object;
-     }
+   | { new (...args: unknown[]): void; prototype: object }
+   | { prototype: object }
    | Record<string, unknown>;
 
 export type ServerModuleTypeMap = {

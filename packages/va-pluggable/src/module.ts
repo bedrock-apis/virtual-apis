@@ -1,7 +1,7 @@
 import { compareVersions, dwarn, VaEventLoader } from '@bedrock-apis/va-common';
 import { ConstructableSymbol, ModuleSymbol } from '@bedrock-apis/virtual-apis';
 import { Impl, ImplStatic, ImplStorage } from './implementation';
-import { Pluggable } from './main';
+import { Pluggable } from './pluggable';
 import { ModuleTypeMap, PartialParts, StorageThis, ThisContext } from './types';
 
 type Version = `${number}.${number}.${number}`;

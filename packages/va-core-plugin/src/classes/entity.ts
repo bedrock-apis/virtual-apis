@@ -1,5 +1,6 @@
 import { Vector2, Vector3 } from '@minecraft/server';
 import { va } from '../core-plugin';
+import { Dimension } from './dimension';
 
 class EntityType extends va.server.class('EntityType') {
    @va.getter('id') public id: string;
@@ -18,8 +19,6 @@ export class EntityTypes extends va.server.class('EntityTypes') {
    }
 }
 
-export class Dimension extends va.server.class('Dimension') {}
-
 type EntityComponentGroup = Record<string, object>;
 
 interface EntityData {
@@ -31,6 +30,13 @@ interface EntityData {
 
 // TODO Move to CorePlugin static property
 const entityDataSource = new Map<string, EntityData>();
+
+entityDataSource.set('minecraft:cow', {
+   identifier: 'minecraft:cow',
+   properties: {},
+   components: {},
+   componentsGroups: new Map(),
+});
 
 export class Entity extends va.server.class('Entity') {
    public constructor(
@@ -60,6 +66,7 @@ export class Entity extends va.server.class('Entity') {
       this.rotation = r;
    }
 
+   @va.property('isSneaking') public isSneaking = false;
    @va.property('nameTag') public nameTag = '';
    @va.getter('dimension') public dimension: Dimension;
    @va.getter('location') public location: Vector3;

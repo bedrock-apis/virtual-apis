@@ -1,6 +1,6 @@
 import { MapWithDefaults } from '@bedrock-apis/va-common';
 import { ErrorFactory, PANIC_ERROR_MESSAGES, ReportAsIs } from '../errorable';
-import { ConstructableSymbol, InvocableSymbol, ModuleSymbol, ObjectValueSymbol } from '../symbols';
+import { ConstructableSymbol, InvocableSymbol, ModuleSymbol } from '../symbols';
 import type { Context } from './context';
 import { InvocationInfo } from './invocation-info';
 export type SymbolCallback = (ctx: InvocationInfo) => void;
@@ -26,37 +26,32 @@ export abstract class ContextPlugin {
    public onAfterReady(): void {}
    public onRegistration(): void {}
    public onDispose(): void {}
-   public bindStorageWithObject(object: ObjectValueSymbol, storage: object): void {
-      this.bindStorageWithHandle(object.getRuntimeValue(this.context), storage);
-   }
+
    public bindStorageWithHandle(handle: object, storage: object): void {
       this.handleToStorage.set(handle, storage);
       this.storageToHandle.set(storage, handle);
    }
    public getCreateHandleFor(storage: object, fallback: ConstructableSymbol): object {
-      let maybeHandle = this.storageToHandle.get(storage);
-      if (!maybeHandle) {
-         maybeHandle = fallback.createRuntimeInstanceInternal(this.context);
-         this.bindStorageWithHandle(maybeHandle, storage);
+      let handle = this.storageToHandle.get(storage);
+      if (!handle) {
+         handle = fallback.createRuntimeInstanceInternal(this.context);
+         this.bindStorageWithHandle(handle, storage);
       }
-      return maybeHandle;
+      return handle;
    }
    public getStorage(handle: object): object | undefined {
       return this.handleToStorage.get(handle);
    }
-   public getOrCreateStorage<T extends object>(handle: object, create: () => T): T {
-      const storage = this.getStorage(handle);
-      if (storage) return storage as T;
-      const created = create();
-      this.bindStorageWithHandle(handle, created);
-      return created;
-   }
 
    public readonly implementations = new MapWithDefaults<InvocableSymbol<unknown>, SymbolCallback[]>();
 
+   protected getImplementations(invocation: InvocationInfo) {
+      return this.implementations.get(invocation.symbol);
+   }
+
    // Anyone can invoke the callbacks but in most cases its from user addon context
    public invoke(invocation: InvocationInfo) {
-      const callbacks = this.implementations.get(invocation.symbol);
+      const callbacks = this.getImplementations(invocation);
 
       if (!callbacks?.length) {
          invocation.diagnostics.errors.report(

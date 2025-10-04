@@ -1,4 +1,6 @@
-import { CorePlugin, va } from '../core-plugin';
+import { MapWithDefaults } from '@bedrock-apis/va-common';
+import { va } from '../core-plugin';
+import { Dimension, DimensionTypes } from './dimension';
 
 export class World extends va.server.class('World') {
    @va.method('stopMusic')
@@ -19,7 +21,15 @@ export class World extends va.server.class('World') {
    @va.method('getDay') public getDay() {
       return 11512;
    }
+
+   protected dimensions = new MapWithDefaults<string, Dimension>();
+
+   @va.method('getDimension') public getDimension(id: string) {
+      const type = DimensionTypes.types.find(e => e.typeId === id);
+      if (!type) throw new Error('unknown dimension ' + id);
+      return va.asHandle(this.dimensions.getOrCreate(id, () => new Dimension(type)));
+   }
 }
 
 export const world = new World();
-CorePlugin.registryModuleObjectVariable('@minecraft/server-bindings::world', world);
+va.server.constant('world', world);

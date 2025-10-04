@@ -5,7 +5,7 @@ import { EventsPlugin } from './events';
 
 export class EarlyExecutionPlugin extends PluginFeature {
    public override onReady(plugin: CorePlugin): void {
-      plugin.server_v2_0_0.onLoad.subscribe(mod => {
+      plugin.server_v2_0.onLoad.subscribe(mod => {
          plugin.context.currentPrivilege = VirtualPrivilege.EarlyExecution;
          const worldLoad = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'worldAfter', 'worldLoad');
          const startup = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'systemBefore', 'startup');
@@ -23,16 +23,16 @@ export class EarlyExecutionPlugin extends PluginFeature {
          }, 1000);
       });
 
-      const blockComponentRegistry = plugin.server_v2_0_0.implementWithStorage('BlockComponentRegistry', () => ({}), {
+      const blockComponentRegistry = plugin.server_v2_0.implementWithStorage('BlockComponentRegistry', () => ({}), {
          registerCustomComponent(name, customComponent) {},
       });
 
-      const customCommandRegistry = plugin.server_v2_0_0.implementWithStorage('CustomCommandRegistry', () => ({}), {
+      const customCommandRegistry = plugin.server_v2_0.implementWithStorage('CustomCommandRegistry', () => ({}), {
          registerEnum(name, values) {},
          registerCommand(customCommand, callback) {},
       });
 
-      const itemComponentRegistry = plugin.server_v2_0_0.implementWithStorage('ItemComponentRegistry', () => ({}), {
+      const itemComponentRegistry = plugin.server_v2_0.implementWithStorage('ItemComponentRegistry', () => ({}), {
          registerCustomComponent(name, itemCustomComponent) {},
       });
    }

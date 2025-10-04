@@ -1,4 +1,5 @@
 import { ConstructableSymbol, InvocableSymbol, InvocationInfo } from '@bedrock-apis/virtual-apis';
+import { ContextPluginLinkedStorage } from './linked-storage';
 import { PluginModule, PluginModuleLoaded } from './module';
 import { ModuleTypeMap, StorageThis, ThisContext } from './types';
 
@@ -69,6 +70,8 @@ export class Impl {
 export class ImplStatic extends Impl {}
 
 export class ImplStorage<T extends object, Native extends object> extends Impl {
+   public storage: ContextPluginLinkedStorage<T>;
+
    public constructor(
       module: PluginModule,
       className: string,
@@ -76,6 +79,7 @@ export class ImplStorage<T extends object, Native extends object> extends Impl {
       protected createStorage: (n: object, m: PluginModuleLoaded<ModuleTypeMap>) => T,
    ) {
       super(module, className, implementation);
+      this.storage = new ContextPluginLinkedStorage<T>(instance => createStorage(instance, this.moduleLoaded!));
       this.module.onLoad.subscribe(l => this.onLoad(l));
    }
 
@@ -85,17 +89,11 @@ export class ImplStorage<T extends object, Native extends object> extends Impl {
 
    protected moduleLoaded?: PluginModuleLoaded;
 
-   protected override getThisValue(
-      native: object,
-      invocation: InvocationInfo,
-      loaded: PluginModuleLoaded<ModuleTypeMap>,
-   ) {
+   protected override getThisValue(native: object, ctx: InvocationInfo, loaded: PluginModuleLoaded<ModuleTypeMap>) {
       if (!this.module.plugin.context.isNativeHandleInternal(native)) throw new Error('Not native');
-      const t = new StorageThis(invocation, native, this.implementation, loaded, this.module.plugin);
+      const t = new StorageThis(ctx, native, this.implementation, loaded, this.module.plugin);
 
-      (t as Mutable<typeof t>).storage = this.module.plugin.getOrCreateStorage(native, () =>
-         this.createStorage(native, loaded),
-      );
+      (t as Mutable<typeof t>).storage = this.storage.get(native, ctx.context);
 
       return t;
    }

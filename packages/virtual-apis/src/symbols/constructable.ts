@@ -90,7 +90,6 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
       );
 
       // Assign all the properties
-      // Use .values() as its same for Sets and Maps for future changes
       for (const bindable of this.staticFields.values()) bindable.compileAssignment(context, constructor);
       for (const bindable of this.prototypeFields.values()) bindable.compileAssignment(context, constructor.prototype);
 
