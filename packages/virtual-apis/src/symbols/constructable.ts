@@ -28,7 +28,7 @@ export class ConstructableSymbol extends InvocableSymbol<new (...params: unknown
    public override kindShort: NativeKindShort = 'constructor';
    public override actionKind: NativeKind = 'constructor for';
    public readonly isConstructable: boolean = false;
-   public createHandleInternal(context: Context): object {
+   protected createHandleInternal(context: Context): object {
       const handle = this.parent?.createHandleInternal(context) ?? context.createHandleInternal();
       this.handles.add(handle);
       return handle;

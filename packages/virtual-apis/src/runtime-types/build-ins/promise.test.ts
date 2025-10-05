@@ -1,15 +1,16 @@
 import { expect, suite, test } from 'vitest';
 import { testType } from '../../tests.helper';
-import { promiseType } from './promise';
+import { PromiseType } from './promise';
+import { voidType } from './void';
 
 suite('PromiseType', () => {
    test('Promise', () => {
-      const type = promiseType;
+      const type = new PromiseType(voidType);
       expect(() => testType(type, new Promise(() => {}))).not.toThrow();
    });
 
    test('Not A Promise', () => {
-      const type = promiseType;
+      const type = new PromiseType(voidType);
       expect(() => testType(type, 'string')).toThrowErrorMatchingInlineSnapshot(
          `[TypeError: Native type conversion failed.]`,
       );

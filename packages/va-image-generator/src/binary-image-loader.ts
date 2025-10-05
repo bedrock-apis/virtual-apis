@@ -18,6 +18,7 @@ import {
    NumberType,
    ObjectValueSymbol,
    ParamsValidator,
+   PromiseType,
    PropertyGetterSymbol,
    PropertySetterSymbol,
    RuntimeType,
@@ -29,11 +30,11 @@ import {
    generatorObjectType,
    MapType,
    OptionalType,
-   promiseType,
    VariantType,
    voidType,
 } from '@bedrock-apis/virtual-apis';
 
+import { d } from '@bedrock-apis/va-common/node';
 import {
    BinaryDetailsStruct,
    BinarySymbolStruct,
@@ -48,7 +49,6 @@ import {
    SymbolBitFlags,
    TypeBitFlagsU16,
 } from './types';
-import { d } from '@bedrock-apis/va-common/node';
 
 interface PreparedModule {
    metadata: Required<ModuleMetadata>;
@@ -481,7 +481,8 @@ export class BinaryImageLoader {
          if (allOf(flags, TypeBitFlagsU16.Variant))
             return new VariantType(extendedRefs?.map(e => this.resolveType(e, currentExports)));
 
-         if (allOf(flags, TypeBitFlagsU16.Promise)) return promiseType;
+         if (allOf(flags, TypeBitFlagsU16.Promise))
+            return new PromiseType(this.resolveType(extendedRef!, currentExports));
 
          if (allOf(flags, TypeBitFlagsU16.Array)) return new ArrayType(this.resolveType(extendedRef!, currentExports));
 

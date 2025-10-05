@@ -7,8 +7,10 @@ import {
    InvocableSymbol,
    ObjectValueSymbol,
    OptionalType,
+   PromiseType,
    PropertyGetterSymbol,
    RuntimeType,
+   VariantType,
 } from '@bedrock-apis/virtual-apis';
 import util from 'node:util';
 import { PluginFeature } from './feature';
@@ -52,11 +54,10 @@ export class VirtualFeatureDecorators {
                   plugin.registerCallback(
                      symbol,
                      ctx =>
-                        (ctx.result = this.autoToHandle(
+                        (ctx.result = this.storageToHandle(
                            symbol.returnType,
                            fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params),
                            ctx.context,
-                           ctx.thisObject as object,
                         )),
                   );
                } else {
@@ -84,11 +85,10 @@ export class VirtualFeatureDecorators {
                if (this.isComplexType(symbol.returnType)) {
                   plugin.registerCallback(symbol, ctx => {
                      const self = plugin.getStorage(ctx.thisObject as object);
-                     ctx.result = this.autoToHandle(
+                     ctx.result = this.storageToHandle(
                         ctx.symbol.returnType,
                         Reflect.get(self as object, propertyKey, self),
                         ctx.context,
-                        ctx.thisObject as object,
                      );
                   });
                } else {
@@ -105,7 +105,7 @@ export class VirtualFeatureDecorators {
                         return Reflect.set(
                            self as object,
                            propertyKey,
-                           this.autoFromHandle(symbol.returnType, ctx.params[0], ctx.context),
+                           this.handleToStorage(symbol.returnType, ctx.params[0], ctx.context),
                            self,
                         );
                      });
@@ -146,55 +146,61 @@ export class VirtualFeatureDecorators {
       });
    }
 
-   // TODO(performance) Make it compileComplexTypeTransformer, basically the same but it will return from and to functions instead of boolean
    protected isComplexType(type: RuntimeType): boolean {
       if (type instanceof ConstructableSymbol) return true;
-      if (type instanceof ArrayType) return this.isComplexType(type.valueType);
       if (type instanceof OptionalType) return this.isComplexType(type.type);
+      if (type instanceof ArrayType) return this.isComplexType(type.valueType);
+      if (type instanceof VariantType) return type.variants.some(e => this.isComplexType(e));
+      if (type instanceof PromiseType) return this.isComplexType(type.valueType);
 
-      // no other types needed
-      return false;
+      return false; // Simple type
    }
 
-   protected autoToHandle(type: RuntimeType, storage: unknown, context: Context, thisObject: object): unknown {
-      if (type instanceof ConstructableSymbol) return this.toHandle(storage, context, type);
-      if (type instanceof ArrayType) {
-         return (storage as unknown[]).map(e => this.autoToHandle(type.valueType, e, context, thisObject));
-      }
-      if (type instanceof OptionalType) {
-         if (!storage) return storage; // empty optional
-         return this.autoToHandle(type.type, storage, context, thisObject);
-      }
-
-      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
-   }
-
-   protected autoFromHandle(type: RuntimeType, handle: unknown, context: Context): unknown | undefined {
-      if (type instanceof ConstructableSymbol) return this.fromHandle(handle, context);
-      if (type instanceof ArrayType) {
-         return (handle as unknown[]).map(e => this.autoFromHandle(type.valueType, e, context));
-      }
-      if (type instanceof OptionalType) {
-         if (!handle) return handle; // empty optional
-         return this.autoFromHandle(type.type, handle, context);
-      }
-
-      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
-   }
-
-   protected fromHandle(value: unknown, context: Context) {
-      if (typeof value !== 'object' || !value) return value;
-
-      return context.plugin.getStorage(value);
-   }
-
-   protected toHandle(storage: unknown, context: Context, symbol: InvocableSymbol<unknown>) {
+   protected storageToHandle(type: RuntimeType, storage: unknown, context: Context): unknown {
       if (typeof storage !== 'object' || !storage) return storage;
 
-      const returnType = symbol.returnType;
-      if (!(returnType instanceof ConstructableSymbol)) return storage;
+      if (type instanceof ConstructableSymbol) return context.plugin.getCreateHandleFor(storage, type);
+      if (type instanceof OptionalType) return this.storageToHandle(type.type, storage, context);
+      if (type instanceof ArrayType) {
+         return (storage as unknown[]).map(e => this.storageToHandle(type.valueType, e, context));
+      }
+      if (type instanceof VariantType) {
+         // There is no return types that are variants
+         throw new Error(`Converting from Variant<${type.name}> to handle is not supported right now`);
+      }
+      if (type instanceof PromiseType) {
+         return new Promise((resolve, reject) => {
+            const target = storage as Promise<unknown>;
+            target.then(e => resolve(this.storageToHandle(type.valueType, e, context)));
+            target.catch(reject);
+         });
+      }
 
-      return context.plugin.getCreateHandleFor(storage, returnType);
+      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
+   }
+
+   protected handleToStorage(type: RuntimeType, handle: unknown, context: Context): unknown | undefined {
+      if (typeof handle !== 'object' || !handle) return handle;
+
+      if (type instanceof ConstructableSymbol) return context.plugin.getStorage(handle);
+      if (type instanceof OptionalType) return this.handleToStorage(type.type, handle, context);
+      if (type instanceof ArrayType) {
+         return (handle as unknown[]).map(e => this.handleToStorage(type.valueType, e, context));
+      }
+      if (type instanceof VariantType) {
+         for (const variant of type.variants) {
+            const converted = this.handleToStorage(variant, handle, context);
+            if (converted !== handle) return converted;
+         }
+         return handle;
+      }
+
+      if (type instanceof PromiseType) {
+         // Is it really the case?
+         throw new Error(`Converting from Promise<${type.valueType.name}> to storage is not supported right now`);
+      }
+
+      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
    }
 
    protected assignMetadata(
