@@ -25,6 +25,11 @@ export interface DecoratedMetadata {
 
 const staticMetaSymbol = Symbol('virtualApis::staticMetadata');
 const prototypeMetaSymbol = Symbol('virtualApis::prototypeMetadata');
+const storageMapper = Symbol('virtualApis::storageMapper');
+const storageUnmap = Symbol('virtualApis::storageUnmap');
+
+type StorageMapper = (type: RuntimeType, storage: object, context: Context) => object;
+type StorageUnmap = (type: RuntimeType, handle: object, context: Context) => object;
 
 export class VirtualFeatureDecorators {
    private getMeta(symbol: symbol, target: object): DecoratedMetadata[] {
@@ -146,6 +151,23 @@ export class VirtualFeatureDecorators {
       });
    }
 
+   protected registerCallsRedirect(target: new (...args: unknown[]) => object, fromKey: string) {
+      const metaArray = this.getStaticMeta(target);
+      const meta = metaArray.at(-1)!; // Only latest one
+      this.onClassLoad(meta, (s, plugin) => {
+         for (const [name, symbol] of s.prototypeFields) {
+            if (!(symbol instanceof InvocableSymbol)) continue;
+
+            plugin.registerCallback(symbol, ctx => {
+               const self = plugin.getStorage(ctx.thisObject as object);
+               const target = (self as Record<string, object>)[fromKey];
+
+               // TODO Maybe there is a simpler way then redefining all of the get/set/method handlers with both complex/simple type
+            });
+         }
+      });
+   }
+
    protected isComplexType(type: RuntimeType): boolean {
       if (type instanceof ConstructableSymbol) return true;
       if (type instanceof OptionalType) return this.isComplexType(type.type);
@@ -156,10 +178,17 @@ export class VirtualFeatureDecorators {
       return false; // Simple type
    }
 
+   // E.g. for mapping SerenityEntity to ScriptEntity
+   protected addStorageMapper(classPrototype: object, storageToHandle: StorageMapper, handleToStorage: StorageUnmap) {
+      (classPrototype as Record<symbol, StorageMapper>)[storageMapper] = storageToHandle;
+      (classPrototype as Record<symbol, StorageUnmap>)[storageUnmap] = handleToStorage;
+   }
+
    protected storageToHandle(type: RuntimeType, storage: unknown, context: Context): unknown {
       if (typeof storage !== 'object' || !storage) return storage;
 
-      if (type instanceof ConstructableSymbol) return context.plugin.getCreateHandleFor(storage, type);
+      if (storageMapper in storage) storage = (storage[storageMapper] as StorageMapper)(type, storage, context);
+      if (type instanceof ConstructableSymbol) return context.plugin.getCreateHandleFor(storage as object, type);
       if (type instanceof OptionalType) return this.storageToHandle(type.type, storage, context);
       if (type instanceof ArrayType) {
          return (storage as unknown[]).map(e => this.storageToHandle(type.valueType, e, context));
@@ -182,7 +211,8 @@ export class VirtualFeatureDecorators {
    protected handleToStorage(type: RuntimeType, handle: unknown, context: Context): unknown | undefined {
       if (typeof handle !== 'object' || !handle) return handle;
 
-      if (type instanceof ConstructableSymbol) return context.plugin.getStorage(handle);
+      if (storageUnmap in handle) handle = (handle[storageUnmap] as StorageUnmap)(type, handle, context);
+      if (type instanceof ConstructableSymbol) return context.plugin.getStorage(handle as object);
       if (type instanceof OptionalType) return this.handleToStorage(type.type, handle, context);
       if (type instanceof ArrayType) {
          return (handle as unknown[]).map(e => this.handleToStorage(type.valueType, e, context));
