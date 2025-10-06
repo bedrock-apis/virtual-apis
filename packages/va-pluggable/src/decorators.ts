@@ -5,6 +5,7 @@ import {
    ConstructableSymbol,
    Context,
    InvocableSymbol,
+   InvocationInfo,
    ObjectValueSymbol,
    OptionalType,
    PromiseType,
@@ -31,6 +32,8 @@ const storageUnmap = Symbol('virtualApis::storageUnmap');
 type StorageMapper = (type: RuntimeType, storage: object, context: Context) => object;
 type StorageUnmap = (type: RuntimeType, handle: object, context: Context) => object;
 
+type GetStorage = (ctx: InvocationInfo) => object | undefined;
+
 export class VirtualFeatureDecorators {
    private getMeta(symbol: symbol, target: object): DecoratedMetadata[] {
       const meta = symbol in target ? (target as Record<symbol, DecoratedMetadata[]>)[symbol] : undefined;
@@ -48,34 +51,40 @@ export class VirtualFeatureDecorators {
       getMeta: (target: object) => DecoratedMetadata[],
       symbolType: new () => InvocableSymbol<unknown>,
    ): MethodDecorator {
-      return (target, _, descriptor) => {
+      return (target, propertyKey) => {
          const metaArray = getMeta(target as object);
 
          for (const meta of metaArray) {
             this.registerImplementation(meta, nativeId, symbolType, (symbol, plugin) => {
-               const fn = descriptor.value as (...args: unknown[]) => void;
+               const getStorage = (ctx: InvocationInfo) => plugin.getStorage(ctx.thisObject as object);
 
-               if (this.isComplexType(symbol.returnType)) {
-                  plugin.registerCallback(
-                     symbol,
-                     ctx =>
-                        (ctx.result = this.storageToHandle(
-                           symbol.returnType,
-                           fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params),
-                           ctx.context,
-                        )),
-                  );
-               } else {
-                  plugin.registerCallback(
-                     symbol,
-                     ctx => (ctx.result = fn.call(plugin.getStorage(ctx.thisObject as object), ...ctx.params)),
-                  );
-               }
+               this.registerFnListener(symbol, plugin, propertyKey, getStorage);
             });
          }
-
-         return descriptor;
       };
+   }
+
+   private registerFnListener(
+      symbol: InvocableSymbol<unknown>,
+      plugin: Pluggable,
+      propertyKey: string | symbol,
+      getStorage: GetStorage,
+   ) {
+      if (this.isComplexType(symbol.returnType)) {
+         plugin.registerCallback(symbol, ctx => {
+            const self = getStorage(ctx) as Record<string | symbol, (...args: unknown[]) => void>;
+            ctx.result = this.storageToHandle(
+               symbol.returnType,
+               Reflect.apply(self[propertyKey]!, self, ctx.params),
+               ctx.context,
+            );
+         });
+      } else {
+         plugin.registerCallback(symbol, ctx => {
+            const self = getStorage(ctx) as Record<string | symbol, (...args: unknown[]) => void>;
+            ctx.result = Reflect.apply(self[propertyKey]!, self, ctx.params);
+         });
+      }
    }
 
    protected createPropertyDecorator(
@@ -87,43 +96,54 @@ export class VirtualFeatureDecorators {
 
          for (const meta of metaArray) {
             this.registerImplementation(meta, nativeId, PropertyGetterSymbol, (symbol, plugin) => {
-               if (this.isComplexType(symbol.returnType)) {
-                  plugin.registerCallback(symbol, ctx => {
-                     const self = plugin.getStorage(ctx.thisObject as object);
-                     ctx.result = this.storageToHandle(
-                        ctx.symbol.returnType,
-                        Reflect.get(self as object, propertyKey, self),
-                        ctx.context,
-                     );
-                  });
-               } else {
-                  plugin.registerCallback(symbol, ctx => {
-                     const self = plugin.getStorage(ctx.thisObject as object);
-                     ctx.result = Reflect.get(self as object, propertyKey, self);
-                  });
-               }
+               const getStorage = (ctx: InvocationInfo) => plugin.getStorage(ctx.thisObject as object);
 
-               if (symbol.setter) {
-                  if (this.isComplexType(symbol.returnType)) {
-                     plugin.registerCallback(symbol.setter, ctx => {
-                        const self = plugin.getStorage(ctx.thisObject as object);
-                        return Reflect.set(
-                           self as object,
-                           propertyKey,
-                           this.handleToStorage(symbol.returnType, ctx.params[0], ctx.context),
-                           self,
-                        );
-                     });
-                  } else {
-                     plugin.registerCallback(symbol.setter, ctx => {
-                        const self = plugin.getStorage(ctx.thisObject as object);
-                        return Reflect.set(self as object, propertyKey, ctx.params[0], self);
-                     });
-                  }
-               }
+               this.registerPropertyListener(symbol, plugin, propertyKey, getStorage);
             });
          }
       };
+   }
+
+   private registerPropertyListener(
+      symbol: PropertyGetterSymbol,
+      plugin: Pluggable,
+      propertyKey: string | symbol,
+      getStorage: GetStorage,
+   ) {
+      if (this.isComplexType(symbol.returnType)) {
+         plugin.registerCallback(symbol, ctx => {
+            const self = getStorage(ctx);
+            ctx.result = this.storageToHandle(
+               ctx.symbol.returnType,
+               Reflect.get(self as object, propertyKey, self),
+               ctx.context,
+            );
+         });
+      } else {
+         plugin.registerCallback(symbol, ctx => {
+            const self = getStorage(ctx);
+            ctx.result = Reflect.get(self as object, propertyKey, self);
+         });
+      }
+
+      if (symbol.setter) {
+         if (this.isComplexType(symbol.returnType)) {
+            plugin.registerCallback(symbol.setter, ctx => {
+               const self = getStorage(ctx);
+               return Reflect.set(
+                  self as object,
+                  propertyKey,
+                  this.handleToStorage(symbol.returnType, ctx.params[0], ctx.context),
+                  self,
+               );
+            });
+         } else {
+            plugin.registerCallback(symbol.setter, ctx => {
+               const self = getStorage(ctx);
+               return Reflect.set(self as object, propertyKey, ctx.params[0], self);
+            });
+         }
+      }
    }
 
    protected onClassLoad(meta: DecoratedMetadata, callback: (s: ConstructableSymbol, plugin: Pluggable) => void) {
@@ -157,13 +177,14 @@ export class VirtualFeatureDecorators {
       this.onClassLoad(meta, (s, plugin) => {
          for (const [name, symbol] of s.prototypeFields) {
             if (!(symbol instanceof InvocableSymbol)) continue;
+            const getStorage: GetStorage = ctx =>
+               (plugin.getStorage(ctx.thisObject as object) as Record<string, object>)[fromKey];
 
-            plugin.registerCallback(symbol, ctx => {
-               const self = plugin.getStorage(ctx.thisObject as object);
-               const target = (self as Record<string, object>)[fromKey];
-
-               // TODO Maybe there is a simpler way then redefining all of the get/set/method handlers with both complex/simple type
-            });
+            if (symbol instanceof PropertyGetterSymbol) {
+               this.registerPropertyListener(symbol, plugin, name, getStorage);
+            } else {
+               this.registerFnListener(symbol, plugin, name, getStorage);
+            }
          }
       });
    }
