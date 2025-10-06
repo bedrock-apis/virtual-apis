@@ -1,12 +1,12 @@
 import type { Vector3 } from '@minecraft/server';
-import { va } from '../core-plugin';
+import { va } from '../decorators';
 
-type DynamicPropertyValue = string | number | boolean | Vector3 | undefined;
+type DynamicPropertyValue = string | number | boolean | Vector3;
 
-export class DynamicProperties extends va.server.utilityClass(['World', 'Entity', 'ItemStack']) {
+export class DynamicProperties extends va.server.base(['World', 'Entity', 'ItemStack']) {
    private dynamicPropertiesStorage = new Map<string, DynamicPropertyValue>();
 
-   protected dynamicPropertiesGuard?: () => void;
+   protected dynamicPropertiesGuard?(): void;
 
    @va.method('getDynamicProperty')
    public getDynamicProperty(identifier: string) {

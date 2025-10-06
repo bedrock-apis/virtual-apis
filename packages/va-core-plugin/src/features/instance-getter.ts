@@ -45,4 +45,4 @@ export class CoreInstanceGetterPlugin extends PluginFeature {
       });
    }
 }
-CorePlugin.registerDefaultFeature(CoreInstanceGetterPlugin);
+CorePlugin.registerFeature(CoreInstanceGetterPlugin);

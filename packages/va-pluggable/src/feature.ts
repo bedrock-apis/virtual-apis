@@ -9,6 +9,9 @@ export class PluginFeature {
    }
 
    public onReadyEvent = new VaEventEmitter<[Pluggable]>();
-}
 
-export class PluginFeatureWithConfig<T extends object> extends PluginFeature {}
+   public static setup<T extends { config: object }>(this: T, config: Partial<T['config']>): T {
+      Object.assign(this.config, config);
+      return this;
+   }
+}

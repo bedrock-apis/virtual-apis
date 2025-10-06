@@ -1,4 +1,4 @@
-import { va } from '../core-plugin';
+import { va } from '../decorators';
 
 class System extends va.server.class('System') {
    @va.method('run')

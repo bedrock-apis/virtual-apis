@@ -8,7 +8,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block (chained): ❓ Unexpected setup error: Error: Dimension::setBlockType is not implemented
+Suite block (chained): ❓ Unexpected setup error: Error: Unknown block type undefined
 
 
 Suite dynamic properties (chained): 
@@ -33,7 +33,11 @@ Suite entity (chained):
   0: ✅
   1: ✅
   2: ✅
-  3: ❓ Unexpected error: ValidityPluginError: Entity::getComponents is not implemented
+  3: ❌ Results mismatch: 
+      
+      [{"typeId":"minecraft:movement"},{"typeId":"minecraft:movement.jump"},{"typeId":"minecraft:lava_movement"},{"typeId":"minecraft:breathable"},{"typeId":"minecraft:health"},{"typeId":"minecraft:navigation.walk"},{"typeId":"minecraft:leashable"},{"typeId":"minecraft:type_family"},{"typeId":"minecraft:movement.basic"},{"typeId":"minecraft:is_hidden_when_invisible"},{"typeId":"minecraft:rideable"},{"typeId":"minecraft:underwater_movement"},{"typeId":"minecraft:can_climb"}]
+      []
+      
   
 
 
@@ -71,11 +75,11 @@ Suite errors (chained):
       
   19: ✅
   20: ✅
-  21: ❌ Error mismatch: Error: Dimension::setBlockType is not implemented != Error: Failed to set member
+  21: ❌ Error mismatch: Error: Unknown block type undefined != Error: Failed to set member
   22: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
-      Error: Dimension::setBlockType is not implemented
+      Error: Unknown block type undefined
       
   23: ✅
   24: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
@@ -84,7 +88,7 @@ Suite errors (chained):
   27: ❌ Error mismatch: 
       
       LocationInUnloadedChunkError: Trying to access location (654654.0, 55.0, 6.0) which is not in a chunk currently loaded and ticking.
-      Error: Dimension::setBlockType is not implemented
+      Error: Unknown block type undefined
       
   28: ❌ Error mismatch: 
       
@@ -111,7 +115,7 @@ Suite errors (chained):
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'types')
+  1: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'get')
   
 
 
@@ -120,9 +124,9 @@ Suite item (chained):
   1: ✅
   2: ✅
   3: ✅
-  4: ❓ Unexpected error: Error: ItemStack::clone is not implemented
-  5: ❓ Unexpected error: Error: ItemStack::getCanDestroy is not implemented
-  6: ❓ Unexpected error: Error: ItemStack::getComponents is not implemented
+  4: ✅
+  5: ✅
+  6: ❌ Results mismatch: [] != [{"typeId":"minecraft:food"},{"typeId":"minecraft:compostable"}]
   7: 0: ✅
     1: ✅
     

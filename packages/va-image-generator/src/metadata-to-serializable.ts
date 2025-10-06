@@ -12,6 +12,8 @@ import {
    MetadataType,
    Privilege,
 } from '@bedrock-apis/va-types';
+// import { writeFile } from 'node:fs/promises';
+// import { normalizeModuleName, printer } from './generate-d-ts';
 import { IMetadataProvider, StrippedMetadataModuleDefinition } from './metadata-provider';
 import {
    BinaryDetailsStruct,
@@ -49,6 +51,11 @@ export class MetadataToSerializableTransformer {
       const stringRef = this.stringRef;
       const modules: SerializableModule[] = [];
 
+      // let allDts = `
+      // /* eslint-disable */
+      // /* prettier-ignore */
+      // `;
+
       for await (const metadata of metadataProvider.getMetadataModules()) {
          metadata.enums ??= [];
 
@@ -75,7 +82,11 @@ export class MetadataToSerializableTransformer {
                ].map(c => stringRef(c.name)),
             },
          });
+
+         // const code = '' + [...printer(metadata)].join('');
+         // allDts += `\ndeclare module '${normalizeModuleName(metadata.name, metadata.version)}' {\n` + code + '\n}';
       }
+      // await writeFile('mods.d.ts', allDts);
 
       const metadata: ImageHeader = {
          metadata: { engine: stringRef('1.21.80.0') },

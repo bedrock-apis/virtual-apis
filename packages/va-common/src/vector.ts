@@ -1,4 +1,17 @@
-import type { Vector3, VectorXZ } from '@minecraft/server';
+export interface Vector2 {
+   x: number;
+   y: number;
+}
+export interface Vector3 {
+   x: number;
+   y: number;
+   z: number;
+}
+
+export interface VectorXZ {
+   x: number;
+   z: number;
+}
 
 export const VecSymbol = Symbol('vector');
 
@@ -14,8 +27,8 @@ export class VecXZ {
    }
 
    /**
-    * Returns if 2d distance between center and a is less then radius. This is way faster then Vector.distance because it
-    * only checks x and z, and also it doesn't use Math.hypot
+    * Returns if 2d distance between center and a is less then radius. This is way faster then Vector.distance because
+    * it only checks x and z, and also it doesn't use Math.hypot
     */
    public static isInsideRadius(center: VectorXZ, a: VectorXZ, radius: number) {
       return (center.x - a.x) ** 2 + (center.z - a.z) ** 2 < radius ** 2;
@@ -109,7 +122,7 @@ export class VecXZ {
       return VecXZ.add(this, a);
    }
 
-   public substract(a: VectorXZ) {
+   public subtract(a: VectorXZ) {
       return VecXZ.subtract(this, a);
    }
 
@@ -134,7 +147,7 @@ export class Vec {
    /**
     * Returns string representation of vector ('x y z')
     *
-    * @param colorize Whenether to color vector args or not
+    * @param colorize Whether to color vector args or not
     */
    public static string = (a: Vector3, colorize?: boolean) =>
       !colorize ? `${a.x} ${a.y} ${a.z}` : `§c${a.x} §a${a.y} §b${a.z}`;
@@ -148,7 +161,7 @@ export class Vec {
    };
 
    /**
-    * Returns whenether vector is valid or not
+    * Returns whether vector is valid or not
     *
     * Valid vector don't uses NaN values
     */
@@ -377,7 +390,7 @@ export class Vec {
       return Vec.add(this, a);
    }
 
-   public substract(a: Vector3) {
+   public subtract(a: Vector3) {
       return Vec.subtract(this, a);
    }
 

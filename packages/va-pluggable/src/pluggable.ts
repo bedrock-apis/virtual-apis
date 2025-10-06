@@ -8,7 +8,7 @@ export abstract class Pluggable extends withGeneratedModules<
    { [K in keyof GeneratedModuleTypes]: PluginModule<GeneratedModuleTypes[K]> },
    typeof ContextPlugin
 >(ContextPlugin) {
-   protected static features: PluginFeature[] = [];
+   protected static features: (typeof PluginFeature)[] = [];
 
    public constructor(context: Context) {
       super(context);
@@ -18,23 +18,29 @@ export abstract class Pluggable extends withGeneratedModules<
       }
    }
 
-   public static registerFeature(feature: PluginFeature) {
+   public static registerFeature(feature: typeof PluginFeature) {
       this.features.push(feature);
    }
 
    public getFeature<T extends typeof PluginFeature>(t: T) {
-      const feature = Pluggable.features.find(e => e instanceof t);
+      const feature = this.features.find(e => e instanceof t);
       if (!feature) throw new Error('no feature');
       return feature as InstanceType<T>;
    }
 
+   protected features: PluginFeature[] = [];
+
    public override onRegistration(): void {
-      for (const feature of Pluggable.features) feature.onCreate(this);
+      for (const featureCreator of Pluggable.features) {
+         const feature = new featureCreator();
+         feature.onCreate(this);
+         this.features.push(feature);
+      }
    }
 
    public override onAfterReady(): void {
       d('pluggable onAfterReady');
-      for (const feature of Pluggable.features) feature.onReady(this);
+      for (const feature of this.features) feature.onReady(this);
       this.onAfterReadyEvent.invoke();
    }
 

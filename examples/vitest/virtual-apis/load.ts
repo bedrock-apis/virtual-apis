@@ -3,22 +3,17 @@ import '@bedrock-apis/va-core-plugin';
 import './plugin';
 
 // Configure
-import { EventsPlugin, SystemPlugin } from '@bedrock-apis/va-core-plugin';
+import { CorePlugin } from '@bedrock-apis/va-core-plugin';
 import { context } from '@bedrock-apis/va-loader/vitest';
-import { MyPlugin } from './plugin';
+import { MyFeature } from './plugin';
 
-// Any plugins should be loaded before context configure
-context.configureAndLoadPlugins({
+context.setup({
    implementationEarlyExit: true,
-   disablePlugins: [SystemPlugin],
 });
 
-context.getPlugin(EventsPlugin).configure({
-   warnIfEventIsNotImplemented: true,
-});
+CorePlugin.registerFeature(MyFeature.setup({ myConfigProperty: 6 }));
+context.use(CorePlugin);
 
-context.getPlugin(MyPlugin).configure({
-   myConfigProperty: 6,
-});
+context.ready();
 
 // SCRIPT API CODE IS LOADED BY VITEST

@@ -1,6 +1,6 @@
 import { VirtualPrivilege } from '@bedrock-apis/va-common';
 import { dwarn } from '@bedrock-apis/va-common/node';
-import { ContextPluginLinkedStorage, PluginFeatureWithConfig } from '@bedrock-apis/va-pluggable';
+import { ContextPluginLinkedStorage, PluginFeature } from '@bedrock-apis/va-pluggable';
 import { PluginModuleLoaded } from '@bedrock-apis/va-pluggable/src/module';
 import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable/src/types';
 import {
@@ -55,14 +55,14 @@ type EventsWithFilters<T extends SystemAfterEvents | SystemBeforeEvents | WorldB
 
 type BaseListener = (...args: unknown[]) => unknown;
 
-export class EventsPlugin extends PluginFeatureWithConfig<Config> {
+export class EventsFeature extends PluginFeature {
+   public static config: Config = {
+      warnIfEventIsNotImplemented: true,
+   };
+
    protected static getEventId(group: string, event: string) {
       return `${group}::${event}`;
    }
-
-   public config: Config = {
-      warnIfEventIsNotImplemented: true,
-   };
 
    public events = new Map<string, Map<BaseListener, object>>();
 
@@ -94,7 +94,7 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
    }
 
    private processTriggerMetadata(plugin: CorePlugin, group: keyof Groups, event: string) {
-      const eventId = EventsPlugin.getEventId(groupsMap[group], event);
+      const eventId = EventsFeature.getEventId(groupsMap[group], event);
       const before = group.includes('before');
       const privilege = before ? VirtualPrivilege.ReadOnly : VirtualPrivilege.None;
       this.implementedEvents.add(eventId);
@@ -213,12 +213,12 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
 
             if (!(subscribe instanceof MethodSymbol) || !(unsubscribe instanceof MethodSymbol)) continue;
 
-            const eventId = EventsPlugin.getEventId(eventsGroup.name, eventSignalGetter.name);
+            const eventId = EventsFeature.getEventId(eventsGroup.name, eventSignalGetter.name);
 
             plugin.registerCallback(
                subscribe,
                ctx => {
-                  if (!this.implementedEvents.has(eventId) && this.config.warnIfEventIsNotImplemented) {
+                  if (!this.implementedEvents.has(eventId) && EventsFeature.config.warnIfEventIsNotImplemented) {
                      dwarn(`Event ${eventId} is not implemented`);
                   }
 
@@ -246,4 +246,4 @@ export class EventsPlugin extends PluginFeatureWithConfig<Config> {
    }
 }
 
-CorePlugin.registerDefaultFeature(EventsPlugin);
+CorePlugin.registerFeature(EventsFeature);

@@ -36,6 +36,7 @@
       "esbuild",
       "gametest",
       "invocables",
+      "Jayly",
       "molang",
       "overworld",
       "proxyify",

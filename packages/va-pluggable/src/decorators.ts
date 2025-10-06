@@ -1,4 +1,4 @@
-import { MapWithDefaults } from '@bedrock-apis/va-common';
+import { MapWithDefaults, VaEventEmitter } from '@bedrock-apis/va-common';
 import {
    ArrayType,
    CompilableSymbol,
@@ -14,7 +14,6 @@ import {
    VariantType,
 } from '@bedrock-apis/virtual-apis';
 import util from 'node:util';
-import { PluginFeature } from './feature';
 import { Pluggable } from './pluggable';
 
 // Usually used as array to support inheritance
@@ -24,15 +23,22 @@ export interface DecoratedMetadata {
    static: boolean;
 }
 
-const staticMetaSymbol = Symbol('virtualApis::staticMetadata');
-const prototypeMetaSymbol = Symbol('virtualApis::prototypeMetadata');
-const storageMapper = Symbol('virtualApis::storageMapper');
-const storageUnmap = Symbol('virtualApis::storageUnmap');
+export const staticMetaSymbol = Symbol('virtualApis::staticMetadata');
+export const prototypeMetaSymbol = Symbol('virtualApis::prototypeMetadata');
+export const storageMapper = Symbol('virtualApis::storageMapper');
+export const storageUnmap = Symbol('virtualApis::storageUnmap');
 
-type StorageMapper = (type: RuntimeType, storage: object, context: Context) => object;
-type StorageUnmap = (type: RuntimeType, handle: object, context: Context) => object;
+export type StorageMapper = (type: RuntimeType, storage: object, context: Context) => object;
+export type StorageUnmap = (type: RuntimeType, handle: object, context: Context) => object;
 
-type GetStorage = (ctx: InvocationInfo) => object | undefined;
+export type GetStorage = (ctx: InvocationInfo) => object | undefined;
+
+type Converter = (value: unknown, context: Context) => unknown;
+
+export interface HandleStorageConverter {
+   storageToHandle: Converter;
+   handleToStorage: Converter;
+}
 
 export class VirtualFeatureDecorators {
    private getMeta(symbol: symbol, target: object): DecoratedMetadata[] {
@@ -43,10 +49,10 @@ export class VirtualFeatureDecorators {
       return meta;
    }
 
-   protected getStaticMeta = this.getMeta.bind(this, staticMetaSymbol);
-   protected getPrototypeMeta = this.getMeta.bind(this, prototypeMetaSymbol);
+   public getStaticMeta = this.getMeta.bind(this, staticMetaSymbol);
+   public getPrototypeMeta = this.getMeta.bind(this, prototypeMetaSymbol);
 
-   protected createMethodDecorator(
+   public createMethodDecorator(
       nativeId: string,
       getMeta: (target: object) => DecoratedMetadata[],
       symbolType: new () => InvocableSymbol<unknown>,
@@ -70,24 +76,14 @@ export class VirtualFeatureDecorators {
       propertyKey: string | symbol,
       getStorage: GetStorage,
    ) {
-      if (this.isComplexType(symbol.returnType)) {
-         plugin.registerCallback(symbol, ctx => {
-            const self = getStorage(ctx) as Record<string | symbol, (...args: unknown[]) => void>;
-            ctx.result = this.storageToHandle(
-               symbol.returnType,
-               Reflect.apply(self[propertyKey]!, self, ctx.params),
-               ctx.context,
-            );
-         });
-      } else {
-         plugin.registerCallback(symbol, ctx => {
-            const self = getStorage(ctx) as Record<string | symbol, (...args: unknown[]) => void>;
-            ctx.result = Reflect.apply(self[propertyKey]!, self, ctx.params);
-         });
-      }
+      const mapper = this.createHandleStorageConverter(symbol.returnType);
+      plugin.registerCallback(symbol, ctx => {
+         const self = getStorage(ctx) as Record<string | symbol, (...args: unknown[]) => void>;
+         ctx.result = mapper.storageToHandle(Reflect.apply(self[propertyKey]!, self, ctx.params), ctx.context);
+      });
    }
 
-   protected createPropertyDecorator(
+   public createPropertyDecorator(
       nativeId: string,
       getMeta: (target: object) => DecoratedMetadata[],
    ): PropertyDecorator {
@@ -110,43 +106,21 @@ export class VirtualFeatureDecorators {
       propertyKey: string | symbol,
       getStorage: GetStorage,
    ) {
-      if (this.isComplexType(symbol.returnType)) {
-         plugin.registerCallback(symbol, ctx => {
-            const self = getStorage(ctx);
-            ctx.result = this.storageToHandle(
-               ctx.symbol.returnType,
-               Reflect.get(self as object, propertyKey, self),
-               ctx.context,
-            );
-         });
-      } else {
-         plugin.registerCallback(symbol, ctx => {
-            const self = getStorage(ctx);
-            ctx.result = Reflect.get(self as object, propertyKey, self);
-         });
-      }
+      const mapper = this.createHandleStorageConverter(symbol.returnType);
+      plugin.registerCallback(symbol, ctx => {
+         const self = getStorage(ctx);
+         ctx.result = mapper.storageToHandle(Reflect.get(self as object, propertyKey, self), ctx.context);
+      });
 
       if (symbol.setter) {
-         if (this.isComplexType(symbol.returnType)) {
-            plugin.registerCallback(symbol.setter, ctx => {
-               const self = getStorage(ctx);
-               return Reflect.set(
-                  self as object,
-                  propertyKey,
-                  this.handleToStorage(symbol.returnType, ctx.params[0], ctx.context),
-                  self,
-               );
-            });
-         } else {
-            plugin.registerCallback(symbol.setter, ctx => {
-               const self = getStorage(ctx);
-               return Reflect.set(self as object, propertyKey, ctx.params[0], self);
-            });
-         }
+         plugin.registerCallback(symbol.setter, ctx => {
+            const self = getStorage(ctx);
+            return Reflect.set(self as object, propertyKey, mapper.handleToStorage(ctx.params[0], ctx.context), self);
+         });
       }
    }
 
-   protected onClassLoad(meta: DecoratedMetadata, callback: (s: ConstructableSymbol, plugin: Pluggable) => void) {
+   public onClassLoad(meta: DecoratedMetadata, callback: (s: ConstructableSymbol, plugin: Pluggable) => void) {
       this.implementations
          .getOrCreate(meta.moduleNameVersion, () => new MapWithDefaults())
          .getOrCreate(meta.classId, () => [])
@@ -157,7 +131,7 @@ export class VirtualFeatureDecorators {
          });
    }
 
-   protected registerConstructable(target: new (...args: unknown[]) => object) {
+   public registerConstructable(target: new (...args: unknown[]) => object) {
       const metaArray = this.getStaticMeta(target);
       const meta = metaArray.at(-1)!; // Only latest one
       this.onClassLoad(meta, (s, plugin) => {
@@ -171,14 +145,14 @@ export class VirtualFeatureDecorators {
       });
    }
 
-   protected registerCallsRedirect(target: new (...args: unknown[]) => object, fromKey: string) {
-      const metaArray = this.getStaticMeta(target);
+   public registerCallsRedirect(target: object, fromKey: string | symbol) {
+      const metaArray = this.getPrototypeMeta(target);
       const meta = metaArray.at(-1)!; // Only latest one
       this.onClassLoad(meta, (s, plugin) => {
          for (const [name, symbol] of s.prototypeFields) {
             if (!(symbol instanceof InvocableSymbol)) continue;
             const getStorage: GetStorage = ctx =>
-               (plugin.getStorage(ctx.thisObject as object) as Record<string, object>)[fromKey];
+               (plugin.getStorage(ctx.thisObject as object) as Record<string | symbol, object>)[fromKey];
 
             if (symbol instanceof PropertyGetterSymbol) {
                this.registerPropertyListener(symbol, plugin, name, getStorage);
@@ -189,75 +163,103 @@ export class VirtualFeatureDecorators {
       });
    }
 
-   protected isComplexType(type: RuntimeType): boolean {
-      if (type instanceof ConstructableSymbol) return true;
-      if (type instanceof OptionalType) return this.isComplexType(type.type);
-      if (type instanceof ArrayType) return this.isComplexType(type.valueType);
-      if (type instanceof VariantType) return type.variants.some(e => this.isComplexType(e));
-      if (type instanceof PromiseType) return this.isComplexType(type.valueType);
-
-      return false; // Simple type
-   }
-
    // E.g. for mapping SerenityEntity to ScriptEntity
-   protected addStorageMapper(classPrototype: object, storageToHandle: StorageMapper, handleToStorage: StorageUnmap) {
+   public addStorageMapper(classPrototype: object, storageToHandle: StorageMapper, handleToStorage: StorageUnmap) {
       (classPrototype as Record<symbol, StorageMapper>)[storageMapper] = storageToHandle;
+      // TODO IT WILL NOT WORK WE NEED TO DEFINE IT ON HANDLE ITSELF
       (classPrototype as Record<symbol, StorageUnmap>)[storageUnmap] = handleToStorage;
    }
 
-   protected storageToHandle(type: RuntimeType, storage: unknown, context: Context): unknown {
-      if (typeof storage !== 'object' || !storage) return storage;
+   // Precompute converters
+   public createHandleStorageConverter(type: RuntimeType): HandleStorageConverter {
+      if (type instanceof ConstructableSymbol) {
+         return {
+            storageToHandle: (storage, context) => {
+               if (typeof storage !== 'object' || !storage) return storage;
+               if (storageMapper in storage) {
+                  storage = (storage[storageMapper] as StorageMapper)(type, storage, context);
+               }
+               return context.plugin.getCreateHandleFor(storage as object, type);
+            },
+            handleToStorage: (handle, context) => {
+               if (typeof handle !== 'object' || !handle) return handle;
+               if (storageUnmap in handle) {
+                  handle = (handle[storageUnmap] as StorageUnmap)(type, handle, context);
+               }
+               return context.plugin.getStorage(handle as object);
+            },
+         };
+      }
 
-      if (storageMapper in storage) storage = (storage[storageMapper] as StorageMapper)(type, storage, context);
-      if (type instanceof ConstructableSymbol) return context.plugin.getCreateHandleFor(storage as object, type);
-      if (type instanceof OptionalType) return this.storageToHandle(type.type, storage, context);
+      if (type instanceof OptionalType) {
+         const innerConverter = this.createHandleStorageConverter(type.type);
+         return {
+            storageToHandle: (storage, context) => {
+               if (!storage) return storage;
+               return innerConverter.storageToHandle(storage, context);
+            },
+            handleToStorage: (handle, context) => {
+               if (!handle) return handle;
+               return innerConverter.handleToStorage(handle, context);
+            },
+         };
+      }
+
       if (type instanceof ArrayType) {
-         return (storage as unknown[]).map(e => this.storageToHandle(type.valueType, e, context));
-      }
-      if (type instanceof VariantType) {
-         // There is no return types that are variants
-         throw new Error(`Converting from Variant<${type.name}> to handle is not supported right now`);
-      }
-      if (type instanceof PromiseType) {
-         return new Promise((resolve, reject) => {
-            const target = storage as Promise<unknown>;
-            target.then(e => resolve(this.storageToHandle(type.valueType, e, context)));
-            target.catch(reject);
-         });
+         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         return {
+            storageToHandle: (storage, context) => {
+               if (!Array.isArray(storage)) return storage;
+               return storage.map(item => innerConverter.storageToHandle(item, context));
+            },
+            handleToStorage: (handle, context) => {
+               if (!Array.isArray(handle)) return handle;
+               return handle.map(item => innerConverter.handleToStorage(item, context));
+            },
+         };
       }
 
-      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
+      if (type instanceof VariantType) {
+         const variantConverters = type.variants.map(v => this.createHandleStorageConverter(v));
+         return {
+            storageToHandle: (storage, context) => {
+               return storage;
+            },
+            handleToStorage: (handle, context) => {
+               if (typeof handle !== 'object' || !handle) return handle;
+               if (storageUnmap in handle) {
+                  handle = (handle[storageUnmap] as StorageUnmap)(type, handle, context);
+               }
+
+               for (let i = 0; i < variantConverters.length; i++) {
+                  const converted = variantConverters[i]!.handleToStorage(handle, context);
+                  if (converted !== handle) return converted;
+               }
+               return handle;
+            },
+         };
+      }
+
+      if (type instanceof PromiseType) {
+         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         return {
+            storageToHandle: (storage, context) => {
+               if (!(storage instanceof Promise)) return storage;
+               return new Promise((resolve, reject) => {
+                  storage.then(value => resolve(innerConverter.storageToHandle(value, context)), reject);
+               });
+            },
+            handleToStorage: (handle, context) => {
+               throw new Error(`Converting from Promise<${type.valueType.name}> to storage is not supported right now`);
+            },
+         };
+      }
+
+      // Return simple types as is
+      return { storageToHandle: value => value, handleToStorage: value => value };
    }
 
-   protected handleToStorage(type: RuntimeType, handle: unknown, context: Context): unknown | undefined {
-      if (typeof handle !== 'object' || !handle) return handle;
-
-      if (storageUnmap in handle) handle = (handle[storageUnmap] as StorageUnmap)(type, handle, context);
-      if (type instanceof ConstructableSymbol) return context.plugin.getStorage(handle as object);
-      if (type instanceof OptionalType) return this.handleToStorage(type.type, handle, context);
-      if (type instanceof ArrayType) {
-         return (handle as unknown[]).map(e => this.handleToStorage(type.valueType, e, context));
-      }
-      if (type instanceof VariantType) {
-         for (const variant of type.variants) {
-            const converted = this.handleToStorage(variant, handle, context);
-            if (converted !== handle) return converted;
-         }
-         return handle;
-      }
-
-      if (type instanceof PromiseType) {
-         // Is it really the case?
-         throw new Error(`Converting from Promise<${type.valueType.name}> to storage is not supported right now`);
-      }
-
-      throw new Error('Type was marked as complex and bindable but is actually not: ' + type.name);
-   }
-
-   protected assignMetadata(
-      virtualClass: { prototype: object },
-      meta: { classId: string; moduleNameVersion: string }[],
-   ) {
+   public assignMetadata(virtualClass: { prototype: object }, meta: { classId: string; moduleNameVersion: string }[]) {
       const prototypeVa = virtualClass.prototype as Record<symbol, DecoratedMetadata[]>;
       prototypeVa[prototypeMetaSymbol] = meta.map(e => ({ ...e, static: false }));
 
@@ -265,8 +267,8 @@ export class VirtualFeatureDecorators {
       staticVa[staticMetaSymbol] = meta.map(e => ({ ...e, static: true }));
    }
 
-   public constructor(feature: PluginFeature) {
-      feature.onReadyEvent.subscribe(plugin => {
+   public constructor(onReadyEvent: VaEventEmitter<[Pluggable]>) {
+      onReadyEvent.subscribe(plugin => {
          for (const [version, classes] of this.implementations) {
             const module = plugin[version as 'server'];
 
@@ -286,7 +288,7 @@ export class VirtualFeatureDecorators {
       MapWithDefaults<string, ((s: CompilableSymbol<unknown>, plugin: Pluggable) => void)[]>
    >();
 
-   protected registerImplementation<T extends new () => InvocableSymbol<unknown>>(
+   public registerImplementation<T extends new () => InvocableSymbol<unknown>>(
       meta: DecoratedMetadata,
       propertyKey: string,
       symbolType: T,
@@ -303,7 +305,7 @@ export class VirtualFeatureDecorators {
       });
    }
 
-   protected registerConstant(moduleNameVersion: string, id: string, storage: object) {
+   public registerConstant(moduleNameVersion: string, id: string, storage: object) {
       this.implementations
          .getOrCreate(moduleNameVersion, () => new MapWithDefaults())
          .getOrCreate(id, () => [])

@@ -1,7 +1,8 @@
 import { MapWithDefaults } from '@bedrock-apis/va-common';
-import { va } from '../core-plugin';
+import { va } from '../decorators';
 import { Dimension, DimensionTypes } from './dimension';
 import { DynamicProperties } from './dynamic-properties';
+import { CorePlugin } from '../core-plugin';
 
 export class World extends va.server.class('World', DynamicProperties) {
    @va.method('stopMusic')
@@ -25,13 +26,19 @@ export class World extends va.server.class('World', DynamicProperties) {
 
    protected dimensions = new MapWithDefaults<string, Dimension>();
 
-   @va.method('getDimension') public getDimension(id: string) {
-      // TODO Common methods for object with types like entities, dimensions, blocks and items
-      const type = DimensionTypes.types.find(e => e.typeId === id || e.typeId === 'minecraft:' + id);
-      if (!type) throw new Error(`Dimension '${id}' is invalid.`);
-      return va.asHandle(this.dimensions.getOrCreate(id, () => new Dimension(type)));
+   @va.method('getDimension') public getDimension(rawId: string) {
+      // Cached
+      const id = CorePlugin.addNamespace(rawId);
+      const dimension = this.dimensions.get(id);
+      if (dimension) return dimension;
+
+      // Creating
+      const type = DimensionTypes.types.find(e => e.typeId === id);
+      if (!type) throw new Error(`Dimension '${rawId}' is invalid.`);
+
+      return this.dimensions.getOrCreate(id, () => new Dimension(type));
    }
 }
 
-export const world = new World();
+export const world = new World([]);
 va.server.constant('world', world);

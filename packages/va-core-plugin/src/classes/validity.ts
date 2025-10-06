@@ -1,4 +1,3 @@
-import { PluginFeature, VirtualFeatureDecorators } from '@bedrock-apis/va-pluggable';
 import {
    DiagnosticsStackReport,
    ErrorFactory,
@@ -6,7 +5,8 @@ import {
    InvocationInfo,
    PANIC_ERROR_MESSAGES,
 } from '@bedrock-apis/virtual-apis';
-import { CorePlugin, va } from '../core-plugin';
+import { CorePlugin } from '../core-plugin';
+import { utils, va } from '../decorators';
 
 type Validator = (ctx: InvocationInfo) => boolean;
 
@@ -14,7 +14,7 @@ class ValidityPluginError extends Error {
    public override name = 'ValidityPluginError';
 }
 
-class ValidityDecorators extends VirtualFeatureDecorators {
+class ValidityDecorators {
    private isValidCheck(this: null, validator: Validator, ctx: InvocationInfo) {
       ctx.result = validator(ctx);
    }
@@ -32,12 +32,12 @@ class ValidityDecorators extends VirtualFeatureDecorators {
    }
 
    public isValid({
-      ignore = [],
+      ignore = ['typeId', 'id'],
       error = TypeError,
    }: { ignore?: string[]; error?: ErrorConstructor } = {}): PropertyDecorator {
       return (prototype, propertyKey) => {
-         const meta = this.getPrototypeMeta(prototype).at(-1)!;
-         this.onClassLoad(meta, (cls, plugin) => {
+         const meta = utils.getPrototypeMeta(prototype).at(-1)!;
+         utils.onClassLoad(meta, (cls, plugin) => {
             if (!(plugin instanceof CorePlugin)) throw new Error('Expected core plugin');
 
             for (const [, symbol] of cls.prototypeFields.entries()) {
@@ -75,20 +75,10 @@ class ValidityDecorators extends VirtualFeatureDecorators {
    }
 }
 
-export class ValidityPlugin extends PluginFeature {
-   public decorators = new ValidityDecorators(this);
-}
-const validator = new ValidityPlugin();
-export const validityGuard = validator.decorators;
-CorePlugin.registerFeature(validator);
+const validityGuard = new ValidityDecorators();
+export const isValid = validityGuard.isValid.bind(validityGuard);
 
-export class SimpleIsValid extends va.server.utilityClass([
-   'Entity',
-   'Block',
-   'Structure',
-   'ScreenDisplay',
-   'Component',
-]) {
-   @validityGuard.isValid()
+export class SimpleIsValid extends va.server.base(['Entity', 'Block', 'Structure', 'ScreenDisplay', 'Component']) {
+   @isValid()
    public isValid = true;
 }

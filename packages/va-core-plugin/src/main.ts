@@ -1,6 +1,7 @@
-import { CorePlugin } from './core-plugin';
+export * from './core-plugin';
 
-export { CorePlugin };
+export * from './decorators';
 
-import './classes/index';
-import './features/index';
+export * from './features/index';
+
+export * from './classes/index';

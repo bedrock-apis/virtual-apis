@@ -1,14 +1,14 @@
 import { VirtualPrivilege } from '@bedrock-apis/va-common';
 import { PluginFeature } from '@bedrock-apis/va-pluggable';
 import { CorePlugin } from '../core-plugin';
-import { EventsPlugin } from './events';
+import { EventsFeature } from './events';
 
 export class EarlyExecutionPlugin extends PluginFeature {
    public override onReady(plugin: CorePlugin): void {
       plugin.server_v2_0.onLoad.subscribe(mod => {
          plugin.context.currentPrivilege = VirtualPrivilege.EarlyExecution;
-         const worldLoad = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'worldAfter', 'worldLoad');
-         const startup = plugin.getFeature(EventsPlugin).createTrigger(plugin, mod, 'systemBefore', 'startup');
+         const worldLoad = plugin.getFeature(EventsFeature).createTrigger(plugin, mod, 'worldAfter', 'worldLoad');
+         const startup = plugin.getFeature(EventsFeature).createTrigger(plugin, mod, 'systemBefore', 'startup');
 
          setTimeout(() => {
             startup({
@@ -37,4 +37,4 @@ export class EarlyExecutionPlugin extends PluginFeature {
       });
    }
 }
-CorePlugin.registerDefaultFeature(EarlyExecutionPlugin);
+CorePlugin.registerFeature(EarlyExecutionPlugin);

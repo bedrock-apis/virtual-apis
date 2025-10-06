@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('scripts', () => {
    it('should return value from the config', () => {
-      using _ = context.temporaryPrivilege(VirtualPrivilege.None);
+      using _ = context.deferPrivilege(VirtualPrivilege.None);
       expect(mc.world.getDay()).toMatchInlineSnapshot(`6`);
    });
 
@@ -99,7 +99,9 @@ describe('scripts', () => {
           "CommandResult": [Function],
           "Component": [Function],
           "Container": [Function],
+          "ContainerRules": undefined,
           "ContainerRulesError": undefined,
+          "ContainerRulesErrorReason": undefined,
           "ContainerSlot": [Function],
           "CustomCommand": undefined,
           "CustomCommandError": undefined,
@@ -614,6 +616,7 @@ describe('scripts', () => {
           "ItemDyeableComponent": [Function],
           "ItemEnchantableComponent": [Function],
           "ItemFoodComponent": [Function],
+          "ItemInventoryComponent": undefined,
           "ItemLockMode": {
             "inventory": "inventory",
             "none": "none",

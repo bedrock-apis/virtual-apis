@@ -1,18 +1,19 @@
-import { PluginWithConfig } from '@bedrock-apis/va-pluggable';
+import { Pluggable, PluginFeature } from '@bedrock-apis/va-pluggable';
 
 interface Config {
    myConfigProperty: number;
 }
 
-export class MyPlugin extends PluginWithConfig<Config> {
-   protected config: Config = {
+export class MyFeature extends PluginFeature {
+   public static config: Config = {
       myConfigProperty: 4,
    };
 
-   protected _ = this.server.implement('World', {
-      getDay() {
-         return this.plugin.config.myConfigProperty;
-      },
-   });
+   public onReady(plugin: Pluggable) {
+      plugin.server.implement('World', {
+         getDay() {
+            return MyFeature.config.myConfigProperty;
+         },
+      });
+   }
 }
-MyPlugin.register('myPlugin');

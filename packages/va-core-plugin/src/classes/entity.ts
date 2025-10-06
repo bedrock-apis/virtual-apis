@@ -1,17 +1,17 @@
 import { IndexedAccessor } from '@bedrock-apis/va-common';
-import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable';
-import { VanillaEntityIdentifier, Vector2, Vector3 } from '@minecraft/server';
-import { CorePlugin, va } from '../core-plugin';
+import { EntityIdentifierType, Vector2, Vector3 } from '@minecraft/server';
+import { va } from '../decorators';
 import { corePluginVanillaDataProvider } from '../dump/provider';
+import { Component, Components } from './components';
 import { Dimension } from './dimension';
 import { DynamicProperties } from './dynamic-properties';
-import { validityGuard } from './validity';
+import { BaseType } from './helpers';
+import { isValid } from './validity';
+import { CorePlugin } from '../core-plugin';
 
 type EntityComponentGroup = Readonly<Record<string, object>>;
 
-export class EntityType extends va.server.class('EntityType') {
-   @va.getter('id') public id: string;
-
+export class EntityType extends va.server.class('EntityType', BaseType) {
    public constructor(
       id: string,
       public readonly entityData: Readonly<{
@@ -22,7 +22,7 @@ export class EntityType extends va.server.class('EntityType') {
          componentsGroups: Map<string, EntityComponentGroup>;
       }>,
    ) {
-      super();
+      super([id]);
       this.id = id;
    }
 }
@@ -31,13 +31,12 @@ export class EntityTypes extends va.server.class('EntityTypes') {
    public static types: EntityType[] = [];
 
    @va.static.method('getAll') public static getAll() {
-      return this.types.map(e => va.asHandle(e));
+      return this.types.slice();
    }
 
-   @va.static.method('get') public static get(id: string | VanillaEntityIdentifier) {
-      id = CorePlugin.addNamespace(id as string);
-      const result = this.types.find(e => e.id === id);
-      return result ? va.asHandle(result) : result;
+   @va.static.method('get') public static get(id: EntityIdentifierType<unknown>) {
+      const stringId = CorePlugin.addNamespace(id as string);
+      return this.types.find(e => e.id === stringId);
    }
 }
 
@@ -57,15 +56,17 @@ corePluginVanillaDataProvider.onRead.subscribe(({ entities: { components, entiti
    }
 });
 
-export class Entity extends va.server.class('Entity', DynamicProperties) {
+class EntityComponent extends va.server.class('EntityComponent', Component) {}
+
+export class Entity extends va.server.class('Entity', DynamicProperties, Components) {
    public constructor(
-      identifier: string | ServerModuleTypeMap['EntityType']['prototype'],
+      identifier: string,
       location: Vector3,
       dimension: Dimension,
-      spawnOptions?: { event?: string; rotation?: Vector2 },
+      spawnOptions?: { event?: string; rotation?: number },
    ) {
-      super();
-      const typeId = typeof identifier === 'string' ? CorePlugin.addNamespace(identifier) : identifier.id;
+      super([], []);
+      const typeId = CorePlugin.addNamespace(identifier);
       const type = EntityTypes.types.find(e => e.id === typeId);
 
       if (!type) throw new Error(`Invalid entity identifier ${typeId}`);
@@ -75,7 +76,7 @@ export class Entity extends va.server.class('Entity', DynamicProperties) {
 
       this.location = location;
       this.dimension = dimension;
-      this.rotation = spawnOptions?.rotation ?? { x: 0, y: 0 };
+      this.rotation = spawnOptions?.rotation ? { y: spawnOptions?.rotation, x: 0 } : { x: 0, y: 0 };
    }
 
    protected rotation: Vector2;
@@ -86,6 +87,10 @@ export class Entity extends va.server.class('Entity', DynamicProperties) {
 
    @va.method('setRotation') public setRotation(r: Vector2) {
       this.rotation = r;
+   }
+
+   @va.method('getComponents') public override getComponents() {
+      return super.getComponents();
    }
 
    @va.getter('localizationKey') public localizationKey: string;
@@ -109,7 +114,7 @@ export class Entity extends va.server.class('Entity', DynamicProperties) {
       return true;
    }
 
-   @validityGuard.isValid({
+   @isValid({
       ignore: ['typeId'],
       error: class InvalidActorError extends Error {
          public override name = 'InvalidActorError';

@@ -1,13 +1,13 @@
-import { IndexedAccessor } from '@bedrock-apis/va-common';
-import { ServerModuleTypeMap } from '@bedrock-apis/va-pluggable';
+import { IndexedAccessor, rawTextToString } from '@bedrock-apis/va-common';
 import type { ItemLockMode, RawMessage, RawText } from '@minecraft/server';
-import { rawTextToString } from '../../../va-common/src/rawtext';
-import { CorePlugin, va } from '../core-plugin';
+import { CorePlugin } from '../core-plugin';
+import { va } from '../decorators';
 import { corePluginVanillaDataProvider } from '../dump/provider';
+import { Components } from './components';
 import { DynamicProperties } from './dynamic-properties';
+import { BaseType } from './helpers';
 
-export class ItemType extends va.server.class('ItemType') {
-   @va.getter('id') public id: string;
+export class ItemType extends va.server.class('ItemType', BaseType) {
    public constructor(
       id: string,
       public readonly data: {
@@ -18,8 +18,7 @@ export class ItemType extends va.server.class('ItemType') {
          weight: number;
       },
    ) {
-      super();
-      this.id = id;
+      super([id]);
    }
 }
 
@@ -27,13 +26,12 @@ export class ItemTypes extends va.server.class('ItemTypes') {
    public static types: ItemType[] = [];
 
    @va.static.method('getAll') public static getAll() {
-      return this.types.map(e => va.asHandle(e));
+      return this.types.slice();
    }
 
    @va.static.method('get') public static get(id: string) {
       id = CorePlugin.addNamespace(id);
-      const result = this.types.find(e => e.id === id);
-      return result ? va.asHandle(result) : result;
+      return this.types.find(e => e.id === id);
    }
 }
 
@@ -52,11 +50,11 @@ corePluginVanillaDataProvider.onRead.subscribe(({ items }) => {
 });
 
 @va.constructable()
-export class ItemStack extends va.server.class('ItemStack', DynamicProperties) {
-   public constructor(identifier: string | ServerModuleTypeMap['ItemType']['prototype'], amount: number) {
-      super();
+export class ItemStack extends va.server.class('ItemStack', DynamicProperties, Components) {
+   public constructor(identifier: string | ItemType, amount: number) {
+      super([], []);
       const typeId = typeof identifier === 'string' ? CorePlugin.addNamespace(identifier) : identifier.id;
-      const type = ItemTypes.types.find(e => e.id === typeId);
+      const type = identifier instanceof ItemType ? identifier : ItemTypes.types.find(e => e.id === typeId);
 
       if (!type) throw new Error(`Invalid item identifier '${identifier}'.`);
 
@@ -71,9 +69,11 @@ export class ItemStack extends va.server.class('ItemStack', DynamicProperties) {
       this.tags = type.data.tags;
    }
 
-   protected override dynamicPropertiesGuard = () => {
+   protected override dynamicPropertiesGuard() {
       if (this.maxAmount > 1) throw new Error('Dynamic properties are not supported');
-   };
+   }
+
+   public override isValid = true;
 
    @va.property('amount') public amount: number;
    @va.getter('type') public type: ItemType;
@@ -104,7 +104,54 @@ export class ItemStack extends va.server.class('ItemStack', DynamicProperties) {
    @va.method('getRawLore') public getRawLore() {
       return this.lore.slice() as RawMessage[]; // its fixed in latest types so
    }
-   @va.method('setLore') public setLore(lore: (string | RawText)[]) {
-      this.lore = lore;
+   @va.method('setLore') public setLore(lore: undefined | (string | RawMessage)[]) {
+      this.lore = lore ?? [];
+   }
+
+   @va.method('getComponents') public override getComponents() {
+      return super.getComponents();
+   }
+
+   protected canPlaceOn: string[] = [];
+
+   @va.method('getCanPlaceOn') public getPlaceOn() {
+      return this.canPlaceOn;
+   }
+
+   @va.method('setCanPlaceOn') public setCanPlaceOn(v: string[]) {
+      this.canPlaceOn = v.slice();
+   }
+
+   protected canDestroy: string[] = [];
+
+   @va.method('setCanDestroy') public setCanDestroy(v: string[]) {
+      this.canDestroy = v.slice();
+   }
+
+   @va.method('getCanDestroy') public getCanDestroy() {
+      return this.canDestroy;
+   }
+
+   @va.method('clone') public clone() {
+      return structuredClone(this) as ItemStack;
+   }
+}
+
+export class ContainerSlot extends va.server.class('ContainerSlot') {
+   public item?: ItemStack;
+
+   public constructor(item?: ItemStack) {
+      super();
+      this.item = item;
+   }
+
+   @va.method('getItem') public getItem() {
+      // Don't allow them to modify item
+      return this.item?.clone();
+   }
+
+   @va.method('setItem') public setItem(item?: ItemStack) {
+      // Item stack is auto converted
+      this.item = item?.clone();
    }
 }
