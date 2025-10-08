@@ -76,10 +76,12 @@ export class Block extends va.server.class('Block') {
 
    @va.method('setType') public setType(type: BlockType) {
       this.type = type;
+      // TODO set permutation
    }
 
    @va.method('setPermutation') public setPermutation(permutation: BlockPermutation) {
       this.permutation = permutation;
+      // TODO set type
    }
 
    @va.method('center') public center() {

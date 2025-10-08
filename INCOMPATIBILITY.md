@@ -115,7 +115,7 @@ Suite errors (chained):
 
 Suite itemTypes (chained): 
   0: ✅
-  1: ❓ Unexpected error: TypeError: Cannot read properties of undefined (reading 'get')
+  1: ✅
   
 
 

@@ -185,7 +185,11 @@ export class PrototypeDecorators extends withGeneratedModules<{
             ? (target: Target, propertyKey: PropertyKey) => void
             : { id: `${Id}`; shouldBe: Handle[Id]; got: Target[PropertyKey] };
 
-      return utils.createPropertyDecorator(id, utils.getPrototypeMeta) as unknown as Return;
+      return utils.createPropertyDecorator(
+         id,
+         utils.getPrototypeMeta,
+         utils.createGetStorageInstanced,
+      ) as unknown as Return;
    }
 
    public method<
@@ -203,7 +207,12 @@ export class PrototypeDecorators extends withGeneratedModules<{
                  got: Target[PropertyKey];
               };
 
-      return utils.createMethodDecorator(id as string, utils.getPrototypeMeta, MethodSymbol) as unknown as Return;
+      return utils.createMethodDecorator(
+         id as string,
+         utils.getPrototypeMeta,
+         utils.createGetStorageInstanced,
+         MethodSymbol,
+      ) as unknown as Return;
    }
 }
 
@@ -223,7 +232,11 @@ export class StaticDecorators {
                  got: Target[PropertyKey];
               };
 
-      return utils.createPropertyDecorator(id as string, utils.getStaticMeta) as unknown as Return;
+      return utils.createPropertyDecorator(
+         id as string,
+         utils.getStaticMeta,
+         utils.createGetStorageStatic,
+      ) as unknown as Return;
    }
 
    public method<
@@ -241,7 +254,12 @@ export class StaticDecorators {
                  got: Target[PropertyKey];
               };
 
-      return utils.createMethodDecorator(id as string, utils.getStaticMeta, FunctionSymbol) as unknown as Return;
+      return utils.createMethodDecorator(
+         id as string,
+         utils.getStaticMeta,
+         utils.createGetStorageStatic,
+         FunctionSymbol,
+      ) as unknown as Return;
    }
 }
 

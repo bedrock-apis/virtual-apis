@@ -95,7 +95,7 @@ export class Entity extends va.server.class('Entity', DynamicProperties, Compone
 
    @va.getter('localizationKey') public localizationKey: string;
    @va.property('isSneaking') public isSneaking = false;
-   @va.property('nameTag') public nameTag = '';
+   @va.property('nameTag') public nameTag: undefined | string = undefined;
    @va.getter('dimension') public dimension: Dimension;
    @va.getter('location') public location: Vector3;
    @va.getter('typeId') public readonly typeId: string;

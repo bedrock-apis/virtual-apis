@@ -4,8 +4,10 @@ import {
    CompilableSymbol,
    ConstructableSymbol,
    Context,
+   InterfaceSymbol,
    InvocableSymbol,
    InvocationInfo,
+   MapType,
    ObjectValueSymbol,
    OptionalType,
    PromiseType,
@@ -15,6 +17,7 @@ import {
 } from '@bedrock-apis/virtual-apis';
 import util from 'node:util';
 import { Pluggable } from './pluggable';
+import { triggerAsyncId } from 'node:async_hooks';
 
 // Usually used as array to support inheritance
 export interface DecoratedMetadata {
@@ -52,9 +55,24 @@ export class VirtualFeatureDecorators {
    public getStaticMeta = this.getMeta.bind(this, staticMetaSymbol);
    public getPrototypeMeta = this.getMeta.bind(this, prototypeMetaSymbol);
 
+   public createGetStorageInstanced(this: void, plugin: Pluggable) {
+      const getStorage = (ctx: InvocationInfo) => {
+         const s = plugin.getStorage(ctx.thisObject as object);
+         if (!s) throw new Error('no storage for ' + util.inspect(ctx.thisObject, true, 20, true));
+         return s;
+      };
+
+      return getStorage;
+   }
+
+   public createGetStorageStatic(this: void, _: Pluggable, target: object) {
+      return (__: InvocationInfo) => target;
+   }
+
    public createMethodDecorator(
       nativeId: string,
       getMeta: (target: object) => DecoratedMetadata[],
+      createGetStorage: (plugin: Pluggable, target: object) => GetStorage,
       symbolType: new () => InvocableSymbol<unknown>,
    ): MethodDecorator {
       return (target, propertyKey) => {
@@ -62,7 +80,7 @@ export class VirtualFeatureDecorators {
 
          for (const meta of metaArray) {
             this.registerImplementation(meta, nativeId, symbolType, (symbol, plugin) => {
-               const getStorage = (ctx: InvocationInfo) => plugin.getStorage(ctx.thisObject as object);
+               const getStorage = createGetStorage(plugin, target);
 
                this.registerFnListener(symbol, plugin, propertyKey, getStorage);
             });
@@ -86,13 +104,14 @@ export class VirtualFeatureDecorators {
    public createPropertyDecorator(
       nativeId: string,
       getMeta: (target: object) => DecoratedMetadata[],
+      createGetStorage: (plugin: Pluggable, target: object) => GetStorage,
    ): PropertyDecorator {
       return (target, propertyKey) => {
          const metaArray = getMeta(target as object);
 
          for (const meta of metaArray) {
             this.registerImplementation(meta, nativeId, PropertyGetterSymbol, (symbol, plugin) => {
-               const getStorage = (ctx: InvocationInfo) => plugin.getStorage(ctx.thisObject as object);
+               const getStorage = createGetStorage(plugin, target);
 
                this.registerPropertyListener(symbol, plugin, propertyKey, getStorage);
             });
@@ -163,6 +182,11 @@ export class VirtualFeatureDecorators {
       });
    }
 
+   private asIsConverters: HandleStorageConverter = {
+      storageToHandle: value => value,
+      handleToStorage: value => value,
+   };
+
    // E.g. for mapping SerenityEntity to ScriptEntity
    public addStorageMapper(classPrototype: object, storageToHandle: StorageMapper, handleToStorage: StorageUnmap) {
       (classPrototype as Record<symbol, StorageMapper>)[storageMapper] = storageToHandle;
@@ -219,10 +243,64 @@ export class VirtualFeatureDecorators {
          };
       }
 
+      if (type instanceof InterfaceSymbol) {
+         // TODO Fix
+         if (type.name === 'RawMessage') return this.asIsConverters;
+
+         const innerConverters = [...type.properties.entries()].map(
+            e => [e[0], this.createHandleStorageConverter(e[1])] as const,
+         );
+
+         return {
+            storageToHandle(storage, c) {
+               if (typeof storage !== 'object' || !storage) return storage;
+               const result: Record<string, unknown> = {};
+               for (const [key, type] of innerConverters)
+                  result[key] = type.storageToHandle((storage as Record<string, unknown>)[key], c);
+
+               return result;
+            },
+            handleToStorage(handle, c) {
+               if (typeof handle !== 'object' || !handle) return handle;
+
+               const result: Record<string, unknown> = {};
+               for (const [key, type] of innerConverters)
+                  result[key] = type.handleToStorage((handle as Record<string, unknown>)[key], c);
+
+               return result;
+            },
+         };
+      }
+
+      if (type instanceof MapType) {
+         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         if (innerConverter === this.asIsConverters) return this.asIsConverters;
+
+         return {
+            storageToHandle(storage, c) {
+               if (typeof storage !== 'object' || !storage) return storage;
+               const result: Record<string, unknown> = {};
+               for (const [key, value] of Object.entries(storage))
+                  result[key] = innerConverter.storageToHandle(value, c);
+
+               return result;
+            },
+            handleToStorage(handle, c) {
+               if (typeof handle !== 'object' || !handle) return handle;
+               const result: Record<string, unknown> = {};
+               for (const [key, value] of Object.entries(handle))
+                  result[key] = innerConverter.handleToStorage(value, c);
+
+               return result;
+            },
+         };
+      }
+
       if (type instanceof VariantType) {
          const variantConverters = type.variants.map(v => this.createHandleStorageConverter(v));
          return {
-            storageToHandle: (storage, context) => {
+            storageToHandle: storage => {
+               // TODO Convert
                return storage;
             },
             handleToStorage: (handle, context) => {
@@ -256,7 +334,7 @@ export class VirtualFeatureDecorators {
       }
 
       // Return simple types as is
-      return { storageToHandle: value => value, handleToStorage: value => value };
+      return this.asIsConverters;
    }
 
    public assignMetadata(virtualClass: { prototype: object }, meta: { classId: string; moduleNameVersion: string }[]) {
