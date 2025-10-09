@@ -54,13 +54,14 @@ export class Block extends va.server.class('Block') {
    public constructor(location: Vector3, dimension: Dimension, type?: BlockType | string) {
       super();
       if (typeof type === 'string') {
-         type = BlockTypes.get(type);
-         if (!type) throw new Error(`Unknown block type ${type}`);
+         const typeId = type;
+         type = BlockTypes.get(typeId);
+         if (!type) throw new Error(`Invalid block type id ${typeId}`);
       }
 
       this.location = location;
       this.dimension = dimension;
-      this.type = type;
+      if (type) this.setType(type);
    }
 
    @va.getter('location') public location: Vector3;
@@ -97,4 +98,34 @@ export class Block extends va.server.class('Block') {
    }
 }
 
-export class BlockPermutation extends va.server.class('BlockPermutation') {}
+export class BlockPermutation extends va.server.class('BlockPermutation') {
+   @va.static.method('resolve')
+   static resolve(id: string, states?: Record<string, number | boolean | string>) {
+      return;
+   }
+
+   public constructor(type: BlockType) {
+      super();
+      this.type = type;
+   }
+
+   @va.method('hasTag') public hasTag(tag: string) {
+      return this.type.data.tags.includes(tag);
+   }
+
+   @va.method('getTags') public getTags() {
+      return this.type.data.tags;
+   }
+
+   @va.method('getState') public getState(stateId: string) {
+      return undefined;
+   }
+
+   @va.method('matches') public matches(id: string, states: Record<string, string | number | boolean>) {}
+
+   @va.method('withState') public withState(id: string, stateValue: string | number | boolean) {
+      return this;
+   }
+
+   @va.getter('type') public type: BlockType;
+}
