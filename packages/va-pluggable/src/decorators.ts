@@ -17,7 +17,6 @@ import {
 } from '@bedrock-apis/virtual-apis';
 import util from 'node:util';
 import { Pluggable } from './pluggable';
-import { triggerAsyncId } from 'node:async_hooks';
 
 // Usually used as array to support inheritance
 export interface DecoratedMetadata {
@@ -195,7 +194,11 @@ export class VirtualFeatureDecorators {
    }
 
    // Precompute converters
-   public createHandleStorageConverter(type: RuntimeType): HandleStorageConverter {
+   public createHandleStorageConverter(
+      type: RuntimeType,
+      innerTypes = new WeakSet<RuntimeType>(),
+   ): HandleStorageConverter {
+      const inner = (t: RuntimeType) => this.createHandleStorageConverter(t, innerTypes);
       if (type instanceof ConstructableSymbol) {
          return {
             storageToHandle: (storage, context) => {
@@ -216,7 +219,7 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof OptionalType) {
-         const innerConverter = this.createHandleStorageConverter(type.type);
+         const innerConverter = inner(type.type);
          return {
             storageToHandle: (storage, context) => {
                if (!storage) return storage;
@@ -230,7 +233,7 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof ArrayType) {
-         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         const innerConverter = inner(type.valueType);
          return {
             storageToHandle: (storage, context) => {
                if (!Array.isArray(storage)) return storage;
@@ -244,12 +247,15 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof InterfaceSymbol) {
-         // TODO Fix
-         if (type.name === 'RawMessage') return this.asIsConverters;
+         // Fix for circular interfaces (RawMessage)
+         if (innerTypes.has(type)) return this.asIsConverters;
+         innerTypes.add(type);
 
-         const innerConverters = [...type.properties.entries()].map(
-            e => [e[0], this.createHandleStorageConverter(e[1])] as const,
-         );
+         const innerConverters: [string, HandleStorageConverter][] = [];
+
+         for (const [key, it] of type.properties.entries()) {
+            innerConverters.push([key, inner(it)]);
+         }
 
          return {
             storageToHandle(storage, c) {
@@ -273,7 +279,7 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof MapType) {
-         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         const innerConverter = inner(type.valueType);
          if (innerConverter === this.asIsConverters) return this.asIsConverters;
 
          return {
@@ -297,7 +303,7 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof VariantType) {
-         const variantConverters = type.variants.map(v => this.createHandleStorageConverter(v));
+         const variantConverters = type.variants.map(v => inner(v));
          return {
             storageToHandle: storage => {
                // TODO Convert
@@ -319,7 +325,7 @@ export class VirtualFeatureDecorators {
       }
 
       if (type instanceof PromiseType) {
-         const innerConverter = this.createHandleStorageConverter(type.valueType);
+         const innerConverter = inner(type.valueType);
          return {
             storageToHandle: (storage, context) => {
                if (!(storage instanceof Promise)) return storage;
@@ -327,7 +333,7 @@ export class VirtualFeatureDecorators {
                   storage.then(value => resolve(innerConverter.storageToHandle(value, context)), reject);
                });
             },
-            handleToStorage: (handle, context) => {
+            handleToStorage: () => {
                throw new Error(`Converting from Promise<${type.valueType.name}> to storage is not supported right now`);
             },
          };

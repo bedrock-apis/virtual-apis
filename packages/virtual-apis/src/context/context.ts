@@ -43,6 +43,8 @@ export class Context implements Disposable {
       Object.assign(this.config, config);
    }
 
+   public onHandleCreate = new EventTarget()
+
    public readonly plugin!: ContextPlugin;
    public use(pluginConstructor: new (context: Context) => ContextPlugin) {
       (this as Mutable<this>).plugin = new pluginConstructor(this);

@@ -1,0 +1,23 @@
+{
+  "name": "serenity",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "private": true,
+  "workspaces": [
+    "plugins/*"
+  ],
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts"
+  },
+  "dependencies": {
+    "@serenityjs/binarystream": "^3.0.10",
+    "@serenityjs/core": "^0.8.15",
+    "@serenityjs/logger": "^0.8.15",
+    "@serenityjs/nbt": "^0.8.15",
+    "@serenityjs/plugins": "^0.8.15",
+    "@serenityjs/protocol": "^0.8.15",
+    "@serenityjs/raknet": "^0.8.15",
+    "@bedrock-apis/va-pluggable": "workspace:*",
+    "@bedrock-apis/virtual-apis": "workspace:*"
+  }
+}

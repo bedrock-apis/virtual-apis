@@ -8,7 +8,7 @@ Later this can be used with bapi scan to autogenerate list of apis you may want 
 
 ```
 
-Suite block (chained): ❓ Unexpected setup error: Error: Unknown block type undefined
+Suite block (chained): ❓ Unexpected setup error: Error: Invalid block type id minecraft:stone
 
 
 Suite dynamic properties (chained): 
@@ -75,11 +75,11 @@ Suite errors (chained):
       
   19: ✅
   20: ✅
-  21: ❌ Error mismatch: Error: Unknown block type undefined != Error: Failed to set member
+  21: ❌ Error mismatch: Error: Invalid block type id minecraft:stone != Error: Failed to set member
   22: ❌ Error mismatch: 
       
       TypeError: Native type conversion failed. Function return value expected type: string
-      Error: Unknown block type undefined
+      Error: Invalid block type id minecraft:stone
       
   23: ✅
   24: ❓ Expected error (InvalidActorError: Failed to get property 'nameTag' due to Entity being invalid (has the Entity been removed?).), got: ""
@@ -88,7 +88,7 @@ Suite errors (chained):
   27: ❌ Error mismatch: 
       
       LocationInUnloadedChunkError: Trying to access location (654654.0, 55.0, 6.0) which is not in a chunk currently loaded and ticking.
-      Error: Unknown block type undefined
+      Error: Invalid block type id bedrock
       
   28: ❌ Error mismatch: 
       

@@ -4,3 +4,4 @@ export * from './generated-modules';
 export * from './linked-storage';
 export * from './pluggable';
 export * from './types';
+export * from './decorators-feature';
