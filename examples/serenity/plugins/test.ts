@@ -10,6 +10,8 @@ import {
 } from '@bedrock-apis/va-pluggable';
 import { Constructable, Prototyped } from '@bedrock-apis/va-pluggable';
 import * as s from '@serenityjs/core';
+import fs from 'fs';
+import path from 'path';
 
 class SerenityPluginVA extends Pluggable {
    public identifier: string = 'serenity';
@@ -61,24 +63,72 @@ SerenityPluginVA.registerFeature(DecoratedClassesFeature);
 
 class World extends sva.server.classMap('World', s.World) {}
 
+class BehaviorPack {
+    static packs: BehaviorPack[] = []
+
+   constructor(private manifestPath: string) {
+      this.readAndParseManifest();
+
+
+   }
+
+   private async readAndParseManifest() {
+      interface Manifest {
+         modules: { type: 'script' | 'data'; entry?: string }[];
+         dependencies?: { module_name: string; version: string }[];
+      }
+      try {
+         const manifest = JSON.parse(await fs.promises.readFile(this.manifestPath, 'utf8')) as Manifest;
+         const scriptModule = manifest.modules.find(e => e.type === 'script');
+         if (scriptModule?.entry) {
+            this.indexJsFullPath = scriptModule.entry;
+            if (!manifest.dependencies) throw new Error('No dependencies found in the manifest!');
+
+            for (const dep of manifest.dependencies) {
+               if (dep.module_name.startsWith('@minecraft')) this.modules.set(dep.module_name, dep.version);
+            }
+
+            BehaviorPack.packs.push(this)
+         }
+      } catch (e) {
+         console.log('Failed to load', this.manifestPath, e);
+         
+      }
+   }
+
+   public indexJsFullPath: string;
+   public modules = new Map<string, string>();
+}
+
 class VirtualApisPlugin extends Plugin implements PluginEvents {
    public readonly priority: PluginPriority = PluginPriority.Low;
+
+   protected behaviorPacks: BehaviorPack[] = [];
 
    public constructor() {
       super('va-plugin', '1.0.0');
    }
 
-   public onInitialize(): void {
+   public async onInitialize() {
       this.logger.info('Sample plugin initialized!');
+
+      if (fs.existsSync('behavior_packs')) await fs.promises.mkdir('behavior_packs');
+      for await (const pack of await fs.promises.readdir('behavior_packs', { withFileTypes: true })) {
+         if (!pack.isDirectory()) {
+            this.logger.warn('Behavior pack', pack.name, 'is not a directory, skipping...');
+            continue;
+         }
+
+         const manifestPath = path.join(pack.parentPath, pack.name, 'manifest.json');
+         if (fs.existsSync(manifestPath)) new BehaviorPack(manifestPath);
+      }
    }
 
    public onStartUp(): void {
       this.logger.info('Sample plugin started up!');
       const world = World.wrap(this.serenity.getWorld());
       sva.server.constant('world', world);
-
-      // TODO: Read behavior packs folder
-      // read manifest, get versions
+      // TODO for all beh packs get script module versions
       // create script contexts, load modules binary, parse & compile
       // run scripts
    }
